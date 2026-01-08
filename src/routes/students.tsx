@@ -4,40 +4,75 @@ import { createFileRoute } from '@tanstack/react-router'
 import { DataCard } from '@/components/data-card'
 import { StudentFilters } from '@/components/students/student-filters'
 import { StudentTable } from '@/components/students/student-table'
+import { ClassSelector } from '@/components/students/class-selector'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  defaultColumns,
+  type ColumnConfig,
+} from '@/components/students/column-visibility-popover'
 
-import { mockStudents, classOptions, getMetrics } from '@/data/mock-students'
-import type { SortField, SortDirection, ConductGrade } from '@/types/student'
+import { mockStudents, getMetrics } from '@/data/mock-students'
+import type { SortCriterion, Student } from '@/types/student'
 
 export const Route = createFileRoute('/students')({
   component: StudentsPage,
 })
 
-const conductOrder: Record<ConductGrade, number> = {
-  Excellent: 4,
-  Good: 3,
-  Fair: 2,
-  Poor: 1,
+// Check if a student matches a sort condition
+function matchesCondition(student: Student, sort: SortCriterion): boolean {
+  const value = student[sort.field as keyof Student]
+
+  switch (sort.operator) {
+    // Numeric operators
+    case 'gt':
+      return Number(value) > Number(sort.value)
+    case 'gte':
+      return Number(value) >= Number(sort.value)
+    case 'lt':
+      return Number(value) < Number(sort.value)
+    case 'lte':
+      return Number(value) <= Number(sort.value)
+    case 'eq':
+      return Number(value) === Number(sort.value)
+    // Text operators
+    case 'contains':
+      return String(value ?? '')
+        .toLowerCase()
+        .includes(String(sort.value).toLowerCase())
+    case 'not_contains':
+      return !String(value ?? '')
+        .toLowerCase()
+        .includes(String(sort.value).toLowerCase())
+    case 'is':
+      return String(value ?? '') === String(sort.value)
+    case 'is_not':
+      return String(value ?? '') !== String(sort.value)
+    case 'is_empty':
+      return !value || value === ''
+    case 'is_not_empty':
+      return !!value && value !== ''
+    default:
+      return false
+  }
 }
 
 function StudentsPage() {
-  const [selectedClass, setSelectedClass] = useState('3A')
+  const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortField, setSortField] = useState<SortField>('name')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [sorts, setSorts] = useState<SortCriterion[]>([])
+  const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns)
 
   const filteredStudents = useMemo(() => {
     let students = mockStudents
 
-    // Filter by class
+    // Filter by class or level
     if (selectedClass !== 'all') {
-      students = students.filter((s) => s.class === selectedClass)
+      if (selectedClass.startsWith('Secondary')) {
+        // Extract level number and filter by classes starting with that number
+        const levelNum = selectedClass.replace('Secondary ', '')
+        students = students.filter((s) => s.class.startsWith(levelNum))
+      } else {
+        students = students.filter((s) => s.class === selectedClass)
+      }
     }
 
     // Filter by search query
@@ -46,46 +81,27 @@ function StudentsPage() {
       students = students.filter((s) => s.name.toLowerCase().includes(query))
     }
 
-    // Sort
-    students = [...students].sort((a, b) => {
-      let comparison = 0
-
-      switch (sortField) {
-        case 'name':
-          comparison = a.name.localeCompare(b.name)
-          break
-        case 'class':
-          comparison = a.class.localeCompare(b.class)
-          break
-        case 'overall':
-          comparison = a.overallPercentage - b.overallPercentage
-          break
-        case 'conduct':
-          comparison = conductOrder[a.conduct] - conductOrder[b.conduct]
-          break
-      }
-
-      return sortDirection === 'asc' ? comparison : -comparison
-    })
+    // Filter: only show records matching ALL criteria
+    if (sorts.length > 0) {
+      students = students.filter((student) =>
+        sorts.every((sort) => matchesCondition(student, sort))
+      )
+    }
 
     return students
-  }, [selectedClass, searchQuery, sortField, sortDirection])
+  }, [selectedClass, searchQuery, sorts])
 
   const metrics = useMemo(
     () => getMetrics(filteredStudents),
     [filteredStudents],
   )
 
-  const handleSortChange = (field: SortField, direction: SortDirection) => {
-    setSortField(field)
-    setSortDirection(direction)
-  }
-
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-start justify-between">
-        <div>
+    <div className="flex h-full flex-col">
+      {/* Fixed content area */}
+      <div className="shrink-0 space-y-6 pt-6">
+        {/* Page Header */}
+        <div className="px-6">
           <h1 className="text-2xl font-semibold">Student dashboard</h1>
           <p className="text-muted-foreground">
             Key data to understand your students holistically
@@ -93,50 +109,43 @@ function StudentsPage() {
         </div>
 
         {/* Class Selector */}
-        <Select value={selectedClass} onValueChange={setSelectedClass}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {classOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="px-6">
+          <ClassSelector value={selectedClass} onValueChange={setSelectedClass} />
+        </div>
+
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-1 gap-4 px-6 md:grid-cols-3">
+          <DataCard
+            label="Attendance"
+            value={`${metrics.absenteeismRate}%`}
+            description="Absenteeism"
+          />
+          <DataCard
+            label="Attendance"
+            value={metrics.lateComing}
+            description="Late-coming"
+          />
+          <DataCard
+            label="Tier 2-3"
+            value={metrics.tier2_3Students}
+            description="Students needing support"
+          />
+        </div>
+
+        {/* Filters */}
+        <StudentFilters
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          sorts={sorts}
+          onSortsChange={setSorts}
+          columns={columns}
+          onColumnsChange={setColumns}
+          className="px-6 pb-4"
+        />
       </div>
 
-      {/* Metrics Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <DataCard
-          label="Attendance"
-          value={`${metrics.absenteeismRate}%`}
-          description="Absenteeism"
-        />
-        <DataCard
-          label="Attendance"
-          value={metrics.lateComing}
-          description="Late-coming"
-        />
-        <DataCard
-          label="Tier 2-3"
-          value={metrics.tier2_3Students}
-          description="Students needing support"
-        />
-      </div>
-
-      {/* Filters */}
-      <StudentFilters
-        searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
-        sortField={sortField}
-        sortDirection={sortDirection}
-        onSortChange={handleSortChange}
-      />
-
-      {/* Student Table */}
-      <StudentTable students={filteredStudents} />
+      {/* Student Table - fills remaining space */}
+      <StudentTable students={filteredStudents} columns={columns} pageSize={20} />
     </div>
   )
 }
