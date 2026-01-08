@@ -11,6 +11,7 @@ import appCss from '../styles.css?url'
 import { AppHeader } from '@/components/app-header'
 import { AppSidebar } from '@/components/app-sidebar'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { Toaster } from '@/components/ui/sonner'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -73,6 +74,7 @@ function RootComponent() {
           <Outlet />
         </div>
       </SidebarInset>
+      <Toaster position="bottom-center" />
     </SidebarProvider>
   )
 }

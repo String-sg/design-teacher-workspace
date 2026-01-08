@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { ListFilter, X, RotateCcw, Save } from 'lucide-react'
+import { ListFilter, X, RotateCcw, Save, Trash2, Pencil } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -327,6 +328,8 @@ export function MultiSortPopover({
   const [customPresets, setCustomPresets] = useState<SortPreset[]>([])
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [presetName, setPresetName] = useState('')
+  const [editingPresetId, setEditingPresetId] = useState<string | null>(null)
+  const [activePresetId, setActivePresetId] = useState<string | null>(null)
 
   const sortPresets = [...defaultPresets, ...customPresets]
 
@@ -335,16 +338,10 @@ export function MultiSortPopover({
     (opt) => !activeFields.has(opt.field),
   )
 
-  // Find matching preset
-  const selectedPreset = sortPresets.find((preset) => {
-    if (preset.sorts.length !== sorts.length) return false
-    return preset.sorts.every(
-      (ps, i) =>
-        sorts[i]?.field === ps.field &&
-        sorts[i]?.operator === ps.operator &&
-        sorts[i]?.value === ps.value
-    )
-  })
+  // Get selected preset from active ID
+  const selectedPreset = activePresetId
+    ? sortPresets.find((p) => p.id === activePresetId)
+    : null
 
   const handleAddSort = (field: SortField) => {
     const fieldOption = sortFieldOptions.find((opt) => opt.field === field)
@@ -395,18 +392,71 @@ export function MultiSortPopover({
 
   const handleReset = () => {
     onSortsChange([])
+    setActivePresetId(null)
   }
 
   const handleSavePreset = () => {
     if (!presetName.trim() || sorts.length === 0) return
-    const newPreset: SortPreset = {
-      id: generatePresetId(),
-      label: presetName.trim(),
-      sorts: sorts.map((s) => ({ ...s })),
+    const savedSorts = sorts.map((s) => ({
+      field: s.field,
+      operator: s.operator,
+      value: s.value,
+    }))
+
+    let savedPresetId: string
+
+    if (editingPresetId) {
+      // Update existing preset
+      savedPresetId = editingPresetId
+      setCustomPresets(
+        customPresets.map((p) =>
+          p.id === editingPresetId
+            ? { ...p, label: presetName.trim(), sorts: savedSorts }
+            : p
+        )
+      )
+      toast.success(`Preset "${presetName.trim()}" updated`)
+    } else {
+      // Create new preset
+      savedPresetId = generatePresetId()
+      const newPreset: SortPreset = {
+        id: savedPresetId,
+        label: presetName.trim(),
+        sorts: savedSorts,
+      }
+      setCustomPresets([...customPresets, newPreset])
+      toast.success(`Preset "${newPreset.label}" saved`)
     }
-    setCustomPresets([...customPresets, newPreset])
+
+    // Update current sorts to match saved preset exactly
+    onSortsChange(savedSorts.map((s) => ({ ...s, id: generateId() })))
+    setActivePresetId(savedPresetId)
     setPresetName('')
+    setEditingPresetId(null)
     setSaveDialogOpen(false)
+  }
+
+  const handleEditPreset = (presetId: string) => {
+    const preset = customPresets.find((p) => p.id === presetId)
+    if (preset) {
+      setPresetName(preset.label)
+      setEditingPresetId(presetId)
+      setActivePresetId(presetId)
+      // Load the preset's filters into the current view
+      onSortsChange(preset.sorts.map((s) => ({ ...s, id: generateId() })))
+      setSaveDialogOpen(true)
+    }
+  }
+
+  const handleDeletePreset = (presetId: string) => {
+    const preset = customPresets.find((p) => p.id === presetId)
+    setCustomPresets(customPresets.filter((p) => p.id !== presetId))
+    if (activePresetId === presetId) {
+      setActivePresetId(null)
+    }
+    if (preset) {
+      toast.success(`Preset "${preset.label}" deleted`)
+    }
   }
 
   const getFieldOption = (field: SortField) =>
@@ -436,14 +486,15 @@ export function MultiSortPopover({
         <div className="border-b p-3">
           <label className="mb-2 block text-sm font-medium">Select filter preset</label>
           <Select
-            value={selectedPreset?.id ?? 'custom'}
+            value={activePresetId ?? 'custom'}
             onValueChange={(presetId) => {
               if (presetId === 'custom') {
-                // Keep current sorts, just switch to custom mode
+                setActivePresetId(null)
                 return
               }
               const preset = sortPresets.find((p) => p.id === presetId)
               if (preset) {
+                setActivePresetId(presetId)
                 onSortsChange(preset.sorts.map((s) => ({ ...s, id: generateId() })))
               }
             }}
@@ -455,11 +506,43 @@ export function MultiSortPopover({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="custom">Custom</SelectItem>
-              {sortPresets.map((preset) => (
+              {defaultPresets.map((preset) => (
                 <SelectItem key={preset.id} value={preset.id}>
                   {preset.label}
                 </SelectItem>
               ))}
+              {customPresets.length > 0 && (
+                <>
+                  <div className="my-1 h-px bg-border" />
+                  {customPresets.map((preset) => (
+                    <div key={preset.id} className="flex items-center justify-between gap-1 pr-2">
+                      <SelectItem value={preset.id} className="flex-1">
+                        {preset.label}
+                      </SelectItem>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEditPreset(preset.id)
+                        }}
+                        className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeletePreset(preset.id)
+                        }}
+                        className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </>
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -632,11 +715,20 @@ export function MultiSortPopover({
               variant="secondary"
               size="sm"
               className="gap-2"
-              onClick={() => setSaveDialogOpen(true)}
+              onClick={() => {
+                const isCustomPreset = selectedPreset && customPresets.some((p) => p.id === selectedPreset.id)
+                if (isCustomPreset && selectedPreset) {
+                  setEditingPresetId(selectedPreset.id)
+                  setPresetName(selectedPreset.label)
+                }
+                setSaveDialogOpen(true)
+              }}
               disabled={sorts.length === 0}
             >
               <Save className="h-4 w-4" />
-              Save as preset
+              {selectedPreset && customPresets.some((p) => p.id === selectedPreset.id)
+                ? 'Update preset'
+                : 'Save as preset'}
             </Button>
             <Button size="sm" onClick={() => setOpen(false)}>
               Done
@@ -646,11 +738,22 @@ export function MultiSortPopover({
       </PopoverContent>
     </Popover>
 
-      {/* Save Preset Dialog */}
-      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+      {/* Save/Edit Preset Dialog */}
+      <Dialog
+        open={saveDialogOpen}
+        onOpenChange={(open) => {
+          setSaveDialogOpen(open)
+          if (!open) {
+            setEditingPresetId(null)
+            setPresetName('')
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Save filter preset</DialogTitle>
+            <DialogTitle>
+              {editingPresetId ? 'Edit filter preset' : 'Save filter preset'}
+            </DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <Input
@@ -665,11 +768,18 @@ export function MultiSortPopover({
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSaveDialogOpen(false)
+                setEditingPresetId(null)
+                setPresetName('')
+              }}
+            >
               Cancel
             </Button>
             <Button onClick={handleSavePreset} disabled={!presetName.trim()}>
-              Save
+              {editingPresetId ? 'Update' : 'Save'}
             </Button>
           </DialogFooter>
         </DialogContent>
