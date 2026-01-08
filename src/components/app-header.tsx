@@ -13,9 +13,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 
-const routeLabels: Record<string, string> = {
-  '/': 'Home',
-  '/students': 'Student dashboard',
+// Route configuration with labels and parent relationships
+const routeConfig: Record<string, { label: string; parent?: string }> = {
+  '/': { label: 'Home' },
+  '/students': { label: 'Student dashboard' },
+  '/announcements': { label: 'Announcements' },
 }
 
 interface AppHeaderProps {
@@ -24,16 +26,24 @@ interface AppHeaderProps {
 
 export function AppHeader({ notificationCount = 0 }: AppHeaderProps) {
   const matches = useMatches()
+  const currentPath = matches[matches.length - 1]?.pathname || '/'
+  const config = routeConfig[currentPath]
 
-  const breadcrumbs = [
-    { label: 'Home', href: '/' },
-    ...matches
-      .filter((match) => match.pathname !== '/')
-      .map((match) => ({
-        label: routeLabels[match.pathname] || match.pathname,
-        href: match.pathname,
-      })),
-  ]
+  // Build breadcrumbs based on parent relationships, not URL hierarchy
+  const breadcrumbs: Array<{ label: string; href: string }> = []
+
+  if (config?.parent && routeConfig[config.parent]) {
+    breadcrumbs.push({
+      label: routeConfig[config.parent].label,
+      href: config.parent,
+    })
+  }
+
+  breadcrumbs.push({
+    label: config?.label || currentPath.split('/').pop() || 'Page',
+    href: currentPath,
+  })
+
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4">
       <div className="flex items-center gap-2">
@@ -43,12 +53,12 @@ export function AppHeader({ notificationCount = 0 }: AppHeaderProps) {
             {breadcrumbs.map((item, index) => {
               const isLast = index === breadcrumbs.length - 1
               return (
-                <BreadcrumbItem key={item.label}>
+                <BreadcrumbItem key={item.href}>
                   {index > 0 && <BreadcrumbSeparator />}
                   {isLast ? (
                     <BreadcrumbPage>{item.label}</BreadcrumbPage>
                   ) : (
-                    <BreadcrumbLink render={<Link to={item.href || '/'} />}>
+                    <BreadcrumbLink render={<Link to={item.href} />}>
                       {item.label}
                     </BreadcrumbLink>
                   )}
@@ -61,8 +71,8 @@ export function AppHeader({ notificationCount = 0 }: AppHeaderProps) {
 
       <div className="flex items-center gap-4">
         <div className="relative">
-          <Button variant="ghost" size="icon">
-            <Bell className="size-4" />
+          <Button variant="secondary" size="icon">
+            <Bell className="size-4 fill-current" />
           </Button>
           {notificationCount > 0 && (
             <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-pink-500 text-xs font-medium text-white ring-2 ring-background">

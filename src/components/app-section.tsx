@@ -3,13 +3,19 @@ import { AppCard } from '@/components/app-card'
 
 interface AppSectionProps {
   title: string
+  description?: string
   apps: Array<App>
 }
 
-export function AppSection({ title, apps }: AppSectionProps) {
+export function AppSection({ title, description, apps }: AppSectionProps) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+      <div className="flex flex-col gap-1">
+        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+        {description && (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        )}
+      </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {apps.map((app) => (
           <AppCard

@@ -1,14 +1,29 @@
 import {
+  BarChart3,
   BookOpen,
+  Bot,
+  Bus,
   Calendar,
+  CircleDollarSign,
+  ClipboardCheck,
+  Compass,
   FileText,
+  Gift,
+  GraduationCap,
   Heart,
+  Lightbulb,
+  MapPin,
   MessageSquare,
+  Network,
+  PenTool,
+  Settings,
+  ShieldCheck,
   Users,
+  Ear,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-export type AppColor = 'pink' | 'blue' | 'orange'
+export type AppColor = 'pink' | 'blue' | 'orange' | 'green' | 'purple'
 
 export interface App {
   id: string
@@ -17,11 +32,13 @@ export interface App {
   icon: LucideIcon
   color: AppColor
   href: string
+  badge?: string
 }
 
 export interface AppCategory {
   id: string
   title: string
+  description: string
   apps: Array<App>
 }
 
@@ -31,92 +48,204 @@ export const featuredApp: App = {
   description: 'View and manage student information at a glance.',
   icon: Users,
   color: 'blue',
-  href: '/student-dashboard',
+  href: '/students',
 }
 
 export const appCategories: Array<AppCategory> = [
   {
-    id: 'classroom-student',
-    title: 'Classroom and Student',
+    id: 'classes-students',
+    title: 'Classes and Students',
+    description: 'Tools for classroom management, student assessment, and academic support',
     apps: [
       {
-        id: 'app-1',
+        id: 'student-dashboard',
         name: 'Student Dashboard',
-        description:
-          'View and manage student information at a glance.',
+        description: 'View and manage student information at a glance.',
         icon: Users,
         color: 'blue',
-        href: '/student-dashboard',
+        href: '/students',
       },
       {
-        id: 'app-2',
-        name: 'Student Wellness',
-        description: 'Track and support student well-being and mental health.',
-        icon: Heart,
+        id: 'seconnect',
+        name: 'SEConnect',
+        description: 'Connecting students and educators',
+        icon: Compass,
+        color: 'blue',
+        href: '/seconnect',
+      },
+      {
+        id: 'attendance-scm',
+        name: 'Attendance (SCM)',
+        description: 'Streamlined attendance tracking',
+        icon: ClipboardCheck,
+        color: 'blue',
+        href: '/attendance',
+      },
+      {
+        id: 'markly',
+        name: 'Mark.ly',
+        description: 'Reimagining marking with AI',
+        icon: PenTool,
+        color: 'blue',
+        href: '/markly',
+      },
+      {
+        id: 'appraiser',
+        name: 'Appraiser',
+        description: 'AI-powered student testimonials in minutes',
+        icon: FileText,
+        color: 'blue',
+        href: '/appraiser',
+      },
+      {
+        id: 'sdis',
+        name: 'Student Development Integrated System (SDIS)',
+        description: 'Holistic student development tracking',
+        icon: Users,
         color: 'pink',
-        href: '/student-wellness',
-      },
-      {
-        id: 'app-3',
-        name: 'Assessment Tools',
-        description: 'Create, manage, and grade assessments with ease.',
-        icon: FileText,
-        color: 'orange',
-        href: '/assessment-tools',
-      },
-      {
-        id: 'app-4',
-        name: 'Learning Resources',
-        description: 'Access curated educational materials and lesson plans.',
-        icon: BookOpen,
-        color: 'blue',
-        href: '/learning-resources',
-      },
-      {
-        id: 'app-5',
-        name: 'Student Progress',
-        description: 'Monitor and analyze student academic progress over time.',
-        icon: Calendar,
-        color: 'blue',
-        href: '/student-progress',
-      },
-      {
-        id: 'app-6',
-        name: 'Behavior Tracking',
-        description: 'Record and manage student behavior and conduct.',
-        icon: FileText,
-        color: 'blue',
-        href: '/behavior-tracking',
+        href: '/sdis',
       },
     ],
   },
   {
-    id: 'parent-communication',
-    title: 'Parent and communication',
+    id: 'parents-communications',
+    title: 'Parents and Communications',
+    description: 'Connect with parents and manage school-home communication',
     apps: [
       {
-        id: 'app-7',
-        name: 'Parent Connect',
-        description: 'Communicate with parents and guardians effectively.',
-        icon: MessageSquare,
+        id: 'all-ears',
+        name: 'All Ears',
+        description: 'Listen, support, empower',
+        icon: Ear,
         color: 'pink',
-        href: '/parent-connect',
+        href: '/all-ears',
       },
       {
-        id: 'app-8',
-        name: 'Announcements',
-        description: 'Send important announcements to parents and students.',
+        id: 'pg-messages',
+        name: 'PG Messages',
+        description: 'Connecting parents and schools seamlessly',
+        icon: MessageSquare,
+        color: 'purple',
+        href: '/pg-messages',
+      },
+      {
+        id: 'heytalia',
+        name: 'HeyTalia',
+        description: 'Smart parent communication assistant',
+        icon: Bot,
+        color: 'purple',
+        href: '/heytalia',
+      },
+    ],
+  },
+  {
+    id: 'school-life-admin',
+    title: 'School Life and Admin',
+    description: 'Administrative tools and school management systems',
+    apps: [
+      {
+        id: 'allocate',
+        name: 'Allocate',
+        description: 'Ensuring fair school placement',
+        icon: Settings,
+        color: 'blue',
+        href: '/allocate',
+      },
+      {
+        id: 'rpa',
+        name: 'RPA (Robotic Process Automation)',
+        description: 'Automating repetitive tasks',
+        icon: Settings,
+        color: 'green',
+        href: '/rpa',
+      },
+      {
+        id: 'student-learning-space',
+        name: 'Student learning space',
+        description: 'Transforming learning through technology',
+        icon: GraduationCap,
+        color: 'green',
+        href: '/student-learning-space',
+      },
+      {
+        id: 'oneplacement',
+        name: 'OnePlacement (OP)',
+        description: 'Seamless online school registration',
+        icon: MapPin,
+        color: 'green',
+        href: '/oneplacement',
+      },
+      {
+        id: 'goventry',
+        name: 'GovEntry',
+        description: 'Self-serve access validation made simple',
+        icon: ShieldCheck,
+        color: 'blue',
+        href: '/goventry',
+      },
+      {
+        id: 'ifaas',
+        name: 'iFAAS',
+        description: 'Streamlined financial operations',
+        icon: CircleDollarSign,
+        color: 'green',
+        href: '/ifaas',
+      },
+      {
+        id: 'ibens',
+        name: 'iBENs',
+        description: 'Managing staff benefits efficiently',
+        icon: Gift,
+        color: 'orange',
+        href: '/ibens',
+      },
+      {
+        id: 'oneschoolbus',
+        name: 'OneSchoolBus (OSB)',
+        description: 'All school bus operations on one platform',
+        icon: Bus,
+        color: 'orange',
+        href: '/oneschoolbus',
+      },
+      {
+        id: 'timetable',
+        name: 'Timetable',
+        description: 'Intelligent school scheduling made effortless',
+        icon: Calendar,
+        color: 'purple',
+        href: '/timetable',
+        badge: '3rd party',
+      },
+    ],
+  },
+  {
+    id: 'growth-community',
+    title: 'Growth and Community',
+    description: 'Professional development and community engagement platforms',
+    apps: [
+      {
+        id: 'glow',
+        name: 'Glow',
+        description: 'On-the-go professional learning',
+        icon: Lightbulb,
+        color: 'blue',
+        href: '/glow',
+      },
+      {
+        id: 'nlds',
+        name: 'nLDS',
+        description: 'Advancing educational innovation',
+        icon: Network,
+        color: 'blue',
+        href: '/nlds',
+      },
+      {
+        id: 'community',
+        name: 'Community',
+        description: 'Building connections across schools',
         icon: Heart,
         color: 'pink',
-        href: '/announcements',
-      },
-      {
-        id: 'app-9',
-        name: 'Meeting Scheduler',
-        description: 'Schedule and manage parent-teacher meetings.',
-        icon: Calendar,
-        color: 'orange',
-        href: '/meeting-scheduler',
+        href: '/community',
       },
     ],
   },

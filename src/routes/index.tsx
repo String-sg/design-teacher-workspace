@@ -29,6 +29,7 @@ function HomePage() {
         <AppSection
           key={category.id}
           title={category.title}
+          description={category.description}
           apps={category.apps}
         />
       ))}
