@@ -42,3 +42,10 @@ bunx shadcn@latest add <component-name>
 ```
 
 Components use Base UI primitives (not Radix). Configuration in `components.json`.
+
+## Task Management
+
+Always update task status in `todos/project-todos.json` when:
+- Picking up a task (set to `in_progress`)
+- Completing a task (set to `completed` with timestamp)
+- Starting new work (create new todo entries)
