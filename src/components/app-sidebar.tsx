@@ -1,5 +1,5 @@
-import { Link, useLocation } from "@tanstack/react-router"
-import { Home, Users } from "lucide-react"
+import { Link, useLocation } from '@tanstack/react-router'
+import { Home, Users } from 'lucide-react'
 
 import {
   Sidebar,
@@ -11,17 +11,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from '@/components/ui/sidebar'
 
 const navigationItems = [
   {
-    title: "Home",
-    url: "/",
+    title: 'Home',
+    url: '/',
     icon: Home,
   },
   {
-    title: "Students",
-    url: "/students",
+    title: 'Students',
+    url: '/students',
     icon: Users,
   },
 ]
@@ -33,7 +33,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-2">
-          <span className="text-lg font-semibold">MOE Workspace</span>
+          <span className="text-lg font-semibold">Teacher Workspace</span>
         </div>
       </SidebarHeader>
       <SidebarContent>

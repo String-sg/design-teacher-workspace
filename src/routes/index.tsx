@@ -1,5 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { EmptyState } from '@/components/empty-state'
+
+import { FeaturedAppCard } from '@/components/app-card'
+import { AppSection } from '@/components/app-section'
+import { Greeting } from '@/components/greeting'
+import { appCategories, featuredApp } from '@/data/apps'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -7,9 +11,27 @@ export const Route = createFileRoute('/')({
 
 function HomePage() {
   return (
-    <EmptyState
-      title="Welcome to MOE Teacher Workspace"
-      description="This page is empty. Start by selecting a section from the sidebar."
-    />
+    <main className="mx-auto flex max-w-4xl flex-col gap-8 py-8">
+      <Greeting />
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold text-foreground">Featured</h2>
+        <FeaturedAppCard
+          name={featuredApp.name}
+          description={featuredApp.description}
+          icon={featuredApp.icon}
+          color={featuredApp.color}
+          href={featuredApp.href}
+        />
+      </section>
+
+      {appCategories.map((category) => (
+        <AppSection
+          key={category.id}
+          title={category.title}
+          apps={category.apps}
+        />
+      ))}
+    </main>
   )
 }
