@@ -37,20 +37,21 @@ export function StudentFilters({
 }: StudentFiltersProps) {
   return (
     <div className={cn('flex items-center justify-between gap-4', className)}>
-      <div className="relative">
-        <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
-        <Input
-          type="text"
-          placeholder="Search name"
-          value={searchValue}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="w-[200px] pl-9"
-        />
+      <div className="flex items-center gap-2">
+        <div className="relative">
+          <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+          <Input
+            type="text"
+            placeholder="Search name"
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-[200px] pl-9"
+          />
+        </div>
+        <MultiSortPopover sorts={sorts} onSortsChange={onSortsChange} />
       </div>
 
       <div className="flex items-center gap-2">
-        <MultiSortPopover sorts={sorts} onSortsChange={onSortsChange} />
-
         <ColumnVisibilityPopover
           columns={columns}
           onColumnsChange={onColumnsChange}

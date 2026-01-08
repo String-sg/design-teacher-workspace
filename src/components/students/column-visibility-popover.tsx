@@ -9,6 +9,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 export interface ColumnConfig {
   id: string
@@ -85,17 +90,20 @@ export function ColumnVisibilityPopover({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <Button variant="outline" className={cn('gap-2', className)} />
-        }
-      >
-        <Columns3 className="h-4 w-4" />
-        Columns
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white text-xs text-muted-foreground shadow-sm">
-          {visibleCount}
-        </span>
-      </PopoverTrigger>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <PopoverTrigger
+              render={
+                <Button variant="outline" size="icon" className={cn(className)} />
+              }
+            >
+              <Columns3 className="h-4 w-4" />
+            </PopoverTrigger>
+          }
+        />
+        <TooltipContent>Show/hide columns</TooltipContent>
+      </Tooltip>
       <PopoverContent className="w-[280px] p-0" align="end">
         {/* Quick actions */}
         <div className="flex items-center gap-2 border-b p-3">

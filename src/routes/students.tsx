@@ -11,50 +11,47 @@ import {
 } from '@/components/students/column-visibility-popover'
 
 import { mockStudents, getMetrics } from '@/data/mock-students'
-import type {
-  SortCriterion,
-  SortField,
-  ConductGrade,
-  Student,
-} from '@/types/student'
+import type { SortCriterion, Student } from '@/types/student'
 
 export const Route = createFileRoute('/students')({
   component: StudentsPage,
 })
 
-const conductOrder: Record<ConductGrade, number> = {
-  Excellent: 4,
-  Good: 3,
-  Fair: 2,
-  Poor: 1,
-}
+// Check if a student matches a sort condition
+function matchesCondition(student: Student, sort: SortCriterion): boolean {
+  const value = student[sort.field as keyof Student]
 
-function compareByField(a: Student, b: Student, field: SortField): number {
-  switch (field) {
-    case 'name':
-      return a.name.localeCompare(b.name)
-    case 'class':
-      return a.class.localeCompare(b.class)
-    case 'overall':
-      return a.overallPercentage - b.overallPercentage
-    case 'conduct':
-      return conductOrder[a.conduct] - conductOrder[b.conduct]
-    case 'offences':
-      return a.offences - b.offences
-    case 'riskIndicators':
-      return a.riskIndicators - b.riskIndicators
-    case 'absences':
-      return a.absences - b.absences
-    case 'lateComing':
-      return a.lateComing - b.lateComing
-    case 'ccaMissed':
-      return a.ccaMissed - b.ccaMissed
-    case 'learningSupport':
-      return (a.learningSupport || '').localeCompare(b.learningSupport || '')
-    case 'postSecEligibility':
-      return a.postSecEligibility.localeCompare(b.postSecEligibility)
+  switch (sort.operator) {
+    // Numeric operators
+    case 'gt':
+      return Number(value) > Number(sort.value)
+    case 'gte':
+      return Number(value) >= Number(sort.value)
+    case 'lt':
+      return Number(value) < Number(sort.value)
+    case 'lte':
+      return Number(value) <= Number(sort.value)
+    case 'eq':
+      return Number(value) === Number(sort.value)
+    // Text operators
+    case 'contains':
+      return String(value ?? '')
+        .toLowerCase()
+        .includes(String(sort.value).toLowerCase())
+    case 'not_contains':
+      return !String(value ?? '')
+        .toLowerCase()
+        .includes(String(sort.value).toLowerCase())
+    case 'is':
+      return String(value ?? '') === String(sort.value)
+    case 'is_not':
+      return String(value ?? '') !== String(sort.value)
+    case 'is_empty':
+      return !value || value === ''
+    case 'is_not_empty':
+      return !!value && value !== ''
     default:
-      return 0
+      return false
   }
 }
 
@@ -84,17 +81,11 @@ function StudentsPage() {
       students = students.filter((s) => s.name.toLowerCase().includes(query))
     }
 
-    // Multi-sort
+    // Filter: only show records matching ALL criteria
     if (sorts.length > 0) {
-      students = [...students].sort((a, b) => {
-        for (const { field, direction } of sorts) {
-          const comparison = compareByField(a, b, field)
-          if (comparison !== 0) {
-            return direction === 'asc' ? comparison : -comparison
-          }
-        }
-        return 0
-      })
+      students = students.filter((student) =>
+        sorts.every((sort) => matchesCondition(student, sort))
+      )
     }
 
     return students
@@ -149,12 +140,12 @@ function StudentsPage() {
           onSortsChange={setSorts}
           columns={columns}
           onColumnsChange={setColumns}
-          className="px-6"
+          className="px-6 pb-4"
         />
       </div>
 
       {/* Student Table - fills remaining space */}
-      <StudentTable students={filteredStudents} columns={columns} />
+      <StudentTable students={filteredStudents} columns={columns} pageSize={20} />
     </div>
   )
 }

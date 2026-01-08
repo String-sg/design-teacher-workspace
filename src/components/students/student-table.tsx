@@ -157,7 +157,7 @@ export function StudentTable({
               {isVisible('attentionTags') && (
                 <TableCell>
                   {student.attentionTags.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex gap-1">
                       {student.attentionTags.map((tag) => (
                         <Badge key={tag} variant={tagVariantMap[tag]}>
                           {tag}

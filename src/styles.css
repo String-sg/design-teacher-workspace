@@ -30,6 +30,7 @@
     --chart-4: oklch(0.488 0.243 264.376);
     --chart-5: oklch(0.424 0.199 265.638);
     --radius: 0.625rem;
+    --radius-input: 0.5rem;
     --sidebar: oklch(0.985 0.002 247.839);
     --sidebar-foreground: oklch(0.13 0.028 261.692);
     --sidebar-primary: oklch(0.546 0.245 262.881);
@@ -114,6 +115,7 @@
     --radius-2xl: calc(var(--radius) + 8px);
     --radius-3xl: calc(var(--radius) + 12px);
     --radius-4xl: calc(var(--radius) + 16px);
+    --radius-input: var(--radius-input);
 }
 
 @layer base {

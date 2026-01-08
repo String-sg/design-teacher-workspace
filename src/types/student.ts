@@ -42,21 +42,51 @@ export interface ClassOption {
 }
 
 export type SortField =
+  // General
   | 'name'
   | 'class'
-  | 'overall'
+  // Academic Performance
+  | 'overallPercentage'
   | 'conduct'
+  | 'learningSupport'
+  | 'postSecEligibility'
+  // Behaviour and Discipline
   | 'offences'
-  | 'riskIndicators'
   | 'absences'
   | 'lateComing'
   | 'ccaMissed'
-  | 'learningSupport'
-  | 'postSecEligibility'
+  // Wellbeing
+  | 'riskIndicators'
+  | 'lowMoodFlagged'
+  | 'socialLinks'
+  | 'counsellingSessions'
+  | 'sen'
+  | 'fas'
+  // Family, Housing, Finance
+  | 'housing'
+  | 'housingType'
+  | 'custody'
+  | 'siblings'
+  | 'externalAgencies'
 
-export type SortDirection = 'asc' | 'desc'
+export type SortOperator =
+  // Numeric operators
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'eq'
+  // Text operators
+  | 'contains'
+  | 'not_contains'
+  | 'is'
+  | 'is_not'
+  | 'is_empty'
+  | 'is_not_empty'
 
 export interface SortCriterion {
+  id: string
   field: SortField
-  direction: SortDirection
+  operator: SortOperator
+  value: string | number
 }

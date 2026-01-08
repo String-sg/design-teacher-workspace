@@ -1,8 +1,17 @@
 import { useState } from 'react'
-import { ArrowUpDown, X, GripVertical, RotateCcw } from 'lucide-react'
+import { ListFilter, X, RotateCcw, Save } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Popover,
   PopoverContent,
@@ -15,63 +24,290 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { SortCriterion, SortField, SortDirection } from '@/types/student'
+import type { SortCriterion, SortField, SortOperator } from '@/types/student'
+
+type FieldType = 'numeric' | 'text' | 'boolean' | 'enum'
+
+type FieldGroup = 'general' | 'academic' | 'behaviour' | 'wellbeing' | 'family'
+
+interface OperatorOption {
+  value: SortOperator
+  label: string
+}
 
 interface SortFieldOption {
   field: SortField
   label: string
-  ascLabel: string
-  descLabel: string
+  type: FieldType
+  group: FieldGroup
+  operators: OperatorOption[]
+  defaultOperator: SortOperator
+  defaultValue: string | number
+  enumValues?: string[]
 }
 
+const groupLabels: Record<FieldGroup, string> = {
+  general: 'General',
+  academic: 'Academic Performance',
+  behaviour: 'Behaviour and Discipline',
+  wellbeing: 'Wellbeing',
+  family: 'Family, Housing, Finance',
+}
+
+const groupOrder: FieldGroup[] = ['general', 'behaviour', 'academic', 'wellbeing', 'family']
+
+const numericOperators: OperatorOption[] = [
+  { value: 'gte', label: 'Greater than or equal' },
+  { value: 'gt', label: 'Greater than' },
+  { value: 'lte', label: 'Less than or equal to' },
+  { value: 'lt', label: 'Less than' },
+  { value: 'eq', label: 'Equal to' },
+]
+
+const textOperators: OperatorOption[] = [
+  { value: 'contains', label: 'contains' },
+  { value: 'not_contains', label: 'does not contain' },
+  { value: 'is', label: 'is' },
+  { value: 'is_not', label: 'is not' },
+  { value: 'is_empty', label: 'is empty' },
+  { value: 'is_not_empty', label: 'is not empty' },
+]
+
+const booleanOperators: OperatorOption[] = [
+  { value: 'is', label: 'is' },
+  { value: 'is_not', label: 'is not' },
+]
+
 const sortFieldOptions: SortFieldOption[] = [
-  { field: 'name', label: 'Names', ascLabel: 'A → Z', descLabel: 'Z → A' },
+  // General
+  {
+    field: 'name',
+    label: 'Name',
+    type: 'text',
+    group: 'general',
+    operators: textOperators,
+    defaultOperator: 'contains',
+    defaultValue: '',
+  },
   {
     field: 'class',
     label: 'Class',
-    ascLabel: 'First → Last',
-    descLabel: 'Last → First',
+    type: 'text',
+    group: 'general',
+    operators: textOperators,
+    defaultOperator: 'contains',
+    defaultValue: '',
   },
-  { field: 'overall', label: 'Overall %', ascLabel: '1 → 9', descLabel: '9 → 1' },
+  // Behaviour and Discipline
   {
-    field: 'conduct',
-    label: 'Conduct',
-    ascLabel: 'First → Last',
-    descLabel: 'Last → First',
+    field: 'absences',
+    label: 'Non-valid Absenteeism',
+    type: 'numeric',
+    group: 'behaviour',
+    operators: numericOperators,
+    defaultOperator: 'gte',
+    defaultValue: 5,
   },
-  { field: 'offences', label: 'Offences', ascLabel: '1 → 9', descLabel: '9 → 1' },
-  {
-    field: 'riskIndicators',
-    label: 'Risk Indicators',
-    ascLabel: '1 → 9',
-    descLabel: '9 → 1',
-  },
-  { field: 'absences', label: 'Absences', ascLabel: '1 → 9', descLabel: '9 → 1' },
   {
     field: 'lateComing',
-    label: 'Late Coming',
-    ascLabel: '1 → 9',
-    descLabel: '9 → 1',
+    label: 'Late-coming',
+    type: 'numeric',
+    group: 'behaviour',
+    operators: numericOperators,
+    defaultOperator: 'gte',
+    defaultValue: 5,
+  },
+  {
+    field: 'offences',
+    label: 'Offences',
+    type: 'numeric',
+    group: 'behaviour',
+    operators: numericOperators,
+    defaultOperator: 'gte',
+    defaultValue: 1,
   },
   {
     field: 'ccaMissed',
-    label: 'CCA Missed',
-    ascLabel: '1 → 9',
-    descLabel: '9 → 1',
+    label: 'CCA Sessions Missed',
+    type: 'numeric',
+    group: 'behaviour',
+    operators: numericOperators,
+    defaultOperator: 'gte',
+    defaultValue: 3,
+  },
+  // Academic Performance
+  {
+    field: 'overallPercentage',
+    label: 'Overall %',
+    type: 'numeric',
+    group: 'academic',
+    operators: numericOperators,
+    defaultOperator: 'lte',
+    defaultValue: 50,
+  },
+  {
+    field: 'conduct',
+    label: 'Conduct',
+    type: 'enum',
+    group: 'academic',
+    operators: booleanOperators,
+    defaultOperator: 'is',
+    defaultValue: 'Poor',
+    enumValues: ['Excellent', 'Good', 'Fair', 'Poor'],
   },
   {
     field: 'learningSupport',
     label: 'Learning Support',
-    ascLabel: 'A → Z',
-    descLabel: 'Z → A',
+    type: 'text',
+    group: 'academic',
+    operators: textOperators,
+    defaultOperator: 'is_not_empty',
+    defaultValue: '',
   },
   {
     field: 'postSecEligibility',
     label: 'Post-Sec Eligibility',
-    ascLabel: 'A → Z',
-    descLabel: 'Z → A',
+    type: 'text',
+    group: 'academic',
+    operators: textOperators,
+    defaultOperator: 'contains',
+    defaultValue: '',
+  },
+  // Wellbeing
+  {
+    field: 'riskIndicators',
+    label: 'Risk Indicators (TCI)',
+    type: 'numeric',
+    group: 'wellbeing',
+    operators: numericOperators,
+    defaultOperator: 'gte',
+    defaultValue: 3,
+  },
+  {
+    field: 'lowMoodFlagged',
+    label: 'Low Mood',
+    type: 'boolean',
+    group: 'wellbeing',
+    operators: booleanOperators,
+    defaultOperator: 'is',
+    defaultValue: 'Yes',
+    enumValues: ['Yes', 'No'],
+  },
+  {
+    field: 'socialLinks',
+    label: 'Social Links',
+    type: 'numeric',
+    group: 'wellbeing',
+    operators: numericOperators,
+    defaultOperator: 'lte',
+    defaultValue: 2,
+  },
+  {
+    field: 'counsellingSessions',
+    label: 'Counselling Sessions',
+    type: 'numeric',
+    group: 'wellbeing',
+    operators: numericOperators,
+    defaultOperator: 'gte',
+    defaultValue: 1,
+  },
+  {
+    field: 'sen',
+    label: 'SEN',
+    type: 'text',
+    group: 'wellbeing',
+    operators: textOperators,
+    defaultOperator: 'is_not_empty',
+    defaultValue: '',
+  },
+  {
+    field: 'fas',
+    label: 'FAS',
+    type: 'boolean',
+    group: 'wellbeing',
+    operators: booleanOperators,
+    defaultOperator: 'is',
+    defaultValue: 'Yes',
+    enumValues: ['Yes', 'No'],
+  },
+  // Family, Housing, Finance
+  {
+    field: 'housing',
+    label: 'Housing',
+    type: 'text',
+    group: 'family',
+    operators: textOperators,
+    defaultOperator: 'is_not_empty',
+    defaultValue: '',
+  },
+  {
+    field: 'housingType',
+    label: 'Ownership',
+    type: 'enum',
+    group: 'family',
+    operators: booleanOperators,
+    defaultOperator: 'is',
+    defaultValue: 'Rented',
+    enumValues: ['Owned', 'Rented'],
+  },
+  {
+    field: 'custody',
+    label: 'Custody',
+    type: 'text',
+    group: 'family',
+    operators: textOperators,
+    defaultOperator: 'is_not_empty',
+    defaultValue: '',
+  },
+  {
+    field: 'siblings',
+    label: 'Siblings',
+    type: 'numeric',
+    group: 'family',
+    operators: numericOperators,
+    defaultOperator: 'gte',
+    defaultValue: 3,
+  },
+  {
+    field: 'externalAgencies',
+    label: 'External Agencies',
+    type: 'text',
+    group: 'family',
+    operators: textOperators,
+    defaultOperator: 'is_not_empty',
+    defaultValue: '',
   },
 ]
+
+interface SortPreset {
+  id: string
+  label: string
+  sorts: SortCriterion[]
+}
+
+const defaultPresets: SortPreset[] = [
+  {
+    id: 'support',
+    label: 'Support',
+    sorts: [
+      { id: '1', field: 'riskIndicators', operator: 'gte', value: 3 },
+      { id: '2', field: 'absences', operator: 'gte', value: 5 },
+      { id: '3', field: 'conduct', operator: 'is', value: 'Poor' },
+    ],
+  },
+  {
+    id: 'leadership',
+    label: 'Leadership',
+    sorts: [
+      { id: '1', field: 'conduct', operator: 'is', value: 'Excellent' },
+      { id: '2', field: 'overallPercentage', operator: 'gte', value: 70 },
+      { id: '3', field: 'offences', operator: 'eq', value: 0 },
+    ],
+  },
+]
+
+let presetIdCounter = 0
+const generatePresetId = () => `preset-${++presetIdCounter}`
 
 interface MultiSortPopoverProps {
   sorts: SortCriterion[]
@@ -79,22 +315,49 @@ interface MultiSortPopoverProps {
   className?: string
 }
 
+let sortIdCounter = 0
+const generateId = () => `sort-${++sortIdCounter}`
+
 export function MultiSortPopover({
   sorts,
   onSortsChange,
   className,
 }: MultiSortPopoverProps) {
   const [open, setOpen] = useState(false)
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [customPresets, setCustomPresets] = useState<SortPreset[]>([])
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
+  const [presetName, setPresetName] = useState('')
+
+  const sortPresets = [...defaultPresets, ...customPresets]
 
   const activeFields = new Set(sorts.map((s) => s.field))
   const availableFields = sortFieldOptions.filter(
     (opt) => !activeFields.has(opt.field),
   )
 
+  // Find matching preset
+  const selectedPreset = sortPresets.find((preset) => {
+    if (preset.sorts.length !== sorts.length) return false
+    return preset.sorts.every(
+      (ps, i) =>
+        sorts[i]?.field === ps.field &&
+        sorts[i]?.operator === ps.operator &&
+        sorts[i]?.value === ps.value
+    )
+  })
+
   const handleAddSort = (field: SortField) => {
-    onSortsChange([...sorts, { field, direction: 'asc' }])
+    const fieldOption = sortFieldOptions.find((opt) => opt.field === field)
+    if (!fieldOption) return
+    onSortsChange([
+      ...sorts,
+      {
+        id: generateId(),
+        field,
+        operator: fieldOption.defaultOperator,
+        value: fieldOption.defaultValue,
+      },
+    ])
   }
 
   const handleRemoveSort = (index: number) => {
@@ -102,14 +365,31 @@ export function MultiSortPopover({
   }
 
   const handleFieldChange = (index: number, field: SortField) => {
+    const fieldOption = sortFieldOptions.find((opt) => opt.field === field)
+    if (!fieldOption) return
     const newSorts = [...sorts]
-    newSorts[index] = { ...newSorts[index], field }
+    newSorts[index] = {
+      ...newSorts[index],
+      field,
+      operator: fieldOption.defaultOperator,
+      value: fieldOption.defaultValue,
+    }
     onSortsChange(newSorts)
   }
 
-  const handleDirectionChange = (index: number, direction: SortDirection) => {
+  const handleOperatorChange = (index: number, operator: SortOperator) => {
     const newSorts = [...sorts]
-    newSorts[index] = { ...newSorts[index], direction }
+    newSorts[index] = { ...newSorts[index], operator }
+    // Clear value for empty operators
+    if (operator === 'is_empty' || operator === 'is_not_empty') {
+      newSorts[index].value = ''
+    }
+    onSortsChange(newSorts)
+  }
+
+  const handleValueChange = (index: number, value: string | number) => {
+    const newSorts = [...sorts]
+    newSorts[index] = { ...newSorts[index], value }
     onSortsChange(newSorts)
   }
 
@@ -117,62 +397,83 @@ export function MultiSortPopover({
     onSortsChange([])
   }
 
-  const handleDragStart = (index: number) => {
-    setDraggedIndex(index)
-  }
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault()
-    setDragOverIndex(index)
-  }
-
-  const handleDragEnd = () => {
-    if (draggedIndex !== null && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
-      const newSorts = [...sorts]
-      const [removed] = newSorts.splice(draggedIndex, 1)
-      newSorts.splice(dragOverIndex, 0, removed)
-      onSortsChange(newSorts)
+  const handleSavePreset = () => {
+    if (!presetName.trim() || sorts.length === 0) return
+    const newPreset: SortPreset = {
+      id: generatePresetId(),
+      label: presetName.trim(),
+      sorts: sorts.map((s) => ({ ...s })),
     }
-    setDraggedIndex(null)
-    setDragOverIndex(null)
+    setCustomPresets([...customPresets, newPreset])
+    setPresetName('')
+    setSaveDialogOpen(false)
   }
 
   const getFieldOption = (field: SortField) =>
     sortFieldOptions.find((opt) => opt.field === field)
 
+  const needsValueInput = (operator: SortOperator) =>
+    !['is_empty', 'is_not_empty'].includes(operator)
+
   return (
+    <>
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
           <Button variant="outline" className={cn('gap-2', className)} />
         }
       >
-        <ArrowUpDown className="h-4 w-4" />
-        Sort
+        <ListFilter className="h-4 w-4" />
+        Filter
         {sorts.length > 0 && (
           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
             {sorts.length}
           </span>
         )}
       </PopoverTrigger>
-      <PopoverContent className="w-[420px] p-0" align="end">
+      <PopoverContent className="w-[600px] gap-0 p-0" align="start">
+        {/* Preset Selector */}
+        <div className="border-b p-3">
+          <label className="mb-2 block text-sm font-medium">Select filter preset</label>
+          <Select
+            value={selectedPreset?.id ?? 'custom'}
+            onValueChange={(presetId) => {
+              if (presetId === 'custom') {
+                // Keep current sorts, just switch to custom mode
+                return
+              }
+              const preset = sortPresets.find((p) => p.id === presetId)
+              if (preset) {
+                onSortsChange(preset.sorts.map((s) => ({ ...s, id: generateId() })))
+              }
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue>
+                {selectedPreset?.label ?? 'Custom'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="custom">Custom</SelectItem>
+              {sortPresets.map((preset) => (
+                <SelectItem key={preset.id} value={preset.id}>
+                  {preset.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Active Sorts */}
         {sorts.length > 0 && (
-          <div className="border-b p-3">
-            <div className="space-y-2">
+          <div className="p-3">
+            <div className="max-h-[280px] space-y-2 overflow-y-auto">
               {sorts.map((sort, index) => {
                 const fieldOption = getFieldOption(sort.field)
                 return (
                   <div
-                    key={`${sort.field}-${index}`}
-                    draggable
-                    onDragStart={() => handleDragStart(index)}
-                    onDragOver={(e) => handleDragOver(e, index)}
-                    onDragEnd={handleDragEnd}
-                    className={cn(
-                      'flex items-center gap-2',
-                      dragOverIndex === index && draggedIndex !== index && 'opacity-50',
-                    )}
+                    key={sort.id}
+                    className="flex items-center gap-2"
                   >
                     {/* Field Selector */}
                     <Select
@@ -181,15 +482,13 @@ export function MultiSortPopover({
                         handleFieldChange(index, value as SortField)
                       }
                     >
-                      <SelectTrigger className="w-[160px]">
-                        <SelectValue />
+                      <SelectTrigger className="w-[180px] shrink-0">
+                        <SelectValue>{fieldOption?.label}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        {/* Current field always available */}
                         <SelectItem value={sort.field}>
                           {fieldOption?.label}
                         </SelectItem>
-                        {/* Plus available fields */}
                         {availableFields.map((opt) => (
                           <SelectItem key={opt.field} value={opt.field}>
                             {opt.label}
@@ -198,25 +497,75 @@ export function MultiSortPopover({
                       </SelectContent>
                     </Select>
 
-                    {/* Direction Selector */}
+                    {/* Operator Selector */}
                     <Select
-                      value={sort.direction}
+                      value={sort.operator}
                       onValueChange={(value) =>
-                        handleDirectionChange(index, value as SortDirection)
+                        handleOperatorChange(index, value as SortOperator)
                       }
                     >
-                      <SelectTrigger className="w-[130px]">
+                      <SelectTrigger className="w-[200px] shrink-0">
                         <SelectValue>
-                          {sort.direction === 'asc'
-                            ? fieldOption?.ascLabel
-                            : fieldOption?.descLabel}
+                          {fieldOption?.operators.find(
+                            (op) => op.value === sort.operator
+                          )?.label}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="asc">{fieldOption?.ascLabel}</SelectItem>
-                        <SelectItem value="desc">{fieldOption?.descLabel}</SelectItem>
+                        {fieldOption?.operators.map((op) => (
+                          <SelectItem key={op.value} value={op.value}>
+                            {op.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
+
+                    {/* Value Input */}
+                    <div className="w-[140px] shrink-0">
+                      {needsValueInput(sort.operator) && (
+                        <>
+                          {fieldOption?.type === 'numeric' ? (
+                            <Input
+                              type="number"
+                              value={sort.value}
+                              onChange={(e) =>
+                                handleValueChange(index, Number(e.target.value))
+                              }
+                              className="w-full"
+                            />
+                          ) : fieldOption?.type === 'boolean' ||
+                            fieldOption?.type === 'enum' ? (
+                            <Select
+                              value={String(sort.value)}
+                              onValueChange={(value) =>
+                                handleValueChange(index, value)
+                              }
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {fieldOption.enumValues?.map((v) => (
+                                  <SelectItem key={v} value={v}>
+                                    {v}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              type="text"
+                              value={String(sort.value)}
+                              onChange={(e) =>
+                                handleValueChange(index, e.target.value)
+                              }
+                              placeholder="Enter value"
+                              className="w-full"
+                            />
+                          )}
+                        </>
+                      )}
+                    </div>
 
                     {/* Remove Button */}
                     <Button
@@ -227,11 +576,6 @@ export function MultiSortPopover({
                     >
                       <X className="h-4 w-4" />
                     </Button>
-
-                    {/* Drag Handle */}
-                    <div className="cursor-grab text-muted-foreground hover:text-foreground">
-                      <GripVertical className="h-4 w-4" />
-                    </div>
                   </div>
                 )
               })}
@@ -239,36 +583,97 @@ export function MultiSortPopover({
           </div>
         )}
 
-        {/* Available Fields */}
+        {/* Available Fields - Grouped by Section */}
         {availableFields.length > 0 && (
-          <div className="p-2">
-            {availableFields.map((opt) => (
-              <button
-                key={opt.field}
-                type="button"
-                onClick={() => handleAddSort(opt.field)}
-                className="w-full rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-accent"
-              >
-                {opt.label}
-              </button>
-            ))}
+          <div className={sorts.length > 0 ? 'border-t' : ''}>
+            <div className="px-3 py-2 text-sm font-medium text-muted-foreground">Add filter criteria</div>
+            <ScrollArea className="h-[300px]">
+              <div>
+                {groupOrder.map((group) => {
+                  const groupFields = availableFields.filter((opt) => opt.group === group)
+                  if (groupFields.length === 0) return null
+                  return (
+                    <div key={group} className="mb-2 last:mb-0">
+                      <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                        {groupLabels[group]}
+                      </div>
+                      {groupFields.map((opt) => (
+                        <button
+                          key={opt.field}
+                          type="button"
+                          onClick={() => handleAddSort(opt.field)}
+                          className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  )
+                })}
+              </div>
+            </ScrollArea>
           </div>
         )}
 
-        {/* Reset Button */}
-        {sorts.length > 0 && (
-          <div className="border-t p-3">
-            <button
-              type="button"
-              onClick={handleReset}
-              className="flex items-center gap-2 text-sm text-primary hover:underline"
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between border-t px-3 py-1.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            disabled={sorts.length === 0}
+            className="gap-2 text-destructive hover:text-destructive disabled:text-muted-foreground"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset
+          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="gap-2"
+              onClick={() => setSaveDialogOpen(true)}
+              disabled={sorts.length === 0}
             >
-              <RotateCcw className="h-4 w-4" />
-              Reset
-            </button>
+              <Save className="h-4 w-4" />
+              Save as preset
+            </Button>
+            <Button size="sm" onClick={() => setOpen(false)}>
+              Done
+            </Button>
           </div>
-        )}
+        </div>
       </PopoverContent>
     </Popover>
+
+      {/* Save Preset Dialog */}
+      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save filter preset</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Enter preset name"
+              value={presetName}
+              onChange={(e) => setPresetName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSavePreset()
+                }
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSavePreset} disabled={!presetName.trim()}>
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
