@@ -1,11 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
+import { EmptyState } from '@/components/empty-state'
 
-export const Route = createFileRoute("/")({ component: App });
+export const Route = createFileRoute('/')({
+  component: HomePage,
+})
 
-function App() {
+function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      <div className="font-medium">Hello World</div>
-    </div>
-  );
+    <EmptyState
+      title="Welcome to MOE Teacher Workspace"
+      description="This page is empty. Start by selecting a section from the sidebar."
+    />
+  )
 }

@@ -1,0 +1,78 @@
+{
+  "project": "moe-teacher-workspace",
+  "lastUpdated": "2026-01-08T04:55:00.000Z",
+  "todos": [
+    {
+      "id": "tw-001",
+      "title": "Initialize TanStack Start project with Bun",
+      "description": "Set up the base TanStack Start project using Bun as the package manager and runtime",
+      "status": "completed",
+      "createdAt": "2026-01-08T04:40:00.000Z",
+      "completedAt": "2026-01-08T04:42:00.000Z"
+    },
+    {
+      "id": "tw-002",
+      "title": "Configure Shadcn UI with Base UI",
+      "description": "Install and configure Shadcn UI using Base UI (MUI) primitives with maia style",
+      "status": "completed",
+      "createdAt": "2026-01-08T04:42:00.000Z",
+      "completedAt": "2026-01-08T04:45:00.000Z"
+    },
+    {
+      "id": "tw-003",
+      "title": "Create sidebar navigation",
+      "description": "Implement sidebar component with Home and Students navigation items",
+      "status": "completed",
+      "createdAt": "2026-01-08T04:45:00.000Z",
+      "completedAt": "2026-01-08T04:48:00.000Z"
+    },
+    {
+      "id": "tw-004",
+      "title": "Create empty state components",
+      "description": "Create reusable empty state component for pages without content",
+      "status": "completed",
+      "createdAt": "2026-01-08T04:48:00.000Z",
+      "completedAt": "2026-01-08T04:49:00.000Z"
+    },
+    {
+      "id": "tw-005",
+      "title": "Configure root layout with sidebar",
+      "description": "Update root layout to include SidebarProvider and sidebar components",
+      "status": "completed",
+      "createdAt": "2026-01-08T04:49:00.000Z",
+      "completedAt": "2026-01-08T04:51:00.000Z"
+    },
+    {
+      "id": "tw-006",
+      "title": "Create Home and Students pages",
+      "description": "Create route pages for Home and Students with empty states",
+      "status": "completed",
+      "createdAt": "2026-01-08T04:51:00.000Z",
+      "completedAt": "2026-01-08T04:52:00.000Z"
+    },
+    {
+      "id": "tw-007",
+      "title": "Verify application build and dev server",
+      "description": "Run build and dev server to verify all components work correctly",
+      "status": "completed",
+      "createdAt": "2026-01-08T04:52:00.000Z",
+      "completedAt": "2026-01-08T04:55:00.000Z"
+    },
+    {
+      "id": "tw-008",
+      "title": "Implement student list functionality",
+      "description": "Add ability to display and manage a list of students on the Students page",
+      "status": "not_started",
+      "createdAt": "2026-01-08T04:55:00.000Z",
+      "completedAt": null
+    },
+    {
+      "id": "tw-009",
+      "title": "Implement dashboard widgets for Home page",
+      "description": "Add summary widgets and statistics to the Home page",
+      "status": "not_started",
+      "createdAt": "2026-01-08T04:55:00.000Z",
+      "completedAt": null
+    }
+  ]
+}
