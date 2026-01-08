@@ -67,9 +67,9 @@ function RootComponent() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="h-screen overflow-hidden">
         <AppHeader notificationCount={8} />
-        <div className="flex flex-1 flex-col p-4">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <Outlet />
         </div>
       </SidebarInset>
