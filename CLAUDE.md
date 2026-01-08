@@ -30,9 +30,10 @@ bun run check          # Format and lint (prettier + eslint)
 ### Path Aliases
 
 Use `@/*` to import from `src/*`:
+
 ```tsx
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 ```
 
 ### Adding Shadcn Components
@@ -46,6 +47,7 @@ Components use Base UI primitives (not Radix). Configuration in `components.json
 ## Task Management
 
 Always update task status in `todos/project-todos.json` when:
+
 - Picking up a task (set to `in_progress`)
 - Completing a task (set to `completed` with timestamp)
 - Starting new work (create new todo entries)
