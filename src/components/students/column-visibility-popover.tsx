@@ -21,7 +21,7 @@ export interface ColumnConfig {
   visible: boolean
 }
 
-export const defaultColumns: ColumnConfig[] = [
+export const defaultColumns: Array<ColumnConfig> = [
   { id: 'index', label: '#', visible: true },
   { id: 'name', label: 'Name', visible: true },
   { id: 'class', label: 'Class', visible: true },
@@ -48,8 +48,8 @@ export const defaultColumns: ColumnConfig[] = [
 ]
 
 interface ColumnVisibilityPopoverProps {
-  columns: ColumnConfig[]
-  onColumnsChange: (columns: ColumnConfig[]) => void
+  columns: Array<ColumnConfig>
+  onColumnsChange: (columns: Array<ColumnConfig>) => void
   className?: string
 }
 
@@ -95,7 +95,11 @@ export function ColumnVisibilityPopover({
           render={
             <PopoverTrigger
               render={
-                <Button variant="outline" size="icon" className={cn(className)} />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(className)}
+                />
               }
             >
               <Columns3 className="h-4 w-4" />

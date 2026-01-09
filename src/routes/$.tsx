@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { Construction } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,8 @@ function ComingSoonPage() {
             Coming Soon
           </h1>
           <p className="max-w-md text-muted-foreground">
-            This feature is currently under development. Check back later for updates.
+            This feature is currently under development. Check back later for
+            updates.
           </p>
         </div>
         <Button asChild variant="outline">

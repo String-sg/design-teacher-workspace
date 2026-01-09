@@ -5,11 +5,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ```bash
-bun --bun run dev      # Start dev server on port 3000
+bun run dev            # Start dev server on port 3000
 bun run build          # Production build
 bun run test           # Run tests with vitest
 bun run check          # Format and lint (prettier + eslint)
 ```
+
+> Note: `bunfig.toml` configures Bun to use its native runtime by default for all scripts.
 
 ## Architecture
 

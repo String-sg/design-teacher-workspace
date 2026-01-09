@@ -70,7 +70,7 @@ function RootComponent() {
       <AppSidebar />
       <SidebarInset className="h-screen overflow-hidden">
         <AppHeader notificationCount={8} />
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col overflow-auto">
           <Outlet />
         </div>
       </SidebarInset>

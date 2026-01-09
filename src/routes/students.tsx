@@ -1,17 +1,18 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 
+import type { SortCriterion, Student } from '@/types/student'
+import type {ColumnConfig} from '@/components/students/column-visibility-popover';
 import { DataCard } from '@/components/data-card'
 import { StudentFilters } from '@/components/students/student-filters'
 import { StudentTable } from '@/components/students/student-table'
 import { ClassSelector } from '@/components/students/class-selector'
 import {
-  defaultColumns,
-  type ColumnConfig,
+  
+  defaultColumns
 } from '@/components/students/column-visibility-popover'
 
-import { mockStudents, getMetrics } from '@/data/mock-students'
-import type { SortCriterion, Student } from '@/types/student'
+import { getMetrics, mockStudents } from '@/data/mock-students'
 
 export const Route = createFileRoute('/students')({
   component: StudentsPage,
@@ -58,8 +59,8 @@ function matchesCondition(student: Student, sort: SortCriterion): boolean {
 function StudentsPage() {
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [searchQuery, setSearchQuery] = useState('')
-  const [sorts, setSorts] = useState<SortCriterion[]>([])
-  const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns)
+  const [sorts, setSorts] = useState<Array<SortCriterion>>([])
+  const [columns, setColumns] = useState<Array<ColumnConfig>>(defaultColumns)
 
   const filteredStudents = useMemo(() => {
     let students = mockStudents
@@ -84,7 +85,7 @@ function StudentsPage() {
     // Filter: only show records matching ALL criteria
     if (sorts.length > 0) {
       students = students.filter((student) =>
-        sorts.every((sort) => matchesCondition(student, sort))
+        sorts.every((sort) => matchesCondition(student, sort)),
       )
     }
 
@@ -110,7 +111,10 @@ function StudentsPage() {
 
         {/* Class Selector */}
         <div className="px-6">
-          <ClassSelector value={selectedClass} onValueChange={setSelectedClass} />
+          <ClassSelector
+            value={selectedClass}
+            onValueChange={setSelectedClass}
+          />
         </div>
 
         {/* Metrics Cards */}
@@ -145,7 +149,11 @@ function StudentsPage() {
       </div>
 
       {/* Student Table - fills remaining space */}
-      <StudentTable students={filteredStudents} columns={columns} pageSize={20} />
+      <StudentTable
+        students={filteredStudents}
+        columns={columns}
+        pageSize={20}
+      />
     </div>
   )
 }

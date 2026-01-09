@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import { ListFilter, X, RotateCcw, Save, Trash2, Pencil } from 'lucide-react'
+import { ListFilter, Pencil, RotateCcw, Save, Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
 
+import type { SortCriterion, SortField, SortOperator } from '@/types/student'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -25,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { SortCriterion, SortField, SortOperator } from '@/types/student'
 
 type FieldType = 'numeric' | 'text' | 'boolean' | 'enum'
 
@@ -41,10 +41,10 @@ interface SortFieldOption {
   label: string
   type: FieldType
   group: FieldGroup
-  operators: OperatorOption[]
+  operators: Array<OperatorOption>
   defaultOperator: SortOperator
   defaultValue: string | number
-  enumValues?: string[]
+  enumValues?: Array<string>
 }
 
 const groupLabels: Record<FieldGroup, string> = {
@@ -55,9 +55,15 @@ const groupLabels: Record<FieldGroup, string> = {
   family: 'Family, Housing, Finance',
 }
 
-const groupOrder: FieldGroup[] = ['general', 'behaviour', 'academic', 'wellbeing', 'family']
+const groupOrder: Array<FieldGroup> = [
+  'general',
+  'behaviour',
+  'academic',
+  'wellbeing',
+  'family',
+]
 
-const numericOperators: OperatorOption[] = [
+const numericOperators: Array<OperatorOption> = [
   { value: 'gte', label: 'Greater than or equal' },
   { value: 'gt', label: 'Greater than' },
   { value: 'lte', label: 'Less than or equal to' },
@@ -65,7 +71,7 @@ const numericOperators: OperatorOption[] = [
   { value: 'eq', label: 'Equal to' },
 ]
 
-const textOperators: OperatorOption[] = [
+const textOperators: Array<OperatorOption> = [
   { value: 'contains', label: 'contains' },
   { value: 'not_contains', label: 'does not contain' },
   { value: 'is', label: 'is' },
@@ -74,12 +80,12 @@ const textOperators: OperatorOption[] = [
   { value: 'is_not_empty', label: 'is not empty' },
 ]
 
-const booleanOperators: OperatorOption[] = [
+const booleanOperators: Array<OperatorOption> = [
   { value: 'is', label: 'is' },
   { value: 'is_not', label: 'is not' },
 ]
 
-const sortFieldOptions: SortFieldOption[] = [
+const sortFieldOptions: Array<SortFieldOption> = [
   // General
   {
     field: 'name',
@@ -283,10 +289,10 @@ const sortFieldOptions: SortFieldOption[] = [
 interface SortPreset {
   id: string
   label: string
-  sorts: SortCriterion[]
+  sorts: Array<SortCriterion>
 }
 
-const defaultPresets: SortPreset[] = [
+const defaultPresets: Array<SortPreset> = [
   {
     id: 'support',
     label: 'Support',
@@ -311,8 +317,8 @@ let presetIdCounter = 0
 const generatePresetId = () => `preset-${++presetIdCounter}`
 
 interface MultiSortPopoverProps {
-  sorts: SortCriterion[]
-  onSortsChange: (sorts: SortCriterion[]) => void
+  sorts: Array<SortCriterion>
+  onSortsChange: (sorts: Array<SortCriterion>) => void
   className?: string
 }
 
@@ -325,7 +331,7 @@ export function MultiSortPopover({
   className,
 }: MultiSortPopoverProps) {
   const [open, setOpen] = useState(false)
-  const [customPresets, setCustomPresets] = useState<SortPreset[]>([])
+  const [customPresets, setCustomPresets] = useState<Array<SortPreset>>([])
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [presetName, setPresetName] = useState('')
   const [editingPresetId, setEditingPresetId] = useState<string | null>(null)
@@ -412,8 +418,8 @@ export function MultiSortPopover({
         customPresets.map((p) =>
           p.id === editingPresetId
             ? { ...p, label: presetName.trim(), sorts: savedSorts }
-            : p
-        )
+            : p,
+        ),
       )
       toast.success(`Preset "${presetName.trim()}" updated`)
     } else {
@@ -467,276 +473,290 @@ export function MultiSortPopover({
 
   return (
     <>
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <Button variant="outline" className={cn('gap-2', className)} />
-        }
-      >
-        <ListFilter className="h-4 w-4" />
-        Filter
-        {sorts.length > 0 && (
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-            {sorts.length}
-          </span>
-        )}
-      </PopoverTrigger>
-      <PopoverContent className="w-[600px] gap-0 p-0" align="start">
-        {/* Preset Selector */}
-        <div className="border-b p-3">
-          <label className="mb-2 block text-sm font-medium">Select filter preset</label>
-          <Select
-            value={activePresetId ?? 'custom'}
-            onValueChange={(presetId) => {
-              if (presetId === 'custom') {
-                setActivePresetId(null)
-                return
-              }
-              const preset = sortPresets.find((p) => p.id === presetId)
-              if (preset) {
-                setActivePresetId(presetId)
-                onSortsChange(preset.sorts.map((s) => ({ ...s, id: generateId() })))
-              }
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue>
-                {selectedPreset?.label ?? 'Custom'}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="custom">Custom</SelectItem>
-              {defaultPresets.map((preset) => (
-                <SelectItem key={preset.id} value={preset.id}>
-                  {preset.label}
-                </SelectItem>
-              ))}
-              {customPresets.length > 0 && (
-                <>
-                  <div className="my-1 h-px bg-border" />
-                  {customPresets.map((preset) => (
-                    <div key={preset.id} className="flex items-center justify-between gap-1 pr-2">
-                      <SelectItem value={preset.id} className="flex-1">
-                        {preset.label}
-                      </SelectItem>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleEditPreset(preset.id)
-                        }}
-                        className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          render={
+            <Button variant="outline" className={cn('gap-2', className)} />
+          }
+        >
+          <ListFilter className="h-4 w-4" />
+          Filter
+          {sorts.length > 0 && (
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+              {sorts.length}
+            </span>
+          )}
+        </PopoverTrigger>
+        <PopoverContent className="w-[600px] gap-0 p-0" align="start">
+          {/* Preset Selector */}
+          <div className="border-b p-3">
+            <label className="mb-2 block text-sm font-medium">
+              Select filter preset
+            </label>
+            <Select
+              value={activePresetId ?? 'custom'}
+              onValueChange={(presetId) => {
+                if (presetId === 'custom') {
+                  setActivePresetId(null)
+                  return
+                }
+                const preset = sortPresets.find((p) => p.id === presetId)
+                if (preset) {
+                  setActivePresetId(presetId)
+                  onSortsChange(
+                    preset.sorts.map((s) => ({ ...s, id: generateId() })),
+                  )
+                }
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue>{selectedPreset?.label ?? 'Custom'}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="custom">Custom</SelectItem>
+                {defaultPresets.map((preset) => (
+                  <SelectItem key={preset.id} value={preset.id}>
+                    {preset.label}
+                  </SelectItem>
+                ))}
+                {customPresets.length > 0 && (
+                  <>
+                    <div className="my-1 h-px bg-border" />
+                    {customPresets.map((preset) => (
+                      <div
+                        key={preset.id}
+                        className="flex items-center justify-between gap-1 pr-2"
                       >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeletePreset(preset.id)
-                        }}
-                        className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Active Sorts */}
-        {sorts.length > 0 && (
-          <div className="p-3">
-            <div className="max-h-[280px] space-y-2 overflow-y-auto">
-              {sorts.map((sort, index) => {
-                const fieldOption = getFieldOption(sort.field)
-                return (
-                  <div
-                    key={sort.id}
-                    className="flex items-center gap-2"
-                  >
-                    {/* Field Selector */}
-                    <Select
-                      value={sort.field}
-                      onValueChange={(value) =>
-                        handleFieldChange(index, value as SortField)
-                      }
-                    >
-                      <SelectTrigger className="w-[180px] shrink-0">
-                        <SelectValue>{fieldOption?.label}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={sort.field}>
-                          {fieldOption?.label}
+                        <SelectItem value={preset.id} className="flex-1">
+                          {preset.label}
                         </SelectItem>
-                        {availableFields.map((opt) => (
-                          <SelectItem key={opt.field} value={opt.field}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    {/* Operator Selector */}
-                    <Select
-                      value={sort.operator}
-                      onValueChange={(value) =>
-                        handleOperatorChange(index, value as SortOperator)
-                      }
-                    >
-                      <SelectTrigger className="w-[200px] shrink-0">
-                        <SelectValue>
-                          {fieldOption?.operators.find(
-                            (op) => op.value === sort.operator
-                          )?.label}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {fieldOption?.operators.map((op) => (
-                          <SelectItem key={op.value} value={op.value}>
-                            {op.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    {/* Value Input */}
-                    <div className="w-[140px] shrink-0">
-                      {needsValueInput(sort.operator) && (
-                        <>
-                          {fieldOption?.type === 'numeric' ? (
-                            <Input
-                              type="number"
-                              value={sort.value}
-                              onChange={(e) =>
-                                handleValueChange(index, Number(e.target.value))
-                              }
-                              className="w-full"
-                            />
-                          ) : fieldOption?.type === 'boolean' ||
-                            fieldOption?.type === 'enum' ? (
-                            <Select
-                              value={String(sort.value)}
-                              onValueChange={(value) =>
-                                handleValueChange(index, value)
-                              }
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {fieldOption.enumValues?.map((v) => (
-                                  <SelectItem key={v} value={v}>
-                                    {v}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Input
-                              type="text"
-                              value={String(sort.value)}
-                              onChange={(e) =>
-                                handleValueChange(index, e.target.value)
-                              }
-                              placeholder="Enter value"
-                              className="w-full"
-                            />
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    {/* Remove Button */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 shrink-0"
-                      onClick={() => handleRemoveSort(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Available Fields - Grouped by Section */}
-        {availableFields.length > 0 && (
-          <div className={sorts.length > 0 ? 'border-t' : ''}>
-            <div className="px-3 py-2 text-sm font-medium text-muted-foreground">Add filter criteria</div>
-            <ScrollArea className="h-[300px]">
-              <div>
-                {groupOrder.map((group) => {
-                  const groupFields = availableFields.filter((opt) => opt.group === group)
-                  if (groupFields.length === 0) return null
-                  return (
-                    <div key={group} className="mb-2 last:mb-0">
-                      <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                        {groupLabels[group]}
-                      </div>
-                      {groupFields.map((opt) => (
                         <button
-                          key={opt.field}
                           type="button"
-                          onClick={() => handleAddSort(opt.field)}
-                          className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEditPreset(preset.id)
+                          }}
+                          className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                         >
-                          {opt.label}
+                          <Pencil className="h-3.5 w-3.5" />
                         </button>
-                      ))}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeletePreset(preset.id)
+                          }}
+                          className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Active Sorts */}
+          {sorts.length > 0 && (
+            <div className="p-3">
+              <div className="max-h-[280px] space-y-2 overflow-y-auto">
+                {sorts.map((sort, index) => {
+                  const fieldOption = getFieldOption(sort.field)
+                  return (
+                    <div key={sort.id} className="flex items-center gap-2">
+                      {/* Field Selector */}
+                      <Select
+                        value={sort.field}
+                        onValueChange={(value) =>
+                          handleFieldChange(index, value as SortField)
+                        }
+                      >
+                        <SelectTrigger className="w-[180px] shrink-0">
+                          <SelectValue>{fieldOption?.label}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={sort.field}>
+                            {fieldOption?.label}
+                          </SelectItem>
+                          {availableFields.map((opt) => (
+                            <SelectItem key={opt.field} value={opt.field}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Operator Selector */}
+                      <Select
+                        value={sort.operator}
+                        onValueChange={(value) =>
+                          handleOperatorChange(index, value as SortOperator)
+                        }
+                      >
+                        <SelectTrigger className="w-[200px] shrink-0">
+                          <SelectValue>
+                            {
+                              fieldOption?.operators.find(
+                                (op) => op.value === sort.operator,
+                              )?.label
+                            }
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {fieldOption?.operators.map((op) => (
+                            <SelectItem key={op.value} value={op.value}>
+                              {op.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Value Input */}
+                      <div className="w-[140px] shrink-0">
+                        {needsValueInput(sort.operator) && (
+                          <>
+                            {fieldOption?.type === 'numeric' ? (
+                              <Input
+                                type="number"
+                                value={sort.value}
+                                onChange={(e) =>
+                                  handleValueChange(
+                                    index,
+                                    Number(e.target.value),
+                                  )
+                                }
+                                className="w-full"
+                              />
+                            ) : fieldOption?.type === 'boolean' ||
+                              fieldOption?.type === 'enum' ? (
+                              <Select
+                                value={String(sort.value)}
+                                onValueChange={(value) =>
+                                  handleValueChange(index, value)
+                                }
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {fieldOption.enumValues?.map((v) => (
+                                    <SelectItem key={v} value={v}>
+                                      {v}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Input
+                                type="text"
+                                value={String(sort.value)}
+                                onChange={(e) =>
+                                  handleValueChange(index, e.target.value)
+                                }
+                                placeholder="Enter value"
+                                className="w-full"
+                              />
+                            )}
+                          </>
+                        )}
+                      </div>
+
+                      {/* Remove Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => handleRemoveSort(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
                   )
                 })}
               </div>
-            </ScrollArea>
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Footer Actions */}
-        <div className="flex items-center justify-between border-t px-3 py-1.5">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            disabled={sorts.length === 0}
-            className="gap-2 text-destructive hover:text-destructive disabled:text-muted-foreground"
-          >
-            <RotateCcw className="h-4 w-4" />
-            Reset
-          </Button>
-          <div className="flex items-center gap-2">
+          {/* Available Fields - Grouped by Section */}
+          {availableFields.length > 0 && (
+            <div className={sorts.length > 0 ? 'border-t' : ''}>
+              <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
+                Add filter criteria
+              </div>
+              <ScrollArea className="h-[300px]">
+                <div>
+                  {groupOrder.map((group) => {
+                    const groupFields = availableFields.filter(
+                      (opt) => opt.group === group,
+                    )
+                    if (groupFields.length === 0) return null
+                    return (
+                      <div key={group} className="mb-2 last:mb-0">
+                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                          {groupLabels[group]}
+                        </div>
+                        {groupFields.map((opt) => (
+                          <button
+                            key={opt.field}
+                            type="button"
+                            onClick={() => handleAddSort(opt.field)}
+                            className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
+          )}
+
+          {/* Footer Actions */}
+          <div className="flex items-center justify-between border-t px-3 py-1.5">
             <Button
-              variant="secondary"
+              variant="ghost"
               size="sm"
-              className="gap-2"
-              onClick={() => {
-                const isCustomPreset = selectedPreset && customPresets.some((p) => p.id === selectedPreset.id)
-                if (isCustomPreset && selectedPreset) {
-                  setEditingPresetId(selectedPreset.id)
-                  setPresetName(selectedPreset.label)
-                }
-                setSaveDialogOpen(true)
-              }}
+              onClick={handleReset}
               disabled={sorts.length === 0}
+              className="gap-2 text-destructive hover:text-destructive disabled:text-muted-foreground"
             >
-              <Save className="h-4 w-4" />
-              {selectedPreset && customPresets.some((p) => p.id === selectedPreset.id)
-                ? 'Update preset'
-                : 'Save as preset'}
+              <RotateCcw className="h-4 w-4" />
+              Reset
             </Button>
-            <Button size="sm" onClick={() => setOpen(false)}>
-              Done
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="gap-2"
+                onClick={() => {
+                  const isCustomPreset =
+                    selectedPreset &&
+                    customPresets.some((p) => p.id === selectedPreset.id)
+                  if (isCustomPreset && selectedPreset) {
+                    setEditingPresetId(selectedPreset.id)
+                    setPresetName(selectedPreset.label)
+                  }
+                  setSaveDialogOpen(true)
+                }}
+                disabled={sorts.length === 0}
+              >
+                <Save className="h-4 w-4" />
+                {selectedPreset &&
+                customPresets.some((p) => p.id === selectedPreset.id)
+                  ? 'Update preset'
+                  : 'Save as preset'}
+              </Button>
+              <Button size="sm" onClick={() => setOpen(false)}>
+                Done
+              </Button>
+            </div>
           </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </PopoverContent>
+      </Popover>
 
       {/* Save/Edit Preset Dialog */}
       <Dialog

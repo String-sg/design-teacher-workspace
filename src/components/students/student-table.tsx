@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import type { AttentionTag, Student } from '@/types/student'
+import type { ColumnConfig } from './column-visibility-popover'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,13 +14,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import type { ColumnConfig } from './column-visibility-popover'
 
 import { tagColors } from '@/data/mock-students'
 
 interface StudentTableProps {
   students: Array<Student>
-  columns: ColumnConfig[]
+  columns: Array<ColumnConfig>
   className?: string
   pageSize?: number
 }
@@ -63,7 +63,7 @@ export function StudentTable({
 
   // Generate page numbers to display
   const getPageNumbers = () => {
-    const pages: (number | 'ellipsis')[] = []
+    const pages: Array<number | 'ellipsis'> = []
     const maxVisible = 5
 
     if (totalPages <= maxVisible) {
@@ -100,7 +100,8 @@ export function StudentTable({
   const startIndex = (currentPage - 1) * pageSize + 1
 
   // Helper to check if a column is visible
-  const isVisible = (id: string) => columns.find((c) => c.id === id)?.visible ?? true
+  const isVisible = (id: string) =>
+    columns.find((c) => c.id === id)?.visible ?? true
 
   return (
     <div className={cn('flex min-h-0 flex-1 flex-col', className)}>
@@ -108,35 +109,85 @@ export function StudentTable({
         <TableHeader>
           <TableRow>
             {isVisible('index') && (
-              <TableHead className="sticky left-0 z-20 w-12 min-w-12 bg-background pl-6">#</TableHead>
+              <TableHead className="sticky left-0 z-20 w-12 min-w-12 bg-background pl-6">
+                #
+              </TableHead>
             )}
             {isVisible('name') && (
-              <TableHead className={cn(
-                'sticky z-20 min-w-[140px] bg-background',
-                isVisible('index') ? 'left-12' : 'left-0'
-              )}>Name</TableHead>
+              <TableHead
+                className={cn(
+                  'sticky z-20 min-w-[140px] bg-background',
+                  isVisible('index') ? 'left-12' : 'left-0',
+                )}
+              >
+                Name
+              </TableHead>
             )}
-            {isVisible('class') && <TableHead className="min-w-[60px]">Class</TableHead>}
-            {isVisible('attentionTags') && <TableHead className="min-w-[100px]">Attention tag</TableHead>}
-            {isVisible('overallPercentage') && <TableHead className="min-w-[80px]">Overall %</TableHead>}
-            {isVisible('conduct') && <TableHead className="min-w-[90px]">Conduct</TableHead>}
-            {isVisible('learningSupport') && <TableHead className="min-w-[100px]">Learning Support</TableHead>}
-            {isVisible('postSecEligibility') && <TableHead className="min-w-[120px]">Post-Sec Eligibility</TableHead>}
-            {isVisible('offences') && <TableHead className="min-w-[70px]">Offences</TableHead>}
-            {isVisible('absences') && <TableHead className="min-w-[100px]">Absences</TableHead>}
-            {isVisible('lateComing') && <TableHead className="min-w-[80px]">Late-coming</TableHead>}
-            {isVisible('ccaMissed') && <TableHead className="min-w-[80px]">CCA Missed</TableHead>}
-            {isVisible('riskIndicators') && <TableHead className="min-w-[80px]">Risk (TCI)</TableHead>}
-            {isVisible('lowMoodFlagged') && <TableHead className="min-w-[80px]">Low Mood</TableHead>}
-            {isVisible('socialLinks') && <TableHead className="min-w-[80px]">Social Links</TableHead>}
-            {isVisible('counsellingSessions') && <TableHead className="min-w-[90px]">Counselling</TableHead>}
-            {isVisible('sen') && <TableHead className="min-w-[80px]">SEN</TableHead>}
-            {isVisible('housing') && <TableHead className="min-w-[80px]">Housing</TableHead>}
-            {isVisible('housingType') && <TableHead className="min-w-[90px]">Ownership</TableHead>}
-            {isVisible('custody') && <TableHead className="min-w-[80px]">Custody</TableHead>}
-            {isVisible('siblings') && <TableHead className="min-w-[70px]">Siblings</TableHead>}
-            {isVisible('externalAgencies') && <TableHead className="min-w-[100px]">Ext. Agencies</TableHead>}
-            {isVisible('fas') && <TableHead className="min-w-[60px] pr-6">FAS</TableHead>}
+            {isVisible('class') && (
+              <TableHead className="min-w-[60px]">Class</TableHead>
+            )}
+            {isVisible('attentionTags') && (
+              <TableHead className="min-w-[100px]">Attention tag</TableHead>
+            )}
+            {isVisible('overallPercentage') && (
+              <TableHead className="min-w-[80px]">Overall %</TableHead>
+            )}
+            {isVisible('conduct') && (
+              <TableHead className="min-w-[90px]">Conduct</TableHead>
+            )}
+            {isVisible('learningSupport') && (
+              <TableHead className="min-w-[100px]">Learning Support</TableHead>
+            )}
+            {isVisible('postSecEligibility') && (
+              <TableHead className="min-w-[120px]">
+                Post-Sec Eligibility
+              </TableHead>
+            )}
+            {isVisible('offences') && (
+              <TableHead className="min-w-[70px]">Offences</TableHead>
+            )}
+            {isVisible('absences') && (
+              <TableHead className="min-w-[100px]">Absences</TableHead>
+            )}
+            {isVisible('lateComing') && (
+              <TableHead className="min-w-[80px]">Late-coming</TableHead>
+            )}
+            {isVisible('ccaMissed') && (
+              <TableHead className="min-w-[80px]">CCA Missed</TableHead>
+            )}
+            {isVisible('riskIndicators') && (
+              <TableHead className="min-w-[80px]">Risk (TCI)</TableHead>
+            )}
+            {isVisible('lowMoodFlagged') && (
+              <TableHead className="min-w-[80px]">Low Mood</TableHead>
+            )}
+            {isVisible('socialLinks') && (
+              <TableHead className="min-w-[80px]">Social Links</TableHead>
+            )}
+            {isVisible('counsellingSessions') && (
+              <TableHead className="min-w-[90px]">Counselling</TableHead>
+            )}
+            {isVisible('sen') && (
+              <TableHead className="min-w-[80px]">SEN</TableHead>
+            )}
+            {isVisible('housing') && (
+              <TableHead className="min-w-[80px]">Housing</TableHead>
+            )}
+            {isVisible('housingType') && (
+              <TableHead className="min-w-[90px]">Ownership</TableHead>
+            )}
+            {isVisible('custody') && (
+              <TableHead className="min-w-[80px]">Custody</TableHead>
+            )}
+            {isVisible('siblings') && (
+              <TableHead className="min-w-[70px]">Siblings</TableHead>
+            )}
+            {isVisible('externalAgencies') && (
+              <TableHead className="min-w-[100px]">Ext. Agencies</TableHead>
+            )}
+            {isVisible('fas') && (
+              <TableHead className="min-w-[60px] pr-6">FAS</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -148,10 +199,14 @@ export function StudentTable({
                 </TableCell>
               )}
               {isVisible('name') && (
-                <TableCell className={cn(
-                  'sticky z-10 bg-background font-medium',
-                  isVisible('index') ? 'left-12' : 'left-0'
-                )}>{student.name}</TableCell>
+                <TableCell
+                  className={cn(
+                    'sticky z-10 bg-background font-medium',
+                    isVisible('index') ? 'left-12' : 'left-0',
+                  )}
+                >
+                  {student.name}
+                </TableCell>
               )}
               {isVisible('class') && <TableCell>{student.class}</TableCell>}
               {isVisible('attentionTags') && (
@@ -188,10 +243,14 @@ export function StudentTable({
                 <TableCell>
                   <Badge
                     className={cn(
-                      student.conduct === 'Poor' && 'bg-red-100 text-red-700 hover:bg-red-100',
-                      student.conduct === 'Fair' && 'bg-amber-100 text-amber-700 hover:bg-amber-100',
-                      student.conduct === 'Good' && 'bg-slate-100 text-slate-700 hover:bg-slate-100',
-                      student.conduct === 'Excellent' && 'bg-green-100 text-green-700 hover:bg-green-100',
+                      student.conduct === 'Poor' &&
+                        'bg-red-100 text-red-700 hover:bg-red-100',
+                      student.conduct === 'Fair' &&
+                        'bg-amber-100 text-amber-700 hover:bg-amber-100',
+                      student.conduct === 'Good' &&
+                        'bg-slate-100 text-slate-700 hover:bg-slate-100',
+                      student.conduct === 'Excellent' &&
+                        'bg-green-100 text-green-700 hover:bg-green-100',
                     )}
                   >
                     {student.conduct}
@@ -287,8 +346,12 @@ export function StudentTable({
                   )}
                 </TableCell>
               )}
-              {isVisible('socialLinks') && <TableCell>{student.socialLinks}</TableCell>}
-              {isVisible('counsellingSessions') && <TableCell>{student.counsellingSessions}</TableCell>}
+              {isVisible('socialLinks') && (
+                <TableCell>{student.socialLinks}</TableCell>
+              )}
+              {isVisible('counsellingSessions') && (
+                <TableCell>{student.counsellingSessions}</TableCell>
+              )}
               {isVisible('sen') && (
                 <TableCell>
                   {student.sen || (
@@ -305,11 +368,13 @@ export function StudentTable({
               )}
               {isVisible('housingType') && (
                 <TableCell>
-                  {student.housingType === 'Rented'
-                    ? 'Rental'
-                    : student.housingType === 'Owned'
-                      ? 'Owner occupied'
-                      : <span className="text-muted-foreground">N/A</span>}
+                  {student.housingType === 'Rented' ? (
+                    'Rental'
+                  ) : student.housingType === 'Owned' ? (
+                    'Owner occupied'
+                  ) : (
+                    <span className="text-muted-foreground">N/A</span>
+                  )}
                 </TableCell>
               )}
               {isVisible('custody') && (
@@ -319,7 +384,9 @@ export function StudentTable({
                   )}
                 </TableCell>
               )}
-              {isVisible('siblings') && <TableCell>{student.siblings}</TableCell>}
+              {isVisible('siblings') && (
+                <TableCell>{student.siblings}</TableCell>
+              )}
               {isVisible('externalAgencies') && (
                 <TableCell>
                   {student.externalAgencies || (
