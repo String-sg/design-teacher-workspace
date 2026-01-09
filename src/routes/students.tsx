@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 
-import type { SortCriterion, Student } from '@/types/student'
+import type { FilterCriterion, Student } from '@/types/student'
 import type {ColumnConfig} from '@/components/students/column-visibility-popover';
 import { DataCard } from '@/components/data-card'
 import { StudentFilters } from '@/components/students/student-filters'
@@ -18,35 +18,35 @@ export const Route = createFileRoute('/students')({
   component: StudentsPage,
 })
 
-// Check if a student matches a sort condition
-function matchesCondition(student: Student, sort: SortCriterion): boolean {
-  const value = student[sort.field as keyof Student]
+// Check if a student matches a filter condition
+function matchesCondition(student: Student, filter: FilterCriterion): boolean {
+  const value = student[filter.field as keyof Student]
 
-  switch (sort.operator) {
+  switch (filter.operator) {
     // Numeric operators
     case 'gt':
-      return Number(value) > Number(sort.value)
+      return Number(value) > Number(filter.value)
     case 'gte':
-      return Number(value) >= Number(sort.value)
+      return Number(value) >= Number(filter.value)
     case 'lt':
-      return Number(value) < Number(sort.value)
+      return Number(value) < Number(filter.value)
     case 'lte':
-      return Number(value) <= Number(sort.value)
+      return Number(value) <= Number(filter.value)
     case 'eq':
-      return Number(value) === Number(sort.value)
+      return Number(value) === Number(filter.value)
     // Text operators
     case 'contains':
       return String(value ?? '')
         .toLowerCase()
-        .includes(String(sort.value).toLowerCase())
+        .includes(String(filter.value).toLowerCase())
     case 'not_contains':
       return !String(value ?? '')
         .toLowerCase()
-        .includes(String(sort.value).toLowerCase())
+        .includes(String(filter.value).toLowerCase())
     case 'is':
-      return String(value ?? '') === String(sort.value)
+      return String(value ?? '') === String(filter.value)
     case 'is_not':
-      return String(value ?? '') !== String(sort.value)
+      return String(value ?? '') !== String(filter.value)
     case 'is_empty':
       return !value || value === ''
     case 'is_not_empty':
@@ -59,7 +59,7 @@ function matchesCondition(student: Student, sort: SortCriterion): boolean {
 function StudentsPage() {
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [searchQuery, setSearchQuery] = useState('')
-  const [sorts, setSorts] = useState<Array<SortCriterion>>([])
+  const [filters, setFilters] = useState<Array<FilterCriterion>>([])
   const [columns, setColumns] = useState<Array<ColumnConfig>>(defaultColumns)
 
   // Get students for the selected class/level (this determines the base list)
@@ -80,11 +80,11 @@ function StudentsPage() {
     return students
   }, [selectedClass])
 
-  // Determine which students match the current filters (search + sort criteria)
+  // Determine which students match the current filters (search + filter criteria)
   const { matchedIds, hasActiveFilters } = useMemo(() => {
     const hasSearch = !!searchQuery
-    const hasSortFilters = sorts.length > 0
-    const hasActiveFilters = hasSearch || hasSortFilters
+    const hasFilterCriteria = filters.length > 0
+    const hasActiveFilters = hasSearch || hasFilterCriteria
 
     if (!hasActiveFilters) {
       // No filters active - all students are "matched"
@@ -96,18 +96,21 @@ function StudentsPage() {
 
     for (const student of classStudents) {
       // Check search query
-      const matchesSearch = !hasSearch || student.name.toLowerCase().includes(query)
+      const matchesSearch =
+        !hasSearch || student.name.toLowerCase().includes(query)
 
-      // Check sort/filter criteria
-      const matchesSorts = !hasSortFilters || sorts.every((sort) => matchesCondition(student, sort))
+      // Check filter criteria
+      const matchesFilters =
+        !hasFilterCriteria ||
+        filters.every((filter) => matchesCondition(student, filter))
 
-      if (matchesSearch && matchesSorts) {
+      if (matchesSearch && matchesFilters) {
         matchedIds.add(student.id)
       }
     }
 
     return { matchedIds, hasActiveFilters }
-  }, [classStudents, searchQuery, sorts])
+  }, [classStudents, searchQuery, filters])
 
   // Sort students: matched first, then unmatched
   const sortedStudents = useMemo(() => {
@@ -180,8 +183,8 @@ function StudentsPage() {
         <StudentFilters
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
-          sorts={sorts}
-          onSortsChange={setSorts}
+          filters={filters}
+          onFiltersChange={setFilters}
           columns={columns}
           onColumnsChange={setColumns}
           className="px-6 pb-4"

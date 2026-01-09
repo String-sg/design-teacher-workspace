@@ -41,7 +41,7 @@ export interface ClassOption {
   label: string
 }
 
-export type SortField =
+export type FilterField =
   // General
   | 'name'
   | 'class'
@@ -69,7 +69,7 @@ export type SortField =
   | 'siblings'
   | 'externalAgencies'
 
-export type SortOperator =
+export type FilterOperator =
   // Numeric operators
   | 'gt'
   | 'gte'
@@ -84,9 +84,16 @@ export type SortOperator =
   | 'is_empty'
   | 'is_not_empty'
 
-export interface SortCriterion {
+export interface FilterCriterion {
   id: string
-  field: SortField
-  operator: SortOperator
+  field: FilterField
+  operator: FilterOperator
   value: string | number
 }
+
+/** @deprecated Use FilterField instead */
+export type SortField = FilterField
+/** @deprecated Use FilterOperator instead */
+export type SortOperator = FilterOperator
+/** @deprecated Use FilterCriterion instead */
+export type SortCriterion = FilterCriterion

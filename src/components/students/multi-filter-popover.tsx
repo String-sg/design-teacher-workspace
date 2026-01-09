@@ -1,8 +1,25 @@
-import { useState } from 'react'
-import { ListFilter, Pencil, RotateCcw, Save, Trash2, X } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Equal,
+  EqualNot,
+  ListFilter,
+  Pencil,
+  RotateCcw,
+  Save,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { toast } from 'sonner'
 
-import type { SortCriterion, SortField, SortOperator } from '@/types/student'
+import type {
+  FilterCriterion,
+  FilterField,
+  FilterOperator,
+} from '@/types/student'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -32,17 +49,18 @@ type FieldType = 'numeric' | 'text' | 'boolean' | 'enum'
 type FieldGroup = 'general' | 'academic' | 'behaviour' | 'wellbeing' | 'family'
 
 interface OperatorOption {
-  value: SortOperator
+  value: FilterOperator
   label: string
+  icon?: ReactNode
 }
 
-interface SortFieldOption {
-  field: SortField
+interface FilterFieldOption {
+  field: FilterField
   label: string
   type: FieldType
   group: FieldGroup
   operators: Array<OperatorOption>
-  defaultOperator: SortOperator
+  defaultOperator: FilterOperator
   defaultValue: string | number
   enumValues?: Array<string>
 }
@@ -64,11 +82,31 @@ const groupOrder: Array<FieldGroup> = [
 ]
 
 const numericOperators: Array<OperatorOption> = [
-  { value: 'gte', label: 'Greater than or equal' },
-  { value: 'gt', label: 'Greater than' },
-  { value: 'lte', label: 'Less than or equal to' },
-  { value: 'lt', label: 'Less than' },
-  { value: 'eq', label: 'Equal to' },
+  {
+    value: 'gte',
+    label: 'Greater than or equal',
+    icon: <ChevronsRight className="h-4 w-4" />,
+  },
+  {
+    value: 'gt',
+    label: 'Greater than',
+    icon: <ChevronRight className="h-4 w-4" />,
+  },
+  {
+    value: 'lte',
+    label: 'Less than or equal to',
+    icon: <ChevronsLeft className="h-4 w-4" />,
+  },
+  {
+    value: 'lt',
+    label: 'Less than',
+    icon: <ChevronLeft className="h-4 w-4" />,
+  },
+  {
+    value: 'eq',
+    label: 'Equal to',
+    icon: <Equal className="h-4 w-4" />,
+  },
 ]
 
 const textOperators: Array<OperatorOption> = [
@@ -81,11 +119,11 @@ const textOperators: Array<OperatorOption> = [
 ]
 
 const booleanOperators: Array<OperatorOption> = [
-  { value: 'is', label: 'is' },
-  { value: 'is_not', label: 'is not' },
+  { value: 'is', label: 'is', icon: <Equal className="h-4 w-4" /> },
+  { value: 'is_not', label: 'is not', icon: <EqualNot className="h-4 w-4" /> },
 ]
 
-const sortFieldOptions: Array<SortFieldOption> = [
+const filterFieldOptions: Array<FilterFieldOption> = [
   // General
   {
     field: 'name',
@@ -286,17 +324,17 @@ const sortFieldOptions: Array<SortFieldOption> = [
   },
 ]
 
-interface SortPreset {
+interface FilterPreset {
   id: string
   label: string
-  sorts: Array<SortCriterion>
+  filters: Array<FilterCriterion>
 }
 
-const defaultPresets: Array<SortPreset> = [
+const defaultPresets: Array<FilterPreset> = [
   {
     id: 'support',
     label: 'Support',
-    sorts: [
+    filters: [
       { id: '1', field: 'riskIndicators', operator: 'gte', value: 3 },
       { id: '2', field: 'absences', operator: 'gte', value: 5 },
       { id: '3', field: 'conduct', operator: 'is', value: 'Poor' },
@@ -305,7 +343,7 @@ const defaultPresets: Array<SortPreset> = [
   {
     id: 'leadership',
     label: 'Leadership',
-    sorts: [
+    filters: [
       { id: '1', field: 'conduct', operator: 'is', value: 'Excellent' },
       { id: '2', field: 'overallPercentage', operator: 'gte', value: 70 },
       { id: '3', field: 'offences', operator: 'eq', value: 0 },
@@ -316,44 +354,44 @@ const defaultPresets: Array<SortPreset> = [
 let presetIdCounter = 0
 const generatePresetId = () => `preset-${++presetIdCounter}`
 
-interface MultiSortPopoverProps {
-  sorts: Array<SortCriterion>
-  onSortsChange: (sorts: Array<SortCriterion>) => void
+interface MultiFilterPopoverProps {
+  filters: Array<FilterCriterion>
+  onFiltersChange: (filters: Array<FilterCriterion>) => void
   className?: string
 }
 
-let sortIdCounter = 0
-const generateId = () => `sort-${++sortIdCounter}`
+let filterIdCounter = 0
+const generateId = () => `filter-${++filterIdCounter}`
 
-export function MultiSortPopover({
-  sorts,
-  onSortsChange,
+export function MultiFilterPopover({
+  filters,
+  onFiltersChange,
   className,
-}: MultiSortPopoverProps) {
+}: MultiFilterPopoverProps) {
   const [open, setOpen] = useState(false)
-  const [customPresets, setCustomPresets] = useState<Array<SortPreset>>([])
+  const [customPresets, setCustomPresets] = useState<Array<FilterPreset>>([])
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [presetName, setPresetName] = useState('')
   const [editingPresetId, setEditingPresetId] = useState<string | null>(null)
   const [activePresetId, setActivePresetId] = useState<string | null>(null)
 
-  const sortPresets = [...defaultPresets, ...customPresets]
+  const filterPresets = [...defaultPresets, ...customPresets]
 
-  const activeFields = new Set(sorts.map((s) => s.field))
-  const availableFields = sortFieldOptions.filter(
+  const activeFields = new Set(filters.map((f) => f.field))
+  const availableFields = filterFieldOptions.filter(
     (opt) => !activeFields.has(opt.field),
   )
 
   // Get selected preset from active ID
   const selectedPreset = activePresetId
-    ? sortPresets.find((p) => p.id === activePresetId)
+    ? filterPresets.find((p) => p.id === activePresetId)
     : null
 
-  const handleAddSort = (field: SortField) => {
-    const fieldOption = sortFieldOptions.find((opt) => opt.field === field)
+  const handleAddFilter = (field: FilterField) => {
+    const fieldOption = filterFieldOptions.find((opt) => opt.field === field)
     if (!fieldOption) return
-    onSortsChange([
-      ...sorts,
+    onFiltersChange([
+      ...filters,
       {
         id: generateId(),
         field,
@@ -363,50 +401,50 @@ export function MultiSortPopover({
     ])
   }
 
-  const handleRemoveSort = (index: number) => {
-    onSortsChange(sorts.filter((_, i) => i !== index))
+  const handleRemoveFilter = (index: number) => {
+    onFiltersChange(filters.filter((_, i) => i !== index))
   }
 
-  const handleFieldChange = (index: number, field: SortField) => {
-    const fieldOption = sortFieldOptions.find((opt) => opt.field === field)
+  const handleFieldChange = (index: number, field: FilterField) => {
+    const fieldOption = filterFieldOptions.find((opt) => opt.field === field)
     if (!fieldOption) return
-    const newSorts = [...sorts]
-    newSorts[index] = {
-      ...newSorts[index],
+    const newFilters = [...filters]
+    newFilters[index] = {
+      ...newFilters[index],
       field,
       operator: fieldOption.defaultOperator,
       value: fieldOption.defaultValue,
     }
-    onSortsChange(newSorts)
+    onFiltersChange(newFilters)
   }
 
-  const handleOperatorChange = (index: number, operator: SortOperator) => {
-    const newSorts = [...sorts]
-    newSorts[index] = { ...newSorts[index], operator }
+  const handleOperatorChange = (index: number, operator: FilterOperator) => {
+    const newFilters = [...filters]
+    newFilters[index] = { ...newFilters[index], operator }
     // Clear value for empty operators
     if (operator === 'is_empty' || operator === 'is_not_empty') {
-      newSorts[index].value = ''
+      newFilters[index].value = ''
     }
-    onSortsChange(newSorts)
+    onFiltersChange(newFilters)
   }
 
   const handleValueChange = (index: number, value: string | number) => {
-    const newSorts = [...sorts]
-    newSorts[index] = { ...newSorts[index], value }
-    onSortsChange(newSorts)
+    const newFilters = [...filters]
+    newFilters[index] = { ...newFilters[index], value }
+    onFiltersChange(newFilters)
   }
 
   const handleReset = () => {
-    onSortsChange([])
+    onFiltersChange([])
     setActivePresetId(null)
   }
 
   const handleSavePreset = () => {
-    if (!presetName.trim() || sorts.length === 0) return
-    const savedSorts = sorts.map((s) => ({
-      field: s.field,
-      operator: s.operator,
-      value: s.value,
+    if (!presetName.trim() || filters.length === 0) return
+    const savedFilters = filters.map((f) => ({
+      field: f.field,
+      operator: f.operator,
+      value: f.value,
     }))
 
     let savedPresetId: string
@@ -417,7 +455,7 @@ export function MultiSortPopover({
       setCustomPresets(
         customPresets.map((p) =>
           p.id === editingPresetId
-            ? { ...p, label: presetName.trim(), sorts: savedSorts }
+            ? { ...p, label: presetName.trim(), filters: savedFilters }
             : p,
         ),
       )
@@ -425,17 +463,17 @@ export function MultiSortPopover({
     } else {
       // Create new preset
       savedPresetId = generatePresetId()
-      const newPreset: SortPreset = {
+      const newPreset: FilterPreset = {
         id: savedPresetId,
         label: presetName.trim(),
-        sorts: savedSorts,
+        filters: savedFilters,
       }
       setCustomPresets([...customPresets, newPreset])
       toast.success(`Preset "${newPreset.label}" saved`)
     }
 
-    // Update current sorts to match saved preset exactly
-    onSortsChange(savedSorts.map((s) => ({ ...s, id: generateId() })))
+    // Update current filters to match saved preset exactly
+    onFiltersChange(savedFilters.map((f) => ({ ...f, id: generateId() })))
     setActivePresetId(savedPresetId)
     setPresetName('')
     setEditingPresetId(null)
@@ -449,7 +487,7 @@ export function MultiSortPopover({
       setEditingPresetId(presetId)
       setActivePresetId(presetId)
       // Load the preset's filters into the current view
-      onSortsChange(preset.sorts.map((s) => ({ ...s, id: generateId() })))
+      onFiltersChange(preset.filters.map((f) => ({ ...f, id: generateId() })))
       setSaveDialogOpen(true)
     }
   }
@@ -465,10 +503,10 @@ export function MultiSortPopover({
     }
   }
 
-  const getFieldOption = (field: SortField) =>
-    sortFieldOptions.find((opt) => opt.field === field)
+  const getFieldOption = (field: FilterField) =>
+    filterFieldOptions.find((opt) => opt.field === field)
 
-  const needsValueInput = (operator: SortOperator) =>
+  const needsValueInput = (operator: FilterOperator) =>
     !['is_empty', 'is_not_empty'].includes(operator)
 
   return (
@@ -481,15 +519,15 @@ export function MultiSortPopover({
         >
           <ListFilter className="h-4 w-4" />
           Filter
-          {sorts.length > 0 && (
+          {filters.length > 0 && (
             <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-              {sorts.length}
+              {filters.length}
             </span>
           )}
         </PopoverTrigger>
         <PopoverContent className="w-[600px] gap-0 p-0" align="start">
           {/* Preset Selector */}
-          <div className="border-b p-3">
+          <div className="border-b px-6 py-6">
             <label className="mb-2 block text-sm font-medium">
               Select filter preset
             </label>
@@ -500,11 +538,11 @@ export function MultiSortPopover({
                   setActivePresetId(null)
                   return
                 }
-                const preset = sortPresets.find((p) => p.id === presetId)
+                const preset = filterPresets.find((p) => p.id === presetId)
                 if (preset) {
                   setActivePresetId(presetId)
-                  onSortsChange(
-                    preset.sorts.map((s) => ({ ...s, id: generateId() })),
+                  onFiltersChange(
+                    preset.filters.map((f) => ({ ...f, id: generateId() })),
                   )
                 }
               }}
@@ -558,26 +596,26 @@ export function MultiSortPopover({
             </Select>
           </div>
 
-          {/* Active Sorts */}
-          {sorts.length > 0 && (
-            <div className="p-3">
+          {/* Active Filters */}
+          {filters.length > 0 && (
+            <div className="px-6 py-6">
               <div className="max-h-[280px] space-y-2 overflow-y-auto">
-                {sorts.map((sort, index) => {
-                  const fieldOption = getFieldOption(sort.field)
+                {filters.map((filter, index) => {
+                  const fieldOption = getFieldOption(filter.field)
                   return (
-                    <div key={sort.id} className="flex items-center gap-2">
+                    <div key={filter.id} className="flex items-center gap-2">
                       {/* Field Selector */}
                       <Select
-                        value={sort.field}
+                        value={filter.field}
                         onValueChange={(value) =>
-                          handleFieldChange(index, value as SortField)
+                          handleFieldChange(index, value as FilterField)
                         }
                       >
                         <SelectTrigger className="w-[180px] shrink-0">
                           <SelectValue>{fieldOption?.label}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={sort.field}>
+                          <SelectItem value={filter.field}>
                             {fieldOption?.label}
                           </SelectItem>
                           {availableFields.map((opt) => (
@@ -590,24 +628,33 @@ export function MultiSortPopover({
 
                       {/* Operator Selector */}
                       <Select
-                        value={sort.operator}
+                        value={filter.operator}
                         onValueChange={(value) =>
-                          handleOperatorChange(index, value as SortOperator)
+                          handleOperatorChange(index, value as FilterOperator)
                         }
                       >
                         <SelectTrigger className="w-[200px] shrink-0">
                           <SelectValue>
-                            {
-                              fieldOption?.operators.find(
-                                (op) => op.value === sort.operator,
-                              )?.label
-                            }
+                            {(() => {
+                              const op = fieldOption?.operators.find(
+                                (op) => op.value === filter.operator,
+                              )
+                              return (
+                                <span className="flex items-center gap-2">
+                                  {op?.icon}
+                                  {op?.label}
+                                </span>
+                              )
+                            })()}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {fieldOption?.operators.map((op) => (
                             <SelectItem key={op.value} value={op.value}>
-                              {op.label}
+                              <span className="flex items-center gap-2">
+                                {op.icon}
+                                {op.label}
+                              </span>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -615,12 +662,12 @@ export function MultiSortPopover({
 
                       {/* Value Input */}
                       <div className="w-[140px] shrink-0">
-                        {needsValueInput(sort.operator) && (
+                        {needsValueInput(filter.operator) && (
                           <>
                             {fieldOption?.type === 'numeric' ? (
                               <Input
                                 type="number"
-                                value={sort.value}
+                                value={filter.value}
                                 onChange={(e) =>
                                   handleValueChange(
                                     index,
@@ -632,7 +679,7 @@ export function MultiSortPopover({
                             ) : fieldOption?.type === 'boolean' ||
                               fieldOption?.type === 'enum' ? (
                               <Select
-                                value={String(sort.value)}
+                                value={String(filter.value)}
                                 onValueChange={(value) =>
                                   handleValueChange(index, value)
                                 }
@@ -651,7 +698,7 @@ export function MultiSortPopover({
                             ) : (
                               <Input
                                 type="text"
-                                value={String(sort.value)}
+                                value={String(filter.value)}
                                 onChange={(e) =>
                                   handleValueChange(index, e.target.value)
                                 }
@@ -668,7 +715,7 @@ export function MultiSortPopover({
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 shrink-0"
-                        onClick={() => handleRemoveSort(index)}
+                        onClick={() => handleRemoveFilter(index)}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -681,19 +728,19 @@ export function MultiSortPopover({
 
           {/* Available Fields - Grouped by Section */}
           {availableFields.length > 0 && (
-            <div className={sorts.length > 0 ? 'border-t' : ''}>
-              <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
+            <div className={filters.length > 0 ? 'border-t' : ''}>
+              <div className="bg-muted/50 px-6 py-2 text-sm font-medium text-muted-foreground">
                 Add filter criteria
               </div>
               <ScrollArea className="h-[300px]">
-                <div>
+                <div className="px-3 py-3">
                   {groupOrder.map((group) => {
                     const groupFields = availableFields.filter(
                       (opt) => opt.group === group,
                     )
                     if (groupFields.length === 0) return null
                     return (
-                      <div key={group} className="mb-2 last:mb-0">
+                      <div key={group} className="mb-4 last:mb-0">
                         <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
                           {groupLabels[group]}
                         </div>
@@ -701,7 +748,7 @@ export function MultiSortPopover({
                           <button
                             key={opt.field}
                             type="button"
-                            onClick={() => handleAddSort(opt.field)}
+                            onClick={() => handleAddFilter(opt.field)}
                             className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
                           >
                             {opt.label}
@@ -721,7 +768,7 @@ export function MultiSortPopover({
               variant="ghost"
               size="sm"
               onClick={handleReset}
-              disabled={sorts.length === 0}
+              disabled={filters.length === 0}
               className="gap-2 text-destructive hover:text-destructive disabled:text-muted-foreground"
             >
               <RotateCcw className="h-4 w-4" />
@@ -742,7 +789,7 @@ export function MultiSortPopover({
                   }
                   setSaveDialogOpen(true)
                 }}
-                disabled={sorts.length === 0}
+                disabled={filters.length === 0}
               >
                 <Save className="h-4 w-4" />
                 {selectedPreset &&

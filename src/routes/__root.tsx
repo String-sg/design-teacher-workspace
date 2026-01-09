@@ -47,6 +47,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        {process.env.NODE_ENV === 'development' && (
+          <script
+            src="https://cdn.jsdelivr.net/npm/react-grab@latest/dist/index.global.js"
+            data-activation-key="c"
+            data-activation-mode="hold"
+          />
+        )}
         <TanStackDevtools
           config={{
             position: 'bottom-right',

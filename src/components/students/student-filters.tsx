@@ -1,12 +1,9 @@
 import { MoreHorizontal, Search } from 'lucide-react'
 
-import { MultiSortPopover } from './multi-sort-popover'
-import {
-  
-  ColumnVisibilityPopover
-} from './column-visibility-popover'
-import type {ColumnConfig} from './column-visibility-popover';
-import type { SortCriterion } from '@/types/student'
+import { MultiFilterPopover } from './multi-filter-popover'
+import { ColumnVisibilityPopover } from './column-visibility-popover'
+import type { ColumnConfig } from './column-visibility-popover'
+import type { FilterCriterion } from '@/types/student'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -20,8 +17,8 @@ import {
 interface StudentFiltersProps {
   searchValue: string
   onSearchChange: (value: string) => void
-  sorts: Array<SortCriterion>
-  onSortsChange: (sorts: Array<SortCriterion>) => void
+  filters: Array<FilterCriterion>
+  onFiltersChange: (filters: Array<FilterCriterion>) => void
   columns: Array<ColumnConfig>
   onColumnsChange: (columns: Array<ColumnConfig>) => void
   className?: string
@@ -30,8 +27,8 @@ interface StudentFiltersProps {
 export function StudentFilters({
   searchValue,
   onSearchChange,
-  sorts,
-  onSortsChange,
+  filters,
+  onFiltersChange,
   columns,
   onColumnsChange,
   className,
@@ -49,7 +46,10 @@ export function StudentFilters({
             className="w-[200px] pl-9"
           />
         </div>
-        <MultiSortPopover sorts={sorts} onSortsChange={onSortsChange} />
+        <MultiFilterPopover
+          filters={filters}
+          onFiltersChange={onFiltersChange}
+        />
       </div>
 
       <div className="flex items-center gap-2">
