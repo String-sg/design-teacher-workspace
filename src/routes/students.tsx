@@ -62,7 +62,8 @@ function StudentsPage() {
   const [sorts, setSorts] = useState<Array<SortCriterion>>([])
   const [columns, setColumns] = useState<Array<ColumnConfig>>(defaultColumns)
 
-  const filteredStudents = useMemo(() => {
+  // Get students for the selected class/level (this determines the base list)
+  const classStudents = useMemo(() => {
     let students = mockStudents
 
     // Filter by class or level
@@ -76,25 +77,64 @@ function StudentsPage() {
       }
     }
 
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      students = students.filter((s) => s.name.toLowerCase().includes(query))
-    }
-
-    // Filter: only show records matching ALL criteria
-    if (sorts.length > 0) {
-      students = students.filter((student) =>
-        sorts.every((sort) => matchesCondition(student, sort)),
-      )
-    }
-
     return students
-  }, [selectedClass, searchQuery, sorts])
+  }, [selectedClass])
+
+  // Determine which students match the current filters (search + sort criteria)
+  const { matchedIds, hasActiveFilters } = useMemo(() => {
+    const hasSearch = !!searchQuery
+    const hasSortFilters = sorts.length > 0
+    const hasActiveFilters = hasSearch || hasSortFilters
+
+    if (!hasActiveFilters) {
+      // No filters active - all students are "matched"
+      return { matchedIds: new Set<string>(), hasActiveFilters: false }
+    }
+
+    const matchedIds = new Set<string>()
+    const query = searchQuery.toLowerCase()
+
+    for (const student of classStudents) {
+      // Check search query
+      const matchesSearch = !hasSearch || student.name.toLowerCase().includes(query)
+
+      // Check sort/filter criteria
+      const matchesSorts = !hasSortFilters || sorts.every((sort) => matchesCondition(student, sort))
+
+      if (matchesSearch && matchesSorts) {
+        matchedIds.add(student.id)
+      }
+    }
+
+    return { matchedIds, hasActiveFilters }
+  }, [classStudents, searchQuery, sorts])
+
+  // Sort students: matched first, then unmatched
+  const sortedStudents = useMemo(() => {
+    if (!hasActiveFilters) {
+      return classStudents
+    }
+
+    return [...classStudents].sort((a, b) => {
+      const aMatched = matchedIds.has(a.id)
+      const bMatched = matchedIds.has(b.id)
+      if (aMatched && !bMatched) return -1
+      if (!aMatched && bMatched) return 1
+      return 0
+    })
+  }, [classStudents, matchedIds, hasActiveFilters])
+
+  // For metrics, we only count the matched students
+  const matchedStudents = useMemo(() => {
+    if (!hasActiveFilters) {
+      return classStudents
+    }
+    return classStudents.filter((s) => matchedIds.has(s.id))
+  }, [classStudents, matchedIds, hasActiveFilters])
 
   const metrics = useMemo(
-    () => getMetrics(filteredStudents),
-    [filteredStudents],
+    () => getMetrics(matchedStudents),
+    [matchedStudents],
   )
 
   return (
@@ -150,9 +190,11 @@ function StudentsPage() {
 
       {/* Student Table - fills remaining space */}
       <StudentTable
-        students={filteredStudents}
+        students={sortedStudents}
         columns={columns}
         pageSize={20}
+        matchedIds={hasActiveFilters ? matchedIds : undefined}
+        matchedCount={hasActiveFilters ? matchedIds.size : 0}
       />
     </div>
   )
