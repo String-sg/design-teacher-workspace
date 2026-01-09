@@ -18,6 +18,8 @@ const routeConfig: Record<string, { label: string; parent?: string }> = {
   '/': { label: 'Home' },
   '/students': { label: 'Student dashboard' },
   '/announcements': { label: 'Announcements' },
+  '/announcements/': { label: 'Announcements' },
+  '/announcements/$id': { label: 'Announcement', parent: '/announcements' },
 }
 
 interface AppHeaderProps {
@@ -27,7 +29,11 @@ interface AppHeaderProps {
 export function AppHeader({ notificationCount = 0 }: AppHeaderProps) {
   const matches = useMatches()
   const currentPath = matches[matches.length - 1]?.pathname || '/'
-  const config = routeConfig[currentPath]
+  const routeId = matches[matches.length - 1]?.routeId || '/'
+
+  // Use routeId for config lookup (handles dynamic routes like /announcements/$id)
+  const configKey = routeId === '/' ? '/' : routeId.replace(/_/g, '')
+  const config = routeConfig[configKey] || routeConfig[currentPath]
 
   // Build breadcrumbs based on parent relationships, not URL hierarchy
   const breadcrumbs: Array<{ label: string; href: string }> = []

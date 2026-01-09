@@ -48,7 +48,9 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className={`flex items-center gap-2 px-2 py-2 ${isCollapsed ? 'justify-center' : ''}`}>
+        <div
+          className={`flex items-center gap-2 px-2 py-2 ${isCollapsed ? 'justify-center' : ''}`}
+        >
           {isCollapsed ? (
             <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <GraduationCap className="size-5" />
@@ -71,7 +73,9 @@ export function AppSidebar() {
                     className={isCollapsed ? 'flex-col h-auto py-2 gap-1' : ''}
                   >
                     <item.icon className={isCollapsed ? 'size-5' : 'size-4'} />
-                    <span className={isCollapsed ? 'text-[10px] leading-tight' : ''}>
+                    <span
+                      className={isCollapsed ? 'text-[10px] leading-tight' : ''}
+                    >
                       {isCollapsed ? item.shortTitle : item.title}
                     </span>
                   </SidebarMenuButton>
@@ -98,7 +102,9 @@ export function AppSidebar() {
                     className={isCollapsed ? 'flex-col h-auto py-2 gap-1' : ''}
                   >
                     <item.icon className={isCollapsed ? 'size-5' : 'size-4'} />
-                    <span className={isCollapsed ? 'text-[10px] leading-tight' : ''}>
+                    <span
+                      className={isCollapsed ? 'text-[10px] leading-tight' : ''}
+                    >
                       {isCollapsed ? item.shortTitle : item.title}
                     </span>
                   </SidebarMenuButton>

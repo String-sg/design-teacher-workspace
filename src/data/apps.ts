@@ -7,6 +7,7 @@ import {
   CircleDollarSign,
   ClipboardCheck,
   Compass,
+  Ear,
   FileText,
   Gift,
   GraduationCap,
@@ -19,7 +20,6 @@ import {
   Settings,
   ShieldCheck,
   Users,
-  Ear,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -55,7 +55,8 @@ export const appCategories: Array<AppCategory> = [
   {
     id: 'classes-students',
     title: 'Classes and Students',
-    description: 'Tools for classroom management, student assessment, and academic support',
+    description:
+      'Tools for classroom management, student assessment, and academic support',
     apps: [
       {
         id: 'student-dashboard',

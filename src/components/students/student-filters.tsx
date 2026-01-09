@@ -1,5 +1,11 @@
 import { MoreHorizontal, Search } from 'lucide-react'
 
+import { MultiSortPopover } from './multi-sort-popover'
+import {
+  
+  ColumnVisibilityPopover
+} from './column-visibility-popover'
+import type {ColumnConfig} from './column-visibility-popover';
 import type { SortCriterion } from '@/types/student'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
@@ -10,19 +16,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MultiSortPopover } from './multi-sort-popover'
-import {
-  ColumnVisibilityPopover,
-  type ColumnConfig,
-} from './column-visibility-popover'
 
 interface StudentFiltersProps {
   searchValue: string
   onSearchChange: (value: string) => void
-  sorts: SortCriterion[]
-  onSortsChange: (sorts: SortCriterion[]) => void
-  columns: ColumnConfig[]
-  onColumnsChange: (columns: ColumnConfig[]) => void
+  sorts: Array<SortCriterion>
+  onSortsChange: (sorts: Array<SortCriterion>) => void
+  columns: Array<ColumnConfig>
+  onColumnsChange: (columns: Array<ColumnConfig>) => void
   className?: string
 }
 
