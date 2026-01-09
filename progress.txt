@@ -1,0 +1,18 @@
+[2026-01-09T12:00:00Z] tw-010 - Removed useMemo, moved static filtering to module level in announcements.index.tsx
+[2026-01-09T12:01:00Z] tw-011 - Changed useMemo to useEffect for pagination reset in student-table.tsx
+[2026-01-09T12:02:00Z] tw-012 - Removed deprecated type aliases (SortField, SortOperator, SortCriterion) from student.ts
+[2026-01-09T12:03:00Z] tw-013 - Removed react-grab from dependencies, moved shadcn to devDependencies in package.json
+[2026-01-09T12:04:00Z] tw-014 - Extracted SidebarMenuItems component in app-sidebar.tsx to eliminate duplicate menu rendering
+[2026-01-09T12:05:00Z] tw-015 - Created getStatusColor utility in lib/utils.ts, refactored student-table.tsx to use threshold configs
+[2026-01-09T12:06:00Z] tw-016 - Added aria-label and aria-pressed to class selector buttons in class-selector.tsx
+[2026-01-09T12:07:00Z] tw-017 - Added aria-label="Notifications" to bell button in app-header.tsx
+[2026-01-09T12:08:00Z] tw-018 - Added aria-label="Search students" to search input in student-filters.tsx
+[2026-01-09T12:09:00Z] tw-019 - Added aria-label and aria-expanded to filter popover button in multi-filter-popover.tsx
+[2026-01-09T12:10:00Z] tw-020 - Added aria-label="Page N" and aria-current to pagination buttons in student-table.tsx
+[2026-01-09T12:11:00Z] tw-021 - Memoized activeFields and availableFields with useMemo in multi-filter-popover.tsx
+[2026-01-09T12:12:00Z] tw-022 - Memoized pageNumbers calculation in student-table.tsx
+[2026-01-09T12:13:00Z] tw-023 - Created src/data/filter-config.ts with extracted filter field configurations
+[2026-01-09T12:14:00Z] tw-024 - Created src/hooks/use-pagination.ts custom hook
+[2026-01-09T12:15:00Z] tw-025 - Created src/components/ui/error-boundary.tsx and wrapped app in __root.tsx
+[2026-01-09T12:16:00Z] tw-026 - Created src/components/students/student-table-skeleton.tsx for loading states
+[2026-01-09T12:17:00Z] tw-027 - Added responsive flex-col/flex-row classes to student-filters.tsx

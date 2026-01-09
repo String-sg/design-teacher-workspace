@@ -77,7 +77,7 @@ export function AppHeader({ notificationCount = 0 }: AppHeaderProps) {
 
       <div className="flex items-center gap-4">
         <div className="relative">
-          <Button variant="secondary" size="icon">
+          <Button variant="secondary" size="icon" aria-label="Notifications">
             <Bell className="size-4 fill-current" />
           </Button>
           {notificationCount > 0 && (

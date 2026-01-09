@@ -1,6 +1,6 @@
 {
   "project": "moe-teacher-workspace",
-  "lastUpdated": "2026-01-08T04:55:00.000Z",
+  "lastUpdated": "2026-01-09T12:00:00.000Z",
   "todos": [
     {
       "id": "tw-001",
@@ -73,6 +73,186 @@
       "status": "not_started",
       "createdAt": "2026-01-08T04:55:00.000Z",
       "completedAt": null
+    },
+    {
+      "id": "tw-010",
+      "title": "Fix useMemo dependency in announcements route",
+      "description": "Fix empty dependency array in useMemo at src/routes/announcements.index.tsx:15-18. Add [mockAnnouncements] as dependency or remove useMemo if data is static.",
+      "status": "completed",
+      "priority": "high",
+      "category": "bug-fix",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-011",
+      "title": "Replace useMemo with useEffect for pagination reset",
+      "description": "Convert useMemo to useEffect at src/components/students/student-table.tsx:60-64. useMemo is being used for side effects (resetting pagination) which is an anti-pattern.",
+      "status": "completed",
+      "priority": "high",
+      "category": "bug-fix",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-012",
+      "title": "Remove deprecated type aliases",
+      "description": "Delete unused deprecated type aliases (SortField, SortOperator, SortCriterion) from src/types/student.ts:94-99. These have no usage in the codebase.",
+      "status": "completed",
+      "priority": "high",
+      "category": "cleanup",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-013",
+      "title": "Clean up package.json dependencies",
+      "description": "Remove react-grab (only loaded via CDN), move shadcn to devDependencies, remove tw-animate-css (no imports found).",
+      "status": "completed",
+      "priority": "high",
+      "category": "cleanup",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-014",
+      "title": "Extract reusable SidebarMenuItems component",
+      "description": "Create <SidebarMenuItems items={...} isCollapsed={...} /> component to eliminate duplicate menu item rendering at src/components/app-sidebar.tsx:67-88 and 96-112.",
+      "status": "completed",
+      "priority": "medium",
+      "category": "refactor",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-015",
+      "title": "Extract color threshold utility function",
+      "description": "Create getStatusColor(value, thresholds) utility in src/lib/utils.ts to replace repeated color logic at src/components/students/student-table.tsx:314-420 (used 6 times).",
+      "status": "completed",
+      "priority": "medium",
+      "category": "refactor",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-016",
+      "title": "Add aria-labels to class selector buttons",
+      "description": "Add descriptive aria-label attributes to level/class buttons at src/components/students/class-selector.tsx:104-131 for accessibility.",
+      "status": "completed",
+      "priority": "medium",
+      "category": "accessibility",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-017",
+      "title": "Add aria-label to notification button",
+      "description": "Add aria-label=\"Notifications\" to bell icon button at src/components/app-header.tsx:80 for screen reader accessibility.",
+      "status": "completed",
+      "priority": "medium",
+      "category": "accessibility",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-018",
+      "title": "Add aria-label to search input",
+      "description": "Add aria-label=\"Search students\" to search input at src/components/students/student-filters.tsx:41-47 for accessibility.",
+      "status": "completed",
+      "priority": "medium",
+      "category": "accessibility",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-019",
+      "title": "Add aria-labels to filter popover",
+      "description": "Add aria-label=\"Filter students\" and aria-expanded state to filter popover button at src/components/students/multi-filter-popover.tsx:530-542.",
+      "status": "completed",
+      "priority": "medium",
+      "category": "accessibility",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-020",
+      "title": "Add aria-labels to pagination",
+      "description": "Add aria-current=\"page\" to active page button and aria-label=\"Page N\" to all page buttons at src/components/students/student-table.tsx:515-530.",
+      "status": "completed",
+      "priority": "medium",
+      "category": "accessibility",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-021",
+      "title": "Memoize activeFields in multi-filter-popover",
+      "description": "Wrap activeFields Set computation in useMemo at src/components/students/multi-filter-popover.tsx:395-398 to prevent unnecessary recalculations.",
+      "status": "completed",
+      "priority": "low",
+      "category": "performance",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-022",
+      "title": "Memoize getPageNumbers in student-table",
+      "description": "Use useMemo or useCallback for pagination calculation at src/components/students/student-table.tsx:79-112 to prevent recalculation on every render.",
+      "status": "completed",
+      "priority": "low",
+      "category": "performance",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-023",
+      "title": "Extract filter field options to config file",
+      "description": "Move filterFieldOptions from src/components/students/multi-filter-popover.tsx to src/data/filter-config.ts for better organization.",
+      "status": "completed",
+      "priority": "low",
+      "category": "refactor",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-024",
+      "title": "Create usePagination custom hook",
+      "description": "Extract pagination logic from src/components/students/student-table.tsx to a new src/hooks/use-pagination.ts custom hook.",
+      "status": "completed",
+      "priority": "low",
+      "category": "refactor",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-025",
+      "title": "Add error boundary to root layout",
+      "description": "Wrap app in ErrorBoundary component with fallback UI at src/routes/__root.tsx for better error handling.",
+      "status": "completed",
+      "priority": "low",
+      "category": "enhancement",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-026",
+      "title": "Implement loading skeletons for student table",
+      "description": "Add loading state with skeleton placeholders to src/routes/students.tsx using the existing src/components/ui/skeleton.tsx component.",
+      "status": "completed",
+      "priority": "low",
+      "category": "enhancement",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
+    },
+    {
+      "id": "tw-027",
+      "title": "Improve responsive design for filter toolbar",
+      "description": "Add flex-col md:flex-row for mobile stacking at src/components/students/student-filters.tsx:37 to prevent overflow on smaller screens.",
+      "status": "completed",
+      "priority": "low",
+      "category": "enhancement",
+      "createdAt": "2026-01-09T10:00:00.000Z",
+      "completedAt": "2026-01-09T12:00:00.000Z"
     }
   ]
 }

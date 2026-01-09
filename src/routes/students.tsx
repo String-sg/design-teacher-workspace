@@ -2,15 +2,12 @@ import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 
 import type { FilterCriterion, Student } from '@/types/student'
-import type {ColumnConfig} from '@/components/students/column-visibility-popover';
+import type { ColumnConfig } from '@/components/students/column-visibility-popover'
 import { DataCard } from '@/components/data-card'
 import { StudentFilters } from '@/components/students/student-filters'
 import { StudentTable } from '@/components/students/student-table'
 import { ClassSelector } from '@/components/students/class-selector'
-import {
-  
-  defaultColumns
-} from '@/components/students/column-visibility-popover'
+import { defaultColumns } from '@/components/students/column-visibility-popover'
 
 import { getMetrics, mockStudents } from '@/data/mock-students'
 
@@ -135,10 +132,7 @@ function StudentsPage() {
     return classStudents.filter((s) => matchedIds.has(s.id))
   }, [classStudents, matchedIds, hasActiveFilters])
 
-  const metrics = useMemo(
-    () => getMetrics(matchedStudents),
-    [matchedStudents],
-  )
+  const metrics = useMemo(() => getMetrics(matchedStudents), [matchedStudents])
 
   return (
     <div className="flex h-full flex-col">

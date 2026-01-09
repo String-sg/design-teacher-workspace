@@ -1,5 +1,6 @@
 import { Link, useLocation } from '@tanstack/react-router'
 import { GraduationCap, Home, Megaphone, Users } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 import {
   Sidebar,
@@ -15,7 +16,15 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 
-const topItems = [
+interface MenuItem {
+  title: string
+  shortTitle: string
+  url: string
+  icon: LucideIcon
+  badge?: number
+}
+
+const topItems: Array<MenuItem> = [
   {
     title: 'Announcements',
     shortTitle: 'Announce',
@@ -25,7 +34,7 @@ const topItems = [
   },
 ]
 
-const navigationItems = [
+const navigationItems: Array<MenuItem> = [
   {
     title: 'Home',
     shortTitle: 'Home',
@@ -39,6 +48,43 @@ const navigationItems = [
     icon: Users,
   },
 ]
+
+interface SidebarMenuItemsProps {
+  items: Array<MenuItem>
+  isCollapsed: boolean
+  currentPath: string
+}
+
+function SidebarMenuItems({
+  items,
+  isCollapsed,
+  currentPath,
+}: SidebarMenuItemsProps) {
+  return (
+    <SidebarMenu>
+      {items.map((item) => (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton
+            render={<Link to={item.url} />}
+            isActive={currentPath === item.url}
+            tooltip={item.title}
+            className={isCollapsed ? 'flex-col h-auto py-2 gap-1' : ''}
+          >
+            <item.icon className={isCollapsed ? 'size-5' : 'size-4'} />
+            <span className={isCollapsed ? 'text-[10px] leading-tight' : ''}>
+              {isCollapsed ? item.shortTitle : item.title}
+            </span>
+          </SidebarMenuButton>
+          {item.badge && !isCollapsed && (
+            <SidebarMenuBadge className="bg-muted text-muted-foreground">
+              {item.badge}
+            </SidebarMenuBadge>
+          )}
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  )
+}
 
 export function AppSidebar() {
   const location = useLocation()
@@ -63,54 +109,21 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {topItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    render={<Link to={item.url} />}
-                    isActive={location.pathname === item.url}
-                    tooltip={item.title}
-                    className={isCollapsed ? 'flex-col h-auto py-2 gap-1' : ''}
-                  >
-                    <item.icon className={isCollapsed ? 'size-5' : 'size-4'} />
-                    <span
-                      className={isCollapsed ? 'text-[10px] leading-tight' : ''}
-                    >
-                      {isCollapsed ? item.shortTitle : item.title}
-                    </span>
-                  </SidebarMenuButton>
-                  {item.badge && !isCollapsed && (
-                    <SidebarMenuBadge className="bg-muted text-muted-foreground">
-                      {item.badge}
-                    </SidebarMenuBadge>
-                  )}
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <SidebarMenuItems
+              items={topItems}
+              isCollapsed={isCollapsed}
+              currentPath={location.pathname}
+            />
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarSeparator className="mx-0" />
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    render={<Link to={item.url} />}
-                    isActive={location.pathname === item.url}
-                    tooltip={item.title}
-                    className={isCollapsed ? 'flex-col h-auto py-2 gap-1' : ''}
-                  >
-                    <item.icon className={isCollapsed ? 'size-5' : 'size-4'} />
-                    <span
-                      className={isCollapsed ? 'text-[10px] leading-tight' : ''}
-                    >
-                      {isCollapsed ? item.shortTitle : item.title}
-                    </span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <SidebarMenuItems
+              items={navigationItems}
+              isCollapsed={isCollapsed}
+              currentPath={location.pathname}
+            />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
