@@ -206,21 +206,22 @@ export function StudentTable({
         </TableHeader>
         <TableBody>
           {paginatedStudents.map((student, index) => {
-            const globalIndex = startIndex + index
-            const isInMatchedSection = globalIndex < matchedCount
+            // Use 0-based index for header logic (startIndex - 1 converts 1-based to 0-based)
+            const zeroBasedGlobalIndex = (startIndex - 1) + index
+            const isInMatchedSection = zeroBasedGlobalIndex < matchedCount
             const unmatchedCount = students.length - matchedCount
             const visibleColumnCount = columns.filter((c) => c.visible).length
 
             // Show matched header at the start when filters are active and there are matches
-            const showMatchedHeader = matchedIds && matchedCount > 0 && globalIndex === 0
+            const showMatchedHeader = matchedIds && matchedCount > 0 && zeroBasedGlobalIndex === 0
 
             // Show unmatched header when:
             // - Filters are active AND there are unmatched students
-            // - Either: transitioning from matched to unmatched (globalIndex === matchedCount)
-            // - Or: no matches exist and this is the first item (globalIndex === 0)
+            // - Either: transitioning from matched to unmatched (zeroBasedGlobalIndex === matchedCount)
+            // - Or: no matches exist and this is the first item (zeroBasedGlobalIndex === 0)
             const showUnmatchedHeader = matchedIds && unmatchedCount > 0 && (
-              (matchedCount > 0 && globalIndex === matchedCount) ||
-              (matchedCount === 0 && globalIndex === 0)
+              (matchedCount > 0 && zeroBasedGlobalIndex === matchedCount) ||
+              (matchedCount === 0 && zeroBasedGlobalIndex === 0)
             )
 
             // Determine if this row should be hidden due to collapsed section
@@ -239,7 +240,7 @@ export function StudentTable({
                 >
                   <TableCell
                     colSpan={visibleColumnCount}
-                    className="bg-muted/50 py-2 pl-6 text-sm font-medium text-muted-foreground"
+                    className="bg-muted/50 py-2 pl-4 text-sm font-medium text-muted-foreground"
                   >
                     <div className="flex items-center gap-2">
                       <ChevronDown
@@ -248,7 +249,7 @@ export function StudentTable({
                           isMatchedCollapsed && '-rotate-90'
                         )}
                       />
-                      Matched students ({matchedCount})
+                      Matching filter criteria ({matchedCount})
                     </div>
                   </TableCell>
                 </TableRow>
@@ -260,7 +261,7 @@ export function StudentTable({
                 >
                   <TableCell
                     colSpan={visibleColumnCount}
-                    className="bg-muted/50 py-2 pl-6 text-sm font-medium text-muted-foreground"
+                    className="bg-muted/50 py-2 pl-4 text-sm font-medium text-muted-foreground"
                   >
                     <div className="flex items-center gap-2">
                       <ChevronDown
@@ -269,7 +270,7 @@ export function StudentTable({
                           isUnmatchedCollapsed && '-rotate-90'
                         )}
                       />
-                      Other students ({unmatchedCount})
+                      Not matching filter criteria ({unmatchedCount})
                     </div>
                   </TableCell>
                 </TableRow>

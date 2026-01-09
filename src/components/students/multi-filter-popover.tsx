@@ -6,6 +6,7 @@ import {
   ChevronsRight,
   Equal,
   EqualNot,
+  Info,
   ListFilter,
   Pencil,
   RotateCcw,
@@ -43,6 +44,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 type FieldType = 'numeric' | 'text' | 'boolean' | 'enum'
 
@@ -327,6 +333,7 @@ const filterFieldOptions: Array<FilterFieldOption> = [
 interface FilterPreset {
   id: string
   label: string
+  description?: string
   filters: Array<FilterCriterion>
 }
 
@@ -334,6 +341,7 @@ const defaultPresets: Array<FilterPreset> = [
   {
     id: 'support',
     label: 'Support',
+    description: 'Identify students for support',
     filters: [
       { id: '1', field: 'riskIndicators', operator: 'gte', value: 3 },
       { id: '2', field: 'absences', operator: 'gte', value: 5 },
@@ -343,6 +351,7 @@ const defaultPresets: Array<FilterPreset> = [
   {
     id: 'leadership',
     label: 'Leadership',
+    description: 'Find potential leaders',
     filters: [
       { id: '1', field: 'conduct', operator: 'is', value: 'Excellent' },
       { id: '2', field: 'overallPercentage', operator: 'gte', value: 70 },
@@ -350,6 +359,12 @@ const defaultPresets: Array<FilterPreset> = [
     ],
   },
 ]
+
+const customPresetOption = {
+  id: 'custom',
+  label: 'Custom',
+  description: 'Build your own criteria from scratch',
+}
 
 let presetIdCounter = 0
 const generatePresetId = () => `preset-${++presetIdCounter}`
@@ -528,9 +543,21 @@ export function MultiFilterPopover({
         <PopoverContent className="w-[600px] gap-0 p-0" align="start">
           {/* Preset Selector */}
           <div className="border-b px-6 py-6">
-            <label className="mb-2 block text-sm font-medium">
-              Select filter preset
-            </label>
+            <div className="mb-2 flex items-center gap-1.5">
+              <label className="text-sm font-medium">Select filter preset</label>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                      <Info className="h-3.5 w-3.5" />
+                    </button>
+                  }
+                />
+                <TooltipContent side="right">
+                  Quickly filter students using preset criteria
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <Select
               value={activePresetId ?? 'custom'}
               onValueChange={(presetId) => {
@@ -551,12 +578,24 @@ export function MultiFilterPopover({
                 <SelectValue>{selectedPreset?.label ?? 'Custom'}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="custom">Custom</SelectItem>
                 {defaultPresets.map((preset) => (
                   <SelectItem key={preset.id} value={preset.id}>
-                    {preset.label}
+                    <div className="flex flex-col">
+                      <span>{preset.label}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {preset.description}
+                      </span>
+                    </div>
                   </SelectItem>
                 ))}
+                <SelectItem value="custom">
+                  <div className="flex flex-col">
+                    <span>{customPresetOption.label}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {customPresetOption.description}
+                    </span>
+                  </div>
+                </SelectItem>
                 {customPresets.length > 0 && (
                   <>
                     <div className="my-1 h-px bg-border" />
@@ -611,10 +650,10 @@ export function MultiFilterPopover({
                           handleFieldChange(index, value as FilterField)
                         }
                       >
-                        <SelectTrigger className="w-[180px] shrink-0">
+                        <SelectTrigger className="min-w-0 flex-1">
                           <SelectValue>{fieldOption?.label}</SelectValue>
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="min-w-max">
                           <SelectItem value={filter.field}>
                             {fieldOption?.label}
                           </SelectItem>
@@ -633,7 +672,7 @@ export function MultiFilterPopover({
                           handleOperatorChange(index, value as FilterOperator)
                         }
                       >
-                        <SelectTrigger className="w-[200px] shrink-0">
+                        <SelectTrigger className="min-w-0 flex-1">
                           <SelectValue>
                             {(() => {
                               const op = fieldOption?.operators.find(
@@ -648,7 +687,7 @@ export function MultiFilterPopover({
                             })()}
                           </SelectValue>
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="min-w-max">
                           {fieldOption?.operators.map((op) => (
                             <SelectItem key={op.value} value={op.value}>
                               <span className="flex items-center gap-2">
@@ -661,7 +700,7 @@ export function MultiFilterPopover({
                       </Select>
 
                       {/* Value Input */}
-                      <div className="w-[140px] shrink-0">
+                      <div className="min-w-0 flex-1">
                         {needsValueInput(filter.operator) && (
                           <>
                             {fieldOption?.type === 'numeric' ? (
@@ -763,13 +802,13 @@ export function MultiFilterPopover({
           )}
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-between border-t px-3 py-1.5">
+          <div className="flex items-center justify-between border-t px-6 py-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleReset}
               disabled={filters.length === 0}
-              className="gap-2 text-destructive hover:text-destructive disabled:text-muted-foreground"
+              className="-ml-2 gap-2 text-destructive hover:text-destructive disabled:text-muted-foreground"
             >
               <RotateCcw className="h-4 w-4" />
               Reset

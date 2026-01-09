@@ -32,11 +32,9 @@ function AnnouncementDetailPage() {
     <main className="mx-auto flex max-w-4xl flex-col gap-6 py-8">
       {/* Back button */}
       <div>
-        <Button variant="ghost" size="sm" className="-ml-2" asChild>
-          <Link to="/announcements">
-            <ArrowLeft className="mr-1 size-4" />
-            Back to Announcements
-          </Link>
+        <Button variant="ghost" size="sm" className="-ml-2" render={<Link to="/announcements" />}>
+          <ArrowLeft className="mr-1 size-4" />
+          Back to Announcements
         </Button>
       </div>
 
