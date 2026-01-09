@@ -240,7 +240,7 @@ export function StudentTable({
                 >
                   <TableCell
                     colSpan={visibleColumnCount}
-                    className="bg-muted/50 py-2 pl-6 text-sm font-medium text-muted-foreground"
+                    className="bg-muted/50 py-2 pl-4 text-sm font-medium text-muted-foreground"
                   >
                     <div className="flex items-center gap-2">
                       <ChevronDown
@@ -261,7 +261,7 @@ export function StudentTable({
                 >
                   <TableCell
                     colSpan={visibleColumnCount}
-                    className="bg-muted/50 py-2 pl-6 text-sm font-medium text-muted-foreground"
+                    className="bg-muted/50 py-2 pl-4 text-sm font-medium text-muted-foreground"
                   >
                     <div className="flex items-center gap-2">
                       <ChevronDown

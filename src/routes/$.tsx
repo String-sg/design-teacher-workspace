@@ -23,8 +23,8 @@ function ComingSoonPage() {
             updates.
           </p>
         </div>
-        <Button asChild variant="outline">
-          <Link to="/">Back to Home</Link>
+        <Button variant="outline" render={<Link to="/" />}>
+          Back to Home
         </Button>
       </div>
     </main>

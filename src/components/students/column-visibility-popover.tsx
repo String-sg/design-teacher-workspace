@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Tooltip,
   TooltipContent,
@@ -120,25 +121,27 @@ export function ColumnVisibilityPopover({
         </div>
 
         {/* Column list */}
-        <div className="max-h-[300px] overflow-y-auto p-2">
-          {columns.map((column) => (
-            <label
-              key={column.id}
-              className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 hover:bg-accent"
-            >
-              <Checkbox
-                checked={column.visible}
-                onCheckedChange={() => handleToggle(column.id)}
-                disabled={
-                  column.visible &&
-                  visibleCount <= 2 &&
-                  (column.id === 'name' || column.id === 'index')
-                }
-              />
-              <span className="text-sm">{column.label}</span>
-            </label>
-          ))}
-        </div>
+        <ScrollArea className="h-[300px]">
+          <div className="p-2">
+            {columns.map((column) => (
+              <label
+                key={column.id}
+                className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 hover:bg-accent"
+              >
+                <Checkbox
+                  checked={column.visible}
+                  onCheckedChange={() => handleToggle(column.id)}
+                  disabled={
+                    column.visible &&
+                    visibleCount <= 2 &&
+                    (column.id === 'name' || column.id === 'index')
+                  }
+                />
+                <span className="text-sm">{column.label}</span>
+              </label>
+            ))}
+          </div>
+        </ScrollArea>
 
         {/* Reset button */}
         <div className="border-t p-3">
