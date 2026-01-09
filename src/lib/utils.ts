@@ -6,7 +6,7 @@ export function cn(...inputs: Array<ClassValue>) {
   return twMerge(clsx(inputs))
 }
 
-interface StatusThreshold {
+export interface StatusThreshold {
   min?: number
   max?: number
   className: string

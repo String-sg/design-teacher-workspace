@@ -48,7 +48,7 @@ export function StudentTableSkeleton({
               <TableCell>
                 <Skeleton className="h-6 w-12 rounded-full" />
               </TableCell>
-              {Array.from({ length: Math.max(0, columns - 4) }).map((_, i) => (
+              {Array.from({ length: Math.max(0, columns - 4) }).map((__, i) => (
                 <TableCell key={i}>
                   <Skeleton className="h-4 w-12" />
                 </TableCell>

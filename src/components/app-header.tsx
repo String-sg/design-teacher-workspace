@@ -28,25 +28,34 @@ interface AppHeaderProps {
 
 export function AppHeader({ notificationCount = 0 }: AppHeaderProps) {
   const matches = useMatches()
-  const currentPath = matches[matches.length - 1]?.pathname || '/'
-  const routeId = matches[matches.length - 1]?.routeId || '/'
+
+  const lastMatch = matches.at(-1)!
+  const currentPath = lastMatch.pathname
+  const routeId = lastMatch.routeId
 
   // Use routeId for config lookup (handles dynamic routes like /announcements/$id)
   const configKey = routeId === '/' ? '/' : routeId.replace(/_/g, '')
-  const config = routeConfig[configKey] || routeConfig[currentPath]
+  const config = routeConfig[configKey]
 
   // Build breadcrumbs based on parent relationships, not URL hierarchy
   const breadcrumbs: Array<{ label: string; href: string }> = []
 
-  if (config?.parent && routeConfig[config.parent]) {
-    breadcrumbs.push({
-      label: routeConfig[config.parent].label,
-      href: config.parent,
-    })
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- config may be undefined for unregistered routes
+  if (config?.parent) {
+    const parentConfig = routeConfig[config.parent]
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (parentConfig) {
+      breadcrumbs.push({
+        label: parentConfig.label,
+        href: config.parent,
+      })
+    }
   }
 
+  const defaultLabel = currentPath.split('/').pop() || 'Page'
   breadcrumbs.push({
-    label: config?.label || currentPath.split('/').pop() || 'Page',
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- config may be undefined for unregistered routes
+    label: config?.label ?? defaultLabel,
     href: currentPath,
   })
 

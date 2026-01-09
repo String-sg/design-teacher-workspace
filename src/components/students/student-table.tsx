@@ -14,40 +14,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-
+import { usePagination } from '@/hooks/use-pagination'
 import { tagColors } from '@/data/mock-students'
-
-// Threshold configurations for status colors
-const overallPercentageThresholds = [
-  { max: 40, className: 'text-red-600' },
-  { min: 40, max: 60, className: 'text-amber-600' },
-  { min: 60, className: 'text-foreground' },
-]
-
-const offencesThresholds = [
-  { min: 4, className: 'text-red-600' },
-  { min: 1, max: 4, className: 'text-amber-600' },
-]
-
-const absencesThresholds = [
-  { min: 15, className: 'text-red-600' },
-  { min: 5, max: 15, className: 'text-amber-600' },
-]
-
-const lateComingThresholds = [
-  { min: 10, className: 'text-red-600' },
-  { min: 5, max: 10, className: 'text-amber-600' },
-]
-
-const ccaMissedThresholds = [
-  { min: 8, className: 'text-red-600' },
-  { min: 3, max: 8, className: 'text-amber-600' },
-]
-
-const riskIndicatorsThresholds = [
-  { min: 4, className: 'text-red-600' },
-  { min: 2, max: 4, className: 'text-amber-600' },
-]
+import {
+  absencesThresholds,
+  ccaMissedThresholds,
+  lateComingThresholds,
+  offencesThresholds,
+  overallPercentageThresholds,
+  riskIndicatorsThresholds,
+} from '@/data/threshold-config'
 
 interface StudentTableProps {
   students: Array<Student>
@@ -71,9 +47,23 @@ export function StudentTable({
   matchedIds,
   matchedCount = 0,
 }: StudentTableProps) {
-  const [currentPage, setCurrentPage] = useState(1)
   const [isMatchedCollapsed, setIsMatchedCollapsed] = useState(false)
   const [isUnmatchedCollapsed, setIsUnmatchedCollapsed] = useState(false)
+
+  const {
+    currentPage,
+    totalPages,
+    startIndex,
+    pageNumbers,
+    goToPage,
+    goToNextPage,
+    goToPreviousPage,
+    canGoNext,
+    canGoPrevious,
+  } = usePagination({
+    totalItems: students.length,
+    pageSize,
+  })
 
   // Reset collapsed state when filters change
   useEffect(() => {
@@ -81,69 +71,12 @@ export function StudentTable({
     setIsUnmatchedCollapsed(false)
   }, [matchedIds, matchedCount])
 
-  const totalPages = Math.ceil(students.length / pageSize)
-
   const paginatedStudents = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize
     return students.slice(startIndex, startIndex + pageSize)
-  }, [students, currentPage, pageSize])
+  }, [students, startIndex, pageSize])
 
-  // Reset to page 1 when students change (e.g., filtering)
-  useEffect(() => {
-    if (currentPage > Math.ceil(students.length / pageSize)) {
-      setCurrentPage(1)
-    }
-  }, [students.length, pageSize, currentPage])
-
-  const handlePrevious = () => {
-    setCurrentPage((prev) => Math.max(1, prev - 1))
-  }
-
-  const handleNext = () => {
-    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-  }
-
-  const handlePageClick = (page: number) => {
-    setCurrentPage(page)
-  }
-
-  // Generate page numbers to display (memoized to prevent recalculation on every render)
-  const pageNumbers = useMemo(() => {
-    const pages: Array<number | 'ellipsis'> = []
-    const maxVisible = 5
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) {
-          pages.push(i)
-        }
-        pages.push('ellipsis')
-        pages.push(totalPages)
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1)
-        pages.push('ellipsis')
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i)
-        }
-      } else {
-        pages.push(1)
-        pages.push('ellipsis')
-        pages.push(currentPage - 1)
-        pages.push(currentPage)
-        pages.push(currentPage + 1)
-        pages.push('ellipsis')
-        pages.push(totalPages)
-      }
-    }
-
-    return pages
-  }, [totalPages, currentPage])
-
-  const startIndex = (currentPage - 1) * pageSize + 1
+  // Convert to 1-based for display
+  const displayStartIndex = startIndex + 1
 
   // Helper to check if a column is visible
   const isVisible = (id: string) =>
@@ -238,8 +171,8 @@ export function StudentTable({
         </TableHeader>
         <TableBody>
           {paginatedStudents.map((student, index) => {
-            // Use 0-based index for header logic (startIndex - 1 converts 1-based to 0-based)
-            const zeroBasedGlobalIndex = startIndex - 1 + index
+            // startIndex from usePagination is already 0-based
+            const zeroBasedGlobalIndex = startIndex + index
             const isInMatchedSection = zeroBasedGlobalIndex < matchedCount
             const unmatchedCount = students.length - matchedCount
             const visibleColumnCount = columns.filter((c) => c.visible).length
@@ -317,7 +250,7 @@ export function StudentTable({
                   <TableRow>
                     {isVisible('index') && (
                       <TableCell className="sticky left-0 z-10 bg-background pl-6 text-muted-foreground">
-                        {startIndex + index}
+                        {displayStartIndex + index}
                       </TableCell>
                     )}
                     {isVisible('name') && (
@@ -530,8 +463,8 @@ export function StudentTable({
             <Button
               variant="ghost"
               size="sm"
-              onClick={handlePrevious}
-              disabled={currentPage === 1}
+              onClick={goToPreviousPage}
+              disabled={!canGoPrevious}
             >
               <ChevronLeft className="h-4 w-4" />
               Previous
@@ -552,7 +485,7 @@ export function StudentTable({
                   variant={currentPage === page ? 'outline' : 'ghost'}
                   size="icon"
                   className="h-8 w-8"
-                  onClick={() => handlePageClick(page)}
+                  onClick={() => goToPage(page)}
                   aria-label={`Page ${page}`}
                   aria-current={currentPage === page ? 'page' : undefined}
                 >
@@ -564,8 +497,8 @@ export function StudentTable({
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
+              onClick={goToNextPage}
+              disabled={!canGoNext}
             >
               Next
               <ChevronRight className="h-4 w-4" />

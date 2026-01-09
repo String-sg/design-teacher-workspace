@@ -81,14 +81,14 @@ function StudentsPage() {
   const { matchedIds, hasActiveFilters } = useMemo(() => {
     const hasSearch = !!searchQuery
     const hasFilterCriteria = filters.length > 0
-    const hasActiveFilters = hasSearch || hasFilterCriteria
+    const isFiltering = hasSearch || hasFilterCriteria
 
-    if (!hasActiveFilters) {
+    if (!isFiltering) {
       // No filters active - all students are "matched"
       return { matchedIds: new Set<string>(), hasActiveFilters: false }
     }
 
-    const matchedIds = new Set<string>()
+    const matched = new Set<string>()
     const query = searchQuery.toLowerCase()
 
     for (const student of classStudents) {
@@ -102,11 +102,11 @@ function StudentsPage() {
         filters.every((filter) => matchesCondition(student, filter))
 
       if (matchesSearch && matchesFilters) {
-        matchedIds.add(student.id)
+        matched.add(student.id)
       }
     }
 
-    return { matchedIds, hasActiveFilters }
+    return { matchedIds: matched, hasActiveFilters: isFiltering }
   }, [classStudents, searchQuery, filters])
 
   // Sort students: matched first, then unmatched

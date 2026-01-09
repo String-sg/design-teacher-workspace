@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState } from 'react'
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,19 +15,19 @@ import {
   X,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import type { ReactNode } from 'react'
 
 import type {
   FilterCriterion,
   FilterField,
   FilterOperator,
 } from '@/types/student'
+import type { FilterFieldOption, OperatorOption } from '@/data/filter-config'
 import {
   filterFieldConfigs,
   groupLabels,
   groupOrder,
   textOperators,
-  type FilterFieldOption,
-  type OperatorOption,
 } from '@/data/filter-config'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -464,13 +464,13 @@ export function MultiFilterPopover({
                         <SelectTrigger className="min-w-0 flex-1">
                           <SelectValue>
                             {(() => {
-                              const op = fieldOption?.operators.find(
-                                (op) => op.value === filter.operator,
+                              const selectedOp = fieldOption?.operators.find(
+                                (o) => o.value === filter.operator,
                               )
                               return (
                                 <span className="flex items-center gap-2">
-                                  {op?.icon}
-                                  {op?.label}
+                                  {selectedOp?.icon}
+                                  {selectedOp?.label}
                                 </span>
                               )
                             })()}
@@ -608,9 +608,9 @@ export function MultiFilterPopover({
                 size="sm"
                 className="gap-2"
                 onClick={() => {
-                  const isCustomPreset =
-                    selectedPreset &&
-                    customPresets.some((p) => p.id === selectedPreset.id)
+                  const isCustomPreset = customPresets.some(
+                    (p) => p.id === selectedPreset?.id,
+                  )
                   if (isCustomPreset && selectedPreset) {
                     setEditingPresetId(selectedPreset.id)
                     setPresetName(selectedPreset.label)
@@ -636,9 +636,9 @@ export function MultiFilterPopover({
       {/* Save/Edit Preset Dialog */}
       <Dialog
         open={saveDialogOpen}
-        onOpenChange={(open) => {
-          setSaveDialogOpen(open)
-          if (!open) {
+        onOpenChange={(isOpen) => {
+          setSaveDialogOpen(isOpen)
+          if (!isOpen) {
             setEditingPresetId(null)
             setPresetName('')
           }
