@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import type { AttentionTag, Student } from '@/types/student'
 import type { ColumnConfig } from './column-visibility-popover'
@@ -22,6 +22,10 @@ interface StudentTableProps {
   columns: Array<ColumnConfig>
   className?: string
   pageSize?: number
+  /** When provided, a divider will be shown between matched and unmatched students */
+  matchedIds?: Set<string>
+  /** Number of matched students (used to show divider at correct position) */
+  matchedCount?: number
 }
 
 const tagVariantMap: Record<AttentionTag, 'default' | 'secondary' | 'outline'> =
@@ -32,8 +36,18 @@ export function StudentTable({
   columns,
   className,
   pageSize = 10,
+  matchedIds,
+  matchedCount = 0,
 }: StudentTableProps) {
   const [currentPage, setCurrentPage] = useState(1)
+  const [isMatchedCollapsed, setIsMatchedCollapsed] = useState(false)
+  const [isUnmatchedCollapsed, setIsUnmatchedCollapsed] = useState(false)
+
+  // Reset collapsed state when filters change
+  useEffect(() => {
+    setIsMatchedCollapsed(false)
+    setIsUnmatchedCollapsed(false)
+  }, [matchedIds, matchedCount])
 
   const totalPages = Math.ceil(students.length / pageSize)
 
@@ -191,8 +205,77 @@ export function StudentTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedStudents.map((student, index) => (
-            <TableRow key={student.id}>
+          {paginatedStudents.map((student, index) => {
+            const globalIndex = startIndex + index
+            const isInMatchedSection = globalIndex < matchedCount
+            const unmatchedCount = students.length - matchedCount
+            const visibleColumnCount = columns.filter((c) => c.visible).length
+
+            // Show matched header at the start when filters are active and there are matches
+            const showMatchedHeader = matchedIds && matchedCount > 0 && globalIndex === 0
+
+            // Show unmatched header when:
+            // - Filters are active AND there are unmatched students
+            // - Either: transitioning from matched to unmatched (globalIndex === matchedCount)
+            // - Or: no matches exist and this is the first item (globalIndex === 0)
+            const showUnmatchedHeader = matchedIds && unmatchedCount > 0 && (
+              (matchedCount > 0 && globalIndex === matchedCount) ||
+              (matchedCount === 0 && globalIndex === 0)
+            )
+
+            // Determine if this row should be hidden due to collapsed section
+            // When matchedCount is 0, all students are in the unmatched section
+            const isHidden = matchedIds && (
+              (matchedCount > 0 && isInMatchedSection && isMatchedCollapsed) ||
+              (unmatchedCount > 0 && !isInMatchedSection && isUnmatchedCollapsed)
+            )
+
+            return (
+            <React.Fragment key={student.id}>
+              {showMatchedHeader && (
+                <TableRow
+                  className="cursor-pointer hover:bg-muted/30"
+                  onClick={() => setIsMatchedCollapsed(!isMatchedCollapsed)}
+                >
+                  <TableCell
+                    colSpan={visibleColumnCount}
+                    className="bg-muted/50 py-2 pl-6 text-sm font-medium text-muted-foreground"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ChevronDown
+                        className={cn(
+                          'h-4 w-4 transition-transform',
+                          isMatchedCollapsed && '-rotate-90'
+                        )}
+                      />
+                      Matched students ({matchedCount})
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+              {showUnmatchedHeader && (
+                <TableRow
+                  className="cursor-pointer hover:bg-muted/30"
+                  onClick={() => setIsUnmatchedCollapsed(!isUnmatchedCollapsed)}
+                >
+                  <TableCell
+                    colSpan={visibleColumnCount}
+                    className="bg-muted/50 py-2 pl-6 text-sm font-medium text-muted-foreground"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ChevronDown
+                        className={cn(
+                          'h-4 w-4 transition-transform',
+                          isUnmatchedCollapsed && '-rotate-90'
+                        )}
+                      />
+                      Other students ({unmatchedCount})
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+              {!isHidden && (
+            <TableRow>
               {isVisible('index') && (
                 <TableCell className="sticky left-0 z-10 bg-background pl-6 text-muted-foreground">
                   {startIndex + index}
@@ -402,7 +485,10 @@ export function StudentTable({
                 </TableCell>
               )}
             </TableRow>
-          ))}
+              )}
+            </React.Fragment>
+            )
+          })}
         </TableBody>
       </Table>
 
