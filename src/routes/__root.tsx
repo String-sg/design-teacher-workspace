@@ -10,6 +10,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import appCss from '../styles.css?url'
 import { AppHeader } from '@/components/app-header'
 import { AppSidebar } from '@/components/app-sidebar'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 
@@ -73,15 +74,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="h-screen overflow-hidden">
-        <AppHeader notificationCount={8} />
-        <div className="flex min-h-0 flex-1 flex-col overflow-auto">
-          <Outlet />
-        </div>
-      </SidebarInset>
-      <Toaster position="bottom-center" />
-    </SidebarProvider>
+    <ErrorBoundary>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset className="h-screen overflow-hidden">
+          <AppHeader notificationCount={8} />
+          <div className="flex min-h-0 flex-1 flex-col overflow-auto">
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
+          </div>
+        </SidebarInset>
+        <Toaster position="bottom-center" />
+      </SidebarProvider>
+    </ErrorBoundary>
   )
 }

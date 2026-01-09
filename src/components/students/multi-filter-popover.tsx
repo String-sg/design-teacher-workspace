@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useMemo, useState } from 'react'
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,12 +15,20 @@ import {
   X,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import type { ReactNode } from 'react'
 
 import type {
   FilterCriterion,
   FilterField,
   FilterOperator,
 } from '@/types/student'
+import type { FilterFieldOption, OperatorOption } from '@/data/filter-config'
+import {
+  filterFieldConfigs,
+  groupLabels,
+  groupOrder,
+  textOperators,
+} from '@/data/filter-config'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -50,43 +58,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-type FieldType = 'numeric' | 'text' | 'boolean' | 'enum'
-
-type FieldGroup = 'general' | 'academic' | 'behaviour' | 'wellbeing' | 'family'
-
-interface OperatorOption {
-  value: FilterOperator
-  label: string
-  icon?: ReactNode
-}
-
-interface FilterFieldOption {
-  field: FilterField
-  label: string
-  type: FieldType
-  group: FieldGroup
-  operators: Array<OperatorOption>
-  defaultOperator: FilterOperator
-  defaultValue: string | number
-  enumValues?: Array<string>
-}
-
-const groupLabels: Record<FieldGroup, string> = {
-  general: 'General',
-  academic: 'Academic Performance',
-  behaviour: 'Behaviour and Discipline',
-  wellbeing: 'Wellbeing',
-  family: 'Family, Housing, Finance',
-}
-
-const groupOrder: Array<FieldGroup> = [
-  'general',
-  'behaviour',
-  'academic',
-  'wellbeing',
-  'family',
-]
-
+// Operator options with icons (defined here since they include React components)
 const numericOperators: Array<OperatorOption> = [
   {
     value: 'gte',
@@ -115,220 +87,23 @@ const numericOperators: Array<OperatorOption> = [
   },
 ]
 
-const textOperators: Array<OperatorOption> = [
-  { value: 'contains', label: 'contains' },
-  { value: 'not_contains', label: 'does not contain' },
-  { value: 'is', label: 'is' },
-  { value: 'is_not', label: 'is not' },
-  { value: 'is_empty', label: 'is empty' },
-  { value: 'is_not_empty', label: 'is not empty' },
-]
-
 const booleanOperators: Array<OperatorOption> = [
   { value: 'is', label: 'is', icon: <Equal className="h-4 w-4" /> },
   { value: 'is_not', label: 'is not', icon: <EqualNot className="h-4 w-4" /> },
 ]
 
-const filterFieldOptions: Array<FilterFieldOption> = [
-  // General
-  {
-    field: 'name',
-    label: 'Name',
-    type: 'text',
-    group: 'general',
-    operators: textOperators,
-    defaultOperator: 'contains',
-    defaultValue: '',
-  },
-  {
-    field: 'class',
-    label: 'Class',
-    type: 'text',
-    group: 'general',
-    operators: textOperators,
-    defaultOperator: 'contains',
-    defaultValue: '',
-  },
-  // Behaviour and Discipline
-  {
-    field: 'absences',
-    label: 'Non-valid Absenteeism',
-    type: 'numeric',
-    group: 'behaviour',
-    operators: numericOperators,
-    defaultOperator: 'gte',
-    defaultValue: 5,
-  },
-  {
-    field: 'lateComing',
-    label: 'Late-coming',
-    type: 'numeric',
-    group: 'behaviour',
-    operators: numericOperators,
-    defaultOperator: 'gte',
-    defaultValue: 5,
-  },
-  {
-    field: 'offences',
-    label: 'Offences',
-    type: 'numeric',
-    group: 'behaviour',
-    operators: numericOperators,
-    defaultOperator: 'gte',
-    defaultValue: 1,
-  },
-  {
-    field: 'ccaMissed',
-    label: 'CCA Sessions Missed',
-    type: 'numeric',
-    group: 'behaviour',
-    operators: numericOperators,
-    defaultOperator: 'gte',
-    defaultValue: 3,
-  },
-  // Academic Performance
-  {
-    field: 'overallPercentage',
-    label: 'Overall %',
-    type: 'numeric',
-    group: 'academic',
-    operators: numericOperators,
-    defaultOperator: 'lte',
-    defaultValue: 50,
-  },
-  {
-    field: 'conduct',
-    label: 'Conduct',
-    type: 'enum',
-    group: 'academic',
-    operators: booleanOperators,
-    defaultOperator: 'is',
-    defaultValue: 'Poor',
-    enumValues: ['Excellent', 'Good', 'Fair', 'Poor'],
-  },
-  {
-    field: 'learningSupport',
-    label: 'Learning Support',
-    type: 'text',
-    group: 'academic',
-    operators: textOperators,
-    defaultOperator: 'is_not_empty',
-    defaultValue: '',
-  },
-  {
-    field: 'postSecEligibility',
-    label: 'Post-Sec Eligibility',
-    type: 'text',
-    group: 'academic',
-    operators: textOperators,
-    defaultOperator: 'contains',
-    defaultValue: '',
-  },
-  // Wellbeing
-  {
-    field: 'riskIndicators',
-    label: 'Risk Indicators (TCI)',
-    type: 'numeric',
-    group: 'wellbeing',
-    operators: numericOperators,
-    defaultOperator: 'gte',
-    defaultValue: 3,
-  },
-  {
-    field: 'lowMoodFlagged',
-    label: 'Low Mood',
-    type: 'boolean',
-    group: 'wellbeing',
-    operators: booleanOperators,
-    defaultOperator: 'is',
-    defaultValue: 'Yes',
-    enumValues: ['Yes', 'No'],
-  },
-  {
-    field: 'socialLinks',
-    label: 'Social Links',
-    type: 'numeric',
-    group: 'wellbeing',
-    operators: numericOperators,
-    defaultOperator: 'lte',
-    defaultValue: 2,
-  },
-  {
-    field: 'counsellingSessions',
-    label: 'Counselling Sessions',
-    type: 'numeric',
-    group: 'wellbeing',
-    operators: numericOperators,
-    defaultOperator: 'gte',
-    defaultValue: 1,
-  },
-  {
-    field: 'sen',
-    label: 'SEN',
-    type: 'text',
-    group: 'wellbeing',
-    operators: textOperators,
-    defaultOperator: 'is_not_empty',
-    defaultValue: '',
-  },
-  {
-    field: 'fas',
-    label: 'FAS',
-    type: 'boolean',
-    group: 'wellbeing',
-    operators: booleanOperators,
-    defaultOperator: 'is',
-    defaultValue: 'Yes',
-    enumValues: ['Yes', 'No'],
-  },
-  // Family, Housing, Finance
-  {
-    field: 'housing',
-    label: 'Housing',
-    type: 'text',
-    group: 'family',
-    operators: textOperators,
-    defaultOperator: 'is_not_empty',
-    defaultValue: '',
-  },
-  {
-    field: 'housingType',
-    label: 'Ownership',
-    type: 'enum',
-    group: 'family',
-    operators: booleanOperators,
-    defaultOperator: 'is',
-    defaultValue: 'Rented',
-    enumValues: ['Owned', 'Rented'],
-  },
-  {
-    field: 'custody',
-    label: 'Custody',
-    type: 'text',
-    group: 'family',
-    operators: textOperators,
-    defaultOperator: 'is_not_empty',
-    defaultValue: '',
-  },
-  {
-    field: 'siblings',
-    label: 'Siblings',
-    type: 'numeric',
-    group: 'family',
-    operators: numericOperators,
-    defaultOperator: 'gte',
-    defaultValue: 3,
-  },
-  {
-    field: 'externalAgencies',
-    label: 'External Agencies',
-    type: 'text',
-    group: 'family',
-    operators: textOperators,
-    defaultOperator: 'is_not_empty',
-    defaultValue: '',
-  },
-]
+// Build filterFieldOptions from config, adding operator arrays based on field type
+const filterFieldOptions: Array<FilterFieldOption> = filterFieldConfigs.map(
+  (config) => ({
+    ...config,
+    operators:
+      config.type === 'numeric'
+        ? numericOperators
+        : config.type === 'boolean' || config.type === 'enum'
+          ? booleanOperators
+          : textOperators,
+  }),
+)
 
 interface FilterPreset {
   id: string
@@ -392,9 +167,13 @@ export function MultiFilterPopover({
 
   const filterPresets = [...defaultPresets, ...customPresets]
 
-  const activeFields = new Set(filters.map((f) => f.field))
-  const availableFields = filterFieldOptions.filter(
-    (opt) => !activeFields.has(opt.field),
+  const activeFields = useMemo(
+    () => new Set(filters.map((f) => f.field)),
+    [filters],
+  )
+  const availableFields = useMemo(
+    () => filterFieldOptions.filter((opt) => !activeFields.has(opt.field)),
+    [activeFields],
   )
 
   // Get selected preset from active ID
@@ -529,7 +308,12 @@ export function MultiFilterPopover({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger
           render={
-            <Button variant="outline" className={cn('gap-2', className)} />
+            <Button
+              variant="outline"
+              className={cn('gap-2', className)}
+              aria-label="Filter students"
+              aria-expanded={open}
+            />
           }
         >
           <ListFilter className="h-4 w-4" />
@@ -544,11 +328,16 @@ export function MultiFilterPopover({
           {/* Preset Selector */}
           <div className="border-b px-6 py-6">
             <div className="mb-2 flex items-center gap-1.5">
-              <label className="text-sm font-medium">Select filter preset</label>
+              <label className="text-sm font-medium">
+                Select filter preset
+              </label>
               <Tooltip>
                 <TooltipTrigger
                   render={
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <Info className="h-3.5 w-3.5" />
                     </button>
                   }
@@ -675,13 +464,13 @@ export function MultiFilterPopover({
                         <SelectTrigger className="min-w-0 flex-1">
                           <SelectValue>
                             {(() => {
-                              const op = fieldOption?.operators.find(
-                                (op) => op.value === filter.operator,
+                              const selectedOp = fieldOption?.operators.find(
+                                (o) => o.value === filter.operator,
                               )
                               return (
                                 <span className="flex items-center gap-2">
-                                  {op?.icon}
-                                  {op?.label}
+                                  {selectedOp?.icon}
+                                  {selectedOp?.label}
                                 </span>
                               )
                             })()}
@@ -819,9 +608,9 @@ export function MultiFilterPopover({
                 size="sm"
                 className="gap-2"
                 onClick={() => {
-                  const isCustomPreset =
-                    selectedPreset &&
-                    customPresets.some((p) => p.id === selectedPreset.id)
+                  const isCustomPreset = customPresets.some(
+                    (p) => p.id === selectedPreset?.id,
+                  )
                   if (isCustomPreset && selectedPreset) {
                     setEditingPresetId(selectedPreset.id)
                     setPresetName(selectedPreset.label)
@@ -847,9 +636,9 @@ export function MultiFilterPopover({
       {/* Save/Edit Preset Dialog */}
       <Dialog
         open={saveDialogOpen}
-        onOpenChange={(open) => {
-          setSaveDialogOpen(open)
-          if (!open) {
+        onOpenChange={(isOpen) => {
+          setSaveDialogOpen(isOpen)
+          if (!isOpen) {
             setEditingPresetId(null)
             setPresetName('')
           }

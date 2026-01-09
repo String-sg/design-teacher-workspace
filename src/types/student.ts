@@ -90,10 +90,3 @@ export interface FilterCriterion {
   operator: FilterOperator
   value: string | number
 }
-
-/** @deprecated Use FilterField instead */
-export type SortField = FilterField
-/** @deprecated Use FilterOperator instead */
-export type SortOperator = FilterOperator
-/** @deprecated Use FilterCriterion instead */
-export type SortCriterion = FilterCriterion

@@ -2,15 +2,12 @@ import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 
 import type { FilterCriterion, Student } from '@/types/student'
-import type {ColumnConfig} from '@/components/students/column-visibility-popover';
+import type { ColumnConfig } from '@/components/students/column-visibility-popover'
 import { DataCard } from '@/components/data-card'
 import { StudentFilters } from '@/components/students/student-filters'
 import { StudentTable } from '@/components/students/student-table'
 import { ClassSelector } from '@/components/students/class-selector'
-import {
-  
-  defaultColumns
-} from '@/components/students/column-visibility-popover'
+import { defaultColumns } from '@/components/students/column-visibility-popover'
 
 import { getMetrics, mockStudents } from '@/data/mock-students'
 
@@ -84,14 +81,14 @@ function StudentsPage() {
   const { matchedIds, hasActiveFilters } = useMemo(() => {
     const hasSearch = !!searchQuery
     const hasFilterCriteria = filters.length > 0
-    const hasActiveFilters = hasSearch || hasFilterCriteria
+    const isFiltering = hasSearch || hasFilterCriteria
 
-    if (!hasActiveFilters) {
+    if (!isFiltering) {
       // No filters active - all students are "matched"
       return { matchedIds: new Set<string>(), hasActiveFilters: false }
     }
 
-    const matchedIds = new Set<string>()
+    const matched = new Set<string>()
     const query = searchQuery.toLowerCase()
 
     for (const student of classStudents) {
@@ -105,11 +102,11 @@ function StudentsPage() {
         filters.every((filter) => matchesCondition(student, filter))
 
       if (matchesSearch && matchesFilters) {
-        matchedIds.add(student.id)
+        matched.add(student.id)
       }
     }
 
-    return { matchedIds, hasActiveFilters }
+    return { matchedIds: matched, hasActiveFilters: isFiltering }
   }, [classStudents, searchQuery, filters])
 
   // Sort students: matched first, then unmatched
@@ -135,10 +132,7 @@ function StudentsPage() {
     return classStudents.filter((s) => matchedIds.has(s.id))
   }, [classStudents, matchedIds, hasActiveFilters])
 
-  const metrics = useMemo(
-    () => getMetrics(matchedStudents),
-    [matchedStudents],
-  )
+  const metrics = useMemo(() => getMetrics(matchedStudents), [matchedStudents])
 
   return (
     <div className="flex h-full flex-col">

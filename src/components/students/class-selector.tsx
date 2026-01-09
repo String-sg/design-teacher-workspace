@@ -104,6 +104,8 @@ export function ClassSelector({
               <button
                 type="button"
                 onClick={() => handleSelect(group.level)}
+                aria-label={`Select ${group.level}`}
+                aria-pressed={value === group.level}
                 className={cn(
                   'flex w-full items-center justify-between px-3 py-2 text-sm font-semibold hover:bg-accent rounded-md',
                   value === group.level && 'bg-accent',
@@ -119,6 +121,8 @@ export function ClassSelector({
                   key={classOption.value}
                   type="button"
                   onClick={() => handleSelect(classOption.value)}
+                  aria-label={`Select class ${classOption.label}`}
+                  aria-pressed={value === classOption.value}
                   className={cn(
                     'flex w-full items-center justify-between py-2 pl-6 pr-3 text-sm hover:bg-accent rounded-md',
                     value === classOption.value && 'bg-accent',

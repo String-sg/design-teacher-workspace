@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 
 import { AnnouncementList } from '@/components/announcements/announcement-list'
@@ -9,13 +9,11 @@ export const Route = createFileRoute('/announcements/')({
   component: AnnouncementsPage,
 })
 
+// Static filtering - computed once at module level since mockAnnouncements never changes
+const unreadAnnouncements = mockAnnouncements.filter((a) => !a.isRead)
+
 function AnnouncementsPage() {
   const [activeTab, setActiveTab] = useState<string>('to-read')
-
-  const unreadAnnouncements = useMemo(
-    () => mockAnnouncements.filter((a) => !a.isRead),
-    [],
-  )
 
   const unreadCount = unreadAnnouncements.length
 

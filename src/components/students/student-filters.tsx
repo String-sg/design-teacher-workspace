@@ -34,16 +34,22 @@ export function StudentFilters({
   className,
 }: StudentFiltersProps) {
   return (
-    <div className={cn('flex items-center justify-between gap-4', className)}>
-      <div className="flex items-center gap-2">
-        <div className="relative">
+    <div
+      className={cn(
+        'flex flex-col gap-4 md:flex-row md:items-center md:justify-between',
+        className,
+      )}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 md:flex-none">
           <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
           <Input
             type="text"
             placeholder="Search name"
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-[200px] pl-9"
+            className="w-full pl-9 md:w-[200px]"
+            aria-label="Search students"
           />
         </div>
         <MultiFilterPopover
