@@ -51,14 +51,10 @@ export function ColumnHeaderMenu({
   const hasActiveFilter =
     column.filterField && activeFilterFields.has(column.filterField)
 
-  // Sticky columns need their own border shadows since bg-background covers the thead shadow
-  const stickyShadow = isSticky
-    ? showStickyShadow
-      ? 'shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border),2px_0_5px_-2px_rgba(0,0,0,0.1)]'
-      : 'shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border)]'
-    : showStickyShadow
-      ? 'shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]'
-      : undefined
+  // All column headers need border shadows (thead has none). Last sticky column also gets drop shadow.
+  const stickyShadow = showStickyShadow
+    ? 'shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border),2px_0_5px_-2px_rgba(0,0,0,0.1)]'
+    : 'shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border)]'
 
   // Non-interactive columns render as plain TableHead
   if (!column.sortable && !column.filterable) {

@@ -111,7 +111,7 @@ export function StudentTable({
     <div className={cn('flex min-h-0 flex-1 flex-col bg-white', className)}>
       <Table>
         <TableHeader>
-          <TableRow className="hover:bg-transparent">
+          <TableRow className="border-0 hover:bg-transparent">
             {isVisible('index') && (
               <ColumnHeaderMenu
                 column={columns.find((c) => c.id === 'index')!}
