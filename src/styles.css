@@ -129,3 +129,14 @@
     @apply font-sans;
   }
 }
+
+/* Hide TanStack DevTools toggle button by default, show on hover */
+[data-tanstack-devtools-panel-toggle] {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+[data-tanstack-devtools-panel-toggle]:hover,
+[data-tanstack-devtools-panel-toggle]:focus {
+  opacity: 1;
+}

@@ -1,7 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 
-import type { AttentionTag, FilterCriterion, Student } from '@/types/student'
+import { ColumnHeaderMenu } from './column-header-menu'
+import type {
+  AttentionTag,
+  FilterField,
+  SortConfig,
+  SortDirection,
+  Student,
+} from '@/types/student'
 import type { ColumnConfig } from './column-visibility-popover'
 import { cn, getStatusColor } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -34,8 +41,18 @@ interface StudentTableProps {
   matchedIds?: Set<string>
   /** Number of matched students (used to show divider at correct position) */
   matchedCount?: number
-  /** Active filters (used to show filter indicator on column headers) */
-  filters?: Array<FilterCriterion>
+  /** Current sort configuration */
+  sort: SortConfig | null
+  /** Set of filter fields that have active filters */
+  activeFilterFields: Set<FilterField>
+  /** Handler for sorting by a column */
+  onSort: (field: string, direction: SortDirection) => void
+  /** Handler for clearing the current sort */
+  onClearSort: () => void
+  /** Handler for adding a quick filter */
+  onAddQuickFilter: (field: FilterField) => void
+  /** Handler for clearing a filter by field */
+  onClearFilter: (field: FilterField) => void
 }
 
 const tagVariantMap: Record<AttentionTag, 'default' | 'secondary' | 'outline'> =
@@ -48,7 +65,12 @@ export function StudentTable({
   pageSize = 10,
   matchedIds,
   matchedCount = 0,
-  filters = [],
+  sort,
+  activeFilterFields,
+  onSort,
+  onClearSort,
+  onAddQuickFilter,
+  onClearFilter,
 }: StudentTableProps) {
   const [isMatchedCollapsed, setIsMatchedCollapsed] = useState(false)
   const [isUnmatchedCollapsed, setIsUnmatchedCollapsed] = useState(false)
@@ -85,238 +107,291 @@ export function StudentTable({
   const isVisible = (id: string) =>
     columns.find((c) => c.id === id)?.visible ?? true
 
-  // Set of fields that have active filters
-  const filteredFields = useMemo(
-    () => new Set(filters.map((f) => f.field)),
-    [filters],
-  )
-
-  // Helper to check if a column has an active filter
-  const hasFilter = (id: string) => filteredFields.has(id)
-
   return (
     <div className={cn('flex min-h-0 flex-1 flex-col bg-white', className)}>
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="hover:bg-transparent">
             {isVisible('index') && (
-              <TableHead className="sticky left-0 z-20 w-12 min-w-12 bg-white pl-6">
-                #
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'index')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                isSticky
+                stickyLeft="0"
+                className="w-12 min-w-12 pl-6"
+              />
             )}
             {isVisible('name') && (
-              <TableHead
-                className={cn(
-                  'sticky z-20 min-w-[140px]',
-                  isVisible('index') ? 'left-12' : 'left-0',
-                  hasFilter('name') ? 'bg-blue-50' : 'bg-white',
-                )}
-              >
-                Name
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'name')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                isSticky
+                stickyLeft={isVisible('index') ? '48px' : '0'}
+                showStickyShadow
+                className="min-w-[150px]"
+              />
             )}
             {isVisible('class') && (
-              <TableHead
-                className={cn(
-                  'min-w-[60px]',
-                  hasFilter('class') && 'bg-blue-50',
-                )}
-              >
-                Class
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'class')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[90px]"
+              />
             )}
             {isVisible('attentionTags') && (
-              <TableHead className="min-w-[100px]">Attention tag</TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'attentionTags')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[150px]"
+              />
             )}
             {isVisible('overallPercentage') && (
-              <TableHead
-                className={cn(
-                  'min-w-[80px]',
-                  hasFilter('overallPercentage') && 'bg-blue-50',
-                )}
-              >
-                Overall %
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'overallPercentage')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[120px]"
+              />
             )}
             {isVisible('conduct') && (
-              <TableHead
-                className={cn(
-                  'min-w-[90px]',
-                  hasFilter('conduct') && 'bg-blue-50',
-                )}
-              >
-                Conduct
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'conduct')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[115px]"
+              />
             )}
             {isVisible('learningSupport') && (
-              <TableHead
-                className={cn(
-                  'min-w-[100px]',
-                  hasFilter('learningSupport') && 'bg-blue-50',
-                )}
-              >
-                Learning Support
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'learningSupport')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[180px]"
+              />
             )}
             {isVisible('postSecEligibility') && (
-              <TableHead
-                className={cn(
-                  'min-w-[120px]',
-                  hasFilter('postSecEligibility') && 'bg-blue-50',
-                )}
-              >
-                Post-Sec Eligibility
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'postSecEligibility')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[200px]"
+              />
             )}
             {isVisible('offences') && (
-              <TableHead
-                className={cn(
-                  'min-w-[70px]',
-                  hasFilter('offences') && 'bg-blue-50',
-                )}
-              >
-                Offences
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'offences')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[115px]"
+              />
             )}
             {isVisible('absences') && (
-              <TableHead
-                className={cn(
-                  'min-w-[100px]',
-                  hasFilter('absences') && 'bg-blue-50',
-                )}
-              >
-                Absences
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'absences')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[115px]"
+              />
             )}
             {isVisible('lateComing') && (
-              <TableHead
-                className={cn(
-                  'min-w-[80px]',
-                  hasFilter('lateComing') && 'bg-blue-50',
-                )}
-              >
-                Late-coming
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'lateComing')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[135px]"
+              />
             )}
             {isVisible('ccaMissed') && (
-              <TableHead
-                className={cn(
-                  'min-w-[80px]',
-                  hasFilter('ccaMissed') && 'bg-blue-50',
-                )}
-              >
-                CCA Missed
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'ccaMissed')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[130px]"
+              />
             )}
             {isVisible('riskIndicators') && (
-              <TableHead
-                className={cn(
-                  'min-w-[80px]',
-                  hasFilter('riskIndicators') && 'bg-blue-50',
-                )}
-              >
-                Risk (TCI)
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'riskIndicators')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[120px]"
+              />
             )}
             {isVisible('lowMoodFlagged') && (
-              <TableHead
-                className={cn(
-                  'min-w-[80px]',
-                  hasFilter('lowMoodFlagged') && 'bg-blue-50',
-                )}
-              >
-                Low Mood
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'lowMoodFlagged')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[120px]"
+              />
             )}
             {isVisible('socialLinks') && (
-              <TableHead
-                className={cn(
-                  'min-w-[80px]',
-                  hasFilter('socialLinks') && 'bg-blue-50',
-                )}
-              >
-                Social Links
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'socialLinks')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[140px]"
+              />
             )}
             {isVisible('counsellingSessions') && (
-              <TableHead
-                className={cn(
-                  'min-w-[90px]',
-                  hasFilter('counsellingSessions') && 'bg-blue-50',
-                )}
-              >
-                Counselling
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'counsellingSessions')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[135px]"
+              />
             )}
             {isVisible('sen') && (
-              <TableHead
-                className={cn(
-                  'min-w-[80px]',
-                  hasFilter('sen') && 'bg-blue-50',
-                )}
-              >
-                SEN
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'sen')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[80px]"
+              />
             )}
             {isVisible('housing') && (
-              <TableHead
-                className={cn(
-                  'min-w-[80px]',
-                  hasFilter('housing') && 'bg-blue-50',
-                )}
-              >
-                Housing
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'housing')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[110px]"
+              />
             )}
             {isVisible('housingType') && (
-              <TableHead
-                className={cn(
-                  'min-w-[90px]',
-                  hasFilter('housingType') && 'bg-blue-50',
-                )}
-              >
-                Ownership
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'housingType')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[125px]"
+              />
             )}
             {isVisible('custody') && (
-              <TableHead
-                className={cn(
-                  'min-w-[80px]',
-                  hasFilter('custody') && 'bg-blue-50',
-                )}
-              >
-                Custody
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'custody')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[110px]"
+              />
             )}
             {isVisible('siblings') && (
-              <TableHead
-                className={cn(
-                  'min-w-[70px]',
-                  hasFilter('siblings') && 'bg-blue-50',
-                )}
-              >
-                Siblings
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'siblings')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[110px]"
+              />
             )}
             {isVisible('externalAgencies') && (
-              <TableHead
-                className={cn(
-                  'min-w-[100px]',
-                  hasFilter('externalAgencies') && 'bg-blue-50',
-                )}
-              >
-                Ext. Agencies
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'externalAgencies')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[155px]"
+              />
             )}
             {isVisible('fas') && (
-              <TableHead
-                className={cn(
-                  'min-w-[60px] pr-6',
-                  hasFilter('fas') && 'bg-blue-50',
-                )}
-              >
-                FAS
-              </TableHead>
+              <ColumnHeaderMenu
+                column={columns.find((c) => c.id === 'fas')!}
+                currentSort={sort}
+                activeFilterFields={activeFilterFields}
+                onSort={onSort}
+                onClearSort={onClearSort}
+                onAddQuickFilter={onAddQuickFilter}
+                onClearFilter={onClearFilter}
+                className="min-w-[75px] pr-6"
+              />
             )}
           </TableRow>
         </TableHeader>
@@ -407,7 +482,7 @@ export function StudentTable({
                     {isVisible('name') && (
                       <TableCell
                         className={cn(
-                          'sticky z-10 bg-white font-medium',
+                          'sticky z-10 bg-white font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]',
                           isVisible('index') ? 'left-12' : 'left-0',
                         )}
                       >

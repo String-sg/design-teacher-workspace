@@ -90,3 +90,10 @@ export interface FilterCriterion {
   operator: FilterOperator
   value: string | number
 }
+
+export type SortDirection = 'asc' | 'desc'
+
+export interface SortConfig {
+  field: string
+  direction: SortDirection
+}
