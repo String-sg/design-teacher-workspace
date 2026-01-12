@@ -24,7 +24,7 @@ function Table({ className, ...props }: React.ComponentProps<'table'>) {
       </ScrollAreaPrimitive.Scrollbar>
       <ScrollAreaPrimitive.Scrollbar
         orientation="horizontal"
-        className="absolute bottom-0 left-0 right-2.5 flex h-2.5 touch-none select-none flex-col border-t border-t-transparent p-px transition-opacity"
+        className="absolute bottom-0 left-0 right-2.5 z-40 flex h-2.5 touch-none select-none flex-col border-t border-t-transparent p-px transition-opacity"
       >
         <ScrollAreaPrimitive.Thumb className="relative flex-1 rounded-full bg-border" />
       </ScrollAreaPrimitive.Scrollbar>
@@ -38,7 +38,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
     <thead
       data-slot="table-header"
       className={cn(
-        'sticky top-0 z-30 bg-background [&_tr]:border-b',
+        'sticky top-0 z-30 bg-background shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border)]',
         className,
       )}
       {...props}

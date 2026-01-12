@@ -1,8 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 
-import type { FilterCriterion, Student } from '@/types/student'
+import type {
+  FilterCriterion,
+  FilterField,
+  SortConfig,
+  SortDirection,
+  Student,
+} from '@/types/student'
 import type { ColumnConfig } from '@/components/students/column-visibility-popover'
+import { filterFieldConfigs } from '@/data/filter-config'
 import { DataCard } from '@/components/data-card'
 import { StudentFilters } from '@/components/students/student-filters'
 import { StudentTable } from '@/components/students/student-table'
@@ -58,6 +65,7 @@ function StudentsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<Array<FilterCriterion>>([])
   const [columns, setColumns] = useState<Array<ColumnConfig>>(defaultColumns)
+  const [sort, setSort] = useState<SortConfig | null>(null)
 
   // Get students for the selected class/level (this determines the base list)
   const classStudents = useMemo(() => {
@@ -109,20 +117,79 @@ function StudentsPage() {
     return { matchedIds: matched, hasActiveFilters: isFiltering }
   }, [classStudents, searchQuery, filters])
 
-  // Sort students: matched first, then unmatched
+  // Compute active filter fields for header indicators
+  const activeFilterFields = useMemo(
+    () => new Set(filters.map((f) => f.field)),
+    [filters],
+  )
+
+  // Sort handlers
+  const handleSort = useCallback((field: string, direction: SortDirection) => {
+    setSort({ field, direction })
+  }, [])
+
+  const handleClearSort = useCallback(() => {
+    setSort(null)
+  }, [])
+
+  const handleAddQuickFilter = useCallback((field: FilterField) => {
+    const fieldConfig = filterFieldConfigs.find((c) => c.field === field)
+    if (!fieldConfig) return
+
+    setFilters((prev) => [
+      ...prev,
+      {
+        id: `filter-${Date.now()}`,
+        field,
+        operator: fieldConfig.defaultOperator,
+        value: fieldConfig.defaultValue,
+      },
+    ])
+  }, [])
+
+  const handleClearFilter = useCallback((field: FilterField) => {
+    setFilters((prev) => prev.filter((f) => f.field !== field))
+  }, [])
+
+  // Sort students: apply column sort first, then partition by filter matches
   const sortedStudents = useMemo(() => {
-    if (!hasActiveFilters) {
-      return classStudents
+    const result = [...classStudents]
+
+    // Apply column sort first
+    if (sort) {
+      result.sort((a, b) => {
+        const aVal = a[sort.field as keyof Student]
+        const bVal = b[sort.field as keyof Student]
+
+        // Handle null/undefined
+        if (aVal == null && bVal == null) return 0
+        if (aVal == null) return sort.direction === 'asc' ? 1 : -1
+        if (bVal == null) return sort.direction === 'asc' ? -1 : 1
+
+        // Numeric comparison
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sort.direction === 'asc' ? aVal - bVal : bVal - aVal
+        }
+
+        // String comparison
+        const comparison = String(aVal).localeCompare(String(bVal))
+        return sort.direction === 'asc' ? comparison : -comparison
+      })
     }
 
-    return [...classStudents].sort((a, b) => {
-      const aMatched = matchedIds.has(a.id)
-      const bMatched = matchedIds.has(b.id)
-      if (aMatched && !bMatched) return -1
-      if (!aMatched && bMatched) return 1
-      return 0
-    })
-  }, [classStudents, matchedIds, hasActiveFilters])
+    // Then partition by filter matches (matched students first)
+    if (hasActiveFilters) {
+      result.sort((a, b) => {
+        const aMatched = matchedIds.has(a.id)
+        const bMatched = matchedIds.has(b.id)
+        if (aMatched && !bMatched) return -1
+        if (!aMatched && bMatched) return 1
+        return 0
+      })
+    }
+
+    return result
+  }, [classStudents, sort, matchedIds, hasActiveFilters])
 
   // For metrics, we only count the matched students
   const matchedStudents = useMemo(() => {
@@ -192,7 +259,12 @@ function StudentsPage() {
         pageSize={20}
         matchedIds={hasActiveFilters ? matchedIds : undefined}
         matchedCount={hasActiveFilters ? matchedIds.size : 0}
-        filters={filters}
+        sort={sort}
+        activeFilterFields={activeFilterFields}
+        onSort={handleSort}
+        onClearSort={handleClearSort}
+        onAddQuickFilter={handleAddQuickFilter}
+        onClearFilter={handleClearFilter}
       />
     </div>
   )
