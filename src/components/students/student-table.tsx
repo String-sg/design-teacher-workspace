@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 
-import type { AttentionTag, Student } from '@/types/student'
+import type { AttentionTag, FilterCriterion, Student } from '@/types/student'
 import type { ColumnConfig } from './column-visibility-popover'
 import { cn, getStatusColor } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -34,6 +34,8 @@ interface StudentTableProps {
   matchedIds?: Set<string>
   /** Number of matched students (used to show divider at correct position) */
   matchedCount?: number
+  /** Active filters (used to show filter indicator on column headers) */
+  filters?: Array<FilterCriterion>
 }
 
 const tagVariantMap: Record<AttentionTag, 'default' | 'secondary' | 'outline'> =
@@ -46,6 +48,7 @@ export function StudentTable({
   pageSize = 10,
   matchedIds,
   matchedCount = 0,
+  filters = [],
 }: StudentTableProps) {
   const [isMatchedCollapsed, setIsMatchedCollapsed] = useState(false)
   const [isUnmatchedCollapsed, setIsUnmatchedCollapsed] = useState(false)
@@ -82,90 +85,238 @@ export function StudentTable({
   const isVisible = (id: string) =>
     columns.find((c) => c.id === id)?.visible ?? true
 
+  // Set of fields that have active filters
+  const filteredFields = useMemo(
+    () => new Set(filters.map((f) => f.field)),
+    [filters],
+  )
+
+  // Helper to check if a column has an active filter
+  const hasFilter = (id: string) => filteredFields.has(id)
+
   return (
-    <div className={cn('flex min-h-0 flex-1 flex-col', className)}>
+    <div className={cn('flex min-h-0 flex-1 flex-col bg-white', className)}>
       <Table>
         <TableHeader>
           <TableRow>
             {isVisible('index') && (
-              <TableHead className="sticky left-0 z-20 w-12 min-w-12 bg-background pl-6">
+              <TableHead className="sticky left-0 z-20 w-12 min-w-12 bg-white pl-6">
                 #
               </TableHead>
             )}
             {isVisible('name') && (
               <TableHead
                 className={cn(
-                  'sticky z-20 min-w-[140px] bg-background',
+                  'sticky z-20 min-w-[140px]',
                   isVisible('index') ? 'left-12' : 'left-0',
+                  hasFilter('name') ? 'bg-blue-50' : 'bg-white',
                 )}
               >
                 Name
               </TableHead>
             )}
             {isVisible('class') && (
-              <TableHead className="min-w-[60px]">Class</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[60px]',
+                  hasFilter('class') && 'bg-blue-50',
+                )}
+              >
+                Class
+              </TableHead>
             )}
             {isVisible('attentionTags') && (
               <TableHead className="min-w-[100px]">Attention tag</TableHead>
             )}
             {isVisible('overallPercentage') && (
-              <TableHead className="min-w-[80px]">Overall %</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[80px]',
+                  hasFilter('overallPercentage') && 'bg-blue-50',
+                )}
+              >
+                Overall %
+              </TableHead>
             )}
             {isVisible('conduct') && (
-              <TableHead className="min-w-[90px]">Conduct</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[90px]',
+                  hasFilter('conduct') && 'bg-blue-50',
+                )}
+              >
+                Conduct
+              </TableHead>
             )}
             {isVisible('learningSupport') && (
-              <TableHead className="min-w-[100px]">Learning Support</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[100px]',
+                  hasFilter('learningSupport') && 'bg-blue-50',
+                )}
+              >
+                Learning Support
+              </TableHead>
             )}
             {isVisible('postSecEligibility') && (
-              <TableHead className="min-w-[120px]">
+              <TableHead
+                className={cn(
+                  'min-w-[120px]',
+                  hasFilter('postSecEligibility') && 'bg-blue-50',
+                )}
+              >
                 Post-Sec Eligibility
               </TableHead>
             )}
             {isVisible('offences') && (
-              <TableHead className="min-w-[70px]">Offences</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[70px]',
+                  hasFilter('offences') && 'bg-blue-50',
+                )}
+              >
+                Offences
+              </TableHead>
             )}
             {isVisible('absences') && (
-              <TableHead className="min-w-[100px]">Absences</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[100px]',
+                  hasFilter('absences') && 'bg-blue-50',
+                )}
+              >
+                Absences
+              </TableHead>
             )}
             {isVisible('lateComing') && (
-              <TableHead className="min-w-[80px]">Late-coming</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[80px]',
+                  hasFilter('lateComing') && 'bg-blue-50',
+                )}
+              >
+                Late-coming
+              </TableHead>
             )}
             {isVisible('ccaMissed') && (
-              <TableHead className="min-w-[80px]">CCA Missed</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[80px]',
+                  hasFilter('ccaMissed') && 'bg-blue-50',
+                )}
+              >
+                CCA Missed
+              </TableHead>
             )}
             {isVisible('riskIndicators') && (
-              <TableHead className="min-w-[80px]">Risk (TCI)</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[80px]',
+                  hasFilter('riskIndicators') && 'bg-blue-50',
+                )}
+              >
+                Risk (TCI)
+              </TableHead>
             )}
             {isVisible('lowMoodFlagged') && (
-              <TableHead className="min-w-[80px]">Low Mood</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[80px]',
+                  hasFilter('lowMoodFlagged') && 'bg-blue-50',
+                )}
+              >
+                Low Mood
+              </TableHead>
             )}
             {isVisible('socialLinks') && (
-              <TableHead className="min-w-[80px]">Social Links</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[80px]',
+                  hasFilter('socialLinks') && 'bg-blue-50',
+                )}
+              >
+                Social Links
+              </TableHead>
             )}
             {isVisible('counsellingSessions') && (
-              <TableHead className="min-w-[90px]">Counselling</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[90px]',
+                  hasFilter('counsellingSessions') && 'bg-blue-50',
+                )}
+              >
+                Counselling
+              </TableHead>
             )}
             {isVisible('sen') && (
-              <TableHead className="min-w-[80px]">SEN</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[80px]',
+                  hasFilter('sen') && 'bg-blue-50',
+                )}
+              >
+                SEN
+              </TableHead>
             )}
             {isVisible('housing') && (
-              <TableHead className="min-w-[80px]">Housing</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[80px]',
+                  hasFilter('housing') && 'bg-blue-50',
+                )}
+              >
+                Housing
+              </TableHead>
             )}
             {isVisible('housingType') && (
-              <TableHead className="min-w-[90px]">Ownership</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[90px]',
+                  hasFilter('housingType') && 'bg-blue-50',
+                )}
+              >
+                Ownership
+              </TableHead>
             )}
             {isVisible('custody') && (
-              <TableHead className="min-w-[80px]">Custody</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[80px]',
+                  hasFilter('custody') && 'bg-blue-50',
+                )}
+              >
+                Custody
+              </TableHead>
             )}
             {isVisible('siblings') && (
-              <TableHead className="min-w-[70px]">Siblings</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[70px]',
+                  hasFilter('siblings') && 'bg-blue-50',
+                )}
+              >
+                Siblings
+              </TableHead>
             )}
             {isVisible('externalAgencies') && (
-              <TableHead className="min-w-[100px]">Ext. Agencies</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[100px]',
+                  hasFilter('externalAgencies') && 'bg-blue-50',
+                )}
+              >
+                Ext. Agencies
+              </TableHead>
             )}
             {isVisible('fas') && (
-              <TableHead className="min-w-[60px] pr-6">FAS</TableHead>
+              <TableHead
+                className={cn(
+                  'min-w-[60px] pr-6',
+                  hasFilter('fas') && 'bg-blue-50',
+                )}
+              >
+                FAS
+              </TableHead>
             )}
           </TableRow>
         </TableHeader>
@@ -249,14 +400,14 @@ export function StudentTable({
                 {!isHidden && (
                   <TableRow>
                     {isVisible('index') && (
-                      <TableCell className="sticky left-0 z-10 bg-background pl-6 text-muted-foreground">
+                      <TableCell className="sticky left-0 z-10 bg-white pl-6 text-muted-foreground">
                         {displayStartIndex + index}
                       </TableCell>
                     )}
                     {isVisible('name') && (
                       <TableCell
                         className={cn(
-                          'sticky z-10 bg-background font-medium',
+                          'sticky z-10 bg-white font-medium',
                           isVisible('index') ? 'left-12' : 'left-0',
                         )}
                       >

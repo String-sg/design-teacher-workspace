@@ -162,6 +162,7 @@ export function MultiFilterPopover({
   const [customPresets, setCustomPresets] = useState<Array<FilterPreset>>([])
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [presetName, setPresetName] = useState('')
+  const [presetDescription, setPresetDescription] = useState('')
   const [editingPresetId, setEditingPresetId] = useState<string | null>(null)
   const [activePresetId, setActivePresetId] = useState<string | null>(null)
 
@@ -249,7 +250,12 @@ export function MultiFilterPopover({
       setCustomPresets(
         customPresets.map((p) =>
           p.id === editingPresetId
-            ? { ...p, label: presetName.trim(), filters: savedFilters }
+            ? {
+                ...p,
+                label: presetName.trim(),
+                description: presetDescription.trim() || undefined,
+                filters: savedFilters,
+              }
             : p,
         ),
       )
@@ -260,6 +266,7 @@ export function MultiFilterPopover({
       const newPreset: FilterPreset = {
         id: savedPresetId,
         label: presetName.trim(),
+        description: presetDescription.trim() || undefined,
         filters: savedFilters,
       }
       setCustomPresets([...customPresets, newPreset])
@@ -270,6 +277,7 @@ export function MultiFilterPopover({
     onFiltersChange(savedFilters.map((f) => ({ ...f, id: generateId() })))
     setActivePresetId(savedPresetId)
     setPresetName('')
+    setPresetDescription('')
     setEditingPresetId(null)
     setSaveDialogOpen(false)
   }
@@ -278,6 +286,7 @@ export function MultiFilterPopover({
     const preset = customPresets.find((p) => p.id === presetId)
     if (preset) {
       setPresetName(preset.label)
+      setPresetDescription(preset.description ?? '')
       setEditingPresetId(presetId)
       setActivePresetId(presetId)
       // Load the preset's filters into the current view
@@ -388,13 +397,23 @@ export function MultiFilterPopover({
                 {customPresets.length > 0 && (
                   <>
                     <div className="my-1 h-px bg-border" />
+                    <div className="py-1.5 pl-3 text-xs font-semibold text-muted-foreground">
+                      Saved presets
+                    </div>
                     {customPresets.map((preset) => (
                       <div
                         key={preset.id}
                         className="flex items-center justify-between gap-1 pr-2"
                       >
                         <SelectItem value={preset.id} className="flex-1">
-                          {preset.label}
+                          <div className="flex flex-col">
+                            <span>{preset.label}</span>
+                            {preset.description && (
+                              <span className="text-xs text-muted-foreground">
+                                {preset.description}
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                         <button
                           type="button"
@@ -558,7 +577,7 @@ export function MultiFilterPopover({
           {availableFields.length > 0 && (
             <div className={filters.length > 0 ? 'border-t' : ''}>
               <div className="bg-muted/50 px-6 py-2 text-sm font-medium text-muted-foreground">
-                Add filter criteria
+                Filter criteria
               </div>
               <ScrollArea className="h-[300px]">
                 <div className="px-3 py-3">
@@ -641,6 +660,7 @@ export function MultiFilterPopover({
           if (!isOpen) {
             setEditingPresetId(null)
             setPresetName('')
+            setPresetDescription('')
           }
         }}
       >
@@ -650,17 +670,33 @@ export function MultiFilterPopover({
               {editingPresetId ? 'Edit filter preset' : 'Save filter preset'}
             </DialogTitle>
           </DialogHeader>
-          <div className="py-4">
-            <Input
-              placeholder="Enter preset name"
-              value={presetName}
-              onChange={(e) => setPresetName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSavePreset()
-                }
-              }}
-            />
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Name</label>
+              <Input
+                placeholder="Enter preset name"
+                value={presetName}
+                onChange={(e) => setPresetName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Description{' '}
+                <span className="font-normal text-muted-foreground">
+                  (optional)
+                </span>
+              </label>
+              <Input
+                placeholder="Enter a brief description"
+                value={presetDescription}
+                onChange={(e) => setPresetDescription(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSavePreset()
+                  }
+                }}
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button
@@ -669,6 +705,7 @@ export function MultiFilterPopover({
                 setSaveDialogOpen(false)
                 setEditingPresetId(null)
                 setPresetName('')
+                setPresetDescription('')
               }}
             >
               Cancel
