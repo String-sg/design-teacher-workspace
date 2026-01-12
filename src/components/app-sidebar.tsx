@@ -2,6 +2,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import { GraduationCap, Home, Megaphone, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
+import { NotificationPopover } from '@/components/notifications/notification-popover'
 import {
   Sidebar,
   SidebarContent,
@@ -95,14 +96,17 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div
-          className={`flex items-center gap-2 px-2 py-2 ${isCollapsed ? 'justify-center' : ''}`}
+          className={`flex items-center gap-2 px-2 py-2 ${isCollapsed ? 'justify-center' : 'justify-between'}`}
         >
           {isCollapsed ? (
             <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <GraduationCap className="size-5" />
             </div>
           ) : (
-            <span className="text-lg font-semibold">Teacher Workspace</span>
+            <>
+              <span className="text-lg font-semibold">Teacher Workspace</span>
+              <NotificationPopover />
+            </>
           )}
         </div>
       </SidebarHeader>

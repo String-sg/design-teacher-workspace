@@ -1,6 +1,5 @@
 import { Link, useMatches } from '@tanstack/react-router'
 
-import { NotificationPopover } from '@/components/notifications/notification-popover'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Breadcrumb,
@@ -79,13 +78,10 @@ export function AppHeader() {
         </Breadcrumb>
       </div>
 
-      <div className="flex items-center gap-4">
-        <NotificationPopover />
-        <Avatar size="lg">
-          <AvatarImage src="" alt="User avatar" />
-          <AvatarFallback>MT</AvatarFallback>
-        </Avatar>
-      </div>
+      <Avatar size="lg">
+        <AvatarImage src="" alt="User avatar" />
+        <AvatarFallback>MT</AvatarFallback>
+      </Avatar>
     </header>
   )
 }

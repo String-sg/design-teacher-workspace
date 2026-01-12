@@ -135,7 +135,7 @@ function StudentsPage() {
   const metrics = useMemo(() => getMetrics(matchedStudents), [matchedStudents])
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-slate-50">
       {/* Fixed content area */}
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
@@ -192,6 +192,7 @@ function StudentsPage() {
         pageSize={20}
         matchedIds={hasActiveFilters ? matchedIds : undefined}
         matchedCount={hasActiveFilters ? matchedIds.size : 0}
+        filters={filters}
       />
     </div>
   )
