@@ -1,6 +1,6 @@
 import { Link, useMatches } from '@tanstack/react-router'
-import { Bell } from 'lucide-react'
 
+import { NotificationPopover } from '@/components/notifications/notification-popover'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Breadcrumb,
@@ -10,7 +10,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { Button } from '@/components/ui/button'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 
 // Route configuration with labels and parent relationships
@@ -22,11 +21,7 @@ const routeConfig: Record<string, { label: string; parent?: string }> = {
   '/announcements/$id': { label: 'Announcement', parent: '/announcements' },
 }
 
-interface AppHeaderProps {
-  notificationCount?: number
-}
-
-export function AppHeader({ notificationCount = 0 }: AppHeaderProps) {
+export function AppHeader() {
   const matches = useMatches()
 
   const lastMatch = matches.at(-1)!
@@ -85,16 +80,7 @@ export function AppHeader({ notificationCount = 0 }: AppHeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="relative">
-          <Button variant="secondary" size="icon" aria-label="Notifications">
-            <Bell className="size-4 fill-current" />
-          </Button>
-          {notificationCount > 0 && (
-            <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-pink-500 text-xs font-medium text-white ring-2 ring-background">
-              {notificationCount > 99 ? '99+' : notificationCount}
-            </span>
-          )}
-        </div>
+        <NotificationPopover />
         <Avatar size="lg">
           <AvatarImage src="" alt="User avatar" />
           <AvatarFallback>MT</AvatarFallback>
