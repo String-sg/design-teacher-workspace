@@ -9,6 +9,7 @@
   "editorType": ["figma"],
   "documentAccess": "dynamic-page",
   "networkAccess": {
-    "allowedDomains": ["*"]
+    "allowedDomains": ["*"],
+    "reasoning": "This plugin needs to fetch assets and styles from any domain to import DOM elements into Figma."
   }
 }
