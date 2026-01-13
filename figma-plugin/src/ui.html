@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>DOM to Figma</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 13px;
+        color: #333;
+        background: #fff;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      h1 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .description {
+        color: #666;
+        margin-bottom: 16px;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+        min-height: 0;
+      }
+
+      label {
+        font-weight: 500;
+        color: #333;
+      }
+
+      textarea {
+        flex: 1;
+        min-height: 200px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: 'Monaco', 'Menlo', monospace;
+        font-size: 12px;
+        resize: none;
+        background: #fafafa;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #18a0fb;
+        background: #fff;
+      }
+
+      textarea::placeholder {
+        color: #999;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      button {
+        flex: 1;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-primary {
+        background: #18a0fb;
+        color: white;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: #0d8de5;
+      }
+
+      .btn-secondary {
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background: #eee;
+      }
+
+      .btn-paste {
+        background: #f0f0f0;
+        color: #333;
+        flex: none;
+        padding: 8px 16px;
+        margin-bottom: 8px;
+      }
+
+      .btn-paste:hover:not(:disabled) {
+        background: #e5e5e5;
+      }
+
+      .status {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        display: none;
+      }
+
+      .status.visible {
+        display: block;
+      }
+
+      .status.success {
+        background: #e6f7e6;
+        color: #1e7e1e;
+      }
+
+      .status.error {
+        background: #ffe6e6;
+        color: #cc0000;
+      }
+
+      .status.info {
+        background: #e6f3ff;
+        color: #0066cc;
+      }
+
+      .help {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #eee;
+        font-size: 12px;
+        color: #666;
+      }
+
+      .help ol {
+        margin-left: 16px;
+        margin-top: 8px;
+      }
+
+      .help li {
+        margin-bottom: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>DOM to Figma</h1>
+    <p class="description">Import web designs as editable Figma layers</p>
+
+    <div class="input-group">
+      <label for="json-input">Paste exported JSON:</label>
+      <button class="btn-paste" id="paste-btn">Paste from Clipboard</button>
+      <textarea
+        id="json-input"
+        placeholder='{"schemaVersion":"1.0.0","name":"My Page",...}'
+      ></textarea>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-secondary" id="cancel-btn">Cancel</button>
+      <button class="btn-primary" id="import-btn" disabled>
+        Import Design
+      </button>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div class="help">
+      <strong>How to use:</strong>
+      <ol>
+        <li>In your web app, click the Figma icon and choose "Copy Page"</li>
+        <li>Click "Paste from Clipboard" above</li>
+        <li>Click "Import Design" to create the layers</li>
+      </ol>
+    </div>
+
+    <script>
+      const jsonInput = document.getElementById('json-input')
+      const importBtn = document.getElementById('import-btn')
+      const cancelBtn = document.getElementById('cancel-btn')
+      const pasteBtn = document.getElementById('paste-btn')
+      const statusDiv = document.getElementById('status')
+
+      // Enable import button when JSON is entered
+      jsonInput.addEventListener('input', () => {
+        const hasContent = jsonInput.value.trim().length > 0
+        importBtn.disabled = !hasContent
+      })
+
+      // Paste from clipboard
+      pasteBtn.addEventListener('click', async () => {
+        try {
+          const text = await navigator.clipboard.readText()
+          jsonInput.value = text
+          importBtn.disabled = !text.trim()
+          showStatus('Pasted from clipboard', 'info')
+        } catch (err) {
+          showStatus(
+            'Failed to read clipboard. Please paste manually.',
+            'error',
+          )
+        }
+      })
+
+      // Import button
+      importBtn.addEventListener('click', () => {
+        const json = jsonInput.value.trim()
+        if (!json) return
+
+        try {
+          // Validate JSON
+          JSON.parse(json)
+          importBtn.disabled = true
+          showStatus('Importing...', 'info')
+          parent.postMessage(
+            { pluginMessage: { type: 'import', data: json } },
+            '*',
+          )
+        } catch (err) {
+          showStatus('Invalid JSON format', 'error')
+        }
+      })
+
+      // Cancel button
+      cancelBtn.addEventListener('click', () => {
+        parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+      })
+
+      // Handle messages from plugin
+      window.onmessage = (event) => {
+        const msg = event.data.pluginMessage
+        if (!msg) return
+
+        if (msg.type === 'success') {
+          showStatus(msg.message, 'success')
+          importBtn.disabled = false
+        } else if (msg.type === 'error') {
+          showStatus(msg.message, 'error')
+          importBtn.disabled = false
+        } else if (msg.type === 'status') {
+          showStatus(msg.message, 'info')
+        }
+      }
+
+      function showStatus(message, type) {
+        statusDiv.textContent = message
+        statusDiv.className = `status visible ${type}`
+      }
+    </script>
+  </body>
+</html>
