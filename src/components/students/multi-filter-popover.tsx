@@ -443,10 +443,10 @@ export function MultiFilterPopover({
             </Select>
           </div>
 
-          {/* Active Filters */}
-          {filters.length > 0 && (
-            <div className="px-6 py-6">
-              <div className="max-h-[280px] space-y-2 overflow-y-auto">
+          {/* Active Filters - Fixed height section */}
+          <div className="h-[140px] px-6 py-4">
+            {filters.length > 0 ? (
+              <div className="h-full space-y-2 overflow-y-auto">
                 {filters.map((filter, index) => {
                   const fieldOption = getFieldOption(filter.field)
                   return (
@@ -570,12 +570,16 @@ export function MultiFilterPopover({
                   )
                 })}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Select a filter criteria below to get started
+              </div>
+            )}
+          </div>
 
           {/* Available Fields - Grouped by Section */}
           {availableFields.length > 0 && (
-            <div className={filters.length > 0 ? 'border-t' : ''}>
+            <div className="border-t">
               <div className="bg-muted/50 px-6 py-2 text-sm font-medium text-muted-foreground">
                 Filter criteria
               </div>
