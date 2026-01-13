@@ -109,18 +109,16 @@ export function NotificationPopover() {
       <PopoverTrigger
         render={
           <Button
-            variant="secondary"
-            size="icon"
+            variant="outline"
+            size="icon-sm"
             aria-label="Notifications"
             className="relative"
           />
         }
       >
-        <Bell className="size-4 fill-current" />
+        <Bell className="size-4" />
         {unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-pink-500 text-xs font-medium text-white ring-2 ring-background">
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
+          <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-blue-500 ring-2 ring-background" />
         )}
       </PopoverTrigger>
 
