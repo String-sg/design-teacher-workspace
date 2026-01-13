@@ -1,0 +1,14 @@
+{
+  "name": "DOM to Figma",
+  "id": "dom-to-figma-importer",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["*"]
+  }
+}
