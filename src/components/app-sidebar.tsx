@@ -1,8 +1,7 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { GraduationCap, Home, Megaphone, Users } from 'lucide-react'
+import { Home, Megaphone, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-import { NotificationPopover } from '@/components/notifications/notification-popover'
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +12,7 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
+  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
 
@@ -24,16 +23,6 @@ interface MenuItem {
   icon: LucideIcon
   badge?: number
 }
-
-const topItems: Array<MenuItem> = [
-  {
-    title: 'Announcements',
-    shortTitle: 'Announce',
-    url: '/announcements',
-    icon: Megaphone,
-    badge: 3,
-  },
-]
 
 const navigationItems: Array<MenuItem> = [
   {
@@ -47,6 +36,13 @@ const navigationItems: Array<MenuItem> = [
     shortTitle: 'Students',
     url: '/students',
     icon: Users,
+  },
+  {
+    title: 'Announcements',
+    shortTitle: 'Announce',
+    url: '/announcements',
+    icon: Megaphone,
+    badge: 3,
   },
 ]
 
@@ -69,7 +65,7 @@ function SidebarMenuItems({
             render={<Link to={item.url} />}
             isActive={currentPath === item.url}
             tooltip={item.title}
-            className={isCollapsed ? 'flex-col h-auto py-2 gap-1' : ''}
+            className={isCollapsed ? 'flex-col !h-auto !w-auto py-2 gap-1' : ''}
           >
             <item.icon className={isCollapsed ? 'size-5' : 'size-4'} />
             <span className={isCollapsed ? 'text-[10px] leading-tight' : ''}>
@@ -94,33 +90,21 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <div
-          className={`flex items-center gap-2 px-2 py-2 ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-        >
-          {isCollapsed ? (
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <GraduationCap className="size-5" />
-            </div>
-          ) : (
-            <>
-              <span className="text-lg font-semibold">Teacher Workspace</span>
-              <NotificationPopover />
-            </>
-          )}
-        </div>
+      <SidebarHeader
+        className={
+          isCollapsed ? 'flex flex-col items-center gap-2 px-2 py-4' : 'p-0'
+        }
+      >
+        {isCollapsed ? (
+          <SidebarTrigger />
+        ) : (
+          <div className="flex h-14 items-center justify-between gap-2 px-4">
+            <span className="text-sm font-semibold">Teacher Workspace</span>
+            <SidebarTrigger />
+          </div>
+        )}
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenuItems
-              items={topItems}
-              isCollapsed={isCollapsed}
-              currentPath={location.pathname}
-            />
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarSeparator className="mx-0" />
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenuItems

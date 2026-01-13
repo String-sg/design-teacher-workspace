@@ -1,5 +1,6 @@
 import { Link, useMatches } from '@tanstack/react-router'
 
+import { NotificationPopover } from '@/components/notifications/notification-popover'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Breadcrumb,
@@ -9,7 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { SidebarTrigger } from '@/components/ui/sidebar'
+import { Button } from '@/components/ui/button'
 
 // Route configuration with labels and parent relationships
 const routeConfig: Record<string, { label: string; parent?: string }> = {
@@ -56,7 +57,6 @@ export function AppHeader() {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4">
       <div className="flex items-center gap-2">
-        <SidebarTrigger className="-ml-1" />
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((item, index) => {
@@ -77,11 +77,15 @@ export function AppHeader() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-
-      <Avatar size="lg">
-        <AvatarImage src="" alt="User avatar" />
-        <AvatarFallback>MT</AvatarFallback>
-      </Avatar>
+      <div className="flex items-center gap-2">
+        <NotificationPopover />
+        <Button variant="outline" size="icon-sm" className="rounded-full">
+          <Avatar size="xs">
+            <AvatarImage src="" alt="User avatar" />
+            <AvatarFallback>R</AvatarFallback>
+          </Avatar>
+        </Button>
+      </div>
     </header>
   )
 }
