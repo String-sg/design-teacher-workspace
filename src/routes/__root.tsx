@@ -13,7 +13,6 @@ import { AppSidebar } from '@/components/app-sidebar'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
-import { DomToFigmaPanel } from '@/components/dev-tools/dom-to-figma'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -89,7 +88,6 @@ function RootComponent() {
           </div>
         </SidebarInset>
         <Toaster position="bottom-center" />
-        {import.meta.env.DEV && <DomToFigmaPanel />}
       </SidebarProvider>
     </ErrorBoundary>
   )
