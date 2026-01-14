@@ -18,7 +18,6 @@ import {
 
 interface MenuItem {
   title: string
-  shortTitle: string
   url: string
   icon: LucideIcon
   badge?: number
@@ -26,37 +25,29 @@ interface MenuItem {
 
 const navigationItems: Array<MenuItem> = [
   {
+    title: 'Announcements',
+    url: '/announcements',
+    icon: Megaphone,
+    badge: 3,
+  },
+  {
     title: 'Home',
-    shortTitle: 'Home',
     url: '/',
     icon: Home,
   },
   {
     title: 'Students',
-    shortTitle: 'Students',
     url: '/students',
     icon: Users,
-  },
-  {
-    title: 'Announcements',
-    shortTitle: 'Announce',
-    url: '/announcements',
-    icon: Megaphone,
-    badge: 3,
   },
 ]
 
 interface SidebarMenuItemsProps {
   items: Array<MenuItem>
-  isCollapsed: boolean
   currentPath: string
 }
 
-function SidebarMenuItems({
-  items,
-  isCollapsed,
-  currentPath,
-}: SidebarMenuItemsProps) {
+function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
   return (
     <SidebarMenu>
       {items.map((item) => (
@@ -65,14 +56,11 @@ function SidebarMenuItems({
             render={<Link to={item.url} />}
             isActive={currentPath === item.url}
             tooltip={item.title}
-            className={isCollapsed ? 'flex-col !h-auto !w-auto py-2 gap-1' : ''}
           >
-            <item.icon className={isCollapsed ? 'size-5' : 'size-4'} />
-            <span className={isCollapsed ? 'text-[10px] leading-tight' : ''}>
-              {isCollapsed ? item.shortTitle : item.title}
-            </span>
+            <item.icon className="size-4" />
+            <span>{item.title}</span>
           </SidebarMenuButton>
-          {item.badge && !isCollapsed && (
+          {item.badge && (
             <SidebarMenuBadge className="bg-muted text-muted-foreground">
               {item.badge}
             </SidebarMenuBadge>
@@ -109,7 +97,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenuItems
               items={navigationItems}
-              isCollapsed={isCollapsed}
               currentPath={location.pathname}
             />
           </SidebarGroupContent>
