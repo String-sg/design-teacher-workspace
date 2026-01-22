@@ -202,7 +202,7 @@ function StudentsPage() {
   const metrics = useMemo(() => getMetrics(matchedStudents), [matchedStudents])
 
   return (
-    <div className="flex flex-col bg-slate-50">
+    <div className="flex flex-col">
       {/* Fixed content area */}
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
