@@ -1,35 +1,16 @@
 import * as React from 'react'
-import { ScrollArea as ScrollAreaPrimitive } from '@base-ui/react/scroll-area'
 
 import { cn } from '@/lib/utils'
 
 function Table({ className, ...props }: React.ComponentProps<'table'>) {
   return (
-    <ScrollAreaPrimitive.Root
-      data-slot="table-container"
-      className={cn('relative min-h-0 flex-1', className)}
-    >
-      <ScrollAreaPrimitive.Viewport className="size-full">
-        <table
-          data-slot="table"
-          className="w-full caption-bottom text-sm"
-          {...props}
-        />
-      </ScrollAreaPrimitive.Viewport>
-      <ScrollAreaPrimitive.Scrollbar
-        orientation="vertical"
-        className="absolute right-0 top-0 bottom-2.5 flex w-2.5 touch-none select-none border-l border-l-transparent p-px transition-opacity"
-      >
-        <ScrollAreaPrimitive.Thumb className="relative flex-1 rounded-full bg-border" />
-      </ScrollAreaPrimitive.Scrollbar>
-      <ScrollAreaPrimitive.Scrollbar
-        orientation="horizontal"
-        className="absolute bottom-0 left-0 right-2.5 z-40 flex h-2.5 touch-none select-none flex-col border-t border-t-transparent p-px transition-opacity"
-      >
-        <ScrollAreaPrimitive.Thumb className="relative flex-1 rounded-full bg-border" />
-      </ScrollAreaPrimitive.Scrollbar>
-      <ScrollAreaPrimitive.Corner className="bg-background" />
-    </ScrollAreaPrimitive.Root>
+    <div data-slot="table-container" className={cn('relative', className)}>
+      <table
+        data-slot="table"
+        className="w-max min-w-full caption-bottom text-sm"
+        {...props}
+      />
+    </div>
   )
 }
 
@@ -37,7 +18,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
   return (
     <thead
       data-slot="table-header"
-      className={cn('sticky top-0 z-30 bg-background', className)}
+      className={cn('bg-white', className)}
       {...props}
     />
   )

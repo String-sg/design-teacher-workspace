@@ -62,7 +62,7 @@ export function ColumnHeaderMenu({
       <TableHead
         className={cn(
           className,
-          isSticky && 'sticky z-20 bg-background',
+          isSticky && 'sticky z-20 bg-white',
           stickyShadow,
         )}
         style={stickyLeft ? { left: stickyLeft } : undefined}
@@ -76,7 +76,7 @@ export function ColumnHeaderMenu({
     <TableHead
       className={cn(
         className,
-        isSticky && 'sticky z-20 bg-background',
+        isSticky && 'sticky z-20 bg-white',
         stickyShadow,
       )}
       style={stickyLeft ? { left: stickyLeft } : undefined}
