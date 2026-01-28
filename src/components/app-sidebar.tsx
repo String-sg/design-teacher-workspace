@@ -2,6 +2,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import { Home, Megaphone, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
+import type { FeatureFlagKey } from '@/lib/feature-flags'
 import {
   Sidebar,
   SidebarContent,
@@ -15,12 +16,14 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { useFeatureFlags } from '@/lib/feature-flags'
 
 interface MenuItem {
   title: string
   url: string
   icon: LucideIcon
   badge?: number
+  featureFlag?: FeatureFlagKey
 }
 
 const navigationItems: Array<MenuItem> = [
@@ -29,6 +32,7 @@ const navigationItems: Array<MenuItem> = [
     url: '/announcements',
     icon: Megaphone,
     badge: 3,
+    featureFlag: 'announcements',
   },
   {
     title: 'Home',
@@ -74,7 +78,12 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
 export function AppSidebar() {
   const location = useLocation()
   const { state } = useSidebar()
+  const { isEnabled } = useFeatureFlags()
   const isCollapsed = state === 'collapsed'
+
+  const filteredItems = navigationItems.filter(
+    (item) => !item.featureFlag || isEnabled(item.featureFlag),
+  )
 
   return (
     <Sidebar collapsible="icon">
@@ -96,7 +105,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenuItems
-              items={navigationItems}
+              items={filteredItems}
               currentPath={location.pathname}
             />
           </SidebarGroupContent>

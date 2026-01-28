@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentsRouteImport } from './routes/students'
+import { Route as FeatureFlagsRouteImport } from './routes/feature-flags'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
@@ -19,6 +20,11 @@ import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
   path: '/students',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeatureFlagsRoute = FeatureFlagsRouteImport.update({
+  id: '/feature-flags',
+  path: '/feature-flags',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnnouncementsRoute = AnnouncementsRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
+  '/feature-flags': typeof FeatureFlagsRoute
   '/students': typeof StudentsRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/feature-flags': typeof FeatureFlagsRoute
   '/students': typeof StudentsRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
+  '/feature-flags': typeof FeatureFlagsRoute
   '/students': typeof StudentsRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
@@ -77,16 +86,24 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/announcements'
+    | '/feature-flags'
     | '/students'
     | '/announcements/$id'
     | '/announcements/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$' | '/students' | '/announcements/$id' | '/announcements'
+  to:
+    | '/'
+    | '/$'
+    | '/feature-flags'
+    | '/students'
+    | '/announcements/$id'
+    | '/announcements'
   id:
     | '__root__'
     | '/'
     | '/$'
     | '/announcements'
+    | '/feature-flags'
     | '/students'
     | '/announcements/$id'
     | '/announcements/'
@@ -96,6 +113,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
+  FeatureFlagsRoute: typeof FeatureFlagsRoute
   StudentsRoute: typeof StudentsRoute
 }
 
@@ -106,6 +124,13 @@ declare module '@tanstack/react-router' {
       path: '/students'
       fullPath: '/students'
       preLoaderRoute: typeof StudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feature-flags': {
+      id: '/feature-flags'
+      path: '/feature-flags'
+      fullPath: '/feature-flags'
+      preLoaderRoute: typeof FeatureFlagsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/announcements': {
@@ -164,6 +189,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
+  FeatureFlagsRoute: FeatureFlagsRoute,
   StudentsRoute: StudentsRoute,
 }
 export const routeTree = rootRouteImport
