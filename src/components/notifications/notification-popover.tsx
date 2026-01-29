@@ -143,16 +143,6 @@ export function NotificationPopover() {
             ))}
           </div>
         </ScrollArea>
-
-        <div className="border-t px-4 py-3">
-          <Link
-            to="/announcements"
-            onClick={handleSelect}
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            View all announcements
-          </Link>
-        </div>
       </PopoverContent>
     </Popover>
   )
