@@ -1,6 +1,7 @@
 import { Link, useMatches } from '@tanstack/react-router'
 
 import { NotificationPopover } from '@/components/notifications/notification-popover'
+import { useFeatureFlag } from '@/hooks/use-feature-flag'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Breadcrumb,
@@ -23,6 +24,7 @@ const routeConfig: Record<string, { label: string; parent?: string }> = {
 
 export function AppHeader() {
   const matches = useMatches()
+  const showNotifications = useFeatureFlag('notifications')
 
   const lastMatch = matches.at(-1)!
   const currentPath = lastMatch.pathname
@@ -78,7 +80,7 @@ export function AppHeader() {
         </Breadcrumb>
       </div>
       <div className="flex items-center gap-2">
-        <NotificationPopover />
+        {showNotifications && <NotificationPopover />}
         <Button variant="outline" size="icon-sm" className="rounded-full">
           <Avatar size="xs">
             <AvatarImage src="" alt="User avatar" />

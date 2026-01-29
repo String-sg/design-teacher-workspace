@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useFeatureFlags } from '@/lib/feature-flags'
 
-export const Route = createFileRoute('/feature-flags')({
+export const Route = createFileRoute('/flags')({
   component: FeatureFlagsPage,
 })
 
