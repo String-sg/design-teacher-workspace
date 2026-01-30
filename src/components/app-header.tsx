@@ -1,7 +1,7 @@
 import { Link, useMatches } from '@tanstack/react-router'
 
 import { NotificationPopover } from '@/components/notifications/notification-popover'
-import { useFeatureFlag } from '@/hooks/use-feature-flag'
+import { useFeatureIsOn } from '@/lib/growthbook'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Breadcrumb,
@@ -24,7 +24,7 @@ const routeConfig: Record<string, { label: string; parent?: string }> = {
 
 export function AppHeader() {
   const matches = useMatches()
-  const showNotifications = useFeatureFlag('notifications')
+  const showNotifications = useFeatureIsOn('notifications')
 
   const lastMatch = matches.at(-1)!
   const currentPath = lastMatch.pathname

@@ -2,7 +2,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import { Home, Megaphone, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-import type { FeatureFlagKey } from '@/lib/feature-flags'
+import type { FeatureFlagKey } from '@/lib/growthbook'
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +16,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { useFeatureFlags } from '@/lib/feature-flags'
+import { useFeatureIsOn } from '@/lib/growthbook'
 
 interface MenuItem {
   title: string
@@ -78,11 +78,14 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
 export function AppSidebar() {
   const location = useLocation()
   const { state } = useSidebar()
-  const { isEnabled } = useFeatureFlags()
   const isCollapsed = state === 'collapsed'
 
+  const announcementsEnabled = useFeatureIsOn('announcements')
+
   const filteredItems = navigationItems.filter(
-    (item) => !item.featureFlag || isEnabled(item.featureFlag),
+    (item) =>
+      !item.featureFlag ||
+      (item.featureFlag === 'announcements' && announcementsEnabled),
   )
 
   return (
