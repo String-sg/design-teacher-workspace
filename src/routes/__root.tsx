@@ -4,8 +4,10 @@ import {
   Scripts,
   createRootRoute,
 } from '@tanstack/react-router'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import * as React from 'react'
 
 import appCss from '../styles.css?url'
 import { AppHeader } from '@/components/app-header'
@@ -76,25 +78,29 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const [queryClient] = React.useState(() => new QueryClient())
+
   return (
     <ErrorBoundary>
-      <GrowthBookProvider>
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset className="h-screen overflow-hidden">
-            <AppHeader />
-            <div
-              data-scroll-container
-              className="flex min-h-0 flex-1 flex-col overflow-auto bg-slate-1"
-            >
-              <ErrorBoundary>
-                <Outlet />
-              </ErrorBoundary>
-            </div>
-          </SidebarInset>
-          <Toaster position="bottom-center" />
-        </SidebarProvider>
-      </GrowthBookProvider>
+      <QueryClientProvider client={queryClient}>
+        <GrowthBookProvider>
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset className="h-screen overflow-hidden">
+              <AppHeader />
+              <div
+                data-scroll-container
+                className="flex min-h-0 flex-1 flex-col overflow-auto bg-slate-1"
+              >
+                <ErrorBoundary>
+                  <Outlet />
+                </ErrorBoundary>
+              </div>
+            </SidebarInset>
+            <Toaster position="bottom-center" />
+          </SidebarProvider>
+        </GrowthBookProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   )
 }
