@@ -13,7 +13,7 @@ import { AppSidebar } from '@/components/app-sidebar'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
-import { FeatureFlagProvider } from '@/lib/feature-flags'
+import { GrowthBookProvider } from '@/lib/growthbook'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -78,7 +78,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <ErrorBoundary>
-      <FeatureFlagProvider>
+      <GrowthBookProvider>
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset className="h-screen overflow-hidden">
@@ -94,7 +94,7 @@ function RootComponent() {
           </SidebarInset>
           <Toaster position="bottom-center" />
         </SidebarProvider>
-      </FeatureFlagProvider>
+      </GrowthBookProvider>
     </ErrorBoundary>
   )
 }

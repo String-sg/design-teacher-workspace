@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { AlertTriangle } from 'lucide-react'
 
-import type { FeatureFlagKey } from '@/lib/feature-flags'
+import type { FeatureFlagKey } from '@/lib/growthbook'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -12,7 +14,7 @@ import {
 } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { useFeatureFlags } from '@/lib/feature-flags'
+import { useDevOverrides } from '@/lib/growthbook'
 
 export const Route = createFileRoute('/flags')({
   component: FeatureFlagsPage,
@@ -39,18 +41,29 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
 ]
 
 function FeatureFlagsPage() {
-  const { flags, setFlag, resetFlags } = useFeatureFlags()
+  const { setOverride, resetOverrides, getCurrentValue, hasOverrides } =
+    useDevOverrides()
 
   return (
     <div className="mx-auto w-full max-w-2xl p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Feature Flags</CardTitle>
+          <CardTitle>Feature Flags (Dev Overrides)</CardTitle>
           <CardDescription>
-            Toggle features on or off. Changes are saved automatically.
+            Override feature flag values for local development. These settings
+            are stored locally and will take precedence over GrowthBook values.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {hasOverrides && (
+            <Alert>
+              <AlertTriangle className="size-4" />
+              <AlertDescription>
+                You have local overrides active. These will take precedence over
+                remote GrowthBook values.
+              </AlertDescription>
+            </Alert>
+          )}
           {featureFlagConfigs.map((config) => (
             <div
               key={config.key}
@@ -66,15 +79,15 @@ function FeatureFlagsPage() {
               </div>
               <Switch
                 id={config.key}
-                checked={flags[config.key]}
-                onCheckedChange={(checked) => setFlag(config.key, checked)}
+                checked={getCurrentValue(config.key)}
+                onCheckedChange={(checked) => setOverride(config.key, checked)}
               />
             </div>
           ))}
         </CardContent>
         <CardFooter>
-          <Button variant="outline" onClick={resetFlags}>
-            Reset All to Defaults
+          <Button variant="outline" onClick={resetOverrides}>
+            Clear All Overrides
           </Button>
         </CardFooter>
       </Card>
