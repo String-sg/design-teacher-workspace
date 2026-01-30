@@ -1,11 +1,8 @@
-import {
-  GrowthBookProvider as GBProvider,
-} from '@growthbook/growthbook-react'
+import { GrowthBookProvider as GBProvider } from '@growthbook/growthbook-react'
 import * as React from 'react'
 
 import { createGrowthBookClient } from './client'
-import type {
-  GrowthBook} from '@growthbook/growthbook-react';
+import type { GrowthBook } from '@growthbook/growthbook-react'
 import type { AppFeatures } from './types'
 
 interface GrowthBookProviderProps {
