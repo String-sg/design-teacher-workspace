@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react'
 
 import type { FeatureFlagKey } from '@/lib/growthbook'
 import type { GrowthBookFeature } from '@/lib/growthbook/server'
+import { useRefreshFeatures } from '@/lib/growthbook'
 import {
   Card,
   CardContent,
@@ -41,6 +42,7 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
 
 function FeatureFlagsPage() {
   const queryClient = useQueryClient()
+  const refreshFeatures = useRefreshFeatures()
 
   const {
     data: featuresData,
@@ -59,8 +61,10 @@ function FeatureFlagsPage() {
       featureId: FeatureFlagKey
       enabled: boolean
     }) => toggleFeatureFlag({ data: { featureId, enabled } }),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['growthbook-features'] })
+      // Refresh the GrowthBook client features to update all components using feature flags
+      await refreshFeatures()
     },
   })
 
