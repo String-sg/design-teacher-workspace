@@ -34,6 +34,12 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
     label: 'Notifications',
     description: 'Enable notification features',
   },
+  {
+    key: 'holistic-reports',
+    label: 'Holistic Reports',
+    description:
+      'Enable holistic development reports showing student progress across academic and character development',
+  },
 ]
 
 function FeatureFlagsPage() {
@@ -59,7 +65,7 @@ function FeatureFlagsPage() {
                 <Label htmlFor={config.key} className="text-sm font-medium">
                   {config.label}
                 </Label>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm text-muted-foreground">
                   {config.description}
                 </p>
               </div>
