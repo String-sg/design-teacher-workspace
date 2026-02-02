@@ -15,6 +15,7 @@ import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
+import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 
 const StudentsRoute = StudentsRouteImport.update({
@@ -47,6 +48,11 @@ const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AnnouncementsRoute,
 } as any)
+const StudentsIdRoute = StudentsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => StudentsRoute,
+} as any)
 const AnnouncementsIdRoute = AnnouncementsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -58,16 +64,18 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
-  '/students': typeof StudentsRoute
+  '/students': typeof StudentsRouteWithChildren
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/flags': typeof FlagsRoute
-  '/students': typeof StudentsRoute
+  '/students': typeof StudentsRouteWithChildren
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
 }
 export interface FileRoutesById {
@@ -76,8 +84,9 @@ export interface FileRoutesById {
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
-  '/students': typeof StudentsRoute
+  '/students': typeof StudentsRouteWithChildren
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
 }
 export interface FileRouteTypes {
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/flags'
     | '/students'
     | '/announcements/$id'
+    | '/students/$id'
     | '/announcements/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/flags'
     | '/students'
     | '/announcements/$id'
+    | '/students/$id'
     | '/announcements'
   id:
     | '__root__'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/flags'
     | '/students'
     | '/announcements/$id'
+    | '/students/$id'
     | '/announcements/'
   fileRoutesById: FileRoutesById
 }
@@ -114,7 +126,7 @@ export interface RootRouteChildren {
   SplatRoute: typeof SplatRoute
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
-  StudentsRoute: typeof StudentsRoute
+  StudentsRoute: typeof StudentsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -161,6 +173,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnouncementsIndexRouteImport
       parentRoute: typeof AnnouncementsRoute
     }
+    '/students/$id': {
+      id: '/students/$id'
+      path: '/$id'
+      fullPath: '/students/$id'
+      preLoaderRoute: typeof StudentsIdRouteImport
+      parentRoute: typeof StudentsRoute
+    }
     '/announcements/$id': {
       id: '/announcements/$id'
       path: '/$id'
@@ -185,12 +204,24 @@ const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
   AnnouncementsRouteChildren,
 )
 
+interface StudentsRouteChildren {
+  StudentsIdRoute: typeof StudentsIdRoute
+}
+
+const StudentsRouteChildren: StudentsRouteChildren = {
+  StudentsIdRoute: StudentsIdRoute,
+}
+
+const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
+  StudentsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
   FlagsRoute: FlagsRoute,
-  StudentsRoute: StudentsRoute,
+  StudentsRoute: StudentsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

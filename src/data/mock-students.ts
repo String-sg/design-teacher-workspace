@@ -1071,3 +1071,7 @@ export const tagColors: Record<
   LSP: 'secondary',
   SEN: 'outline',
 }
+
+export function getStudentById(id: string): Student | undefined {
+  return mockStudents.find((student) => student.id === id)
+}
