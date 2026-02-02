@@ -1,4 +1,4 @@
-import { Link, useMatches } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 
 import { NotificationPopover } from '@/components/notifications/notification-popover'
 import { useFeatureIsOn } from '@/lib/feature-flags'
@@ -12,49 +12,11 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
-
-// Route configuration with labels and parent relationships
-const routeConfig: Record<string, { label: string; parent?: string }> = {
-  '/': { label: 'Home' },
-  '/students': { label: 'Student dashboard' },
-  '/announcements': { label: 'Announcements' },
-  '/announcements/': { label: 'Announcements' },
-  '/announcements/$id': { label: 'Announcement', parent: '/announcements' },
-}
+import { useBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 export function AppHeader() {
-  const matches = useMatches()
+  const breadcrumbs = useBreadcrumbs()
   const showNotifications = useFeatureIsOn('notifications')
-
-  const lastMatch = matches.at(-1)!
-  const currentPath = lastMatch.pathname
-  const routeId = lastMatch.routeId
-
-  // Use routeId for config lookup (handles dynamic routes like /announcements/$id)
-  const configKey = routeId === '/' ? '/' : routeId.replace(/_/g, '')
-  const config = routeConfig[configKey]
-
-  // Build breadcrumbs based on parent relationships, not URL hierarchy
-  const breadcrumbs: Array<{ label: string; href: string }> = []
-
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- config may be undefined for unregistered routes
-  if (config?.parent) {
-    const parentConfig = routeConfig[config.parent]
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (parentConfig) {
-      breadcrumbs.push({
-        label: parentConfig.label,
-        href: config.parent,
-      })
-    }
-  }
-
-  const defaultLabel = currentPath.split('/').pop() || 'Page'
-  breadcrumbs.push({
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- config may be undefined for unregistered routes
-    label: config?.label ?? defaultLabel,
-    href: currentPath,
-  })
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4">

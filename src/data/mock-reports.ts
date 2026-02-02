@@ -1,9 +1,21 @@
 import { mockStudents } from './mock-students'
-import type { HolisticReport, Term } from '@/types/report'
+import type {
+  HolisticReport,
+  Term,
+  ReviewStatus,
+  ParentStatus,
+} from '@/types/report'
 import type { Student } from '@/types/student'
 
 const TERMS: Array<Term> = ['Term 1', 'Term 2', 'Term 3', 'Term 4']
 const CURRENT_ACADEMIC_YEAR = 2025
+
+const REVIEW_STATUSES: Array<ReviewStatus> = ['pending', 'in_review', 'approved']
+const PARENT_STATUSES: Array<ParentStatus> = ['not_sent', 'sent', 'viewed']
+
+function getRandomStatus<T>(statuses: Array<T>, seed: number): T {
+  return statuses[seed % statuses.length]
+}
 
 export function generateReportFromStudent(
   student: Student,
@@ -12,6 +24,9 @@ export function generateReportFromStudent(
 ): HolisticReport {
   const termIndex = TERMS.indexOf(term)
   const reportId = `${student.id}-${academicYear}-${termIndex + 1}`
+
+  // Use a simple hash from student id and term for deterministic random statuses
+  const seed = student.id.charCodeAt(0) + termIndex
 
   return {
     id: reportId,
@@ -39,6 +54,8 @@ export function generateReportFromStudent(
     },
     teacherObservations: student.teacherObservations,
     nextSteps: student.nextSteps,
+    reviewStatus: getRandomStatus(REVIEW_STATUSES, seed),
+    parentStatus: getRandomStatus(PARENT_STATUSES, seed + 1),
   }
 }
 
