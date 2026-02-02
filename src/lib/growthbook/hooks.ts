@@ -1,16 +1,30 @@
-import { useGrowthBookClient } from './provider'
+import { useEffect, useState } from 'react'
+
+import { useGrowthBookClient, useGrowthBookSubscription } from './provider'
 import { DEFAULT_FEATURE_VALUES } from './types'
 import type { AppFeatures, FeatureFlagKey } from './types'
 
 export function useFeatureIsOn(id: FeatureFlagKey): boolean {
   const gb = useGrowthBookClient()
+  const { subscribe } = useGrowthBookSubscription()
+  const defaultValue = DEFAULT_FEATURE_VALUES[id]
 
-  // During SSR or before GrowthBook is ready, return default values
-  if (!gb) {
-    return DEFAULT_FEATURE_VALUES[id]
-  }
+  const [value, setValue] = useState(() =>
+    gb ? gb.getFeatureValue(id, defaultValue) : defaultValue,
+  )
 
-  return gb.getFeatureValue(id, DEFAULT_FEATURE_VALUES[id])
+  useEffect(() => {
+    const updateValue = () => {
+      if (gb) {
+        setValue(gb.getFeatureValue(id, defaultValue))
+      }
+    }
+
+    updateValue()
+    return subscribe(updateValue)
+  }, [gb, id, defaultValue, subscribe])
+
+  return value
 }
 
 export function useFeatureValue<TKey extends FeatureFlagKey>(
@@ -18,11 +32,22 @@ export function useFeatureValue<TKey extends FeatureFlagKey>(
   fallback: AppFeatures[TKey],
 ): AppFeatures[TKey] {
   const gb = useGrowthBookClient()
+  const { subscribe } = useGrowthBookSubscription()
 
-  // During SSR or before GrowthBook is ready, return fallback
-  if (!gb) {
-    return fallback
-  }
+  const [value, setValue] = useState(() =>
+    gb ? gb.getFeatureValue(id, fallback) : fallback,
+  )
 
-  return gb.getFeatureValue(id, fallback)
+  useEffect(() => {
+    const updateValue = () => {
+      if (gb) {
+        setValue(gb.getFeatureValue(id, fallback))
+      }
+    }
+
+    updateValue()
+    return subscribe(updateValue)
+  }, [gb, id, fallback, subscribe])
+
+  return value
 }
