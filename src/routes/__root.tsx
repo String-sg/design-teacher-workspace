@@ -15,7 +15,7 @@ import { AppSidebar } from '@/components/app-sidebar'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
-import { GrowthBookProvider } from '@/lib/growthbook'
+import { FeatureFlagProvider } from '@/lib/feature-flags'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -83,7 +83,7 @@ function RootComponent() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <GrowthBookProvider>
+        <FeatureFlagProvider>
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset className="h-screen overflow-hidden">
@@ -99,7 +99,7 @@ function RootComponent() {
             </SidebarInset>
             <Toaster position="bottom-center" />
           </SidebarProvider>
-        </GrowthBookProvider>
+        </FeatureFlagProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   )
