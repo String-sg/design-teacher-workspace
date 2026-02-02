@@ -1,5 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { Home, Megaphone, Users } from 'lucide-react'
+import { FileText, Home, Megaphone, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 import type { FeatureFlagKey } from '@/lib/growthbook'
@@ -43,6 +43,11 @@ const navigationItems: Array<MenuItem> = [
     title: 'Students',
     url: '/students',
     icon: Users,
+  },
+  {
+    title: 'Reports',
+    url: '/reports',
+    icon: FileText,
   },
 ]
 

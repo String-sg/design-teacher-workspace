@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { ChevronDown, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 
 import { ColumnHeaderMenu } from './column-header-menu'
 import type {
@@ -631,7 +632,17 @@ export function StudentTable({
                             isVisible('index') ? 'left-12' : 'left-0',
                           )}
                         >
-                          {student.name}
+                          <div className="flex items-center gap-2">
+                            {student.name}
+                            <Link
+                              to="/reports"
+                              search={{ studentId: student.id }}
+                              className="text-muted-foreground hover:text-foreground"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <FileText className="size-4" />
+                            </Link>
+                          </div>
                         </TableCell>
                       )}
                       {isVisible('class') && (
