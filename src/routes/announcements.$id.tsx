@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { getAnnouncementById } from '@/data/mock-announcements'
+import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 export const Route = createFileRoute('/announcements/$id')({
   component: AnnouncementDetailPage,
@@ -17,6 +18,11 @@ export const Route = createFileRoute('/announcements/$id')({
 
 function AnnouncementDetailPage() {
   const { announcement } = Route.useLoaderData()
+
+  useSetBreadcrumbs([
+    { label: 'Announcements', href: '/announcements' },
+    { label: announcement.title, href: `/announcements/${announcement.id}` },
+  ])
 
   const formattedDate = announcement.createdAt.toLocaleDateString('en-SG', {
     weekday: 'long',

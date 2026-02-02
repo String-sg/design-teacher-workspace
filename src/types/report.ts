@@ -2,6 +2,9 @@ import type { ConductGrade } from './student'
 
 export type Term = 'Term 1' | 'Term 2' | 'Term 3' | 'Term 4'
 
+export type ReviewStatus = 'pending' | 'in_review' | 'approved'
+export type ParentStatus = 'not_sent' | 'sent' | 'viewed'
+
 export interface AcademicData {
   overallPercentage: number
   learningSupport: string | null
@@ -32,4 +35,6 @@ export interface HolisticReport {
   character: CharacterData
   teacherObservations: string | null
   nextSteps: string | null
+  reviewStatus: ReviewStatus
+  parentStatus: ParentStatus
 }

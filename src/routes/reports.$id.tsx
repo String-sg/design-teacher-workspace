@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { ReportDetail } from '@/components/reports/report-detail'
 import { Button } from '@/components/ui/button'
 import { getReportById } from '@/data/mock-reports'
+import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 export const Route = createFileRoute('/reports/$id')({
   component: ReportDetailPage,
@@ -12,6 +13,15 @@ export const Route = createFileRoute('/reports/$id')({
 function ReportDetailPage() {
   const { id } = Route.useParams()
   const report = getReportById(id)
+
+  const breadcrumbLabel = report
+    ? `${report.studentName} - ${report.term} ${report.academicYear}`
+    : 'Report'
+
+  useSetBreadcrumbs([
+    { label: 'Reports', href: '/reports' },
+    { label: breadcrumbLabel, href: `/reports/${id}` },
+  ])
 
   if (!report) {
     return (
