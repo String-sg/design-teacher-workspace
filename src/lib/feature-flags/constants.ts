@@ -5,4 +5,5 @@ export const FEATURE_FLAGS_STORAGE_KEY = 'feature_flags'
 export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   announcements: false,
   notifications: true,
+  'holistic-reports': false,
 }

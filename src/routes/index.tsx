@@ -4,12 +4,15 @@ import { FeaturedAppCard } from '@/components/app-card'
 import { AppSection } from '@/components/app-section'
 import { Greeting } from '@/components/greeting'
 import { appCategories, featuredApp } from '@/data/apps'
+import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
 })
 
 function HomePage() {
+  useSetBreadcrumbs([{ label: 'Home', href: '/' }])
+
   return (
     <main className="mx-auto flex max-w-4xl flex-col gap-8 py-8">
       <Greeting />

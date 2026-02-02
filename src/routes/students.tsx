@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 
+import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import type {
   FilterCriterion,
   FilterField,
@@ -61,6 +62,8 @@ function matchesCondition(student: Student, filter: FilterCriterion): boolean {
 }
 
 function StudentsPage() {
+  useSetBreadcrumbs([{ label: 'Student dashboard', href: '/students' }])
+
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<Array<FilterCriterion>>([])

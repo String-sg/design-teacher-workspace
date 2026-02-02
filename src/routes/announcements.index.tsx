@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { AnnouncementList } from '@/components/announcements/announcement-list'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { mockAnnouncements } from '@/data/mock-announcements'
+import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 export const Route = createFileRoute('/announcements/')({
   component: AnnouncementsPage,
@@ -13,6 +14,8 @@ export const Route = createFileRoute('/announcements/')({
 const unreadAnnouncements = mockAnnouncements.filter((a) => !a.isRead)
 
 function AnnouncementsPage() {
+  useSetBreadcrumbs([{ label: 'Announcements', href: '/announcements' }])
+
   const [activeTab, setActiveTab] = useState<string>('to-read')
 
   const unreadCount = unreadAnnouncements.length

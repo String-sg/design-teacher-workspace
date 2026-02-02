@@ -34,6 +34,11 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
     label: 'Notifications',
     description: 'Enable notification features',
   },
+  {
+    key: 'holistic-reports',
+    label: 'Holistic Reports',
+    description: 'Enable the holistic development reports table view',
+  },
 ]
 
 function FeatureFlagsPage() {
