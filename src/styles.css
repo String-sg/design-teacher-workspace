@@ -16,7 +16,6 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* TW Blue - Light Mode */
   --twblue-1: #fcfdff;
   --twblue-2: #f5f9ff;
   --twblue-3: #eaf3ff;
@@ -29,8 +28,6 @@
   --twblue-10: #0058e6;
   --twblue-11: #015ceb;
   --twblue-12: #0b2d6b;
-
-  /* TW Blue Alpha - Light Mode */
   --twblue-a1: #0055ff03;
   --twblue-a2: #0066ff0a;
   --twblue-a3: #006eff15;
@@ -92,7 +89,6 @@
   --slate-10: var(--slate-dark-10);
   --slate-11: var(--slate-dark-11);
   --slate-12: var(--slate-dark-12);
-  /* TW Blue - Dark Mode */
   --twblue-1: #0b1223;
   --twblue-2: #0f1a2e;
   --twblue-3: #0f2847;
@@ -105,8 +101,6 @@
   --twblue-10: #3381ff;
   --twblue-11: #6da8ff;
   --twblue-12: #c0d8ff;
-
-  /* TW Blue Alpha - Dark Mode */
   --twblue-a1: #0044ff05;
   --twblue-a2: #0055ff09;
   --twblue-a3: #0066ff18;
@@ -119,6 +113,7 @@
   --twblue-a10: #3381ff;
   --twblue-a11: #6da8ff;
   --twblue-a12: #c0d8ff;
+
   --crimson-1: var(--crimson-dark-1);
   --crimson-2: var(--crimson-dark-2);
   --crimson-3: var(--crimson-dark-3);
