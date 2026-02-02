@@ -48,6 +48,7 @@ const navigationItems: Array<MenuItem> = [
     title: 'Reports',
     url: '/reports',
     icon: FileText,
+    featureFlag: 'holistic-reports',
   },
 ]
 
@@ -86,12 +87,14 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed'
 
   const announcementsEnabled = useFeatureFlag('announcements')
+  const holisticReportsEnabled = useFeatureFlag('holistic-reports')
 
-  const filteredItems = navigationItems.filter(
-    (item) =>
-      !item.featureFlag ||
-      (item.featureFlag === 'announcements' && announcementsEnabled),
-  )
+  const filteredItems = navigationItems.filter((item) => {
+    if (!item.featureFlag) return true
+    if (item.featureFlag === 'announcements') return announcementsEnabled
+    if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
+    return true
+  })
 
   return (
     <Sidebar collapsible="icon">
