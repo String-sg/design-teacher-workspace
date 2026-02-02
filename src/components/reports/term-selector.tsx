@@ -21,9 +21,7 @@ export function TermSelector({ value, onValueChange }: TermSelectorProps) {
       value={value || 'all'}
       onValueChange={(val) => onValueChange(val === 'all' ? '' : (val as Term))}
     >
-      <SelectTrigger className="w-[140px]">
-        {displayValue}
-      </SelectTrigger>
+      <SelectTrigger className="w-[140px]">{displayValue}</SelectTrigger>
       <SelectContent>
         <SelectItem value="all">All terms</SelectItem>
         {TERMS.map((term) => (

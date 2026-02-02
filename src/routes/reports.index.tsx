@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { Search, Send, ClipboardCheck } from 'lucide-react'
+import { ClipboardCheck, Search, Send } from 'lucide-react'
 
-import type { Term, HolisticReport } from '@/types/report'
+import type { HolisticReport, Term } from '@/types/report'
 import { TermSelector } from '@/components/reports/term-selector'
 import { ReportTable } from '@/components/reports/report-table'
 import { ClassSelector } from '@/components/students/class-selector'
@@ -32,7 +32,9 @@ function ReportsPage() {
   const [selectedTerm, setSelectedTerm] = useState<Term | ''>(initialTerm || '')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [reports, setReports] = useState<Array<HolisticReport>>(() => mockReports)
+  const [reports, setReports] = useState<Array<HolisticReport>>(
+    () => mockReports,
+  )
 
   useSetBreadcrumbs([{ label: 'Reports', href: '/reports' }])
 
@@ -120,7 +122,9 @@ function ReportsPage() {
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
         <div className="px-6">
-          <h1 className="text-2xl font-semibold">Holistic Development Reports</h1>
+          <h1 className="text-2xl font-semibold">
+            Holistic Development Reports
+          </h1>
           <p className="text-muted-foreground">
             View student progress across academic and character development
           </p>
@@ -142,11 +146,15 @@ function ReportsPage() {
           </div>
           <div className="rounded-lg border bg-card p-4">
             <div className="text-sm text-muted-foreground">Students</div>
-            <div className="text-2xl font-semibold">{metrics.uniqueStudents}</div>
+            <div className="text-2xl font-semibold">
+              {metrics.uniqueStudents}
+            </div>
           </div>
           <div className="rounded-lg border bg-card p-4">
             <div className="text-sm text-muted-foreground">Pending Review</div>
-            <div className="text-2xl font-semibold">{metrics.pendingReview}</div>
+            <div className="text-2xl font-semibold">
+              {metrics.pendingReview}
+            </div>
           </div>
           <div className="rounded-lg border bg-card p-4">
             <div className="text-sm text-muted-foreground">Not Sent</div>
@@ -177,19 +185,11 @@ function ReportsPage() {
               {selectedIds.size} selected
             </span>
             <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleSendToParents}
-              >
+              <Button size="sm" variant="outline" onClick={handleSendToParents}>
                 <Send className="mr-2 h-4 w-4" />
                 Send to Parents
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleRequestReview}
-              >
+              <Button size="sm" variant="outline" onClick={handleRequestReview}>
                 <ClipboardCheck className="mr-2 h-4 w-4" />
                 Request Review
               </Button>
