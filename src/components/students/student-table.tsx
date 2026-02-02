@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { ColumnHeaderMenu } from './column-header-menu'
@@ -72,6 +73,7 @@ export function StudentTable({
   onAddQuickFilter,
   onClearFilter,
 }: StudentTableProps) {
+  const navigate = useNavigate()
   const [isMatchedCollapsed, setIsMatchedCollapsed] = useState(false)
   const [isUnmatchedCollapsed, setIsUnmatchedCollapsed] = useState(false)
 
@@ -618,7 +620,15 @@ export function StudentTable({
                     </TableRow>
                   )}
                   {!isHidden && (
-                    <TableRow>
+                    <TableRow
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() =>
+                        navigate({
+                          to: '/students/$id',
+                          params: { id: student.id },
+                        })
+                      }
+                    >
                       {isVisible('index') && (
                         <TableCell className="sticky left-0 z-10 bg-white pl-6 text-muted-foreground">
                           {displayStartIndex + index}
