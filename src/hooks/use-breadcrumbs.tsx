@@ -19,13 +19,14 @@ interface BreadcrumbContextValue {
 
 const BreadcrumbContext = createContext<BreadcrumbContextValue | null>(null)
 
-export function BreadcrumbProvider({ children }: { children: React.ReactNode }) {
+export function BreadcrumbProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const [breadcrumbs, setBreadcrumbs] = useState<Array<BreadcrumbItem>>([])
 
-  const value = useMemo(
-    () => ({ breadcrumbs, setBreadcrumbs }),
-    [breadcrumbs],
-  )
+  const value = useMemo(() => ({ breadcrumbs, setBreadcrumbs }), [breadcrumbs])
 
   return (
     <BreadcrumbContext.Provider value={value}>
@@ -45,7 +46,9 @@ export function useBreadcrumbs() {
 export function useSetBreadcrumbs(breadcrumbs: Array<BreadcrumbItem>) {
   const context = useContext(BreadcrumbContext)
   if (!context) {
-    throw new Error('useSetBreadcrumbs must be used within a BreadcrumbProvider')
+    throw new Error(
+      'useSetBreadcrumbs must be used within a BreadcrumbProvider',
+    )
   }
 
   const { setBreadcrumbs } = context

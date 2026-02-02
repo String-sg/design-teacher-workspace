@@ -13,23 +13,32 @@ import { cn } from '@/lib/utils'
 
 interface StudentProfileProps {
   student: Student
+  headerControls?: React.ReactNode
 }
 
 interface SectionProps {
   id: string
   title: string
   icon: React.ReactNode
+  iconClassName?: string
   children: React.ReactNode
 }
 
-function Section({ id, title, icon, children }: SectionProps) {
+function Section({ id, title, icon, iconClassName, children }: SectionProps) {
   return (
     <section
       id={id}
-      className="scroll-mt-24 rounded-lg border bg-white p-6 shadow-sm"
+      className="scroll-mt-24 rounded-lg border bg-white p-6"
     >
-      <div className="mb-4 flex items-center gap-2">
-        <span className="text-muted-foreground">{icon}</span>
+      <div className="mb-4 flex items-center gap-3">
+        <span
+          className={cn(
+            'flex h-10 w-10 items-center justify-center rounded-lg',
+            iconClassName,
+          )}
+        >
+          {icon}
+        </span>
         <h2 className="text-lg font-semibold">{title}</h2>
       </div>
       {children}
@@ -92,7 +101,10 @@ function RemarksField({ label, value, tooltip }: RemarksFieldProps) {
   )
 }
 
-export function StudentProfile({ student }: StudentProfileProps) {
+export function StudentProfile({
+  student,
+  headerControls,
+}: StudentProfileProps) {
   const sections = [
     { id: 'behaviour', label: 'Behaviour' },
     { id: 'wellbeing', label: 'Wellbeing' },
@@ -104,8 +116,11 @@ export function StudentProfile({ student }: StudentProfileProps) {
   return (
     <div className="flex gap-8">
       <div className="flex-1 space-y-6">
+        {/* Header Controls */}
+        {headerControls}
+
         {/* Student Header Card */}
-        <div className="flex items-center gap-4 rounded-lg border bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-4 rounded-lg border bg-white p-6">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <User className="h-8 w-8 text-muted-foreground" />
           </div>
@@ -120,6 +135,7 @@ export function StudentProfile({ student }: StudentProfileProps) {
           id="behaviour"
           title="Behaviour"
           icon={<BookOpen className="h-5 w-5" />}
+          iconClassName="bg-indigo-100 text-indigo-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <Field
@@ -174,6 +190,7 @@ export function StudentProfile({ student }: StudentProfileProps) {
           id="wellbeing"
           title="Wellbeing"
           icon={<Heart className="h-5 w-5" />}
+          iconClassName="bg-pink-100 text-pink-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <Field
@@ -218,6 +235,7 @@ export function StudentProfile({ student }: StudentProfileProps) {
           id="academic"
           title="Academic"
           icon={<GraduationCap className="h-5 w-5" />}
+          iconClassName="bg-teal-100 text-teal-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <Field
@@ -233,7 +251,12 @@ export function StudentProfile({ student }: StudentProfileProps) {
         </Section>
 
         {/* Family Section */}
-        <Section id="family" title="Family" icon={<Home className="h-5 w-5" />}>
+        <Section
+          id="family"
+          title="Family"
+          icon={<Home className="h-5 w-5" />}
+          iconClassName="bg-amber-100 text-amber-600"
+        >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <Field label="FAS" value={student.fas || '-'} />
             <Field label="Housing" value={student.housing || '-'} />
@@ -255,6 +278,7 @@ export function StudentProfile({ student }: StudentProfileProps) {
           id="others"
           title="Others"
           icon={<MoreHorizontal className="h-5 w-5" />}
+          iconClassName="bg-slate-100 text-slate-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <Field label="Custody" value={student.custody || '-'} />
@@ -276,7 +300,7 @@ export function StudentProfile({ student }: StudentProfileProps) {
               <a
                 key={section.id}
                 href={`#${section.id}`}
-                className="rounded-md px-3 py-1.5 text-sm hover:bg-muted"
+                className="rounded-full bg-muted px-3 py-1.5 text-sm hover:bg-muted/80"
               >
                 {section.label}
               </a>

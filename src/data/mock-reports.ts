@@ -1,16 +1,20 @@
 import { mockStudents } from './mock-students'
 import type {
   HolisticReport,
-  Term,
-  ReviewStatus,
   ParentStatus,
+  ReviewStatus,
+  Term,
 } from '@/types/report'
 import type { Student } from '@/types/student'
 
 const TERMS: Array<Term> = ['Term 1', 'Term 2', 'Term 3', 'Term 4']
 const CURRENT_ACADEMIC_YEAR = 2025
 
-const REVIEW_STATUSES: Array<ReviewStatus> = ['pending', 'in_review', 'approved']
+const REVIEW_STATUSES: Array<ReviewStatus> = [
+  'pending',
+  'in_review',
+  'approved',
+]
 const PARENT_STATUSES: Array<ParentStatus> = ['not_sent', 'sent', 'viewed']
 
 function getRandomStatus<T>(statuses: Array<T>, seed: number): T {

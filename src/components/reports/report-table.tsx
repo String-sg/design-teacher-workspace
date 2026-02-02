@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import type { HolisticReport, ReviewStatus, ParentStatus } from '@/types/report'
+import type { HolisticReport, ParentStatus, ReviewStatus } from '@/types/report'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -27,9 +27,18 @@ interface ReportTableProps {
 
 function getReviewStatusBadge(status: ReviewStatus) {
   const config = {
-    pending: { label: 'Pending', className: 'bg-slate-100 text-slate-700 hover:bg-slate-100' },
-    in_review: { label: 'In Review', className: 'bg-amber-100 text-amber-700 hover:bg-amber-100' },
-    approved: { label: 'Approved', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
+    pending: {
+      label: 'Pending',
+      className: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
+    },
+    in_review: {
+      label: 'In Review',
+      className: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
+    },
+    approved: {
+      label: 'Approved',
+      className: 'bg-green-100 text-green-700 hover:bg-green-100',
+    },
   }
   const { label, className } = config[status]
   return <Badge className={className}>{label}</Badge>
@@ -37,9 +46,18 @@ function getReviewStatusBadge(status: ReviewStatus) {
 
 function getParentStatusBadge(status: ParentStatus) {
   const config = {
-    not_sent: { label: 'Not Sent', className: 'bg-slate-100 text-slate-700 hover:bg-slate-100' },
-    sent: { label: 'Sent', className: 'bg-blue-100 text-blue-700 hover:bg-blue-100' },
-    viewed: { label: 'Viewed', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
+    not_sent: {
+      label: 'Not Sent',
+      className: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
+    },
+    sent: {
+      label: 'Sent',
+      className: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
+    },
+    viewed: {
+      label: 'Viewed',
+      className: 'bg-green-100 text-green-700 hover:bg-green-100',
+    },
   }
   const { label, className } = config[status]
   return <Badge className={className}>{label}</Badge>
@@ -77,10 +95,12 @@ export function ReportTable({
     return new Set(paginatedReports.map((r) => r.id))
   }, [paginatedReports])
 
-  const allPageSelected = paginatedReports.length > 0 &&
+  const allPageSelected =
+    paginatedReports.length > 0 &&
     paginatedReports.every((r) => selectedIds.has(r.id))
 
-  const somePageSelected = paginatedReports.some((r) => selectedIds.has(r.id)) && !allPageSelected
+  const somePageSelected =
+    paginatedReports.some((r) => selectedIds.has(r.id)) && !allPageSelected
 
   const handleSelectAll = () => {
     if (allPageSelected) {
@@ -138,7 +158,9 @@ export function ReportTable({
             <TableRow
               key={report.id}
               className="cursor-pointer"
-              onClick={() => navigate({ to: '/reports/$id', params: { id: report.id } })}
+              onClick={() =>
+                navigate({ to: '/reports/$id', params: { id: report.id } })
+              }
               data-selected={selectedIds.has(report.id) || undefined}
             >
               <TableCell
@@ -157,9 +179,7 @@ export function ReportTable({
               <TableCell>
                 <Badge variant="outline">{report.term}</Badge>
               </TableCell>
-              <TableCell>
-                {getReviewStatusBadge(report.reviewStatus)}
-              </TableCell>
+              <TableCell>{getReviewStatusBadge(report.reviewStatus)}</TableCell>
               <TableCell className="pr-6">
                 {getParentStatusBadge(report.parentStatus)}
               </TableCell>
