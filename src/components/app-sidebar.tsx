@@ -2,7 +2,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import { FileText, Home, Megaphone, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-import type { FeatureFlagKey } from '@/lib/growthbook'
+import type { FeatureFlagKey } from '@/lib/feature-flags'
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +16,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { useFeatureIsOn } from '@/lib/growthbook'
+import { useFeatureIsOn } from '@/lib/feature-flags'
 
 interface MenuItem {
   title: string
@@ -48,6 +48,7 @@ const navigationItems: Array<MenuItem> = [
     title: 'Reports',
     url: '/reports',
     icon: FileText,
+    featureFlag: 'holistic-reports',
   },
 ]
 
@@ -86,12 +87,14 @@ export function AppSidebar() {
   const isCollapsed = state === 'collapsed'
 
   const announcementsEnabled = useFeatureIsOn('announcements')
+  const holisticReportsEnabled = useFeatureIsOn('holistic-reports')
 
-  const filteredItems = navigationItems.filter(
-    (item) =>
-      !item.featureFlag ||
-      (item.featureFlag === 'announcements' && announcementsEnabled),
-  )
+  const filteredItems = navigationItems.filter((item) => {
+    if (!item.featureFlag) return true
+    if (item.featureFlag === 'announcements') return announcementsEnabled
+    if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
+    return true
+  })
 
   return (
     <Sidebar collapsible="icon">

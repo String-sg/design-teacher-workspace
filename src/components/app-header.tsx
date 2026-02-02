@@ -1,7 +1,7 @@
 import { Link, useMatches } from '@tanstack/react-router'
 
 import { NotificationPopover } from '@/components/notifications/notification-popover'
-import { useFeatureIsOn } from '@/lib/growthbook'
+import { useFeatureIsOn } from '@/lib/feature-flags'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Breadcrumb,

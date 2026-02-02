@@ -14,16 +14,18 @@ interface TermSelectorProps {
 }
 
 export function TermSelector({ value, onValueChange }: TermSelectorProps) {
+  const displayValue = value || 'All terms'
+
   return (
     <Select
-      value={value}
-      onValueChange={(val) => onValueChange(val as Term | '')}
+      value={value || 'all'}
+      onValueChange={(val) => onValueChange(val === 'all' ? '' : (val as Term))}
     >
       <SelectTrigger className="w-[140px]">
-        <SelectValue placeholder="All terms" />
+        {displayValue}
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">All terms</SelectItem>
+        <SelectItem value="all">All terms</SelectItem>
         {TERMS.map((term) => (
           <SelectItem key={term} value={term}>
             {term}
