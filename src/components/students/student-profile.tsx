@@ -26,10 +26,7 @@ interface SectionProps {
 
 function Section({ id, title, icon, iconClassName, children }: SectionProps) {
   return (
-    <section
-      id={id}
-      className="scroll-mt-24 rounded-lg border bg-white p-6"
-    >
+    <section id={id} className="scroll-mt-24 rounded-lg border bg-white p-6">
       <div className="mb-4 flex items-center gap-3">
         <span
           className={cn(

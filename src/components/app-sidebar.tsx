@@ -1,11 +1,22 @@
+import * as React from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
-import { FileText, Home, Megaphone, Users } from 'lucide-react'
+import {
+  ArrowUpRight,
+  CircleHelp,
+  FileText,
+  Home,
+  Megaphone,
+  MessageSquare,
+  ScrollText,
+  Users,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 import type { FeatureFlagKey } from '@/lib/feature-flags'
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -14,8 +25,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
-  useSidebar,
 } from '@/components/ui/sidebar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { FeedbackDialog } from '@/components/feedback-dialog'
 import { useFeatureFlag } from '@/hooks/use-feature-flag'
 
 interface MenuItem {
@@ -83,8 +101,7 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
 
 export function AppSidebar() {
   const location = useLocation()
-  const { state } = useSidebar()
-  const isCollapsed = state === 'collapsed'
+  const [feedbackOpen, setFeedbackOpen] = React.useState(false)
 
   const announcementsEnabled = useFeatureFlag('announcements')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
@@ -98,19 +115,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader
-        className={
-          isCollapsed ? 'flex flex-col items-center gap-2 px-2 py-4' : 'p-0'
-        }
-      >
-        {isCollapsed ? (
+      <SidebarHeader className="p-0">
+        <div className="flex h-14 items-center justify-center gap-2 px-4 group-data-[collapsible=icon]:px-0">
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0">
+            Teacher Workspace
+          </span>
           <SidebarTrigger />
-        ) : (
-          <div className="flex h-14 items-center justify-between gap-2 px-4">
-            <span className="text-sm font-semibold">Teacher Workspace</span>
-            <SidebarTrigger />
-          </div>
-        )}
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -122,6 +133,56 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <SidebarMenuButton tooltip="Help">
+                    <CircleHelp className="size-4" />
+                    <span>Help</span>
+                  </SidebarMenuButton>
+                }
+              />
+              <DropdownMenuContent side="top" align="start">
+                <DropdownMenuItem onClick={() => setFeedbackOpen(true)}>
+                  <MessageSquare />
+                  Send feedback
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  render={
+                    <a
+                      href="#"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    />
+                  }
+                >
+                  <FileText />
+                  Docs
+                  <ArrowUpRight className="ml-auto size-3 text-muted-foreground" />
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  render={
+                    <a
+                      href="#"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    />
+                  }
+                >
+                  <ScrollText />
+                  Changelog
+                  <ArrowUpRight className="ml-auto size-3 text-muted-foreground" />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </Sidebar>
   )
 }
