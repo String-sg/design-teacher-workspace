@@ -21,7 +21,7 @@ function AnnouncementsPage() {
   const unreadCount = unreadAnnouncements.length
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-8 py-8">
+    <main className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-8">
       {/* Page Header */}
       <div>
         <h1 className="text-2xl font-semibold">Announcements</h1>
