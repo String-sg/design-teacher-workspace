@@ -153,11 +153,7 @@ export function AppSidebar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   render={
-                    <a
-                      href="#"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    />
+                    <a href="#" target="_blank" rel="noopener noreferrer" />
                   }
                 >
                   <FileText />
@@ -166,11 +162,7 @@ export function AppSidebar() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   render={
-                    <a
-                      href="#"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    />
+                    <a href="#" target="_blank" rel="noopener noreferrer" />
                   }
                 >
                   <ScrollText />
