@@ -4,7 +4,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
-  StickyNote,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -88,12 +87,6 @@ function StudentProfilePage() {
             <ChevronRight className="size-4" />
           </Button>
         </div>
-
-        {/* Notes button (placeholder) */}
-        <Button variant="default" size="sm">
-          <StickyNote className="mr-1 size-4" />
-          Notes
-        </Button>
 
         {/* Download button (placeholder) */}
         <Button variant="outline" size="icon" className="size-8">
