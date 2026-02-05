@@ -1,9 +1,15 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
-import { ArrowLeft } from 'lucide-react'
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { StudentProfile } from '@/components/students/student-profile'
-import { getStudentById } from '@/data/mock-students'
+import { getStudentById, mockStudents } from '@/data/mock-students'
+import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 export const Route = createFileRoute('/students/$id')({
   component: StudentProfilePage,
@@ -12,29 +18,90 @@ export const Route = createFileRoute('/students/$id')({
     if (!student) {
       throw notFound()
     }
-    return { student }
+
+    const currentIndex = mockStudents.findIndex((s) => s.id === params.id)
+    const prevStudent = currentIndex > 0 ? mockStudents[currentIndex - 1] : null
+    const nextStudent =
+      currentIndex < mockStudents.length - 1
+        ? mockStudents[currentIndex + 1]
+        : null
+
+    return {
+      student,
+      prevStudentId: prevStudent?.id ?? null,
+      nextStudentId: nextStudent?.id ?? null,
+      currentIndex: currentIndex + 1,
+      totalStudents: mockStudents.length,
+    }
   },
 })
 
 function StudentProfilePage() {
-  const { student } = Route.useLoaderData()
+  const { student, prevStudentId, nextStudentId } = Route.useLoaderData()
 
-  return (
-    <main className="flex flex-col gap-6 p-6">
-      {/* Back button */}
-      <div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="-ml-2"
-          render={<Link to="/students" />}
-        >
-          <ArrowLeft className="mr-1 size-4" />
-          Dashboard
+  useSetBreadcrumbs([
+    { label: 'Home', href: '/' },
+    { label: 'Student dashboard', href: '/students' },
+    { label: student.name, href: `/students/${student.id}` },
+  ])
+
+  const headerControls = (
+    <div className="flex items-center justify-between">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="-ml-2"
+        render={<Link to="/students" />}
+      >
+        <ArrowLeft className="mr-1 size-4" />
+        Dashboard
+      </Button>
+
+      <div className="flex items-center gap-2">
+        {/* Prev/Next navigation */}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            disabled={!prevStudentId}
+            render={
+              prevStudentId ? (
+                <Link to="/students/$id" params={{ id: prevStudentId }} />
+              ) : undefined
+            }
+          >
+            <ChevronLeft className="size-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            disabled={!nextStudentId}
+            render={
+              nextStudentId ? (
+                <Link to="/students/$id" params={{ id: nextStudentId }} />
+              ) : undefined
+            }
+          >
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
+
+        {/* Download button (placeholder) */}
+        <Button variant="outline" size="icon" className="size-8">
+          <Download className="size-4" />
         </Button>
       </div>
+    </div>
+  )
 
-      <StudentProfile student={student} />
+  return (
+    <main className="flex flex-col gap-4 p-6">
+      {/* Centered content container */}
+      <div className="mx-auto w-full max-w-[860px]">
+        <StudentProfile student={student} headerControls={headerControls} />
+      </div>
     </main>
   )
 }

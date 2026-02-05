@@ -1,13 +1,35 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { Search, Send, ClipboardCheck } from 'lucide-react'
+import { ClipboardCheck, Search, Send } from 'lucide-react'
 
-import type { Term, HolisticReport } from '@/types/report'
+import type {
+  HolisticReport,
+  ParentStatus,
+  ReviewStatus,
+  Term,
+} from '@/types/report'
 import { TermSelector } from '@/components/reports/term-selector'
 import { ReportTable } from '@/components/reports/report-table'
 import { ClassSelector } from '@/components/students/class-selector'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select'
 import { CURRENT_ACADEMIC_YEAR, mockReports } from '@/data/mock-reports'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
@@ -31,8 +53,16 @@ function ReportsPage() {
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [selectedTerm, setSelectedTerm] = useState<Term | ''>(initialTerm || '')
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedReviewStatus, setSelectedReviewStatus] = useState<
+    ReviewStatus | ''
+  >('')
+  const [selectedParentStatus, setSelectedParentStatus] = useState<
+    ParentStatus | ''
+  >('')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [reports, setReports] = useState<Array<HolisticReport>>(() => mockReports)
+  const [reports, setReports] = useState<Array<HolisticReport>>(
+    () => mockReports,
+  )
 
   useSetBreadcrumbs([{ label: 'Reports', href: '/reports' }])
 
@@ -67,7 +97,7 @@ function ReportsPage() {
   }, [allReports, selectedClass])
 
   // Filter by search query
-  const filteredReports = useMemo(() => {
+  const searchFilteredReports = useMemo(() => {
     if (!searchQuery) {
       return classFilteredReports
     }
@@ -77,6 +107,19 @@ function ReportsPage() {
       r.studentName.toLowerCase().includes(query),
     )
   }, [classFilteredReports, searchQuery])
+
+  // Filter by status
+  const filteredReports = useMemo(() => {
+    return searchFilteredReports.filter((r) => {
+      if (selectedReviewStatus && r.reviewStatus !== selectedReviewStatus) {
+        return false
+      }
+      if (selectedParentStatus && r.parentStatus !== selectedParentStatus) {
+        return false
+      }
+      return true
+    })
+  }, [searchFilteredReports, selectedReviewStatus, selectedParentStatus])
 
   // Metrics
   const metrics = useMemo(() => {
@@ -91,6 +134,18 @@ function ReportsPage() {
 
     return { totalReports, uniqueStudents, pendingReview, notSentCount }
   }, [filteredReports])
+
+  const sendableCount = useMemo(() => {
+    return reports.filter(
+      (r) => selectedIds.has(r.id) && r.parentStatus === 'not_sent',
+    ).length
+  }, [reports, selectedIds])
+
+  const reviewableCount = useMemo(() => {
+    return reports.filter(
+      (r) => selectedIds.has(r.id) && r.reviewStatus === 'pending',
+    ).length
+  }, [reports, selectedIds])
 
   const handleSendToParents = () => {
     setReports((prev) =>
@@ -120,7 +175,9 @@ function ReportsPage() {
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
         <div className="px-6">
-          <h1 className="text-2xl font-semibold">Holistic Development Reports</h1>
+          <h1 className="text-2xl font-semibold">
+            Holistic Development Reports
+          </h1>
           <p className="text-muted-foreground">
             View student progress across academic and character development
           </p>
@@ -142,11 +199,15 @@ function ReportsPage() {
           </div>
           <div className="rounded-lg border bg-card p-4">
             <div className="text-sm text-muted-foreground">Students</div>
-            <div className="text-2xl font-semibold">{metrics.uniqueStudents}</div>
+            <div className="text-2xl font-semibold">
+              {metrics.uniqueStudents}
+            </div>
           </div>
           <div className="rounded-lg border bg-card p-4">
             <div className="text-sm text-muted-foreground">Pending Review</div>
-            <div className="text-2xl font-semibold">{metrics.pendingReview}</div>
+            <div className="text-2xl font-semibold">
+              {metrics.pendingReview}
+            </div>
           </div>
           <div className="rounded-lg border bg-card p-4">
             <div className="text-sm text-muted-foreground">Not Sent</div>
@@ -168,6 +229,52 @@ function ReportsPage() {
             />
           </div>
           <TermSelector value={selectedTerm} onValueChange={setSelectedTerm} />
+          <Select
+            value={selectedReviewStatus || 'all'}
+            onValueChange={(val) =>
+              setSelectedReviewStatus(
+                val === 'all' ? '' : (val as ReviewStatus),
+              )
+            }
+          >
+            <SelectTrigger className="w-[160px]">
+              {selectedReviewStatus
+                ? {
+                    pending: 'Pending',
+                    in_review: 'In Review',
+                    approved: 'Approved',
+                  }[selectedReviewStatus]
+                : 'All review'}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All review</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="in_review">In Review</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={selectedParentStatus || 'all'}
+            onValueChange={(val) =>
+              setSelectedParentStatus(
+                val === 'all' ? '' : (val as ParentStatus),
+              )
+            }
+          >
+            <SelectTrigger className="w-[160px]">
+              {selectedParentStatus
+                ? { not_sent: 'Not Sent', sent: 'Sent', viewed: 'Viewed' }[
+                    selectedParentStatus
+                  ]
+                : 'View status'}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All parent</SelectItem>
+              <SelectItem value="not_sent">Not Sent</SelectItem>
+              <SelectItem value="sent">Sent</SelectItem>
+              <SelectItem value="viewed">Viewed</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Bulk Action Bar */}
@@ -177,22 +284,58 @@ function ReportsPage() {
               {selectedIds.size} selected
             </span>
             <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleSendToParents}
-              >
-                <Send className="mr-2 h-4 w-4" />
-                Send to Parents
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleRequestReview}
-              >
-                <ClipboardCheck className="mr-2 h-4 w-4" />
-                Request Review
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger
+                  render={
+                    <Button size="sm" variant="outline">
+                      <Send className="mr-2 h-4 w-4" />
+                      Send to Parents
+                    </Button>
+                  }
+                />
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Send to Parents</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Send {sendableCount} report
+                      {sendableCount !== 1 ? 's' : ''} to parents? Parents will
+                      be notified and can view these reports.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleSendToParents}>
+                      Send
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <AlertDialog>
+                <AlertDialogTrigger
+                  render={
+                    <Button size="sm" variant="outline">
+                      <ClipboardCheck className="mr-2 h-4 w-4" />
+                      Request Review
+                    </Button>
+                  }
+                />
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Request Review</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Request review for {reviewableCount} report
+                      {reviewableCount !== 1 ? 's' : ''}? These reports will be
+                      sent for approval.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleRequestReview}>
+                      Request
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         )}

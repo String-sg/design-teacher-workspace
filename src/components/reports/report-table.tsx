@@ -2,11 +2,12 @@ import { useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import type { HolisticReport, ReviewStatus, ParentStatus } from '@/types/report'
+import type { HolisticReport, ParentStatus, ReviewStatus } from '@/types/report'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { EmptyState } from '@/components/empty-state'
 import {
   Table,
   TableBody,
@@ -27,9 +28,18 @@ interface ReportTableProps {
 
 function getReviewStatusBadge(status: ReviewStatus) {
   const config = {
-    pending: { label: 'Pending', className: 'bg-slate-100 text-slate-700 hover:bg-slate-100' },
-    in_review: { label: 'In Review', className: 'bg-amber-100 text-amber-700 hover:bg-amber-100' },
-    approved: { label: 'Approved', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
+    pending: {
+      label: 'Pending',
+      className: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
+    },
+    in_review: {
+      label: 'In Review',
+      className: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
+    },
+    approved: {
+      label: 'Approved',
+      className: 'bg-green-100 text-green-700 hover:bg-green-100',
+    },
   }
   const { label, className } = config[status]
   return <Badge className={className}>{label}</Badge>
@@ -37,9 +47,18 @@ function getReviewStatusBadge(status: ReviewStatus) {
 
 function getParentStatusBadge(status: ParentStatus) {
   const config = {
-    not_sent: { label: 'Not Sent', className: 'bg-slate-100 text-slate-700 hover:bg-slate-100' },
-    sent: { label: 'Sent', className: 'bg-blue-100 text-blue-700 hover:bg-blue-100' },
-    viewed: { label: 'Viewed', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
+    not_sent: {
+      label: 'Not Sent',
+      className: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
+    },
+    sent: {
+      label: 'Sent',
+      className: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
+    },
+    viewed: {
+      label: 'Viewed',
+      className: 'bg-green-100 text-green-700 hover:bg-green-100',
+    },
   }
   const { label, className } = config[status]
   return <Badge className={className}>{label}</Badge>
@@ -77,10 +96,12 @@ export function ReportTable({
     return new Set(paginatedReports.map((r) => r.id))
   }, [paginatedReports])
 
-  const allPageSelected = paginatedReports.length > 0 &&
+  const allPageSelected =
+    paginatedReports.length > 0 &&
     paginatedReports.every((r) => selectedIds.has(r.id))
 
-  const somePageSelected = paginatedReports.some((r) => selectedIds.has(r.id)) && !allPageSelected
+  const somePageSelected =
+    paginatedReports.some((r) => selectedIds.has(r.id)) && !allPageSelected
 
   const handleSelectAll = () => {
     if (allPageSelected) {
@@ -134,37 +155,50 @@ export function ReportTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedReports.map((report) => (
-            <TableRow
-              key={report.id}
-              className="cursor-pointer"
-              onClick={() => navigate({ to: '/reports/$id', params: { id: report.id } })}
-              data-selected={selectedIds.has(report.id) || undefined}
-            >
-              <TableCell
-                className="sticky left-0 z-10 bg-white pl-6"
-                onClick={(e) => handleSelectRow(report.id, e)}
-              >
-                <Checkbox
-                  checked={selectedIds.has(report.id)}
-                  aria-label={`Select report for ${report.studentName}`}
+          {paginatedReports.length === 0 ? (
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={6} className="h-48">
+                <EmptyState
+                  title="No reports found"
+                  description="Try adjusting your filters or search query."
                 />
               </TableCell>
-              <TableCell className="sticky left-12 z-10 bg-white font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
-                {report.studentName}
-              </TableCell>
-              <TableCell>{report.studentClass}</TableCell>
-              <TableCell>
-                <Badge variant="outline">{report.term}</Badge>
-              </TableCell>
-              <TableCell>
-                {getReviewStatusBadge(report.reviewStatus)}
-              </TableCell>
-              <TableCell className="pr-6">
-                {getParentStatusBadge(report.parentStatus)}
-              </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            paginatedReports.map((report) => (
+              <TableRow
+                key={report.id}
+                className="cursor-pointer"
+                onClick={() =>
+                  navigate({ to: '/reports/$id', params: { id: report.id } })
+                }
+                data-selected={selectedIds.has(report.id) || undefined}
+              >
+                <TableCell
+                  className="sticky left-0 z-10 bg-white pl-6"
+                  onClick={(e) => handleSelectRow(report.id, e)}
+                >
+                  <Checkbox
+                    checked={selectedIds.has(report.id)}
+                    aria-label={`Select report for ${report.studentName}`}
+                  />
+                </TableCell>
+                <TableCell className="sticky left-12 z-10 bg-white font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                  {report.studentName}
+                </TableCell>
+                <TableCell>{report.studentClass}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{report.term}</Badge>
+                </TableCell>
+                <TableCell>
+                  {getReviewStatusBadge(report.reviewStatus)}
+                </TableCell>
+                <TableCell className="pr-6">
+                  {getParentStatusBadge(report.parentStatus)}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
 
