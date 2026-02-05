@@ -9,6 +9,14 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import * as React from 'react'
 
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  import('react-grab').then(() =>
+    import('@react-grab/claude-code/client').then(({ attachAgent }) =>
+      attachAgent()
+    )
+  )
+}
+
 import appCss from '../styles.css?url'
 import { AppHeader } from '@/components/app-header'
 import { AppSidebar } from '@/components/app-sidebar'
@@ -52,13 +60,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        {process.env.NODE_ENV === 'development' && (
-          <script
-            src="https://cdn.jsdelivr.net/npm/react-grab@latest/dist/index.global.js"
-            data-activation-key="c"
-            data-activation-mode="hold"
-          />
-        )}
         {process.env.NODE_ENV === 'development' && (
           <TanStackDevtools
             config={{
