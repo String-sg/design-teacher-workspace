@@ -22,7 +22,7 @@ export function AppIcon({ icon: Icon, color, className }: AppIconProps) {
   return (
     <div
       className={cn(
-        'flex size-16 shrink-0 items-center justify-center rounded-2xl',
+        'flex size-16 shrink-0 items-center justify-center rounded-full',
         colorVariants[color],
         className,
       )}

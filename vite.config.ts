@@ -1,3 +1,4 @@
+import { createRequire } from 'node:module'
 import { defineConfig } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -5,6 +6,9 @@ import viteReact from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
+import { madeRefine } from 'made-refine/vite'
+
+const require = createRequire(import.meta.url)
 
 // Start react-grab relay server in dev mode
 const isDev = process.argv.includes('dev') || process.env.NODE_ENV === 'development'
@@ -31,7 +35,12 @@ const config = defineConfig({
     }),
     tailwindcss(),
     tanstackStart(),
-    viteReact(),
+    viteReact({
+      babel: {
+        plugins: [require.resolve('made-refine/babel')],
+      },
+    }),
+    madeRefine(),
   ],
 })
 
