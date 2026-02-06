@@ -23,6 +23,7 @@ import { AppSidebar } from '@/components/app-sidebar'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
+import { DirectEdit } from 'made-refine'
 import { FeatureFlagProvider } from '@/lib/feature-flags'
 import { BreadcrumbProvider } from '@/hooks/use-breadcrumbs'
 
@@ -73,6 +74,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             ]}
           />
         )}
+        {process.env.NODE_ENV === 'development' && <DirectEdit />}
         <Scripts />
       </body>
     </html>
