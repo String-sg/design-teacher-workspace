@@ -13,6 +13,7 @@ import { Route as StudentsRouteImport } from './routes/students'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as FlagsRouteImport } from './routes/flags'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
+import { Route as GuestRouteImport } from './routes/_guest'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsIndexRouteImport } from './routes/students.index'
@@ -21,6 +22,7 @@ import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.i
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
+import { Route as GuestReportViewTokenRouteImport } from './routes/_guest.report-view.$token'
 
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
@@ -40,6 +42,10 @@ const FlagsRoute = FlagsRouteImport.update({
 const AnnouncementsRoute = AnnouncementsRouteImport.update({
   id: '/announcements',
   path: '/announcements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestRoute = GuestRouteImport.update({
+  id: '/_guest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplatRoute = SplatRouteImport.update({
@@ -82,6 +88,11 @@ const AnnouncementsIdRoute = AnnouncementsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AnnouncementsRoute,
 } as any)
+const GuestReportViewTokenRoute = GuestReportViewTokenRouteImport.update({
+  id: '/report-view/$token',
+  path: '/report-view/$token',
+  getParentRoute: () => GuestRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/announcements/': typeof AnnouncementsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
+  '/report-view/$token': typeof GuestReportViewTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -107,11 +119,13 @@ export interface FileRoutesByTo {
   '/announcements': typeof AnnouncementsIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/students': typeof StudentsIndexRoute
+  '/report-view/$token': typeof GuestReportViewTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/_guest': typeof GuestRouteWithChildren
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/reports': typeof ReportsRouteWithChildren
@@ -122,6 +136,7 @@ export interface FileRoutesById {
   '/announcements/': typeof AnnouncementsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
+  '/_guest/report-view/$token': typeof GuestReportViewTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -138,6 +153,7 @@ export interface FileRouteTypes {
     | '/announcements/'
     | '/reports/'
     | '/students/'
+    | '/report-view/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -149,10 +165,12 @@ export interface FileRouteTypes {
     | '/announcements'
     | '/reports'
     | '/students'
+    | '/report-view/$token'
   id:
     | '__root__'
     | '/'
     | '/$'
+    | '/_guest'
     | '/announcements'
     | '/flags'
     | '/reports'
@@ -163,11 +181,13 @@ export interface FileRouteTypes {
     | '/announcements/'
     | '/reports/'
     | '/students/'
+    | '/_guest/report-view/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  GuestRoute: typeof GuestRouteWithChildren
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
   ReportsRoute: typeof ReportsRouteWithChildren
@@ -202,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/announcements'
       fullPath: '/announcements'
       preLoaderRoute: typeof AnnouncementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_guest': {
+      id: '/_guest'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof GuestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -260,8 +287,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnouncementsIdRouteImport
       parentRoute: typeof AnnouncementsRoute
     }
+    '/_guest/report-view/$token': {
+      id: '/_guest/report-view/$token'
+      path: '/report-view/$token'
+      fullPath: '/report-view/$token'
+      preLoaderRoute: typeof GuestReportViewTokenRouteImport
+      parentRoute: typeof GuestRoute
+    }
   }
 }
+
+interface GuestRouteChildren {
+  GuestReportViewTokenRoute: typeof GuestReportViewTokenRoute
+}
+
+const GuestRouteChildren: GuestRouteChildren = {
+  GuestReportViewTokenRoute: GuestReportViewTokenRoute,
+}
+
+const GuestRouteWithChildren = GuestRoute._addFileChildren(GuestRouteChildren)
 
 interface AnnouncementsRouteChildren {
   AnnouncementsIdRoute: typeof AnnouncementsIdRoute
@@ -307,6 +351,7 @@ const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  GuestRoute: GuestRouteWithChildren,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
   FlagsRoute: FlagsRoute,
   ReportsRoute: ReportsRouteWithChildren,

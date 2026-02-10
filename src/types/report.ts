@@ -3,7 +3,14 @@ import type { ConductGrade } from './student'
 export type Term = 'Term 1' | 'Term 2' | 'Term 3' | 'Term 4'
 
 export type ReviewStatus = 'pending' | 'in_review' | 'approved'
-export type ParentStatus = 'not_sent' | 'sent' | 'viewed'
+export type ParentStatus = 'not_sent' | 'sent' | 'viewed' | 'acknowledged'
+export type StudentStatus =
+  | 'not_sent'
+  | 'sent'
+  | 'viewed'
+  | 'acknowledged'
+  | 'sent_to_parents'
+export type SchoolLevel = 'primary' | 'secondary'
 
 // Academic types
 export type LearningOutcomeStatus =
@@ -28,6 +35,70 @@ export interface AcademicData {
   learningSupport: string | null
   postSecEligibility: string
   subjects: Array<SubjectPerformance>
+}
+
+// Secondary academic types
+export type SecondaryGrade =
+  | 'A1'
+  | 'A2'
+  | 'B3'
+  | 'B4'
+  | 'C5'
+  | 'C6'
+  | 'D7'
+  | 'E8'
+  | 'F9'
+
+export type GradingTier = 'G3' | 'G2' | 'G1' | 'CMH'
+
+export interface SemesterResult {
+  semester: string
+  score: number
+  grade: SecondaryGrade
+  delta?: number
+}
+
+export interface SecondarySubjectPerformance {
+  name: string
+  currentScore: number
+  currentGrade: SecondaryGrade
+  gradingTier: GradingTier
+  semesterHistory: Array<SemesterResult>
+  academicYearOverall: number
+}
+
+export interface AcademicAggregate {
+  label: string
+  value: number | string
+  description: string
+}
+
+export interface ExamOverall {
+  examPerformance: number
+  semesterLabel: string
+  academicYearOverall: number
+  cumulativeLabel: string
+}
+
+export interface GradeDefinition {
+  grade: SecondaryGrade
+  minScore: number
+  maxScore: number
+}
+
+export interface GradingTierDefinition {
+  tier: GradingTier
+  grades: Array<GradeDefinition>
+}
+
+export interface SecondaryAcademicData {
+  overallPercentage: number
+  learningSupport: string | null
+  postSecEligibility: string
+  aggregates: Array<AcademicAggregate>
+  subjects: Array<SecondarySubjectPerformance>
+  overall: ExamOverall
+  gradingSystem: Array<GradingTierDefinition>
 }
 
 export interface CharacterData {
@@ -64,10 +135,14 @@ export interface CoreValue {
   supportedBy: Array<string>
 }
 
+export type NapfaAward = 'Gold' | 'Silver' | 'Bronze' | 'Pass'
+
 export interface PhysicalFitness {
   bmiCategory: string
   percentile: number
   description: string
+  napfaAward?: NapfaAward
+  napfaDescription?: string
 }
 
 export interface VIAActivity {
@@ -103,13 +178,16 @@ export interface HolisticReport {
   term: Term
   academicYear: number
   generatedAt: Date
+  schoolLevel: SchoolLevel
   academic: AcademicData
+  secondaryAcademic?: SecondaryAcademicData
   character: CharacterData
   holistic: HolisticData
   teacherObservations: string | null
   nextSteps: string | null
   reviewStatus: ReviewStatus
   parentStatus: ParentStatus
+  studentStatus: StudentStatus
   nric: string
   indexNumber: number
   formTeacher: string

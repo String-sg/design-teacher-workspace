@@ -3,6 +3,7 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
+  useRouterState,
 } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
@@ -83,6 +84,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const [queryClient] = React.useState(() => new QueryClient())
+  const matches = useRouterState({ select: (s) => s.matches })
+  const isGuestRoute = matches.some((m) => m.routeId === '/_guest')
+
+  if (isGuestRoute) {
+    return (
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    )
+  }
 
   return (
     <ErrorBoundary>

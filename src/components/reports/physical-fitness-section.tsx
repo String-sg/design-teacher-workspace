@@ -1,4 +1,4 @@
-import { Activity } from 'lucide-react'
+import { Activity, Award } from 'lucide-react'
 import type { PhysicalFitness } from '@/types/report'
 
 interface PhysicalFitnessSectionProps {
@@ -30,6 +30,28 @@ export function PhysicalFitnessSection({
       <p className="text-muted-foreground mt-1 text-sm">
         {fitness.description}
       </p>
+
+      {fitness.napfaAward && (
+        <div className="border-border mt-4 border-t pt-4">
+          <div className="flex items-center gap-3">
+            <span className="rounded-full bg-[#fef9ee] px-3 py-1 text-xs font-semibold text-[#f59f00]">
+              Fitness Achievement
+            </span>
+            <span className="flex items-center gap-1 text-sm font-medium text-[#f59f00]">
+              <Award size={14} />
+              {fitness.napfaAward} Award
+            </span>
+          </div>
+          <p className="mt-2 text-sm font-medium">
+            NAPFA award: {fitness.napfaAward}
+          </p>
+          {fitness.napfaDescription && (
+            <p className="text-muted-foreground mt-1 text-sm">
+              {fitness.napfaDescription}
+            </p>
+          )}
+        </div>
+      )}
     </section>
   )
 }

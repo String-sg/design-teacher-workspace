@@ -1,22 +1,24 @@
-import { X } from 'lucide-react'
+import { CheckCircle, Send, X } from 'lucide-react'
+import { ReportOverviewTab } from './report-overview-tab'
+import { AcademicTab } from './academic-tab'
+import { HolisticTab } from './holistic-tab'
+import type { HolisticReport, SchoolLevel } from '@/types/report'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { ReportOverviewTab } from './report-overview-tab'
-import { AcademicTab } from './academic-tab'
-import { HolisticTab } from './holistic-tab'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { HolisticReport } from '@/types/report'
 
 interface ParentPreviewDialogProps {
   report: HolisticReport
   open: boolean
   onOpenChange: (open: boolean) => void
   studentFirstName: string
+  previewMode?: 'parent' | 'student'
+  schoolLevel?: SchoolLevel
 }
 
 export function ParentPreviewDialog({
@@ -24,7 +26,14 @@ export function ParentPreviewDialog({
   open,
   onOpenChange,
   studentFirstName,
+  previewMode = 'parent',
+  schoolLevel,
 }: ParentPreviewDialogProps) {
+  const isStudentPreview = previewMode === 'student'
+  const title = isStudentPreview
+    ? 'Student Mobile Preview'
+    : 'Parent Mobile Preview'
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -33,9 +42,7 @@ export function ParentPreviewDialog({
       >
         <div className="flex items-center justify-between border-b px-5 py-3">
           <DialogHeader className="flex-1">
-            <DialogTitle className="text-sm">
-              Parent Mobile Preview
-            </DialogTitle>
+            <DialogTitle className="text-sm">{title}</DialogTitle>
           </DialogHeader>
           <Button
             variant="ghost"
@@ -83,7 +90,11 @@ export function ParentPreviewDialog({
                 <ReportOverviewTab report={report} />
               </TabsContent>
               <TabsContent value="academic">
-                <AcademicTab data={report.academic} />
+                <AcademicTab
+                  data={report.academic}
+                  secondaryData={report.secondaryAcademic}
+                  schoolLevel={schoolLevel ?? report.schoolLevel}
+                />
               </TabsContent>
               <TabsContent value="holistic">
                 <HolisticTab
@@ -96,13 +107,30 @@ export function ParentPreviewDialog({
         </div>
 
         <div className="border-t px-4 py-3">
-          <Button
-            className="w-full bg-[#12b886] text-white hover:bg-[#0ca678]"
-            size="sm"
-            disabled
-          >
-            Acknowledge Report
-          </Button>
+          {isStudentPreview ? (
+            <div className="flex flex-col gap-2">
+              <Button
+                className="w-full bg-[#f26c47] text-white hover:bg-[#e05a37]"
+                size="sm"
+                disabled
+              >
+                <CheckCircle className="mr-2 size-3.5" />
+                Acknowledge Report
+              </Button>
+              <Button className="w-full" variant="outline" size="sm" disabled>
+                <Send className="mr-2 size-3.5" />
+                Send to Parents
+              </Button>
+            </div>
+          ) : (
+            <Button
+              className="w-full bg-[#12b886] text-white hover:bg-[#0ca678]"
+              size="sm"
+              disabled
+            >
+              Acknowledge Report
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

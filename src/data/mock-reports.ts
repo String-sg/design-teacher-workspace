@@ -1,15 +1,25 @@
-import { mockStudents } from './mock-students'
+import { getSchoolLevel, mockStudents } from './mock-students'
 import type {
+  AcademicAggregate,
   CCAInfo,
   CoreValue,
   CoreValueLevel,
+  ExamOverall,
+  GradingTier,
+  GradingTierDefinition,
   HolisticData,
   HolisticReport,
   LearningOutcome,
   LearningOutcomeStatus,
+  NapfaAward,
   ParentStatus,
   PhysicalFitness,
   ReviewStatus,
+  SecondaryAcademicData,
+  SecondaryGrade,
+  SecondarySubjectPerformance,
+  SemesterResult,
+  StudentStatus,
   SubjectPerformance,
   Term,
   VIAActivity,
@@ -24,7 +34,19 @@ const REVIEW_STATUSES: Array<ReviewStatus> = [
   'in_review',
   'approved',
 ]
-const PARENT_STATUSES: Array<ParentStatus> = ['not_sent', 'sent', 'viewed']
+const PARENT_STATUSES: Array<ParentStatus> = [
+  'not_sent',
+  'sent',
+  'viewed',
+  'acknowledged',
+]
+const STUDENT_STATUSES: Array<StudentStatus> = [
+  'not_sent',
+  'sent',
+  'viewed',
+  'acknowledged',
+  'sent_to_parents',
+]
 
 function getRandomStatus<T>(statuses: Array<T>, seed: number): T {
   return statuses[seed % statuses.length]
@@ -170,6 +192,246 @@ function generateSubjects(
   })
 }
 
+// --- Secondary academic data generators ---
+
+const SECONDARY_SUBJECTS: Array<{ name: string; tier: GradingTier }> = [
+  { name: 'English Language', tier: 'G3' },
+  { name: 'Chinese Language', tier: 'G3' },
+  { name: 'Mathematics', tier: 'G3' },
+  { name: 'Science', tier: 'G3' },
+  { name: 'Music', tier: 'G2' },
+  { name: 'D&T', tier: 'G3' },
+  { name: 'FCE', tier: 'G3' },
+  { name: 'Humanities', tier: 'G3' },
+]
+
+const GRADING_SYSTEM: Array<GradingTierDefinition> = [
+  {
+    tier: 'G3',
+    grades: [
+      { grade: 'A1', minScore: 90, maxScore: 100 },
+      { grade: 'A2', minScore: 75, maxScore: 89 },
+      { grade: 'B3', minScore: 65, maxScore: 74 },
+      { grade: 'B4', minScore: 60, maxScore: 64 },
+      { grade: 'C5', minScore: 55, maxScore: 59 },
+      { grade: 'C6', minScore: 50, maxScore: 54 },
+      { grade: 'D7', minScore: 45, maxScore: 49 },
+      { grade: 'E8', minScore: 40, maxScore: 44 },
+      { grade: 'F9', minScore: 0, maxScore: 39 },
+    ],
+  },
+  {
+    tier: 'G2',
+    grades: [
+      { grade: 'A1', minScore: 85, maxScore: 100 },
+      { grade: 'A2', minScore: 70, maxScore: 84 },
+      { grade: 'B3', minScore: 60, maxScore: 69 },
+      { grade: 'B4', minScore: 55, maxScore: 59 },
+      { grade: 'C5', minScore: 50, maxScore: 54 },
+      { grade: 'C6', minScore: 45, maxScore: 49 },
+      { grade: 'D7', minScore: 40, maxScore: 44 },
+      { grade: 'E8', minScore: 35, maxScore: 39 },
+      { grade: 'F9', minScore: 0, maxScore: 34 },
+    ],
+  },
+  {
+    tier: 'G1',
+    grades: [
+      { grade: 'A1', minScore: 80, maxScore: 100 },
+      { grade: 'A2', minScore: 65, maxScore: 79 },
+      { grade: 'B3', minScore: 55, maxScore: 64 },
+      { grade: 'B4', minScore: 50, maxScore: 54 },
+      { grade: 'C5', minScore: 45, maxScore: 49 },
+      { grade: 'C6', minScore: 40, maxScore: 44 },
+      { grade: 'D7', minScore: 35, maxScore: 39 },
+      { grade: 'E8', minScore: 30, maxScore: 34 },
+      { grade: 'F9', minScore: 0, maxScore: 29 },
+    ],
+  },
+  {
+    tier: 'CMH',
+    grades: [
+      { grade: 'A1', minScore: 85, maxScore: 100 },
+      { grade: 'A2', minScore: 70, maxScore: 84 },
+      { grade: 'B3', minScore: 60, maxScore: 69 },
+      { grade: 'B4', minScore: 55, maxScore: 59 },
+      { grade: 'C5', minScore: 50, maxScore: 54 },
+      { grade: 'C6', minScore: 45, maxScore: 49 },
+      { grade: 'D7', minScore: 40, maxScore: 44 },
+      { grade: 'E8', minScore: 35, maxScore: 39 },
+      { grade: 'F9', minScore: 0, maxScore: 34 },
+    ],
+  },
+]
+
+const NAPFA_AWARDS: Array<NapfaAward> = [
+  'Gold',
+  'Silver',
+  'Silver',
+  'Bronze',
+  'Pass',
+]
+
+const NAPFA_DESCRIPTIONS: Record<NapfaAward, string> = {
+  Gold: 'Outstanding performance across all fitness stations. Demonstrated exceptional strength, flexibility, and endurance during the assessment.',
+  Silver:
+    'Strong performance in agility and endurance tests. Showed exceptional stamina during the 2.4km run.',
+  Bronze:
+    'Solid fitness level with room for improvement. Performed well in sit-ups and standing broad jump stations.',
+  Pass: 'Met minimum fitness requirements across all stations. Encouraged to continue regular physical activity.',
+}
+
+function scoreToGrade(score: number, tier: GradingTier): SecondaryGrade {
+  const tierDef = GRADING_SYSTEM.find((t) => t.tier === tier)
+  if (!tierDef) return 'F9'
+  for (const g of tierDef.grades) {
+    if (score >= g.minScore && score <= g.maxScore) return g.grade
+  }
+  return 'F9'
+}
+
+function gradeToPoints(grade: SecondaryGrade): number {
+  const map: Record<SecondaryGrade, number> = {
+    A1: 1,
+    A2: 2,
+    B3: 3,
+    B4: 4,
+    C5: 5,
+    C6: 6,
+    D7: 7,
+    E8: 8,
+    F9: 9,
+  }
+  return map[grade]
+}
+
+function generateSecondarySubjects(
+  student: Student,
+  seed: number,
+): Array<SecondarySubjectPerformance> {
+  return SECONDARY_SUBJECTS.map((subj, i) => {
+    const baseSeed = seed + i * 7 + student.overallPercentage
+    const currentScore = Math.max(
+      20,
+      Math.min(100, student.overallPercentage + ((baseSeed % 30) - 15)),
+    )
+    const currentGrade = scoreToGrade(currentScore, subj.tier)
+
+    const semesterHistory: Array<SemesterResult> = []
+    for (let sem = 1; sem <= 3; sem++) {
+      const semScore = Math.max(
+        20,
+        Math.min(100, currentScore + (((baseSeed + sem * 5) % 20) - 10)),
+      )
+      const delta =
+        sem > 1 ? semScore - semesterHistory[sem - 2].score : undefined
+      semesterHistory.push({
+        semester: `Semester ${sem}`,
+        score: semScore,
+        grade: scoreToGrade(semScore, subj.tier),
+        delta,
+      })
+    }
+
+    const academicYearOverall = Math.round(
+      semesterHistory.reduce((sum, s) => sum + s.score, 0) /
+        semesterHistory.length,
+    )
+
+    return {
+      name: subj.name,
+      currentScore,
+      currentGrade,
+      gradingTier: subj.tier,
+      semesterHistory,
+      academicYearOverall,
+    }
+  })
+}
+
+function generateAcademicAggregates(
+  subjects: Array<SecondarySubjectPerformance>,
+): Array<AcademicAggregate> {
+  const points = subjects.map((s) => ({
+    name: s.name,
+    points: gradeToPoints(s.currentGrade),
+  }))
+
+  const english = points.find((p) => p.name === 'English Language')
+  const math = points.find((p) => p.name === 'Mathematics')
+  const others = points
+    .filter((p) => p.name !== 'English Language')
+    .sort((a, b) => a.points - b.points)
+
+  const engPts = english?.points ?? 9
+  const mathPts = math?.points ?? 9
+  const othersNoMath = others.filter((p) => p.name !== 'Mathematics')
+
+  const l1r5 = engPts + others.slice(0, 5).reduce((s, p) => s + p.points, 0)
+  const l1r4 = engPts + others.slice(0, 4).reduce((s, p) => s + p.points, 0)
+  const l1b4 =
+    engPts + othersNoMath.slice(0, 4).reduce((s, p) => s + p.points, 0)
+  const elr2b2 = engPts + others.slice(0, 2).reduce((s, p) => s + p.points, 0)
+  const elmab3 =
+    engPts +
+    mathPts +
+    othersNoMath.slice(0, 3).reduce((s, p) => s + p.points, 0)
+
+  return [
+    { label: 'L1R5', value: l1r5, description: 'English + 5 subjects' },
+    { label: 'L1R4', value: l1r4, description: 'English + 4 subjects' },
+    {
+      label: 'L1B4',
+      value: l1b4,
+      description: 'Eng + best 4 sub',
+    },
+    {
+      label: 'ELR2B2',
+      value: `${elr2b2}+`,
+      description: 'English + best 2 subjects',
+    },
+    {
+      label: 'ELMAB3',
+      value: elmab3,
+      description: 'Eng + Math + best 3',
+    },
+  ]
+}
+
+function generateExamOverall(
+  subjects: Array<SecondarySubjectPerformance>,
+  termIndex: number,
+): ExamOverall {
+  const avgScore =
+    subjects.reduce((sum, s) => sum + s.currentScore, 0) / subjects.length
+  const cumulativeAvg =
+    subjects.reduce((sum, s) => sum + s.academicYearOverall, 0) /
+    subjects.length
+  return {
+    examPerformance: Math.round(avgScore * 10) / 10,
+    semesterLabel: `Semester ${termIndex + 1} Average`,
+    academicYearOverall: Math.round(cumulativeAvg * 10) / 10,
+    cumulativeLabel: 'Cumulative Percentage',
+  }
+}
+
+function generateSecondaryAcademic(
+  student: Student,
+  seed: number,
+  termIndex: number,
+): SecondaryAcademicData {
+  const subjects = generateSecondarySubjects(student, seed)
+  return {
+    overallPercentage: student.overallPercentage,
+    learningSupport: student.learningSupport,
+    postSecEligibility: student.postSecEligibility,
+    aggregates: generateAcademicAggregates(subjects),
+    subjects,
+    overall: generateExamOverall(subjects, termIndex),
+    gradingSystem: GRADING_SYSTEM,
+  }
+}
+
 // --- Holistic data generators ---
 
 const CORE_VALUE_LEVELS: Array<CoreValueLevel> = [
@@ -258,7 +520,10 @@ const BMI_CATEGORIES = [
   'Underweight',
 ]
 
-function generatePhysicalFitness(seed: number): PhysicalFitness {
+function generatePhysicalFitness(
+  seed: number,
+  isSecondary: boolean = false,
+): PhysicalFitness {
   const category = seededPick(BMI_CATEGORIES, seed)
   const percentile = 40 + (seed % 50)
   const descriptions: Record<string, string> = {
@@ -269,11 +534,17 @@ function generatePhysicalFitness(seed: number): PhysicalFitness {
     Underweight:
       'BMI is slightly below the healthy range. Encouraged to ensure adequate nutrition and regular meals.',
   }
-  return {
+  const base: PhysicalFitness = {
     bmiCategory: category,
     percentile,
     description: descriptions[category],
   }
+  if (isSecondary) {
+    const award = seededPick(NAPFA_AWARDS, seed + 3)
+    base.napfaAward = award
+    base.napfaDescription = NAPFA_DESCRIPTIONS[award]
+  }
+  return base
 }
 
 const VIA_POOL: Array<Omit<VIAActivity, 'hours'>> = [
@@ -384,10 +655,14 @@ function generateCCA(student: Student, seed: number): Array<CCAInfo> {
   ]
 }
 
-function generateHolisticData(student: Student, seed: number): HolisticData {
+function generateHolisticData(
+  student: Student,
+  seed: number,
+  isSecondary: boolean = false,
+): HolisticData {
   return {
     coreValues: generateCoreValues(student, seed),
-    physicalFitness: generatePhysicalFitness(seed),
+    physicalFitness: generatePhysicalFitness(seed, isSecondary),
     via: generateVIA(seed),
     cca: generateCCA(student, seed),
   }
@@ -403,6 +678,8 @@ export function generateReportFromStudent(
 
   // Use a simple hash from student id and term for deterministic random statuses
   const seed = student.id.charCodeAt(0) + termIndex
+  const schoolLevel = getSchoolLevel(student.class)
+  const isSecondary = schoolLevel === 'secondary'
 
   return {
     id: reportId,
@@ -412,12 +689,16 @@ export function generateReportFromStudent(
     term,
     academicYear,
     generatedAt: new Date(academicYear, termIndex * 3 + 2, 15),
+    schoolLevel,
     academic: {
       overallPercentage: student.overallPercentage,
       learningSupport: student.learningSupport,
       postSecEligibility: student.postSecEligibility,
       subjects: generateSubjects(student, seed),
     },
+    secondaryAcademic: isSecondary
+      ? generateSecondaryAcademic(student, seed, termIndex)
+      : undefined,
     character: {
       conduct: student.conduct,
       offences: student.offences,
@@ -429,11 +710,14 @@ export function generateReportFromStudent(
       socialLinks: student.socialLinks,
       counsellingSessions: student.counsellingSessions,
     },
-    holistic: generateHolisticData(student, seed),
+    holistic: generateHolisticData(student, seed, isSecondary),
     teacherObservations: student.teacherObservations,
     nextSteps: student.nextSteps,
     reviewStatus: getRandomStatus(REVIEW_STATUSES, seed),
     parentStatus: getRandomStatus(PARENT_STATUSES, seed + 1),
+    studentStatus: isSecondary
+      ? getRandomStatus(STUDENT_STATUSES, seed + 2)
+      : ('not_sent' as StudentStatus),
     nric: student.nric,
     indexNumber: student.indexNumber,
     formTeacher: student.formTeacher,
