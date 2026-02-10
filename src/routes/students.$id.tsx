@@ -1,10 +1,5 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
-import {
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-} from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, Download } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { StudentProfile } from '@/components/students/student-profile'

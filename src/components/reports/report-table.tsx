@@ -2,7 +2,13 @@ import { useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import type { HolisticReport, ParentStatus, ReviewStatus } from '@/types/report'
+import type {
+  HolisticReport,
+  ParentStatus,
+  ReviewStatus,
+  SchoolLevel,
+  StudentStatus,
+} from '@/types/report'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -24,6 +30,7 @@ interface ReportTableProps {
   pageSize?: number
   selectedIds: Set<string>
   onSelectionChange: (ids: Set<string>) => void
+  schoolLevel?: SchoolLevel
 }
 
 function getReviewStatusBadge(status: ReviewStatus) {
@@ -59,6 +66,37 @@ function getParentStatusBadge(status: ParentStatus) {
       label: 'Viewed',
       className: 'bg-green-100 text-green-700 hover:bg-green-100',
     },
+    acknowledged: {
+      label: 'Acknowledged',
+      className: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
+    },
+  }
+  const { label, className } = config[status]
+  return <Badge className={className}>{label}</Badge>
+}
+
+function getStudentStatusBadge(status: StudentStatus) {
+  const config = {
+    not_sent: {
+      label: 'Not Sent',
+      className: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
+    },
+    sent: {
+      label: 'Sent',
+      className: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
+    },
+    viewed: {
+      label: 'Viewed',
+      className: 'bg-purple-100 text-purple-700 hover:bg-purple-100',
+    },
+    acknowledged: {
+      label: 'Acknowledged',
+      className: 'bg-green-100 text-green-700 hover:bg-green-100',
+    },
+    sent_to_parents: {
+      label: 'Sent to Parents',
+      className: 'bg-teal-100 text-teal-700 hover:bg-teal-100',
+    },
   }
   const { label, className } = config[status]
   return <Badge className={className}>{label}</Badge>
@@ -70,8 +108,10 @@ export function ReportTable({
   pageSize = 20,
   selectedIds,
   onSelectionChange,
+  schoolLevel = 'secondary',
 }: ReportTableProps) {
   const navigate = useNavigate()
+  const isSecondary = schoolLevel === 'secondary'
 
   const {
     currentPage,
@@ -105,14 +145,12 @@ export function ReportTable({
 
   const handleSelectAll = () => {
     if (allPageSelected) {
-      // Deselect all on current page
       const newSelection = new Set(selectedIds)
       for (const id of paginatedIds) {
         newSelection.delete(id)
       }
       onSelectionChange(newSelection)
     } else {
-      // Select all on current page
       const newSelection = new Set(selectedIds)
       for (const id of paginatedIds) {
         newSelection.add(id)
@@ -132,6 +170,8 @@ export function ReportTable({
     onSelectionChange(newSelection)
   }
 
+  const colSpan = isSecondary ? 7 : 6
+
   return (
     <div className={cn('max-w-full overflow-x-auto bg-white', className)}>
       <Table>
@@ -150,6 +190,9 @@ export function ReportTable({
             </TableHead>
             <TableHead className="min-w-[90px]">Class</TableHead>
             <TableHead className="min-w-[90px]">Term</TableHead>
+            {isSecondary && (
+              <TableHead className="min-w-[130px]">Student Status</TableHead>
+            )}
             <TableHead className="min-w-[120px]">Review Status</TableHead>
             <TableHead className="min-w-[120px] pr-6">Parent Status</TableHead>
           </TableRow>
@@ -157,7 +200,7 @@ export function ReportTable({
         <TableBody>
           {paginatedReports.length === 0 ? (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={6} className="h-48">
+              <TableCell colSpan={colSpan} className="h-48">
                 <EmptyState
                   title="No reports found"
                   description="Try adjusting your filters or search query."
@@ -190,6 +233,11 @@ export function ReportTable({
                 <TableCell>
                   <Badge variant="outline">{report.term}</Badge>
                 </TableCell>
+                {isSecondary && (
+                  <TableCell>
+                    {getStudentStatusBadge(report.studentStatus)}
+                  </TableCell>
+                )}
                 <TableCell>
                   {getReviewStatusBadge(report.reviewStatus)}
                 </TableCell>

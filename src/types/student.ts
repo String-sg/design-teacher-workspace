@@ -27,6 +27,14 @@ export interface Student {
   custodyDetails: string | null
   siblings: number
   externalAgencies: string | null
+  // Student Identity
+  nric: string
+  indexNumber: number
+  formTeacher: string
+  coFormTeacher: string | null
+  promotionStatus: string | null
+  daysPresent: number
+  totalSchoolDays: number
   // Teacher & Action
   teacherObservations: string | null
   nextSteps: string | null
@@ -34,7 +42,7 @@ export interface Student {
 
 export type AttentionTag = 'FAS' | 'GEP' | 'LSM' | 'LSP' | 'SEN'
 
-export type ConductGrade = 'Excellent' | 'Good' | 'Fair' | 'Poor'
+export type ConductGrade = 'Excellent' | 'Very Good' | 'Good' | 'Fair' | 'Poor'
 
 export interface ClassOption {
   value: string

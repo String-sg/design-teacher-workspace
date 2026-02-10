@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { ClipboardCheck, Search, Send } from 'lucide-react'
 
@@ -6,6 +6,8 @@ import type {
   HolisticReport,
   ParentStatus,
   ReviewStatus,
+  SchoolLevel,
+  StudentStatus,
   Term,
 } from '@/types/report'
 import { TermSelector } from '@/components/reports/term-selector'
@@ -31,7 +33,10 @@ import {
   SelectTrigger,
 } from '@/components/ui/select'
 import { CURRENT_ACADEMIC_YEAR, mockReports } from '@/data/mock-reports'
+import { getSchoolLevel } from '@/data/mock-students'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
+import { Switch } from '@/components/ui/switch'
+import { cn } from '@/lib/utils'
 
 interface ReportsSearchParams {
   studentId?: string
@@ -50,6 +55,7 @@ export const Route = createFileRoute('/reports/')({
 
 function ReportsPage() {
   const { studentId: initialStudentId, term: initialTerm } = Route.useSearch()
+  const [schoolLevel, setSchoolLevel] = useState<SchoolLevel>('secondary')
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [selectedTerm, setSelectedTerm] = useState<Term | ''>(initialTerm || '')
   const [searchQuery, setSearchQuery] = useState('')
@@ -59,6 +65,9 @@ function ReportsPage() {
   const [selectedParentStatus, setSelectedParentStatus] = useState<
     ParentStatus | ''
   >('')
+  const [selectedStudentStatus, setSelectedStudentStatus] = useState<
+    StudentStatus | ''
+  >('')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [reports, setReports] = useState<Array<HolisticReport>>(
     () => mockReports,
@@ -66,35 +75,40 @@ function ReportsPage() {
 
   useSetBreadcrumbs([{ label: 'Reports', href: '/reports' }])
 
-  // Get all reports for the current academic year
-  const allReports = useMemo(() => {
+  // Filter by school level first
+  const levelFilteredReports = useMemo(() => {
     return reports.filter((report) => {
-      if (initialStudentId && report.studentId !== initialStudentId) {
+      if (report.academicYear !== CURRENT_ACADEMIC_YEAR) return false
+      if (initialStudentId && report.studentId !== initialStudentId)
         return false
-      }
-      if (selectedTerm && report.term !== selectedTerm) {
-        return false
-      }
-      if (report.academicYear !== CURRENT_ACADEMIC_YEAR) {
-        return false
-      }
-      return true
+      if (selectedTerm && report.term !== selectedTerm) return false
+      return getSchoolLevel(report.studentClass) === schoolLevel
     })
-  }, [reports, initialStudentId, selectedTerm])
+  }, [reports, initialStudentId, selectedTerm, schoolLevel])
 
   // Filter by class/level
   const classFilteredReports = useMemo(() => {
     if (selectedClass === 'all') {
-      return allReports
+      return levelFilteredReports
     }
 
-    if (selectedClass.startsWith('Secondary')) {
-      const levelNum = selectedClass.replace('Secondary ', '')
-      return allReports.filter((r) => r.studentClass.startsWith(levelNum))
+    if (
+      selectedClass.startsWith('Secondary') ||
+      selectedClass.startsWith('Primary')
+    ) {
+      const levelPart = selectedClass.replace(/^(Secondary|Primary)\s*/, '')
+      if (schoolLevel === 'primary') {
+        return levelFilteredReports.filter((r) =>
+          r.studentClass.startsWith(`P${levelPart}`),
+        )
+      }
+      return levelFilteredReports.filter((r) =>
+        r.studentClass.startsWith(levelPart),
+      )
     }
 
-    return allReports.filter((r) => r.studentClass === selectedClass)
-  }, [allReports, selectedClass])
+    return levelFilteredReports.filter((r) => r.studentClass === selectedClass)
+  }, [levelFilteredReports, selectedClass, schoolLevel])
 
   // Filter by search query
   const searchFilteredReports = useMemo(() => {
@@ -117,9 +131,17 @@ function ReportsPage() {
       if (selectedParentStatus && r.parentStatus !== selectedParentStatus) {
         return false
       }
+      if (selectedStudentStatus && r.studentStatus !== selectedStudentStatus) {
+        return false
+      }
       return true
     })
-  }, [searchFilteredReports, selectedReviewStatus, selectedParentStatus])
+  }, [
+    searchFilteredReports,
+    selectedReviewStatus,
+    selectedParentStatus,
+    selectedStudentStatus,
+  ])
 
   // Metrics
   const metrics = useMemo(() => {
@@ -136,10 +158,15 @@ function ReportsPage() {
   }, [filteredReports])
 
   const sendableCount = useMemo(() => {
+    if (schoolLevel === 'secondary') {
+      return reports.filter(
+        (r) => selectedIds.has(r.id) && r.studentStatus === 'not_sent',
+      ).length
+    }
     return reports.filter(
       (r) => selectedIds.has(r.id) && r.parentStatus === 'not_sent',
     ).length
-  }, [reports, selectedIds])
+  }, [reports, selectedIds, schoolLevel])
 
   const reviewableCount = useMemo(() => {
     return reports.filter(
@@ -147,14 +174,24 @@ function ReportsPage() {
     ).length
   }, [reports, selectedIds])
 
-  const handleSendToParents = () => {
-    setReports((prev) =>
-      prev.map((report) =>
-        selectedIds.has(report.id) && report.parentStatus === 'not_sent'
-          ? { ...report, parentStatus: 'sent' as const }
-          : report,
-      ),
-    )
+  const handleSend = () => {
+    if (schoolLevel === 'secondary') {
+      setReports((prev) =>
+        prev.map((report) =>
+          selectedIds.has(report.id) && report.studentStatus === 'not_sent'
+            ? { ...report, studentStatus: 'sent' as const }
+            : report,
+        ),
+      )
+    } else {
+      setReports((prev) =>
+        prev.map((report) =>
+          selectedIds.has(report.id) && report.parentStatus === 'not_sent'
+            ? { ...report, parentStatus: 'sent' as const }
+            : report,
+        ),
+      )
+    }
     setSelectedIds(new Set())
   }
 
@@ -169,8 +206,104 @@ function ReportsPage() {
     setSelectedIds(new Set())
   }
 
+  const handleLevelChange = (level: SchoolLevel) => {
+    setSchoolLevel(level)
+    setSelectedIds(new Set())
+    setSelectedClass(level === 'primary' ? 'all' : 'Secondary 3')
+    setSelectedStudentStatus('')
+  }
+
+  const sendLabel =
+    schoolLevel === 'secondary' ? 'Send to Students' : 'Send to Parents'
+
+  // Draggable floating bar state
+  const floatingRef = useRef<HTMLDivElement>(null)
+  const dragState = useRef<{
+    startX: number
+    startY: number
+    origX: number
+    origY: number
+  } | null>(null)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [hasDragged, setHasDragged] = useState(false)
+
+  const onMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if ((e.target as HTMLElement).closest('[data-slot="switch"]')) return
+      e.preventDefault()
+      const rect = floatingRef.current?.getBoundingClientRect()
+      if (!rect) return
+      dragState.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        origX: position.x,
+        origY: position.y,
+      }
+    },
+    [position],
+  )
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!dragState.current) return
+      const dx = e.clientX - dragState.current.startX
+      const dy = e.clientY - dragState.current.startY
+      setPosition({
+        x: dragState.current.origX + dx,
+        y: dragState.current.origY + dy,
+      })
+      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) setHasDragged(true)
+    }
+    const onMouseUp = () => {
+      dragState.current = null
+      setTimeout(() => setHasDragged(false), 0)
+    }
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [])
+
   return (
     <div className="flex flex-col">
+      {/* Floating draggable level switch */}
+      <div
+        ref={floatingRef}
+        onMouseDown={onMouseDown}
+        style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+        className="fixed right-6 top-4 z-50 flex cursor-grab items-center gap-3 rounded-full border bg-white px-4 py-2 shadow-lg active:cursor-grabbing"
+      >
+        <span
+          className={cn(
+            'text-sm font-medium transition-colors',
+            schoolLevel === 'primary'
+              ? 'text-[#f26c47]'
+              : 'text-muted-foreground',
+          )}
+        >
+          Primary
+        </span>
+        <Switch
+          checked={schoolLevel === 'secondary'}
+          onCheckedChange={(checked: boolean) => {
+            if (!hasDragged)
+              handleLevelChange(checked ? 'secondary' : 'primary')
+          }}
+        />
+        <span
+          className={cn(
+            'text-sm font-medium transition-colors',
+            schoolLevel === 'secondary'
+              ? 'text-[#f26c47]'
+              : 'text-muted-foreground',
+          )}
+        >
+          Secondary
+        </span>
+      </div>
+
       {/* Fixed content area */}
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
@@ -263,9 +396,12 @@ function ReportsPage() {
           >
             <SelectTrigger className="w-[160px]">
               {selectedParentStatus
-                ? { not_sent: 'Not Sent', sent: 'Sent', viewed: 'Viewed' }[
-                    selectedParentStatus
-                  ]
+                ? {
+                    not_sent: 'Not Sent',
+                    sent: 'Sent',
+                    viewed: 'Viewed',
+                    acknowledged: 'Acknowledged',
+                  }[selectedParentStatus]
                 : 'View status'}
             </SelectTrigger>
             <SelectContent>
@@ -273,8 +409,39 @@ function ReportsPage() {
               <SelectItem value="not_sent">Not Sent</SelectItem>
               <SelectItem value="sent">Sent</SelectItem>
               <SelectItem value="viewed">Viewed</SelectItem>
+              <SelectItem value="acknowledged">Acknowledged</SelectItem>
             </SelectContent>
           </Select>
+          {schoolLevel === 'secondary' && (
+            <Select
+              value={selectedStudentStatus || 'all'}
+              onValueChange={(val) =>
+                setSelectedStudentStatus(
+                  val === 'all' ? '' : (val as StudentStatus),
+                )
+              }
+            >
+              <SelectTrigger className="w-[160px]">
+                {selectedStudentStatus
+                  ? {
+                      not_sent: 'Not Sent',
+                      sent: 'Sent',
+                      viewed: 'Viewed',
+                      acknowledged: 'Acknowledged',
+                      sent_to_parents: 'Sent to Parents',
+                    }[selectedStudentStatus]
+                  : 'Student status'}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All student</SelectItem>
+                <SelectItem value="not_sent">Not Sent</SelectItem>
+                <SelectItem value="sent">Sent</SelectItem>
+                <SelectItem value="viewed">Viewed</SelectItem>
+                <SelectItem value="acknowledged">Acknowledged</SelectItem>
+                <SelectItem value="sent_to_parents">Sent to Parents</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* Bulk Action Bar */}
@@ -289,22 +456,25 @@ function ReportsPage() {
                   render={
                     <Button size="sm" variant="outline">
                       <Send className="mr-2 h-4 w-4" />
-                      Send to Parents
+                      {sendLabel}
                     </Button>
                   }
                 />
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Send to Parents</AlertDialogTitle>
+                    <AlertDialogTitle>{sendLabel}</AlertDialogTitle>
                     <AlertDialogDescription>
                       Send {sendableCount} report
-                      {sendableCount !== 1 ? 's' : ''} to parents? Parents will
-                      be notified and can view these reports.
+                      {sendableCount !== 1 ? 's' : ''} to{' '}
+                      {schoolLevel === 'secondary' ? 'students' : 'parents'}?{' '}
+                      {schoolLevel === 'secondary'
+                        ? 'Students will be notified via email.'
+                        : 'Parents will be notified and can view these reports.'}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleSendToParents}>
+                    <AlertDialogAction onClick={handleSend}>
                       Send
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -347,6 +517,7 @@ function ReportsPage() {
         pageSize={20}
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}
+        schoolLevel={schoolLevel}
       />
     </div>
   )

@@ -11,7 +11,8 @@ import { madeRefine } from 'made-refine/vite'
 const require = createRequire(import.meta.url)
 
 // Start react-grab relay server in dev mode
-const isDev = process.argv.includes('dev') || process.env.NODE_ENV === 'development'
+const isDev =
+  process.argv.includes('dev') || process.env.NODE_ENV === 'development'
 if (isDev) {
   Promise.all([
     import('@react-grab/relay/server'),

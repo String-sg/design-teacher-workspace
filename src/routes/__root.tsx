@@ -3,29 +3,30 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
+  useRouterState,
 } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import * as React from 'react'
 
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  import('react-grab').then(() =>
-    import('@react-grab/claude-code/client').then(({ attachAgent }) =>
-      attachAgent()
-    )
-  )
-}
-
+import { DirectEdit } from 'made-refine'
 import appCss from '../styles.css?url'
 import { AppHeader } from '@/components/app-header'
 import { AppSidebar } from '@/components/app-sidebar'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
-import { DirectEdit } from 'made-refine'
 import { FeatureFlagProvider } from '@/lib/feature-flags'
 import { BreadcrumbProvider } from '@/hooks/use-breadcrumbs'
+
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  import('react-grab').then(() =>
+    import('@react-grab/claude-code/client').then(({ attachAgent }) =>
+      attachAgent(),
+    ),
+  )
+}
 
 export const Route = createRootRoute({
   head: () => ({
@@ -83,6 +84,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const [queryClient] = React.useState(() => new QueryClient())
+  const matches = useRouterState({ select: (s) => s.matches })
+  const isGuestRoute = matches.some((m) => m.routeId === '/_guest')
+
+  if (isGuestRoute) {
+    return (
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    )
+  }
 
   return (
     <ErrorBoundary>
