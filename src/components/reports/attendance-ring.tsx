@@ -1,0 +1,55 @@
+export function AttendanceRing({
+  percentage,
+  size = 120,
+  label,
+}: {
+  percentage: number
+  size?: number
+  label?: string
+}) {
+  const strokeWidth = 10
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (percentage / 100) * circumference
+
+  const color =
+    percentage >= 90
+      ? 'text-[#12b886]'
+      : percentage >= 75
+        ? 'text-amber-500'
+        : 'text-red-500'
+
+  return (
+    <div
+      className="relative inline-flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-muted"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          className={color}
+        />
+      </svg>
+      <span className="absolute text-xl font-semibold">
+        {label ?? `${Math.round(percentage)}%`}
+      </span>
+    </div>
+  )
+}

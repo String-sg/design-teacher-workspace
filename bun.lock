@@ -19,7 +19,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "lucide-react": "^0.562.0",
-        "made-refine": "0.1.0-beta.5",
+        "made-refine": "0.1.1-beta.1",
         "nitro": "latest",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
@@ -1170,7 +1170,7 @@
 
     "lz-string": ["lz-string@1.5.0", "", { "bin": { "lz-string": "bin/bin.js" } }, "sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ=="],
 
-    "made-refine": ["made-refine@0.1.0-beta.5", "", { "dependencies": { "@base-ui/react": "^1.1.0", "clsx": "^2.1.1", "lucide-react": "^0.454.0", "tailwind-merge": "^2.6.0" }, "peerDependencies": { "react": ">=18", "react-dom": ">=18" } }, "sha512-v55hAaiCjq5SCWdzfEWIBTS0KMR4OQ6aiWOKQ0h+Lf0X90yu+zLoxqnuzGFb5SNt88uqxnSjIV1COH1v5b5hsg=="],
+    "made-refine": ["made-refine@0.1.1-beta.1", "", { "dependencies": { "@base-ui/react": "^1.1.0", "@modelcontextprotocol/sdk": "^1.12.1", "clsx": "^2.1.1", "lucide-react": "^0.454.0", "tailwind-merge": "^2.6.0", "zod": "^3.25.0" }, "peerDependencies": { "react": ">=18", "react-dom": ">=18" }, "bin": { "made-refine": "dist/cli.cjs", "made-refine-mcp": "dist/mcp.cjs" } }, "sha512-/V/bxIU6whL0fiQR9Y4Btgc0v20IZnZ3oaaepYqqVYxoxohKUluSxvfegp2spYR4fFQbcDs6vvTrwK39vLO7lA=="],
 
     "magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 
