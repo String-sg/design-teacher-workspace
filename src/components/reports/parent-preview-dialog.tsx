@@ -1,16 +1,27 @@
-import { CheckCircle, Send, X } from 'lucide-react'
+import { CheckCircle, Download, Send, X } from 'lucide-react'
 import { ReportOverviewTab } from './report-overview-tab'
 import { AcademicTab } from './academic-tab'
 import { HolisticTab } from './holistic-tab'
 import type { HolisticReport, SchoolLevel } from '@/types/report'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .filter((part) => part.length > 0)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+}
 
 interface ParentPreviewDialogProps {
   report: HolisticReport
@@ -55,17 +66,62 @@ export function ParentPreviewDialog({
 
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 pb-6 pt-4">
-            <div className="mb-1 text-lg font-semibold">
-              {report.studentName}
-              <span className="text-muted-foreground ml-1.5 text-sm font-normal">
-                {report.studentClass}
-              </span>
-            </div>
-            <p className="text-muted-foreground text-xs">
-              {report.term} {report.academicYear}
-            </p>
+            {isStudentPreview ? (
+              <>
+                {/* Guest link layout */}
+                <div className="mb-1 text-center text-sm font-medium text-muted-foreground">
+                  Student Profile
+                </div>
+                <div className="mb-6 flex flex-col items-center gap-3">
+                  <Avatar
+                    size="lg"
+                    className="ring-2 ring-[#f26c47] ring-offset-2"
+                  >
+                    <AvatarFallback>
+                      {getInitials(report.studentName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold">
+                      {report.studentName}
+                    </h2>
+                    <p className="text-muted-foreground text-sm">
+                      {report.studentClass}
+                    </p>
+                  </div>
+                </div>
 
-            <Tabs defaultValue="overview" className="mt-4">
+                <div className="mb-6 flex items-center justify-between text-sm">
+                  <div>
+                    <span className="text-muted-foreground">
+                      {report.term} {report.academicYear}
+                    </span>
+                  </div>
+                  <div className="text-muted-foreground">
+                    Issued{' '}
+                    {report.generatedAt.toLocaleDateString('en-SG', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-1 text-lg font-semibold">
+                  {report.studentName}
+                  <span className="text-muted-foreground ml-1.5 text-sm font-normal">
+                    {report.studentClass}
+                  </span>
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  {report.term} {report.academicYear}
+                </p>
+              </>
+            )}
+
+            <Tabs defaultValue="overview" className={isStudentPreview ? '' : 'mt-4'}>
               <TabsList variant="line">
                 <TabsTrigger
                   value="overview"
@@ -123,13 +179,23 @@ export function ParentPreviewDialog({
               </Button>
             </div>
           ) : (
-            <Button
-              className="w-full bg-[#12b886] text-white hover:bg-[#0ca678]"
-              size="sm"
-              disabled
-            >
-              Acknowledge Report
-            </Button>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 bg-[#12b886] text-white hover:bg-[#0ca678]"
+                  size="sm"
+                  disabled
+                >
+                  Acknowledge Report
+                </Button>
+                <Button variant="outline" size="icon-sm" disabled>
+                  <Download className="size-3.5" />
+                </Button>
+              </div>
+              <p className="text-muted-foreground text-center text-xs">
+                Please scroll through all sections to acknowledge
+              </p>
+            </div>
           )}
         </div>
       </DialogContent>

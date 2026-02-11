@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { ClipboardCheck, Search, Send } from 'lucide-react'
+import { ClipboardCheck, Columns3, ListFilter, Search, Send } from 'lucide-react'
+import { toast } from 'sonner'
 
 import type {
   HolisticReport,
@@ -36,11 +37,29 @@ import { CURRENT_ACADEMIC_YEAR, mockReports } from '@/data/mock-reports'
 import { getSchoolLevel } from '@/data/mock-students'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { Switch } from '@/components/ui/switch'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Label } from '@/components/ui/label'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+
+type GroupBy = 'none' | 'student' | 'term'
 
 interface ReportsSearchParams {
   studentId?: string
   term?: Term
+  groupBy?: GroupBy
 }
 
 export const Route = createFileRoute('/reports/')({
@@ -49,12 +68,13 @@ export const Route = createFileRoute('/reports/')({
     return {
       studentId: search.studentId as string | undefined,
       term: search.term as Term | undefined,
+      groupBy: search.groupBy as GroupBy | undefined,
     }
   },
 })
 
 function ReportsPage() {
-  const { studentId: initialStudentId, term: initialTerm } = Route.useSearch()
+  const { studentId: initialStudentId, term: initialTerm, groupBy: initialGroupBy } = Route.useSearch()
   const [schoolLevel, setSchoolLevel] = useState<SchoolLevel>('secondary')
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [selectedTerm, setSelectedTerm] = useState<Term | ''>(initialTerm || '')
@@ -69,6 +89,7 @@ function ReportsPage() {
     StudentStatus | ''
   >('')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [groupBy, setGroupBy] = useState<GroupBy>(initialGroupBy || 'student')
   const [reports, setReports] = useState<Array<HolisticReport>>(
     () => mockReports,
   )
@@ -206,12 +227,58 @@ function ReportsPage() {
     setSelectedIds(new Set())
   }
 
+  const handleQuickSendStudent = useCallback((id: string) => {
+    setReports((prev) =>
+      prev.map((r) =>
+        r.id === id && r.studentStatus === 'not_sent'
+          ? { ...r, studentStatus: 'sent' as const }
+          : r,
+      ),
+    )
+    toast.success('Report sent to student')
+  }, [])
+
+  const handleQuickSendParent = useCallback((id: string) => {
+    setReports((prev) =>
+      prev.map((r) =>
+        r.id === id && r.parentStatus === 'not_sent'
+          ? { ...r, parentStatus: 'sent' as const }
+          : r,
+      ),
+    )
+    toast.success('Report sent to parents')
+  }, [])
+
+  const handleBulkSendParentsPg = () => {
+    setReports((prev) =>
+      prev.map((report) =>
+        selectedIds.has(report.id) && report.parentStatus === 'not_sent'
+          ? { ...report, parentStatus: 'sent' as const }
+          : report,
+      ),
+    )
+    setSelectedIds(new Set())
+  }
+
+  const pgSendableCount = useMemo(() => {
+    return reports.filter(
+      (r) => selectedIds.has(r.id) && r.parentStatus === 'not_sent',
+    ).length
+  }, [reports, selectedIds])
+
   const handleLevelChange = (level: SchoolLevel) => {
     setSchoolLevel(level)
     setSelectedIds(new Set())
     setSelectedClass(level === 'primary' ? 'all' : 'Secondary 3')
     setSelectedStudentStatus('')
   }
+
+  const activeFilterCount = [
+    selectedTerm,
+    selectedReviewStatus,
+    selectedParentStatus,
+    schoolLevel === 'secondary' ? selectedStudentStatus : '',
+  ].filter(Boolean).length
 
   const sendLabel =
     schoolLevel === 'secondary' ? 'Send to Students' : 'Send to Parents'
@@ -349,7 +416,7 @@ function ReportsPage() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3 px-6 pb-4">
+        <div className="flex items-center gap-3 px-6 pb-4">
           <div className="relative flex-1 md:flex-none">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -361,154 +428,147 @@ function ReportsPage() {
               aria-label="Search students"
             />
           </div>
-          <TermSelector value={selectedTerm} onValueChange={setSelectedTerm} />
-          <Select
-            value={selectedReviewStatus || 'all'}
-            onValueChange={(val) =>
-              setSelectedReviewStatus(
-                val === 'all' ? '' : (val as ReviewStatus),
-              )
-            }
-          >
-            <SelectTrigger className="w-[160px]">
-              {selectedReviewStatus
-                ? {
-                    pending: 'Pending',
-                    in_review: 'In Review',
-                    approved: 'Approved',
-                  }[selectedReviewStatus]
-                : 'All review'}
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All review</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="in_review">In Review</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={selectedParentStatus || 'all'}
-            onValueChange={(val) =>
-              setSelectedParentStatus(
-                val === 'all' ? '' : (val as ParentStatus),
-              )
-            }
-          >
-            <SelectTrigger className="w-[160px]">
-              {selectedParentStatus
-                ? {
-                    not_sent: 'Not Sent',
-                    sent: 'Sent',
-                    viewed: 'Viewed',
-                    acknowledged: 'Acknowledged',
-                  }[selectedParentStatus]
-                : 'View status'}
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All parent</SelectItem>
-              <SelectItem value="not_sent">Not Sent</SelectItem>
-              <SelectItem value="sent">Sent</SelectItem>
-              <SelectItem value="viewed">Viewed</SelectItem>
-              <SelectItem value="acknowledged">Acknowledged</SelectItem>
-            </SelectContent>
-          </Select>
-          {schoolLevel === 'secondary' && (
-            <Select
-              value={selectedStudentStatus || 'all'}
-              onValueChange={(val) =>
-                setSelectedStudentStatus(
-                  val === 'all' ? '' : (val as StudentStatus),
-                )
+          <Popover>
+            <PopoverTrigger
+              render={
+                <Button variant="outline">
+                  <ListFilter className="mr-2 h-4 w-4" />
+                  Filters
+                  {activeFilterCount > 0 && (
+                    <span className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#f26c47] px-1.5 text-xs font-medium text-white">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
               }
-            >
-              <SelectTrigger className="w-[160px]">
-                {selectedStudentStatus
-                  ? {
-                      not_sent: 'Not Sent',
-                      sent: 'Sent',
-                      viewed: 'Viewed',
-                      acknowledged: 'Acknowledged',
-                      sent_to_parents: 'Sent to Parents',
-                    }[selectedStudentStatus]
-                  : 'Student status'}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All student</SelectItem>
-                <SelectItem value="not_sent">Not Sent</SelectItem>
-                <SelectItem value="sent">Sent</SelectItem>
-                <SelectItem value="viewed">Viewed</SelectItem>
-                <SelectItem value="acknowledged">Acknowledged</SelectItem>
-                <SelectItem value="sent_to_parents">Sent to Parents</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
+            />
+            <PopoverContent align="start" className="w-80 gap-3">
+              <div className="space-y-1">
+                <Label>Term</Label>
+                <TermSelector value={selectedTerm} onValueChange={setSelectedTerm} />
+              </div>
+              <div className="space-y-1">
+                <Label>Review status</Label>
+                <Select
+                  value={selectedReviewStatus || 'all'}
+                  onValueChange={(val) =>
+                    setSelectedReviewStatus(
+                      val === 'all' ? '' : (val as ReviewStatus),
+                    )
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    {selectedReviewStatus
+                      ? {
+                          pending: 'Pending',
+                          in_review: 'In Review',
+                          approved: 'Approved',
+                        }[selectedReviewStatus]
+                      : 'All review'}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All review</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in_review">In Review</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Parent view status</Label>
+                <Select
+                  value={selectedParentStatus || 'all'}
+                  onValueChange={(val) =>
+                    setSelectedParentStatus(
+                      val === 'all' ? '' : (val as ParentStatus),
+                    )
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    {selectedParentStatus
+                      ? {
+                          not_sent: 'Not Sent',
+                          sent: 'Sent',
+                          viewed: 'Viewed',
+                          acknowledged: 'Acknowledged',
+                        }[selectedParentStatus]
+                      : 'All status'}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All status</SelectItem>
+                    <SelectItem value="not_sent">Not Sent</SelectItem>
+                    <SelectItem value="sent">Sent</SelectItem>
+                    <SelectItem value="viewed">Viewed</SelectItem>
+                    <SelectItem value="acknowledged">Acknowledged</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {schoolLevel === 'secondary' && (
+                <div className="space-y-1">
+                  <Label>Student view status</Label>
+                  <Select
+                    value={selectedStudentStatus || 'all'}
+                    onValueChange={(val) =>
+                      setSelectedStudentStatus(
+                        val === 'all' ? '' : (val as StudentStatus),
+                      )
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      {selectedStudentStatus
+                        ? {
+                            not_sent: 'Not Sent',
+                            sent: 'Sent',
+                            viewed: 'Viewed',
+                            acknowledged: 'Acknowledged',
+                            sent_to_parents: 'Sent to Parents',
+                          }[selectedStudentStatus]
+                        : 'All student'}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All student</SelectItem>
+                      <SelectItem value="not_sent">Not Sent</SelectItem>
+                      <SelectItem value="sent">Sent</SelectItem>
+                      <SelectItem value="viewed">Viewed</SelectItem>
+                      <SelectItem value="acknowledged">Acknowledged</SelectItem>
+                      <SelectItem value="sent_to_parents">Sent to Parents</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="outline">
+                  <Columns3 className="mr-2 h-4 w-4" />
+                  Views
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="start">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Group by</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={groupBy}
+                  onValueChange={(val) => setGroupBy(val as GroupBy)}
+                >
+                  <DropdownMenuRadioItem value="none">
+                    None
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="student">
+                    Student name
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="term">
+                    Term
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        {/* Bulk Action Bar */}
-        {selectedIds.size > 0 && (
-          <div className="mx-6 flex items-center gap-4 rounded-lg border bg-muted/50 px-4 py-3">
-            <span className="text-sm font-medium">
-              {selectedIds.size} selected
-            </span>
-            <div className="flex gap-2">
-              <AlertDialog>
-                <AlertDialogTrigger
-                  render={
-                    <Button size="sm" variant="outline">
-                      <Send className="mr-2 h-4 w-4" />
-                      {sendLabel}
-                    </Button>
-                  }
-                />
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{sendLabel}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Send {sendableCount} report
-                      {sendableCount !== 1 ? 's' : ''} to{' '}
-                      {schoolLevel === 'secondary' ? 'students' : 'parents'}?{' '}
-                      {schoolLevel === 'secondary'
-                        ? 'Students will be notified via email.'
-                        : 'Parents will be notified and can view these reports.'}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleSend}>
-                      Send
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-              <AlertDialog>
-                <AlertDialogTrigger
-                  render={
-                    <Button size="sm" variant="outline">
-                      <ClipboardCheck className="mr-2 h-4 w-4" />
-                      Request Review
-                    </Button>
-                  }
-                />
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Request Review</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Request review for {reviewableCount} report
-                      {reviewableCount !== 1 ? 's' : ''}? These reports will be
-                      sent for approval.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleRequestReview}>
-                      Request
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Report Table */}
@@ -518,7 +578,102 @@ function ReportsPage() {
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}
         schoolLevel={schoolLevel}
+        groupBy={groupBy}
+        onQuickSendStudent={handleQuickSendStudent}
+        onQuickSendParent={handleQuickSendParent}
       />
+
+      {/* Floating Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed inset-x-0 bottom-6 z-50 flex justify-center">
+          <div className="flex items-center gap-3 rounded-full border bg-white px-5 py-2.5 shadow-lg">
+            <span className="text-sm font-medium text-muted-foreground">
+              {selectedIds.size} selected
+            </span>
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={
+                  <Button size="sm" variant="outline" className="rounded-full">
+                    <Send className="mr-2 h-4 w-4" />
+                    {sendLabel}
+                  </Button>
+                }
+              />
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{sendLabel}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Send {selectedIds.size} report
+                    {selectedIds.size !== 1 ? 's' : ''} to{' '}
+                    {schoolLevel === 'secondary' ? 'students' : 'parents'}?{' '}
+                    {schoolLevel === 'secondary'
+                      ? 'Students will be notified via email.'
+                      : 'Parents will be notified and can view these reports.'}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSend}>
+                    Send
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={
+                  <Button size="sm" variant="outline" className="rounded-full">
+                    <Send className="mr-2 h-4 w-4" />
+                    Send to Parents via PG
+                  </Button>
+                }
+              />
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Send to Parents via PG</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Send {pgSendableCount} report
+                    {pgSendableCount !== 1 ? 's' : ''} to parents via Parents
+                    Gateway? Parents will be notified via PG.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleBulkSendParentsPg}>
+                    Send
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={
+                  <Button size="sm" variant="outline" className="rounded-full">
+                    <ClipboardCheck className="mr-2 h-4 w-4" />
+                    Request Review
+                  </Button>
+                }
+              />
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Request Review</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Request review for {reviewableCount} report
+                    {reviewableCount !== 1 ? 's' : ''}? These reports will be
+                    sent for approval.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleRequestReview}>
+                    Request
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

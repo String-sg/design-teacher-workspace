@@ -109,9 +109,14 @@ export function EmailPreviewDialog({
             <p>Please click the button below to view the full report:</p>
 
             <div className="py-2 text-center">
-              <div className="mx-auto inline-block rounded-lg bg-[#f26c47] px-8 py-3 text-sm font-medium text-white">
+              <a
+                href={reportUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mx-auto inline-block rounded-lg bg-[#f26c47] px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-[#e05a37]"
+              >
                 View Report
-              </div>
+              </a>
               <p className="mt-1.5 text-xs text-muted-foreground">
                 bandung.edu.sg{reportUrl}
               </p>

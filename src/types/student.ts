@@ -27,6 +27,8 @@ export interface Student {
   custodyDetails: string | null
   siblings: number
   externalAgencies: string | null
+  // School
+  schoolName?: string
   // Student Identity
   nric: string
   indexNumber: number

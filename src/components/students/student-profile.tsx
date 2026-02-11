@@ -1,15 +1,25 @@
+import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import {
   BookOpen,
+  ChevronRight,
+  Eye,
+  FileText,
   GraduationCap,
   Heart,
   Home,
   MoreHorizontal,
+  Plus,
   User,
 } from 'lucide-react'
 
 import type { Student } from '@/types/student'
+import type { HolisticReport, ReviewStatus, Term } from '@/types/report'
+import { filterReports, TERMS } from '@/data/mock-reports'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { GenerateHdpWizard } from '@/components/reports/generate-hdp-wizard'
 
 interface StudentProfileProps {
   student: Student
@@ -98,16 +108,76 @@ function RemarksField({ label, value, tooltip }: RemarksFieldProps) {
   )
 }
 
+const REVIEW_STATUS_CONFIG: Record<
+  ReviewStatus,
+  { label: string; className: string }
+> = {
+  pending: {
+    label: 'Pending',
+    className: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
+  },
+  in_review: {
+    label: 'In Review',
+    className: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
+  },
+  approved: {
+    label: 'Approved',
+    className: 'bg-green-100 text-green-700 hover:bg-green-100',
+  },
+}
+
+function ReportRow({ report }: { report: HolisticReport }) {
+  const { label, className } = REVIEW_STATUS_CONFIG[report.reviewStatus]
+  const generatedDate = report.generatedAt.toLocaleDateString('en-SG', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+
+  return (
+    <Link
+      to="/reports/$id"
+      params={{ id: report.id }}
+      className="flex items-center justify-between rounded-lg border px-4 py-3 transition-colors hover:bg-muted/50"
+    >
+      <div className="flex items-center gap-3">
+        <FileText className="h-4 w-4 text-muted-foreground" />
+        <div>
+          <p className="text-sm font-medium">
+            {report.term} — {report.academicYear}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Generated {generatedDate}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Badge className={className}>{label}</Badge>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+      </div>
+    </Link>
+  )
+}
+
 export function StudentProfile({
   student,
   headerControls,
 }: StudentProfileProps) {
+  const [wizardOpen, setWizardOpen] = useState(false)
+
+  const studentReports = filterReports({ studentId: student.id })
+  const existingTerms = new Set(studentReports.map((r) => r.term))
+  const missingTerms = TERMS.filter(
+    (t): t is Term => !existingTerms.has(t),
+  )
+
   const sections = [
     { id: 'behaviour', label: 'Behaviour' },
     { id: 'wellbeing', label: 'Wellbeing' },
     { id: 'academic', label: 'Academic' },
     { id: 'family', label: 'Family' },
     { id: 'others', label: 'Others' },
+    { id: 'reports', label: 'Reports' },
   ]
 
   return (
@@ -286,6 +356,77 @@ export function StudentProfile({
             />
           </dl>
         </Section>
+
+        {/* Reports Section */}
+        <Section
+          id="reports"
+          title="Reports"
+          icon={<FileText className="h-5 w-5" />}
+          iconClassName="bg-red-100 text-red-600"
+        >
+          {studentReports.length > 0 ? (
+            <div className="space-y-2">
+              {studentReports
+                .sort(
+                  (a, b) =>
+                    TERMS.indexOf(a.term) - TERMS.indexOf(b.term),
+                )
+                .map((report) => (
+                  <ReportRow key={report.id} report={report} />
+                ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-8 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <FileText className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">No reports generated</p>
+                <p className="text-xs text-muted-foreground">
+                  Generate a Holistic Development Report for this student
+                </p>
+              </div>
+            </div>
+          )}
+
+          {missingTerms.length > 0 && (
+            <div className="mt-4 flex items-center gap-2 border-t pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setWizardOpen(true)}
+              >
+                <Plus className="mr-1 h-4 w-4" />
+                Generate HDP
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                {missingTerms.length === TERMS.length
+                  ? 'All terms'
+                  : missingTerms.join(', ')}{' '}
+                not yet generated
+              </span>
+            </div>
+          )}
+
+          {studentReports.length > 0 && (
+            <div className="mt-4 border-t pt-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+                render={
+                  <Link
+                    to="/reports"
+                    search={{ studentId: student.id, groupBy: 'student' }}
+                  />
+                }
+              >
+                <Eye className="mr-1 h-4 w-4" />
+                View all in Reports
+              </Button>
+            </div>
+          )}
+        </Section>
       </div>
 
       {/* Jump to Navigation */}
@@ -305,6 +446,13 @@ export function StudentProfile({
           </nav>
         </div>
       </aside>
+
+      <GenerateHdpWizard
+        student={student}
+        missingTerms={missingTerms}
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+      />
     </div>
   )
 }

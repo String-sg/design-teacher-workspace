@@ -24,6 +24,7 @@ export function AcademicTab({
 
   return (
     <div className="flex flex-col gap-6 pt-4">
+      <h2 className="text-lg font-semibold">Subject Performance</h2>
       <SubjectAccordion subjects={data.subjects} />
       <EvaluationGlossary />
     </div>

@@ -52,6 +52,82 @@ function getRandomStatus<T>(statuses: Array<T>, seed: number): T {
   return statuses[seed % statuses.length]
 }
 
+/**
+ * Generates logically consistent review/student/parent statuses.
+ *
+ * Rules:
+ * - pending or in_review → student & parent must be not_sent
+ * - Only approved reports can be sent
+ * - Secondary: student receives first, then parent
+ *   (student must be "sent_to_parents" before parent can be "sent")
+ * - Primary: no student delivery, parent goes directly
+ */
+function generateConsistentStatuses(
+  seed: number,
+  isSecondary: boolean,
+): {
+  reviewStatus: ReviewStatus
+  studentStatus: StudentStatus
+  parentStatus: ParentStatus
+} {
+  const stage = Math.abs(seed) % 12
+
+  // Pending review: stages 0–1 (~17%)
+  if (stage <= 1) {
+    return {
+      reviewStatus: 'pending',
+      studentStatus: 'not_sent',
+      parentStatus: 'not_sent',
+    }
+  }
+
+  // In review: stages 2–3 (~17%)
+  if (stage <= 3) {
+    return {
+      reviewStatus: 'in_review',
+      studentStatus: 'not_sent',
+      parentStatus: 'not_sent',
+    }
+  }
+
+  // Approved: stages 4–11 (~67%)
+  if (!isSecondary) {
+    // Primary: no student delivery, parent goes through pipeline directly
+    if (stage <= 5) {
+      return { reviewStatus: 'approved', studentStatus: 'not_sent', parentStatus: 'not_sent' }
+    }
+    if (stage <= 7) {
+      return { reviewStatus: 'approved', studentStatus: 'not_sent', parentStatus: 'sent' }
+    }
+    if (stage <= 9) {
+      return { reviewStatus: 'approved', studentStatus: 'not_sent', parentStatus: 'viewed' }
+    }
+    return { reviewStatus: 'approved', studentStatus: 'not_sent', parentStatus: 'acknowledged' }
+  }
+
+  // Secondary: student first → then parent
+  if (stage === 4) {
+    return { reviewStatus: 'approved', studentStatus: 'not_sent', parentStatus: 'not_sent' }
+  }
+  if (stage === 5) {
+    return { reviewStatus: 'approved', studentStatus: 'sent', parentStatus: 'not_sent' }
+  }
+  if (stage === 6) {
+    return { reviewStatus: 'approved', studentStatus: 'viewed', parentStatus: 'not_sent' }
+  }
+  if (stage === 7) {
+    return { reviewStatus: 'approved', studentStatus: 'acknowledged', parentStatus: 'not_sent' }
+  }
+  if (stage === 8) {
+    return { reviewStatus: 'approved', studentStatus: 'sent_to_parents', parentStatus: 'sent' }
+  }
+  if (stage === 9) {
+    return { reviewStatus: 'approved', studentStatus: 'sent_to_parents', parentStatus: 'viewed' }
+  }
+  // stages 10–11
+  return { reviewStatus: 'approved', studentStatus: 'sent_to_parents', parentStatus: 'acknowledged' }
+}
+
 function seededPick<T>(arr: Array<T>, seed: number): T {
   return arr[Math.abs(seed) % arr.length]
 }
@@ -69,25 +145,27 @@ const SUBJECT_OUTCOMES: Record<
   string,
   Array<{ name: string; description: string }>
 > = {
-  English: [
+  'English Language': [
     {
-      name: 'Reading Comprehension',
-      description: 'Understands and interprets a variety of texts',
+      name: 'Speaking',
+      description:
+        'Speak clearly and confidently to express thoughts and ideas.',
     },
     {
-      name: 'Writing & Composition',
-      description: 'Expresses ideas clearly in written form',
+      name: 'Reading',
+      description: 'Read and comprehend a variety of texts with fluency.',
     },
     {
-      name: 'Grammar & Vocabulary',
-      description: 'Uses accurate grammar and appropriate vocabulary',
+      name: 'Writing',
+      description: 'Write creatively and accurately for different purposes.',
     },
     {
-      name: 'Oral Communication',
-      description: 'Communicates effectively in spoken English',
+      name: 'Listening',
+      description:
+        'Listen attentively and respond appropriately to spoken language.',
     },
   ],
-  Chinese: [
+  'Chinese Language': [
     {
       name: 'Reading Comprehension',
       description: 'Reads and comprehends Chinese passages',
@@ -442,6 +520,14 @@ const CORE_VALUE_LEVELS: Array<CoreValueLevel> = [
   'Beginning',
 ]
 
+const LEVEL_SHORT_DESCRIPTIONS: Record<CoreValueLevel, string> = {
+  'Demonstrates Very Strongly': 'A role model for others',
+  'Demonstrates Strongly': 'Consistent and impactful',
+  Demonstrates: 'Regularly shows this value',
+  'Regularly Shows': 'Growing in this area',
+  Beginning: 'Starting to develop',
+}
+
 const CORE_VALUE_DEFS: Array<{
   name: string
   description: string
@@ -502,10 +588,12 @@ function generateCoreValues(student: Student, seed: number): Array<CoreValue> {
     const levelIdx = 5 - score
     const numSupports = 1 + ((seed + i) % 2)
     const supportBy = def.supportPool.slice(0, numSupports)
+    const level = CORE_VALUE_LEVELS[levelIdx]
     return {
       name: def.name,
       description: def.description,
-      level: CORE_VALUE_LEVELS[levelIdx],
+      shortDescription: LEVEL_SHORT_DESCRIPTIONS[level],
+      level,
       score,
       supportedBy: supportBy,
     }
@@ -686,6 +774,7 @@ export function generateReportFromStudent(
     studentId: student.id,
     studentName: student.name,
     studentClass: student.class,
+    schoolName: student.schoolName,
     term,
     academicYear,
     generatedAt: new Date(academicYear, termIndex * 3 + 2, 15),
@@ -713,11 +802,13 @@ export function generateReportFromStudent(
     holistic: generateHolisticData(student, seed, isSecondary),
     teacherObservations: student.teacherObservations,
     nextSteps: student.nextSteps,
-    reviewStatus: getRandomStatus(REVIEW_STATUSES, seed),
-    parentStatus: getRandomStatus(PARENT_STATUSES, seed + 1),
-    studentStatus: isSecondary
-      ? getRandomStatus(STUDENT_STATUSES, seed + 2)
-      : ('not_sent' as StudentStatus),
+    teacherComments: [student.teacherObservations, student.nextSteps]
+      .filter(Boolean)
+      .join(' '),
+    ...generateConsistentStatuses(
+      student.id.charCodeAt(0) + (TERMS.length - 1 - termIndex),
+      isSecondary,
+    ),
     nric: student.nric,
     indexNumber: student.indexNumber,
     formTeacher: student.formTeacher,
@@ -735,7 +826,10 @@ function generateAllReports(): Array<HolisticReport> {
   const reports: Array<HolisticReport> = []
 
   for (const student of mockStudents) {
-    for (const term of TERMS) {
+    // First 5 students only have Terms 1-2 generated, so the wizard can generate 3-4
+    const studentIdx = mockStudents.indexOf(student)
+    const termsToGenerate = studentIdx < 5 ? TERMS.slice(0, 2) : TERMS
+    for (const term of termsToGenerate) {
       reports.push(
         generateReportFromStudent(student, term, CURRENT_ACADEMIC_YEAR),
       )
@@ -747,8 +841,26 @@ function generateAllReports(): Array<HolisticReport> {
 
 export const mockReports: Array<HolisticReport> = generateAllReports()
 
+export function addReport(report: HolisticReport): void {
+  if (!mockReports.find((r) => r.id === report.id)) {
+    mockReports.push(report)
+  }
+}
+
 export function getReportById(id: string): HolisticReport | undefined {
   return mockReports.find((report) => report.id === id)
+}
+
+export function getAdjacentReportIds(id: string): {
+  prevId: string | null
+  nextId: string | null
+} {
+  const index = mockReports.findIndex((report) => report.id === id)
+  if (index === -1) return { prevId: null, nextId: null }
+  return {
+    prevId: index > 0 ? mockReports[index - 1].id : null,
+    nextId: index < mockReports.length - 1 ? mockReports[index + 1].id : null,
+  }
 }
 
 export interface ReportFilters {

@@ -130,6 +130,7 @@ export type CoreValueLevel =
 export interface CoreValue {
   name: string
   description: string
+  shortDescription: string
   level: CoreValueLevel
   score: number
   supportedBy: Array<string>
@@ -175,6 +176,7 @@ export interface HolisticReport {
   studentId: string
   studentName: string
   studentClass: string
+  schoolName?: string
   term: Term
   academicYear: number
   generatedAt: Date
@@ -185,6 +187,7 @@ export interface HolisticReport {
   holistic: HolisticData
   teacherObservations: string | null
   nextSteps: string | null
+  teacherComments: string | null
   reviewStatus: ReviewStatus
   parentStatus: ParentStatus
   studentStatus: StudentStatus
