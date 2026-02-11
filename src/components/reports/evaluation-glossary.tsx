@@ -9,32 +9,30 @@ const glossaryItems: Array<{
   {
     status: 'Accomplished',
     description:
-      'Student has demonstrated thorough understanding and consistently applies concepts independently.',
+      'Student consistently demonstrates a high level of understanding and independently applies skills in various contexts.',
   },
   {
     status: 'Competent',
     description:
-      'Student has demonstrated good understanding and can apply concepts with minimal guidance.',
+      'Student demonstrates a good understanding and is able to apply skills independently in most situations.',
   },
   {
     status: 'Developing',
     description:
-      'Student is building understanding and can apply concepts with some support and guidance.',
+      'Student is beginning to understand and apply skills with some guidance and support.',
   },
   {
     status: 'Beginning',
     description:
-      'Student is starting to develop understanding and requires significant support.',
+      'Student is starting to develop understanding of basic concepts and requires significant support.',
   },
 ]
 
 export function EvaluationGlossary() {
   return (
     <div className="mt-8">
-      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide">
-        Evaluation Glossary
-      </h3>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <h3 className="mb-4 text-lg font-semibold">Evaluation Glossary</h3>
+      <div className="flex flex-col gap-3">
         {glossaryItems.map((item) => (
           <div
             key={item.status}
@@ -42,7 +40,7 @@ export function EvaluationGlossary() {
           >
             <span
               className={cn(
-                'w-fit rounded-full px-3 py-1 text-xs font-medium',
+                'w-fit rounded-full px-3 py-1 text-xs font-semibold uppercase',
                 statusColors[item.status],
               )}
             >

@@ -8,8 +8,10 @@ interface VIASectionProps {
 export function VIASection({ activities }: VIASectionProps) {
   return (
     <section className="border-border rounded-lg border p-5">
-      <div className="flex items-center gap-2">
-        <Heart className="text-[#12b886]" size={20} />
+      <div className="flex items-center gap-3">
+        <div className="flex size-9 items-center justify-center rounded-full bg-[#e8feea]">
+          <Heart className="text-[#12b886]" size={18} />
+        </div>
         <h2 className="text-base font-semibold">Values in Action (VIA)</h2>
       </div>
 
@@ -21,11 +23,11 @@ export function VIASection({ activities }: VIASectionProps) {
                 {activity.category}
               </span>
               <span className="text-muted-foreground text-sm">
-                {activity.hours} hours
+                {activity.hours} Hours
               </span>
             </div>
-            <p className="text-sm font-medium">{activity.activityName}</p>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-sm font-semibold">{activity.activityName}</p>
+            <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
               Role: {activity.role}
             </p>
             <p className="text-muted-foreground text-sm">

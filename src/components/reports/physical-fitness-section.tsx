@@ -10,17 +10,19 @@ export function PhysicalFitnessSection({
 }: PhysicalFitnessSectionProps) {
   return (
     <section className="border-border rounded-lg border p-5">
-      <div className="flex items-center gap-2">
-        <Activity className="text-[#12b886]" size={20} />
+      <div className="flex items-center gap-3">
+        <div className="flex size-9 items-center justify-center rounded-full bg-[#e8feea]">
+          <Activity className="text-[#12b886]" size={18} />
+        </div>
         <h2 className="text-base font-semibold">Physical Fitness</h2>
       </div>
 
       <div className="mt-4 flex items-center gap-3">
-        <span className="rounded-full bg-[#e8feea] px-3 py-1 text-xs font-semibold text-[#12b886]">
+        <span className="rounded-full bg-[#e8feea] px-3 py-1 text-xs font-semibold uppercase text-[#12b886]">
           Health Metric
         </span>
         <span className="text-muted-foreground text-sm">
-          {fitness.percentile}th percentile
+          {fitness.percentile}th Percentile
         </span>
       </div>
 

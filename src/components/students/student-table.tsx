@@ -621,7 +621,7 @@ export function StudentTable({
                   )}
                   {!isHidden && (
                     <TableRow
-                      className="cursor-pointer hover:bg-muted/50"
+                      className="group cursor-pointer hover:bg-muted/50"
                       onClick={() =>
                         navigate({
                           to: '/students/$id',
@@ -630,14 +630,14 @@ export function StudentTable({
                       }
                     >
                       {isVisible('index') && (
-                        <TableCell className="sticky left-0 z-10 bg-white pl-6 text-muted-foreground">
+                        <TableCell className="sticky left-0 z-10 bg-white pl-6 text-muted-foreground transition-colors group-hover:bg-muted/50">
                           {displayStartIndex + index}
                         </TableCell>
                       )}
                       {isVisible('name') && (
                         <TableCell
                           className={cn(
-                            'sticky z-10 bg-white font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]',
+                            'sticky z-10 bg-white font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors group-hover:bg-muted/50',
                             isVisible('index') ? 'left-12' : 'left-0',
                           )}
                         >
@@ -645,7 +645,7 @@ export function StudentTable({
                             {student.name}
                             <Link
                               to="/reports"
-                              search={{ studentId: student.id }}
+                              search={{ studentId: student.id, groupBy: 'student' }}
                               className="text-muted-foreground hover:text-foreground"
                               onClick={(e) => e.stopPropagation()}
                             >

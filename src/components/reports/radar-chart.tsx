@@ -3,14 +3,31 @@ import type { CoreValue } from '@/types/report'
 interface RadarChartProps {
   values: Array<CoreValue>
   size?: number
+  colorScheme?: 'green' | 'pink'
 }
 
-export function RadarChart({ values, size = 250 }: RadarChartProps) {
+const COLORS = {
+  green: {
+    fill: 'rgba(18, 184, 134, 0.15)',
+    stroke: '#12b886',
+  },
+  pink: {
+    fill: 'rgba(242, 108, 71, 0.15)',
+    stroke: '#f26c47',
+  },
+}
+
+export function RadarChart({
+  values,
+  size = 250,
+  colorScheme = 'pink',
+}: RadarChartProps) {
   const center = size / 2
   const maxRadius = size / 2 - 30
   const levels = 5
   const angleStep = (2 * Math.PI) / values.length
   const startAngle = -Math.PI / 2
+  const colors = COLORS[colorScheme]
 
   function getPoint(index: number, scale: number): { x: number; y: number } {
     const angle = startAngle + index * angleStep
@@ -61,13 +78,13 @@ export function RadarChart({ values, size = 250 }: RadarChartProps) {
 
       <polygon
         points={dataPolygon}
-        fill="rgba(18, 184, 134, 0.15)"
-        stroke="#12b886"
+        fill={colors.fill}
+        stroke={colors.stroke}
         strokeWidth={2}
       />
 
       {dataPoints.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={4} fill="#12b886" />
+        <circle key={i} cx={p.x} cy={p.y} r={4} fill={colors.stroke} />
       ))}
 
       {values.map((v, i) => {

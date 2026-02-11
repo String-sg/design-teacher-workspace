@@ -1,4 +1,4 @@
-import { Trophy } from 'lucide-react'
+import { Star, Award } from 'lucide-react'
 import { AttendanceRing } from './attendance-ring'
 import type { CCAInfo } from '@/types/report'
 
@@ -9,8 +9,10 @@ interface CCASectionProps {
 export function CCASection({ ccaList }: CCASectionProps) {
   return (
     <section className="border-border rounded-lg border p-5">
-      <div className="flex items-center gap-2">
-        <Trophy className="text-[#12b886]" size={20} />
+      <div className="flex items-center gap-3">
+        <div className="flex size-9 items-center justify-center rounded-full bg-[#eef0ff]">
+          <Star className="text-[#6366f1]" size={18} />
+        </div>
         <h2 className="text-base font-semibold">
           Co-Curricular Activity (CCA)
         </h2>
@@ -26,40 +28,50 @@ export function CCASection({ ccaList }: CCASectionProps) {
           return (
             <div key={cca.name} className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <span className="rounded-full bg-[#e8feea] px-3 py-1 text-xs font-semibold uppercase text-[#12b886]">
-                  {cca.category}
+                <Award className="text-[#6366f1]" size={14} />
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#6366f1]">
+                  CCA: {cca.category}
                 </span>
               </div>
 
               <div>
-                <p className="text-sm font-semibold text-[#f26c47]">
-                  {cca.name}
-                </p>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-base font-semibold">{cca.name}</p>
+                <p className="text-sm font-medium text-[#12b886]">
                   {cca.role} &middot; {cca.years}{' '}
                   {cca.years === 1 ? 'year' : 'years'}
                 </p>
               </div>
 
               {cca.recognition.length > 0 && (
-                <div>
-                  <p className="text-xs font-medium">Recognition</p>
-                  <ul className="text-muted-foreground mt-1 list-inside list-disc text-sm">
-                    {cca.recognition.map((r) => (
-                      <li key={r}>{r}</li>
-                    ))}
-                  </ul>
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider">
+                    Recognition
+                  </p>
+                  {cca.recognition.map((r) => (
+                    <div
+                      key={r}
+                      className="border-border flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+                    >
+                      <Award className="text-muted-foreground size-4 shrink-0" />
+                      {r}
+                    </div>
+                  ))}
                 </div>
               )}
 
-              <div className="flex items-center gap-4">
-                <AttendanceRing percentage={attendancePercentage} size={80} />
-                <div>
-                  <p className="text-sm font-medium">Participation</p>
-                  <p className="text-muted-foreground text-sm">
-                    {cca.sessionsAttended} / {cca.totalSessions} sessions
-                    attended
-                  </p>
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wider">
+                  Participation
+                </p>
+                <div className="flex items-center gap-4">
+                  <AttendanceRing percentage={attendancePercentage} size={80} />
+                  <div>
+                    <p className="text-sm font-medium">Overall Attendance</p>
+                    <p className="text-muted-foreground text-sm">
+                      {cca.sessionsAttended} / {cca.totalSessions} Sessions
+                      Attended
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

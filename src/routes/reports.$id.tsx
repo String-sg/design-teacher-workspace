@@ -1,19 +1,34 @@
 import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowLeft, ClipboardList, Eye, Send } from 'lucide-react'
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Eye,
+  MoreVertical,
+  Send,
+} from 'lucide-react'
+
 import { toast } from 'sonner'
 
 import type { SchoolLevel } from '@/types/report'
 import { AcademicTab } from '@/components/reports/academic-tab'
 import { EmailPreviewDialog } from '@/components/reports/email-preview-dialog'
+import { PgPreviewDialog } from '@/components/reports/pg-preview-dialog'
 import { HolisticTab } from '@/components/reports/holistic-tab'
 import { ParentPreviewDialog } from '@/components/reports/parent-preview-dialog'
 import { ReportOverviewTab } from '@/components/reports/report-overview-tab'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
+import { Button, buttonVariants } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { getReportById } from '@/data/mock-reports'
+import { getAdjacentReportIds, getReportById } from '@/data/mock-reports'
 import { getSchoolLevel } from '@/data/mock-students'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { cn } from '@/lib/utils'
@@ -42,10 +57,12 @@ function ReportDetailPage() {
   const defaultLevel = report
     ? getSchoolLevel(report.studentClass)
     : 'secondary'
-  const [schoolLevel, setSchoolLevel] = useState<SchoolLevel>(defaultLevel)
+  const schoolLevel = defaultLevel
+  const [activeTab, setActiveTab] = useState('overview')
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewMode, setPreviewMode] = useState<'parent' | 'student'>('parent')
   const [emailPreviewOpen, setEmailPreviewOpen] = useState(false)
+  const [pgPreviewOpen, setPgPreviewOpen] = useState(false)
 
   const breadcrumbLabel = report
     ? `${report.studentName} - ${report.term} ${report.academicYear}`
@@ -64,14 +81,15 @@ function ReportDetailPage() {
           <p className="text-muted-foreground mt-2">
             The report you're looking for doesn't exist.
           </p>
-          <Button asChild className="mt-4">
-            <Link to="/reports">Back to Reports</Link>
-          </Button>
+          <Link to="/reports" className={cn(buttonVariants(), 'mt-4')}>
+            Back to Reports
+          </Link>
         </div>
       </main>
     )
   }
 
+  const { prevId, nextId } = getAdjacentReportIds(id)
   const isPrimary = schoolLevel === 'primary'
 
   const handlePreview = () => {
@@ -79,58 +97,38 @@ function ReportDetailPage() {
     setPreviewOpen(true)
   }
 
-  const handleSend = () => {
+  const handleSendToStudent = () => {
     setEmailPreviewOpen(true)
+  }
+
+  const handleSendViaPg = () => {
+    setPgPreviewOpen(true)
+  }
+
+  const handleSaveAsPdf = () => {
+    toast.success('Downloading report as PDF...')
+    window.print()
   }
 
   const handleConfirmSend = () => {
     setEmailPreviewOpen(false)
-    if (isPrimary) {
-      toast.success('Report sent to parent')
-    } else {
-      toast.success("Report sent to student's email")
-    }
+    toast.success("Report sent to student's email")
+  }
+
+  const handleConfirmPgSend = () => {
+    setPgPreviewOpen(false)
+    toast.success('Report sent via Parents Gateway')
   }
 
   return (
-    <>
-      {/* Floating Primary/Secondary switcher */}
-      <div className="fixed right-6 top-4 z-50 flex items-center gap-3 rounded-full border bg-white px-4 py-2 shadow-lg">
-        <span
-          className={cn(
-            'text-sm font-medium transition-colors',
-            schoolLevel === 'primary'
-              ? 'text-[#f26c47]'
-              : 'text-muted-foreground',
-          )}
-        >
-          Primary
-        </span>
-        <Switch
-          checked={schoolLevel === 'secondary'}
-          onCheckedChange={(checked: boolean) => {
-            setSchoolLevel(checked ? 'secondary' : 'primary')
-          }}
-        />
-        <span
-          className={cn(
-            'text-sm font-medium transition-colors',
-            schoolLevel === 'secondary'
-              ? 'text-[#f26c47]'
-              : 'text-muted-foreground',
-          )}
-        >
-          Secondary
-        </span>
-      </div>
-
-      <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/reports">
-              <ArrowLeft className="size-4" />
-            </Link>
-          </Button>
+          <Link
+            to="/reports"
+            className={buttonVariants({ variant: 'ghost', size: 'icon' })}
+          >
+            <ArrowLeft className="size-4" />
+          </Link>
           <Avatar size="lg">
             <AvatarFallback>{getInitials(report.studentName)}</AvatarFallback>
           </Avatar>
@@ -150,9 +148,45 @@ function ReportDetailPage() {
               })}
             </p>
           </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-10 rounded-full"
+              disabled={!prevId}
+              render={
+                prevId ? (
+                  <Link to="/reports/$id" params={{ id: prevId }} />
+                ) : undefined
+              }
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-10 rounded-full"
+              disabled={!nextId}
+              render={
+                nextId ? (
+                  <Link to="/reports/$id" params={{ id: nextId }} />
+                ) : undefined
+              }
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-10 rounded-full"
+              onClick={handleSaveAsPdf}
+            >
+              <Download className="size-4" />
+            </Button>
+          </div>
         </div>
 
-        <Tabs defaultValue="overview">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as string)}>
           <TabsList variant="line">
             <TabsTrigger
               value="overview"
@@ -174,7 +208,10 @@ function ReportDetailPage() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
-            <ReportOverviewTab report={report} />
+            <ReportOverviewTab
+              report={report}
+              onViewHolistic={() => setActiveTab('holistic')}
+            />
           </TabsContent>
           <TabsContent value="academic">
             <AcademicTab
@@ -196,21 +233,45 @@ function ReportDetailPage() {
             <Eye className="mr-2 size-4" />
             {isPrimary ? 'Preview as Parent' : 'Preview as Student'}
           </Button>
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => toast.success('Review requested')}
-          >
-            <ClipboardList className="mr-2 size-4" />
-            Request for Review
-          </Button>
-          <Button
-            className="flex-1 bg-[#f26c47] text-white hover:bg-[#e05a37]"
-            onClick={handleSend}
-          >
-            <Send className="mr-2 size-4" />
-            {isPrimary ? 'Send to Parent' : 'Send to Students'}
-          </Button>
+          {!isPrimary && (
+            <Button
+              className="flex-1 bg-[#f26c47] text-white hover:bg-[#e05a37]"
+              onClick={handleSendToStudent}
+            >
+              <Send className="mr-2 size-4" />
+              Send to Student
+            </Button>
+          )}
+          {isPrimary && (
+            <Button
+              className="flex-1 bg-[#f26c47] text-white hover:bg-[#e05a37]"
+              onClick={handleSendViaPg}
+            >
+              <Send className="mr-2 size-4" />
+              Send to Parents via PG
+            </Button>
+          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="outline" size="icon">
+                  <MoreVertical className="size-4" />
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="end">
+              {!isPrimary && (
+                <DropdownMenuItem onClick={handleSendViaPg}>
+                  <Send className="mr-2 size-4" />
+                  Send to Parents via PG
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={handleSaveAsPdf}>
+                <Download className="mr-2 size-4" />
+                Save as PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <ParentPreviewDialog
@@ -226,10 +287,18 @@ function ReportDetailPage() {
           report={report}
           open={emailPreviewOpen}
           onOpenChange={setEmailPreviewOpen}
-          recipientType={isPrimary ? 'parent' : 'student'}
+          recipientType="student"
           onSend={handleConfirmSend}
         />
-      </main>
-    </>
+
+        <PgPreviewDialog
+          report={report}
+          open={pgPreviewOpen}
+          onOpenChange={setPgPreviewOpen}
+          onSend={handleConfirmPgSend}
+          studentFirstName={getFirstName(report.studentName)}
+          schoolLevel={schoolLevel}
+        />
+    </main>
   )
 }

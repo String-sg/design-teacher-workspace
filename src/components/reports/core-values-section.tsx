@@ -1,3 +1,4 @@
+import { Info, Award } from 'lucide-react'
 import { RadarChart } from './radar-chart'
 import type { CoreValue, CoreValueLevel } from '@/types/report'
 import { cn } from '@/lib/utils'
@@ -21,22 +22,21 @@ export function CoreValuesSection({
 }: CoreValuesSectionProps) {
   return (
     <section className="flex flex-col gap-6">
-      <div>
-        <span className="inline-block rounded-full bg-[#e8feea] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#12b886]">
+      <div className="flex flex-col items-center text-center">
+        <span className="inline-block rounded-full bg-[#fff0ec] px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#f26c47]">
           Core Values Journey
         </span>
-        <h2 className="mt-3 text-xl font-semibold">
+        <h2 className="mt-3 text-xl font-bold">
           Celebrating {studentFirstName}&apos;s Personal Growth
         </h2>
         <p className="text-muted-foreground mt-1 text-sm">
-          Character development is a key part of holistic education. This
-          section reflects how {studentFirstName} embodies our school&apos;s
-          core values through daily interactions and school activities.
+          Character development is a lifelong journey. We celebrate every step
+          forward in fulfilling our core values.
         </p>
       </div>
 
       <div className="flex justify-center">
-        <RadarChart values={coreValues} />
+        <RadarChart values={coreValues} colorScheme="pink" />
       </div>
 
       <div className="flex flex-col gap-4">
@@ -44,14 +44,17 @@ export function CoreValuesSection({
           <div key={value.name} className="border-border rounded-lg border p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
-                <h3 className="text-sm font-semibold">{value.name}</h3>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-sm font-semibold">{value.name}</h3>
+                  <Info className="text-muted-foreground size-3.5" />
+                </div>
                 <p className="text-muted-foreground mt-0.5 text-sm">
-                  {value.description}
+                  {value.shortDescription}
                 </p>
               </div>
               <span
                 className={cn(
-                  'shrink-0 rounded-full px-3 py-1 text-xs font-medium',
+                  'shrink-0 rounded-full px-3 py-1 text-xs font-semibold uppercase',
                   levelColors[value.level],
                 )}
               >
@@ -59,15 +62,18 @@ export function CoreValuesSection({
               </span>
             </div>
             {value.supportedBy.length > 0 && (
-              <div className="mt-3">
-                <p className="text-muted-foreground text-xs font-medium">
-                  Supported by:
-                </p>
-                <ul className="text-muted-foreground mt-1 list-inside list-disc text-xs">
-                  {value.supportedBy.map((s) => (
-                    <li key={s}>{s}</li>
-                  ))}
-                </ul>
+              <div className="mt-3 flex flex-col gap-1.5">
+                {value.supportedBy.map((s) => (
+                  <div
+                    key={s}
+                    className="flex items-center gap-2 rounded-md bg-gray-50 px-3 py-1.5 text-sm"
+                  >
+                    <Award className="text-muted-foreground size-3.5 shrink-0" />
+                    <span>
+                      Supported by: <span className="font-medium">{s}</span>
+                    </span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
