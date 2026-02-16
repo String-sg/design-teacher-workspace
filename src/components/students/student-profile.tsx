@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
   BookOpen,
+  Calendar,
   ChevronRight,
   Eye,
   FileText,
@@ -20,6 +21,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { GenerateHdpWizard } from '@/components/reports/generate-hdp-wizard'
+import { StudentOverviewCards } from './student-overview-cards'
 
 interface StudentProfileProps {
   student: Student
@@ -172,11 +174,11 @@ export function StudentProfile({
   )
 
   const sections = [
+    { id: 'attendance', label: 'Attendance' },
     { id: 'behaviour', label: 'Behaviour' },
     { id: 'wellbeing', label: 'Wellbeing' },
     { id: 'academic', label: 'Academic' },
     { id: 'family', label: 'Family' },
-    { id: 'others', label: 'Others' },
     { id: 'reports', label: 'Reports' },
   ]
 
@@ -197,6 +199,32 @@ export function StudentProfile({
           </div>
         </div>
 
+        {/* Overview Cards */}
+        <StudentOverviewCards student={student} />
+
+        {/* Attendance Section */}
+        <Section
+          id="attendance"
+          title="Attendance"
+          icon={<Calendar className="h-5 w-5" />}
+          iconClassName="bg-yellow-100 text-yellow-600"
+        >
+          <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
+            <Field
+              label="Attendance(%)"
+              value={
+                student.totalSchoolDays > 0
+                  ? Math.round(
+                      (student.daysPresent / student.totalSchoolDays) * 100,
+                    )
+                  : 0
+              }
+            />
+            <Field label="Late-coming(%)" value={student.lateComing} />
+            <Field label="Non-VR absences(%)" value={student.absences} />
+          </dl>
+        </Section>
+
         {/* Behaviour Section */}
         <Section
           id="behaviour"
@@ -205,12 +233,6 @@ export function StudentProfile({
           iconClassName="bg-indigo-100 text-indigo-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
-            <Field
-              label="Attendance(%)"
-              value={`${100 - Math.round((student.absences / 200) * 100)}`}
-            />
-            <Field label="Late-coming(%)" value={student.lateComing} />
-            <Field label="Non-VR absences(%)" value={student.absences} />
             <Field
               label="Offences"
               value={student.offences}
@@ -222,22 +244,7 @@ export function StudentProfile({
             />
             <Field
               label="Conduct grade"
-              value={
-                <Badge
-                  className={cn(
-                    student.conduct === 'Poor' &&
-                      'bg-red-100 text-red-700 hover:bg-red-100',
-                    student.conduct === 'Fair' &&
-                      'bg-amber-100 text-amber-700 hover:bg-amber-100',
-                    student.conduct === 'Good' &&
-                      'bg-slate-100 text-slate-700 hover:bg-slate-100',
-                    student.conduct === 'Excellent' &&
-                      'bg-green-100 text-green-700 hover:bg-green-100',
-                  )}
-                >
-                  {student.conduct}
-                </Badge>
-              }
+              value={student.conduct}
               tooltip="Current term conduct grade"
             />
           </dl>
@@ -302,14 +309,19 @@ export function StudentProfile({
           id="academic"
           title="Academic"
           icon={<GraduationCap className="h-5 w-5" />}
-          iconClassName="bg-teal-100 text-teal-600"
+          iconClassName="bg-blue-100 text-blue-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <Field
               label="Overall % across selected subjects"
-              value={student.overallPercentage}
+              value={`${student.overallPercentage}%`}
               tooltip="Average percentage across all subjects"
             />
+            <Field label="Class rank" value="32/40" />
+            <Field label="Class percentile" value="77%" />
+            <Field label="No. of subjects taken" value="8" />
+            <Field label="Distinctions" value="5" />
+            <Field label="Pass" value="3" />
             <Field
               label="Learning support"
               value={student.learningSupport || '-'}
@@ -322,7 +334,7 @@ export function StudentProfile({
           id="family"
           title="Family"
           icon={<Home className="h-5 w-5" />}
-          iconClassName="bg-amber-100 text-amber-600"
+          iconClassName="bg-green-100 text-green-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <Field label="FAS" value={student.fas || '-'} />
@@ -337,17 +349,6 @@ export function StudentProfile({
                     : '-'
               }
             />
-          </dl>
-        </Section>
-
-        {/* Others Section */}
-        <Section
-          id="others"
-          title="Others"
-          icon={<MoreHorizontal className="h-5 w-5" />}
-          iconClassName="bg-slate-100 text-slate-600"
-        >
-          <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <Field label="Custody" value={student.custody || '-'} />
             <Field label="Siblings" value={student.siblings} />
             <Field
