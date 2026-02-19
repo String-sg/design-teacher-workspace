@@ -2,10 +2,14 @@ import { useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import {
   Briefcase,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Eye,
   GraduationCap,
+  GripVertical,
   Heart,
+  Plus,
   Users,
 } from 'lucide-react'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
@@ -285,6 +289,297 @@ function Step1Audience({ selected, onSelect, onNext }: Step1AudienceProps) {
 }
 
 // ---------------------------------------------------------------------------
+// Step 2 — Form Builder constants
+// ---------------------------------------------------------------------------
+
+const DEMO_QUESTIONS = [
+  {
+    id: 'dq1',
+    type: 'yes-no',
+    text: 'Will your child be attending the field trip to Science Centre on 28 Feb 2026?',
+    required: true,
+    conditionalNote: null,
+  },
+  {
+    id: 'dq2',
+    type: 'mcq',
+    text: "Please select your child's T-shirt size.",
+    required: true,
+    options: ['XS', 'S', 'M', 'L', 'XL'],
+    conditionalNote: 'Shown if Q1 = Yes',
+  },
+  {
+    id: 'dq3',
+    type: 'mcq',
+    text: 'How will your child travel to the venue?',
+    required: true,
+    options: ['School bus', 'Private transport', 'Public transport'],
+    conditionalNote: 'Shown if Q1 = Yes',
+  },
+  {
+    id: 'dq4',
+    type: 'short-answer',
+    text: 'Any medical conditions or dietary restrictions we should be aware of?',
+    required: false,
+    conditionalNote: 'Shown if Q1 = Yes',
+  },
+] as const
+
+const QUESTION_TYPES = [
+  { id: 'yes-no', label: 'Yes / No' },
+  { id: 'mcq', label: 'Multiple Choice (single)' },
+  { id: 'checkbox', label: 'Checkboxes (multi-select)' },
+  { id: 'short-answer', label: 'Short Answer' },
+  { id: 'file-upload', label: 'File Upload' },
+] as const
+
+// ---------------------------------------------------------------------------
+// Step2FormBuilder — helper sub-components
+// ---------------------------------------------------------------------------
+
+function TypeLabel({ type }: { type: string }) {
+  const map: Record<string, string> = {
+    'yes-no': 'Yes / No',
+    mcq: 'Multiple Choice',
+    checkbox: 'Checkboxes',
+    'short-answer': 'Short Answer',
+    'file-upload': 'File Upload',
+  }
+  return <>{map[type] ?? type}</>
+}
+
+interface QuestionCardProps {
+  index: number
+  question: (typeof DEMO_QUESTIONS)[number]
+}
+
+function QuestionCard({ index, question }: QuestionCardProps) {
+  const qNum = index + 1
+  const options =
+    'options' in question ? (question.options as readonly string[]) : []
+
+  return (
+    <div
+      className="relative rounded-lg border-2 bg-white shadow-sm"
+      style={{ borderColor: '#bfdbfe' /* blue-200 */ }}
+    >
+      {/* Blue left accent bar */}
+      <div
+        className="absolute inset-y-0 left-0 w-1 rounded-l-lg"
+        style={{ backgroundColor: '#3b82f6' }}
+      />
+
+      {/* Drag handle — top center */}
+      <div className="absolute left-1/2 top-2 -translate-x-1/2">
+        <GripVertical className="size-4 text-slate-300" />
+      </div>
+
+      <div className="px-6 py-4 pl-7">
+        {/* Top row: type label + required + conditional badge */}
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <span
+            className="text-xs font-semibold uppercase tracking-wide"
+            style={{ color: '#64748b' }}
+          >
+            Q{qNum}.{' '}
+            <TypeLabel type={question.type} />
+          </span>
+
+          <div className="flex items-center gap-2">
+            {question.conditionalNote && (
+              <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                {question.conditionalNote}
+              </span>
+            )}
+            <label className="flex cursor-pointer items-center gap-1.5 text-xs text-slate-500">
+              <input
+                type="checkbox"
+                defaultChecked={question.required}
+                className="size-3.5 rounded accent-blue-600"
+                readOnly
+              />
+              Required
+            </label>
+          </div>
+        </div>
+
+        {/* Question text */}
+        <p className="mb-3 text-sm font-medium text-slate-800">{question.text}</p>
+
+        {/* Answer area */}
+        {question.type === 'yes-no' && (
+          <div className="flex flex-col gap-1.5">
+            {['Yes', 'No'].map((opt) => (
+              <label key={opt} className="flex items-center gap-2 text-sm text-slate-600">
+                <input type="radio" name={`q-${question.id}`} className="accent-blue-600" readOnly />
+                {opt}
+              </label>
+            ))}
+          </div>
+        )}
+
+        {question.type === 'mcq' && options.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            {options.map((opt) => (
+              <label key={opt} className="flex items-center gap-2 text-sm text-slate-600">
+                <input type="radio" name={`q-${question.id}`} className="accent-blue-600" readOnly />
+                {opt}
+              </label>
+            ))}
+          </div>
+        )}
+
+        {question.type === 'short-answer' && (
+          <div
+            className="rounded border border-dashed px-3 py-2 text-sm text-slate-400"
+            style={{ borderColor: '#cbd5e1' }}
+          >
+            Short answer text…
+          </div>
+        )}
+
+        {/* file-upload type is available via + Add content but not in demo questions */}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Step2FormBuilder
+// ---------------------------------------------------------------------------
+
+interface Step2Props {
+  data: WizardData
+  onUpdate: (patch: Partial<WizardData>) => void
+  onNext: () => void
+  onBack: () => void
+}
+
+function Step2FormBuilder({ data, onUpdate, onNext, onBack }: Step2Props) {
+  const [addMenuOpen, setAddMenuOpen] = useState(false)
+
+  return (
+    <div className="flex flex-col gap-0">
+      {/* ── Top bar ── */}
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-base font-semibold" style={{ color: '#1a3a5c' }}>
+          Form content
+        </h2>
+        <div className="flex items-center gap-3">
+          {/* Saved badge */}
+          <span className="flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
+            <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            All changes saved
+          </span>
+          {/* Preview button */}
+          <button
+            className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors duration-150"
+            style={{ borderColor: '#e2e8f0' }}
+          >
+            <Eye className="size-3.5" />
+            Preview
+          </button>
+        </div>
+      </div>
+
+      {/* Separator */}
+      <div className="mb-5 h-px bg-slate-100" />
+
+      {/* ── Form title block ── */}
+      <div className="mb-5 flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Form title
+          </label>
+          <input
+            type="text"
+            value={data.formTitle}
+            onChange={(e) => onUpdate({ formTitle: e.target.value })}
+            className="w-full rounded-lg border px-4 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2"
+            style={{
+              borderColor: '#e2e8f0',
+            }}
+            placeholder="Form title…"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Instructions (optional)
+          </label>
+          <input
+            type="text"
+            className="w-full rounded-lg border px-4 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2"
+            style={{ borderColor: '#e2e8f0' }}
+            placeholder="Add instructions for parents…"
+          />
+        </div>
+      </div>
+
+      {/* ── Question cards ── */}
+      <div className="mb-4 flex flex-col gap-3">
+        {DEMO_QUESTIONS.map((q, i) => (
+          <QuestionCard key={q.id} index={i} question={q} />
+        ))}
+      </div>
+
+      {/* ── + Add content button ── */}
+      <div className="relative mb-6">
+        <button
+          onClick={() => setAddMenuOpen((prev) => !prev)}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed py-3 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors duration-150"
+          style={{ borderColor: '#cbd5e1' }}
+        >
+          <Plus className="size-4" />
+          Add content
+          <ChevronDown
+            className="size-4 transition-transform duration-150"
+            style={{ transform: addMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          />
+        </button>
+
+        {addMenuOpen && (
+          <div
+            className="absolute left-0 right-0 top-full z-10 mt-1 rounded-lg border bg-white shadow-lg"
+            style={{ borderColor: '#e2e8f0' }}
+          >
+            {QUESTION_TYPES.map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => setAddMenuOpen(false)}
+                className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 first:rounded-t-lg last:rounded-b-lg transition-colors duration-100"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Back / Next navigation ── */}
+      <div className="flex justify-between">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all duration-150"
+        >
+          <ChevronLeft className="size-4" />
+          Back
+        </button>
+        <button
+          onClick={onNext}
+          className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150"
+          style={{ backgroundColor: '#1a3a5c' }}
+        >
+          Go to: Recipients
+          <ChevronRight className="size-4" />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // NewFormWizard (main component)
 // ---------------------------------------------------------------------------
 
@@ -347,31 +642,12 @@ export function NewFormWizard() {
         )}
 
         {step === 2 && (
-          <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold" style={{ color: '#1a3a5c' }}>
-              Step 2: Build Form
-            </h2>
-            <p className="text-sm text-slate-500">
-              This step will be implemented in a future task.
-            </p>
-            <div className="flex justify-between">
-              <button
-                onClick={() => setStep(1)}
-                className="flex items-center gap-2 rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all duration-150"
-              >
-                <ChevronLeft className="size-4" />
-                Back
-              </button>
-              <button
-                onClick={() => setStep(3)}
-                className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150"
-                style={{ backgroundColor: '#1a3a5c' }}
-              >
-                Go to: Recipients
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
-          </div>
+          <Step2FormBuilder
+            data={data}
+            onUpdate={update}
+            onNext={() => setStep(3)}
+            onBack={() => setStep(1)}
+          />
         )}
 
         {step === 3 && (
