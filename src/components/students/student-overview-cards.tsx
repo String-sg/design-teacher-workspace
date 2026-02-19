@@ -1,6 +1,6 @@
-import { TrendingDown, TrendingUp, Minus } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react'
 import type { Student } from '@/types/student'
+import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 interface StudentOverviewCardsProps {
@@ -68,9 +68,7 @@ export function StudentOverviewCards({ student }: StudentOverviewCardsProps) {
               <span className="text-xs font-medium">Improving</span>
             </div>
           </div>
-          <div className="text-3xl font-semibold">
-            {student.riskIndicators}
-          </div>
+          <div className="text-3xl font-semibold">{student.riskIndicators}</div>
           <span className="text-muted-foreground text-sm">
             TCI risk indicators
           </span>

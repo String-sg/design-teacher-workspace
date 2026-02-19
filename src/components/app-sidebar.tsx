@@ -2,6 +2,8 @@ import * as React from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
 import {
   ArrowUpRight,
+  BarChart3,
+  Bot,
   CircleHelp,
   FileText,
   Home,
@@ -19,6 +21,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
@@ -42,6 +45,7 @@ interface MenuItem {
   icon: LucideIcon
   badge?: number
   featureFlag?: FeatureFlagKey
+  conceptTag?: boolean
 }
 
 const navigationItems: Array<MenuItem> = [
@@ -58,15 +62,31 @@ const navigationItems: Array<MenuItem> = [
     icon: Home,
   },
   {
-    title: 'Students',
-    url: '/students',
-    icon: Users,
-  },
-  {
     title: 'Reports',
     url: '/reports',
     icon: FileText,
     featureFlag: 'holistic-reports',
+  },
+]
+
+const studentInsightItems: Array<MenuItem> = [
+  {
+    title: 'Student 360',
+    url: '/students',
+    icon: Users,
+    conceptTag: true,
+  },
+  {
+    title: 'Student Analytics',
+    url: '/student-analytics',
+    icon: BarChart3,
+    conceptTag: true,
+  },
+  {
+    title: 'Insight Buddy',
+    url: '/insight-buddy',
+    icon: Bot,
+    conceptTag: true,
   },
 ]
 
@@ -82,11 +102,19 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
         <SidebarMenuItem key={item.title}>
           <SidebarMenuButton
             render={<Link to={item.url} />}
-            isActive={currentPath === item.url}
+            isActive={
+              currentPath === item.url ||
+              (item.url !== '/' && currentPath.startsWith(item.url))
+            }
             tooltip={item.title}
           >
             <item.icon className="size-4" />
             <span>{item.title}</span>
+            {item.conceptTag && (
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground group-data-[collapsible=icon]:hidden">
+                Concept
+              </span>
+            )}
           </SidebarMenuButton>
           {item.badge && (
             <SidebarMenuBadge className="bg-muted text-muted-foreground">
@@ -128,6 +156,15 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenuItems
               items={filteredItems}
+              currentPath={location.pathname}
+            />
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Student Insight</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenuItems
+              items={studentInsightItems}
               currentPath={location.pathname}
             />
           </SidebarGroupContent>

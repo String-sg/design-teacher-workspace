@@ -241,13 +241,21 @@ export function ReportTable({
   // Group-aware pagination: pack complete groups into pages
   const groupPages = useMemo(() => {
     if (!allGroups) return null
-    const pages: Array<Array<{ name: string; reports: Array<HolisticReport> }>> = []
-    let currentPageGroups: Array<{ name: string; reports: Array<HolisticReport> }> = []
+    const pages: Array<
+      Array<{ name: string; reports: Array<HolisticReport> }>
+    > = []
+    let currentPageGroups: Array<{
+      name: string
+      reports: Array<HolisticReport>
+    }> = []
     let currentPageSize = 0
 
     for (const group of allGroups) {
       // If adding this group would exceed pageSize and we already have groups on this page, start a new page
-      if (currentPageSize > 0 && currentPageSize + group.reports.length > pageSize) {
+      if (
+        currentPageSize > 0 &&
+        currentPageSize + group.reports.length > pageSize
+      ) {
         pages.push(currentPageGroups)
         currentPageGroups = []
         currentPageSize = 0
@@ -311,7 +319,10 @@ export function ReportTable({
       const pageIdx = Math.min(groupPage - 1, groupPages.length - 1)
       return groupPages[pageIdx].flatMap((g) => g.reports)
     }
-    return reports.slice(flatPagination.startIndex, flatPagination.startIndex + pageSize)
+    return reports.slice(
+      flatPagination.startIndex,
+      flatPagination.startIndex + pageSize,
+    )
   }, [groupPages, groupPage, reports, flatPagination.startIndex, pageSize])
 
   const visibleGroups = useMemo(() => {
@@ -380,7 +391,9 @@ export function ReportTable({
   const totalPages = isGrouped ? groupTotalPages : flatPagination.totalPages
   const pageNumbers = isGrouped ? groupPageNumbers : flatPagination.pageNumbers
   const canGoPrevious = isGrouped ? groupPage > 1 : flatPagination.canGoPrevious
-  const canGoNext = isGrouped ? groupPage < groupTotalPages : flatPagination.canGoNext
+  const canGoNext = isGrouped
+    ? groupPage < groupTotalPages
+    : flatPagination.canGoNext
   const goToPage = isGrouped
     ? (p: number) => setGroupPage(Math.max(1, Math.min(p, groupTotalPages)))
     : flatPagination.goToPage
@@ -411,9 +424,13 @@ export function ReportTable({
             <TableHead className="min-w-[90px]">Term</TableHead>
             <TableHead className="min-w-[120px]">Review Status</TableHead>
             {isSecondary && (
-              <TableHead className="min-w-[130px]">Student View Status</TableHead>
+              <TableHead className="min-w-[130px]">
+                Student View Status
+              </TableHead>
             )}
-            <TableHead className="min-w-[120px] pr-6">Parent View Status</TableHead>
+            <TableHead className="min-w-[120px] pr-6">
+              Parent View Status
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

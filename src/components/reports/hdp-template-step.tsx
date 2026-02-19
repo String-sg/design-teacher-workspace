@@ -1,4 +1,5 @@
 import { BarChart3, ClipboardList, Pencil } from 'lucide-react'
+import type { Term } from '@/types/report'
 import { Badge } from '@/components/ui/badge'
 import {
   Select,
@@ -7,7 +8,6 @@ import {
   SelectTrigger,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import type { Term } from '@/types/report'
 
 export type TemplateId = 'quarterly' | 'comprehensive' | 'custom'
 
@@ -66,8 +66,7 @@ export const TEMPLATES: Array<HdpTemplate> = [
   {
     id: 'custom',
     name: 'Custom Report',
-    description:
-      'Select your own sections to create a personalized report',
+    description: 'Select your own sections to create a personalized report',
     icon: <Pencil className="size-5 text-amber-600" />,
     tags: ['Customisable'],
     sections: {

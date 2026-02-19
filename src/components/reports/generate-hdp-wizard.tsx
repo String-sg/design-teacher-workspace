@@ -1,27 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
-  X,
-  Eye,
-  Save,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  Save,
+  X,
 } from 'lucide-react'
+import { HdpTemplateStep, TEMPLATES } from './hdp-template-step'
+import { HdpDataStep } from './hdp-data-step'
+import { HdpPreviewStep } from './hdp-preview-step'
+import type { Student } from '@/types/student'
+import type { HolisticReport, Term } from '@/types/report'
+import type { TemplateId } from './hdp-template-step'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
-  generateReportFromStudent,
-  addReport,
   CURRENT_ACADEMIC_YEAR,
+  addReport,
+  generateReportFromStudent,
 } from '@/data/mock-reports'
 import { getSchoolLevel } from '@/data/mock-students'
-import type { Student } from '@/types/student'
-import type { HolisticReport, Term } from '@/types/report'
-import { HdpTemplateStep, TEMPLATES } from './hdp-template-step'
-import type { TemplateId } from './hdp-template-step'
-import { HdpDataStep } from './hdp-data-step'
-import { HdpPreviewStep } from './hdp-preview-step'
 
 const STEPS = ['Template', 'Selection', 'Preview', 'Save']
 
@@ -56,8 +56,9 @@ export function GenerateHdpWizard({
   const [selectedTerm, setSelectedTerm] = useState<Term>(missingTerms[0])
   const [selectedSections, setSelectedSections] =
     useState<Record<string, boolean>>(DEFAULT_SECTIONS)
-  const [generatedReport, setGeneratedReport] =
-    useState<HolisticReport | null>(null)
+  const [generatedReport, setGeneratedReport] = useState<HolisticReport | null>(
+    null,
+  )
   const [isSaved, setIsSaved] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -249,10 +250,7 @@ export function GenerateHdpWizard({
               <Button
                 className="bg-[#f26c47] text-white hover:bg-[#e05a37]"
                 render={
-                  <Link
-                    to="/reports/$id"
-                    params={{ id: generatedReport.id }}
-                  />
+                  <Link to="/reports/$id" params={{ id: generatedReport.id }} />
                 }
               >
                 <Eye className="mr-1.5 size-4" />

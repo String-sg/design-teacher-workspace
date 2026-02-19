@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { ClipboardCheck, Columns3, ListFilter, Search, Send } from 'lucide-react'
+import {
+  ClipboardCheck,
+  Columns3,
+  ListFilter,
+  Search,
+  Send,
+} from 'lucide-react'
 import { toast } from 'sonner'
 
 import type {
@@ -74,7 +80,11 @@ export const Route = createFileRoute('/reports/')({
 })
 
 function ReportsPage() {
-  const { studentId: initialStudentId, term: initialTerm, groupBy: initialGroupBy } = Route.useSearch()
+  const {
+    studentId: initialStudentId,
+    term: initialTerm,
+    groupBy: initialGroupBy,
+  } = Route.useSearch()
   const [schoolLevel, setSchoolLevel] = useState<SchoolLevel>('secondary')
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [selectedTerm, setSelectedTerm] = useState<Term | ''>(initialTerm || '')
@@ -445,7 +455,10 @@ function ReportsPage() {
             <PopoverContent align="start" className="w-80 gap-3">
               <div className="space-y-1">
                 <Label>Term</Label>
-                <TermSelector value={selectedTerm} onValueChange={setSelectedTerm} />
+                <TermSelector
+                  value={selectedTerm}
+                  onValueChange={setSelectedTerm}
+                />
               </div>
               <div className="space-y-1">
                 <Label>Review status</Label>
@@ -531,7 +544,9 @@ function ReportsPage() {
                       <SelectItem value="sent">Sent</SelectItem>
                       <SelectItem value="viewed">Viewed</SelectItem>
                       <SelectItem value="acknowledged">Acknowledged</SelectItem>
-                      <SelectItem value="sent_to_parents">Sent to Parents</SelectItem>
+                      <SelectItem value="sent_to_parents">
+                        Sent to Parents
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -568,7 +583,6 @@ function ReportsPage() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
       </div>
 
       {/* Report Table */}

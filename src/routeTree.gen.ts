@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentsRouteImport } from './routes/students'
+import { Route as StudentAnalyticsRouteImport } from './routes/student-analytics'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as InsightBuddyRouteImport } from './routes/insight-buddy'
 import { Route as FlagsRouteImport } from './routes/flags'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as GuestRouteImport } from './routes/_guest'
@@ -29,9 +31,19 @@ const StudentsRoute = StudentsRouteImport.update({
   path: '/students',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentAnalyticsRoute = StudentAnalyticsRouteImport.update({
+  id: '/student-analytics',
+  path: '/student-analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightBuddyRoute = InsightBuddyRouteImport.update({
+  id: '/insight-buddy',
+  path: '/insight-buddy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FlagsRoute = FlagsRouteImport.update({
@@ -99,7 +111,9 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
+  '/insight-buddy': typeof InsightBuddyRoute
   '/reports': typeof ReportsRouteWithChildren
+  '/student-analytics': typeof StudentAnalyticsRoute
   '/students': typeof StudentsRouteWithChildren
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -113,6 +127,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/flags': typeof FlagsRoute
+  '/insight-buddy': typeof InsightBuddyRoute
+  '/student-analytics': typeof StudentAnalyticsRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
@@ -128,7 +144,9 @@ export interface FileRoutesById {
   '/_guest': typeof GuestRouteWithChildren
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
+  '/insight-buddy': typeof InsightBuddyRoute
   '/reports': typeof ReportsRouteWithChildren
+  '/student-analytics': typeof StudentAnalyticsRoute
   '/students': typeof StudentsRouteWithChildren
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -145,7 +163,9 @@ export interface FileRouteTypes {
     | '/$'
     | '/announcements'
     | '/flags'
+    | '/insight-buddy'
     | '/reports'
+    | '/student-analytics'
     | '/students'
     | '/announcements/$id'
     | '/reports/$id'
@@ -159,6 +179,8 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/flags'
+    | '/insight-buddy'
+    | '/student-analytics'
     | '/announcements/$id'
     | '/reports/$id'
     | '/students/$id'
@@ -173,7 +195,9 @@ export interface FileRouteTypes {
     | '/_guest'
     | '/announcements'
     | '/flags'
+    | '/insight-buddy'
     | '/reports'
+    | '/student-analytics'
     | '/students'
     | '/announcements/$id'
     | '/reports/$id'
@@ -190,7 +214,9 @@ export interface RootRouteChildren {
   GuestRoute: typeof GuestRouteWithChildren
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
+  InsightBuddyRoute: typeof InsightBuddyRoute
   ReportsRoute: typeof ReportsRouteWithChildren
+  StudentAnalyticsRoute: typeof StudentAnalyticsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
 }
 
@@ -203,11 +229,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student-analytics': {
+      id: '/student-analytics'
+      path: '/student-analytics'
+      fullPath: '/student-analytics'
+      preLoaderRoute: typeof StudentAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reports': {
       id: '/reports'
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insight-buddy': {
+      id: '/insight-buddy'
+      path: '/insight-buddy'
+      fullPath: '/insight-buddy'
+      preLoaderRoute: typeof InsightBuddyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/flags': {
@@ -354,7 +394,9 @@ const rootRouteChildren: RootRouteChildren = {
   GuestRoute: GuestRouteWithChildren,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
   FlagsRoute: FlagsRoute,
+  InsightBuddyRoute: InsightBuddyRoute,
   ReportsRoute: ReportsRouteWithChildren,
+  StudentAnalyticsRoute: StudentAnalyticsRoute,
   StudentsRoute: StudentsRouteWithChildren,
 }
 export const routeTree = rootRouteImport

@@ -44,7 +44,7 @@ export interface AppCategory {
 
 export const featuredApp: App = {
   id: 'featured-1',
-  name: 'Student Dashboard',
+  name: 'Student 360',
   description: 'View and manage student information at a glance.',
   icon: Users,
   color: 'blue',
@@ -60,7 +60,7 @@ export const appCategories: Array<AppCategory> = [
     apps: [
       {
         id: 'student-dashboard',
-        name: 'Student Dashboard',
+        name: 'Student 360',
         description: 'View and manage student information at a glance.',
         icon: Users,
         color: 'blue',

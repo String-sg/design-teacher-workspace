@@ -14,14 +14,16 @@ import {
   User,
 } from 'lucide-react'
 
+import { StudentOverviewCards } from './student-overview-cards'
+import { AcademicAnalytics } from './academic-analytics'
+import { AttendanceAnalytics } from './attendance-analytics'
 import type { Student } from '@/types/student'
 import type { HolisticReport, ReviewStatus, Term } from '@/types/report'
-import { filterReports, TERMS } from '@/data/mock-reports'
+import { TERMS, filterReports } from '@/data/mock-reports'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { GenerateHdpWizard } from '@/components/reports/generate-hdp-wizard'
-import { StudentOverviewCards } from './student-overview-cards'
 
 interface StudentProfileProps {
   student: Student
@@ -166,12 +168,12 @@ export function StudentProfile({
   headerControls,
 }: StudentProfileProps) {
   const [wizardOpen, setWizardOpen] = useState(false)
+  const [analyticsOpen, setAnalyticsOpen] = useState(false)
+  const [academicAnalyticsOpen, setAcademicAnalyticsOpen] = useState(false)
 
   const studentReports = filterReports({ studentId: student.id })
   const existingTerms = new Set(studentReports.map((r) => r.term))
-  const missingTerms = TERMS.filter(
-    (t): t is Term => !existingTerms.has(t),
-  )
+  const missingTerms = TERMS.filter((t): t is Term => !existingTerms.has(t))
 
   const sections = [
     { id: 'attendance', label: 'Attendance' },
@@ -184,7 +186,7 @@ export function StudentProfile({
 
   return (
     <div className="flex gap-8">
-      <div className="flex-1 space-y-6">
+      <div className="min-w-0 flex-1 space-y-6">
         {/* Header Controls */}
         {headerControls}
 
@@ -223,6 +225,19 @@ export function StudentProfile({
             <Field label="Late-coming(%)" value={student.lateComing} />
             <Field label="Non-VR absences(%)" value={student.absences} />
           </dl>
+
+          {analyticsOpen && <AttendanceAnalytics />}
+
+          <div className="mt-4">
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-blue-600"
+              onClick={() => setAnalyticsOpen((prev) => !prev)}
+            >
+              {analyticsOpen ? 'Show less ∧' : 'View analytics ∨'}
+            </Button>
+          </div>
         </Section>
 
         {/* Behaviour Section */}
@@ -312,21 +327,28 @@ export function StudentProfile({
           iconClassName="bg-blue-100 text-blue-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
-            <Field
-              label="Overall % across selected subjects"
-              value={`${student.overallPercentage}%`}
-              tooltip="Average percentage across all subjects"
-            />
-            <Field label="Class rank" value="32/40" />
-            <Field label="Class percentile" value="77%" />
-            <Field label="No. of subjects taken" value="8" />
-            <Field label="Distinctions" value="5" />
-            <Field label="Pass" value="3" />
+            <Field label="Overall %" value={student.overallPercentage} />
+            <Field label="Class rank" value="8 / 35" />
+            <Field label="Class percentile" value="77th" />
+            <Field label="No. of subjects" value="6" />
             <Field
               label="Learning support"
               value={student.learningSupport || '-'}
             />
           </dl>
+
+          {academicAnalyticsOpen && <AcademicAnalytics />}
+
+          <div className="mt-4">
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-blue-600"
+              onClick={() => setAcademicAnalyticsOpen((prev) => !prev)}
+            >
+              {academicAnalyticsOpen ? 'Show less ∧' : 'View analytics ∨'}
+            </Button>
+          </div>
         </Section>
 
         {/* Family Section */}
@@ -368,10 +390,7 @@ export function StudentProfile({
           {studentReports.length > 0 ? (
             <div className="space-y-2">
               {studentReports
-                .sort(
-                  (a, b) =>
-                    TERMS.indexOf(a.term) - TERMS.indexOf(b.term),
-                )
+                .sort((a, b) => TERMS.indexOf(a.term) - TERMS.indexOf(b.term))
                 .map((report) => (
                   <ReportRow key={report.id} report={report} />
                 ))}
