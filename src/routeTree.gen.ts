@@ -23,6 +23,7 @@ import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
+import { Route as FormsNewRouteImport } from './routes/forms.new'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 import { Route as GuestReportViewTokenRouteImport } from './routes/_guest.report-view.$token'
 
@@ -95,6 +96,11 @@ const ReportsIdRoute = ReportsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ReportsRoute,
 } as any)
+const FormsNewRoute = FormsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => FormsRoute,
+} as any)
 const AnnouncementsIdRoute = AnnouncementsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRouteWithChildren
   '/students': typeof StudentsRouteWithChildren
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/forms/new': typeof FormsNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/flags': typeof FlagsRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/forms/new': typeof FormsNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRouteWithChildren
   '/students': typeof StudentsRouteWithChildren
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/forms/new': typeof FormsNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/students'
     | '/announcements/$id'
+    | '/forms/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/flags'
     | '/announcements/$id'
+    | '/forms/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/students'
     | '/announcements/$id'
+    | '/forms/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
@@ -317,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsIdRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/forms/new': {
+      id: '/forms/new'
+      path: '/new'
+      fullPath: '/forms/new'
+      preLoaderRoute: typeof FormsNewRouteImport
+      parentRoute: typeof FormsRoute
+    }
     '/announcements/$id': {
       id: '/announcements/$id'
       path: '/$id'
@@ -359,10 +378,12 @@ const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
 )
 
 interface FormsRouteChildren {
+  FormsNewRoute: typeof FormsNewRoute
   FormsIndexRoute: typeof FormsIndexRoute
 }
 
 const FormsRouteChildren: FormsRouteChildren = {
+  FormsNewRoute: FormsNewRoute,
   FormsIndexRoute: FormsIndexRoute,
 }
 
