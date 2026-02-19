@@ -722,6 +722,297 @@ function Step3Recipients({ data, onUpdate, onNext, onBack }: Step3Props) {
 }
 
 // ---------------------------------------------------------------------------
+// PGPhoneMockup
+// ---------------------------------------------------------------------------
+
+interface PGPhoneMockupProps {
+  formTitle: string
+  groups: Array<RecipientGroup>
+}
+
+function PGPhoneMockup({ formTitle, groups }: PGPhoneMockupProps) {
+  const truncatedTitle =
+    formTitle.length > 28 ? formTitle.slice(0, 28) + '…' : formTitle
+  const fromLabel =
+    groups.length > 0 ? `${groups[0].name} Teacher` : '5A Teacher'
+  const dueLabel = '21 Feb'
+
+  // Q1 text from demo questions
+  const q1Text = 'Will your child be attending the field trip to Science Centre?'
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      {/* Label above phone */}
+      <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+        Parent view in PG
+      </span>
+
+      {/* Phone outer frame */}
+      <div className="relative w-[220px] rounded-[32px] border-4 border-slate-800 bg-slate-800 shadow-2xl">
+        {/* Notch */}
+        <div className="absolute left-1/2 top-2 h-4 w-20 -translate-x-1/2 rounded-full bg-slate-900 z-10" />
+
+        {/* Screen */}
+        <div className="overflow-hidden rounded-[28px] bg-white">
+          {/* PG App header */}
+          <div
+            className="px-4 pb-3 pt-8 text-white"
+            style={{ backgroundColor: '#1a3a5c' }}
+          >
+            <p className="text-[9px] font-medium opacity-70 tracking-wide uppercase">
+              Parents Gateway
+            </p>
+            <div className="mt-0.5 flex items-center justify-between">
+              <span className="text-sm font-bold">Forms</span>
+              <svg
+                className="size-4 opacity-80"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Notification card */}
+          <div className="mx-3 mt-3 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
+            {/* Top: blue dot + badge */}
+            <div className="mb-1.5 flex items-center gap-1.5">
+              <div className="size-2 rounded-full bg-blue-500 shrink-0" />
+              <span
+                className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white"
+                style={{ backgroundColor: '#1a3a5c' }}
+              >
+                New Form
+              </span>
+            </div>
+
+            {/* Form title */}
+            <p className="text-[11px] font-semibold leading-snug text-slate-800">
+              {truncatedTitle}
+            </p>
+
+            {/* From / Due */}
+            <div className="mt-1 flex flex-col gap-0.5">
+              <p className="text-[9px] text-slate-500">
+                <span className="font-medium">From:</span> {fromLabel}
+              </p>
+              <p className="text-[9px] text-slate-500">
+                <span className="font-medium">Due:</span> {dueLabel}
+              </p>
+            </div>
+
+            {/* Respond Now button */}
+            <button
+              className="mt-2.5 w-full rounded-lg py-1.5 text-[10px] font-semibold text-white transition-opacity"
+              style={{ backgroundColor: '#1a3a5c' }}
+            >
+              Respond Now
+            </button>
+          </div>
+
+          {/* Q1 preview card */}
+          <div className="mx-3 mt-2.5 mb-3 rounded-xl bg-slate-50 p-3">
+            <p className="mb-1 text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+              Q1 of 4
+            </p>
+            <p className="mb-2.5 text-[10px] font-medium leading-snug text-slate-700">
+              {q1Text}
+            </p>
+            <div className="flex gap-2">
+              {['Yes', 'No'].map((opt) => (
+                <button
+                  key={opt}
+                  className="flex-1 rounded-lg border border-slate-300 py-1 text-[10px] font-semibold text-slate-700 bg-white hover:bg-slate-100 transition-colors"
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Home indicator */}
+        <div className="flex justify-center py-2">
+          <div className="h-1 w-14 rounded-full bg-slate-500 opacity-60" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Step4Send
+// ---------------------------------------------------------------------------
+
+interface Step4Props {
+  data: WizardData
+  onUpdate: (patch: Partial<WizardData>) => void
+  onBack: () => void
+  onSubmit: () => void
+}
+
+function Step4Send({ data, onUpdate, onBack, onSubmit }: Step4Props) {
+  const totalParents = data.selectedGroups.reduce(
+    (sum, g) => sum + g.parentCount,
+    0,
+  )
+  const groupNames = data.selectedGroups.map((g) => g.name).join(', ')
+  const truncatedTitle =
+    data.formTitle.length > 48
+      ? data.formTitle.slice(0, 48) + '…'
+      : data.formTitle
+
+  // Format deadline for display e.g. "2026-02-21" → "21 Feb 2026"
+  function formatDate(iso: string) {
+    if (!iso) return iso
+    const d = new Date(iso + 'T00:00:00')
+    return d.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Two-column layout */}
+      <div className="flex gap-8">
+        {/* ── Left panel ── */}
+        <div className="flex flex-1 flex-col gap-6">
+          {/* Heading */}
+          <div>
+            <h2 className="text-lg font-semibold" style={{ color: '#1a3a5c' }}>
+              Review &amp; Send
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              This form will be sent to{' '}
+              <span className="font-semibold" style={{ color: '#1a3a5c' }}>
+                {totalParents} parents
+              </span>{' '}
+              via Parents Gateway.
+            </p>
+          </div>
+
+          {/* Response deadline */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+              htmlFor="deadline"
+            >
+              Response deadline
+            </label>
+            <input
+              id="deadline"
+              type="date"
+              value={data.deadline}
+              onChange={(e) => onUpdate({ deadline: e.target.value })}
+              className="w-full rounded-lg border px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2"
+              style={{ borderColor: '#e2e8f0' }}
+            />
+          </div>
+
+          {/* Send reminder checkbox */}
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <input
+              type="checkbox"
+              checked={data.sendReminder}
+              onChange={(e) => onUpdate({ sendReminder: e.target.checked })}
+              className="mt-0.5 size-4 rounded accent-blue-700 shrink-0"
+            />
+            <span className="text-sm text-slate-600 leading-snug">
+              Automatically remind non-respondents{' '}
+              <span className="font-medium text-slate-800">
+                2 days before the deadline
+              </span>{' '}
+              via PG.
+            </span>
+          </label>
+
+          {/* Summary card */}
+          <div
+            className="rounded-xl border p-4"
+            style={{
+              backgroundColor: 'rgba(26,58,92,0.03)',
+              borderColor: 'rgba(26,58,92,0.18)',
+            }}
+          >
+            <p
+              className="mb-3 text-xs font-semibold uppercase tracking-wide"
+              style={{ color: '#1a3a5c' }}
+            >
+              Summary
+            </p>
+            <dl className="flex flex-col gap-2">
+              {(
+                [
+                  ['Form', truncatedTitle],
+                  [
+                    'Recipients',
+                    groupNames
+                      ? `${groupNames} (${totalParents} parents)`
+                      : `${totalParents} parents`,
+                  ],
+                  ['Delivery', 'Parents Gateway'],
+                  ['Deadline', data.deadline ? formatDate(data.deadline) : '—'],
+                ] as [string, string][]
+              ).map(([label, value]) => (
+                <div key={label} className="flex gap-3 text-sm">
+                  <dt className="w-24 shrink-0 font-medium text-slate-500">
+                    {label}
+                  </dt>
+                  <dd className="text-slate-800 break-words">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+
+        {/* ── Right panel — phone mockup ── */}
+        <div className="flex shrink-0 items-start justify-center pt-2">
+          <PGPhoneMockup
+            formTitle={data.formTitle}
+            groups={data.selectedGroups}
+          />
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex items-center justify-between pt-2">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all duration-150"
+        >
+          <ChevronLeft className="size-4" />
+          Back
+        </button>
+
+        <button
+          onClick={onSubmit}
+          className="flex flex-col items-center rounded-xl px-8 py-3 text-white shadow-md transition-all duration-150 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
+          style={{ backgroundColor: '#1a3a5c' }}
+        >
+          <span className="text-sm font-bold tracking-wide">
+            Send to Parents
+          </span>
+          {data.formTitle && (
+            <span className="mt-0.5 text-[10px] font-normal opacity-70 max-w-[200px] truncate">
+              {data.formTitle}
+            </span>
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // NewFormWizard (main component)
 // ---------------------------------------------------------------------------
 
@@ -802,31 +1093,14 @@ export function NewFormWizard() {
         )}
 
         {step === 4 && (
-          <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold" style={{ color: '#1a3a5c' }}>
-              Step 4: Send
-            </h2>
-            <p className="text-sm text-slate-500">
-              This step will be implemented in a future task.
-            </p>
-            <div className="flex justify-between">
-              <button
-                onClick={() => setStep(3)}
-                className="flex items-center gap-2 rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all duration-150"
-              >
-                <ChevronLeft className="size-4" />
-                Back
-              </button>
-              <button
-                onClick={() => navigate({ to: '/forms' })}
-                className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150"
-                style={{ backgroundColor: '#16a34a' }}
-              >
-                Done — View Forms
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
-          </div>
+          <Step4Send
+            data={data}
+            onUpdate={update}
+            onBack={() => setStep(3)}
+            onSubmit={() =>
+              navigate({ to: '/forms/$id', params: { id: 'form-1' } })
+            }
+          />
         )}
       </div>
     </main>
