@@ -3,6 +3,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import {
   ArrowUpRight,
   CircleHelp,
+  ClipboardList,
   FileText,
   Home,
   Megaphone,
@@ -51,6 +52,11 @@ const navigationItems: Array<MenuItem> = [
     icon: Megaphone,
     badge: 3,
     featureFlag: 'announcements',
+  },
+  {
+    title: 'Parent Forms',
+    url: '/forms',
+    icon: ClipboardList,
   },
   {
     title: 'Home',
