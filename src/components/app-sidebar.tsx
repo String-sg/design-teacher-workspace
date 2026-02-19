@@ -47,6 +47,11 @@ interface MenuItem {
 
 const navigationItems: Array<MenuItem> = [
   {
+    title: 'Home',
+    url: '/',
+    icon: Home,
+  },
+  {
     title: 'Announcements',
     url: '/announcements',
     icon: Megaphone,
@@ -54,19 +59,14 @@ const navigationItems: Array<MenuItem> = [
     featureFlag: 'announcements',
   },
   {
-    title: 'Parent Forms',
-    url: '/forms',
-    icon: ClipboardList,
-  },
-  {
-    title: 'Home',
-    url: '/',
-    icon: Home,
-  },
-  {
     title: 'Students',
     url: '/students',
     icon: Users,
+  },
+  {
+    title: 'Parent Forms',
+    url: '/forms',
+    icon: ClipboardList,
   },
   {
     title: 'Reports',
