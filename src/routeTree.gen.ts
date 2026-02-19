@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentsRouteImport } from './routes/students'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as FormsRouteImport } from './routes/forms'
 import { Route as FlagsRouteImport } from './routes/flags'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as GuestRouteImport } from './routes/_guest'
@@ -18,6 +19,7 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsIndexRouteImport } from './routes/students.index'
 import { Route as ReportsIndexRouteImport } from './routes/reports.index'
+import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
@@ -32,6 +34,11 @@ const StudentsRoute = StudentsRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FormsRoute = FormsRouteImport.update({
+  id: '/forms',
+  path: '/forms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FlagsRoute = FlagsRouteImport.update({
@@ -68,6 +75,11 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ReportsRoute,
 } as any)
+const FormsIndexRoute = FormsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FormsRoute,
+} as any)
 const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -99,12 +111,14 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
+  '/forms': typeof FormsRouteWithChildren
   '/reports': typeof ReportsRouteWithChildren
   '/students': typeof StudentsRouteWithChildren
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/forms/': typeof FormsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
@@ -117,6 +131,7 @@ export interface FileRoutesByTo {
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
+  '/forms': typeof FormsIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/students': typeof StudentsIndexRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
@@ -128,12 +143,14 @@ export interface FileRoutesById {
   '/_guest': typeof GuestRouteWithChildren
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
+  '/forms': typeof FormsRouteWithChildren
   '/reports': typeof ReportsRouteWithChildren
   '/students': typeof StudentsRouteWithChildren
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/forms/': typeof FormsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
   '/_guest/report-view/$token': typeof GuestReportViewTokenRoute
@@ -145,12 +162,14 @@ export interface FileRouteTypes {
     | '/$'
     | '/announcements'
     | '/flags'
+    | '/forms'
     | '/reports'
     | '/students'
     | '/announcements/$id'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
+    | '/forms/'
     | '/reports/'
     | '/students/'
     | '/report-view/$token'
@@ -163,6 +182,7 @@ export interface FileRouteTypes {
     | '/reports/$id'
     | '/students/$id'
     | '/announcements'
+    | '/forms'
     | '/reports'
     | '/students'
     | '/report-view/$token'
@@ -173,12 +193,14 @@ export interface FileRouteTypes {
     | '/_guest'
     | '/announcements'
     | '/flags'
+    | '/forms'
     | '/reports'
     | '/students'
     | '/announcements/$id'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
+    | '/forms/'
     | '/reports/'
     | '/students/'
     | '/_guest/report-view/$token'
@@ -190,6 +212,7 @@ export interface RootRouteChildren {
   GuestRoute: typeof GuestRouteWithChildren
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
+  FormsRoute: typeof FormsRouteWithChildren
   ReportsRoute: typeof ReportsRouteWithChildren
   StudentsRoute: typeof StudentsRouteWithChildren
 }
@@ -210,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forms': {
+      id: '/forms'
+      path: '/forms'
+      fullPath: '/forms'
+      preLoaderRoute: typeof FormsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/flags': {
       id: '/flags'
       path: '/flags'
@@ -227,7 +257,7 @@ declare module '@tanstack/react-router' {
     '/_guest': {
       id: '/_guest'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof GuestRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -258,6 +288,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/'
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof ReportsRoute
+    }
+    '/forms/': {
+      id: '/forms/'
+      path: '/'
+      fullPath: '/forms/'
+      preLoaderRoute: typeof FormsIndexRouteImport
+      parentRoute: typeof FormsRoute
     }
     '/announcements/': {
       id: '/announcements/'
@@ -321,6 +358,16 @@ const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
   AnnouncementsRouteChildren,
 )
 
+interface FormsRouteChildren {
+  FormsIndexRoute: typeof FormsIndexRoute
+}
+
+const FormsRouteChildren: FormsRouteChildren = {
+  FormsIndexRoute: FormsIndexRoute,
+}
+
+const FormsRouteWithChildren = FormsRoute._addFileChildren(FormsRouteChildren)
+
 interface ReportsRouteChildren {
   ReportsIdRoute: typeof ReportsIdRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
@@ -354,6 +401,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuestRoute: GuestRouteWithChildren,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
   FlagsRoute: FlagsRoute,
+  FormsRoute: FormsRouteWithChildren,
   ReportsRoute: ReportsRouteWithChildren,
   StudentsRoute: StudentsRouteWithChildren,
 }
