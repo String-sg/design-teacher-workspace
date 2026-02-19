@@ -580,6 +580,148 @@ function Step2FormBuilder({ data, onUpdate, onNext, onBack }: Step2Props) {
 }
 
 // ---------------------------------------------------------------------------
+// Step3Recipients
+// ---------------------------------------------------------------------------
+
+interface Step3Props {
+  data: WizardData
+  onUpdate: (patch: Partial<WizardData>) => void
+  onNext: () => void
+  onBack: () => void
+}
+
+function Step3Recipients({ data, onUpdate, onNext, onBack }: Step3Props) {
+  function toggleGroup(group: RecipientGroup) {
+    const exists = data.selectedGroups.find((g) => g.id === group.id)
+    if (exists) {
+      onUpdate({ selectedGroups: data.selectedGroups.filter((g) => g.id !== group.id) })
+    } else {
+      onUpdate({ selectedGroups: [...data.selectedGroups, group] })
+    }
+  }
+
+  const totalParents = data.selectedGroups.reduce((sum, g) => sum + g.parentCount, 0)
+  const canProceed = data.selectedGroups.length > 0
+
+  const classGroups = AVAILABLE_GROUPS.filter((g) => g.type === 'class')
+  const ccaGroups = AVAILABLE_GROUPS.filter((g) => g.type === 'cca')
+
+  function renderGroupCard(group: RecipientGroup) {
+    const isSelected = Boolean(data.selectedGroups.find((g) => g.id === group.id))
+
+    return (
+      <button
+        key={group.id}
+        onClick={() => toggleGroup(group)}
+        className="relative flex flex-col gap-1 rounded-lg border-2 p-4 text-left transition-all duration-150 focus:outline-none hover:border-blue-300"
+        style={{
+          backgroundColor: isSelected ? 'rgba(26,58,92,0.05)' : 'white',
+          borderColor: isSelected ? '#1a3a5c' : '#e2e8f0',
+        }}
+      >
+        {/* Checkmark circle — top-right, shown when selected */}
+        {isSelected && (
+          <div
+            className="absolute right-3 top-3 flex size-5 items-center justify-center rounded-full"
+            style={{ backgroundColor: '#1a3a5c' }}
+          >
+            <svg
+              className="size-3 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={3}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+        )}
+
+        <span className="text-sm font-semibold" style={{ color: '#1a3a5c' }}>
+          {group.name}
+        </span>
+        <span className="text-xs text-slate-500">{group.parentCount} parents</span>
+      </button>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Heading */}
+      <div>
+        <h2 className="text-lg font-semibold" style={{ color: '#1a3a5c' }}>
+          Select recipients
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Choose which groups of parents will receive this form via Parents Gateway.
+        </p>
+      </div>
+
+      {/* Group sections */}
+      <div className="flex flex-col gap-6">
+        {/* Class Groups */}
+        <div className="flex flex-col gap-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Class Groups
+          </span>
+          <div className="grid grid-cols-3 gap-3">
+            {classGroups.map(renderGroupCard)}
+          </div>
+        </div>
+
+        {/* CCA Groups */}
+        <div className="flex flex-col gap-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            CCA Groups
+          </span>
+          <div className="grid grid-cols-3 gap-3">
+            {ccaGroups.map(renderGroupCard)}
+          </div>
+        </div>
+      </div>
+
+      {/* Summary banner — shown when ≥1 group selected */}
+      {canProceed && (
+        <div
+          className="rounded-lg border px-4 py-3 text-sm transition-all duration-150"
+          style={{
+            backgroundColor: 'rgba(26,58,92,0.04)',
+            borderColor: 'rgba(26,58,92,0.25)',
+            color: '#1a3a5c',
+          }}
+        >
+          <span className="font-medium">
+            {data.selectedGroups.map((g) => `${g.name} (${g.parentCount} parents)`).join(', ')}
+          </span>
+          {' '}—{' '}
+          <span className="font-semibold">{totalParents} parents total</span>
+        </div>
+      )}
+
+      {/* Back / Next navigation */}
+      <div className="flex justify-between">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all duration-150"
+        >
+          <ChevronLeft className="size-4" />
+          Back
+        </button>
+        <button
+          onClick={onNext}
+          disabled={!canProceed}
+          className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-40"
+          style={{ backgroundColor: canProceed ? '#1a3a5c' : '#94a3b8' }}
+        >
+          Go to: Send
+          <ChevronRight className="size-4" />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // NewFormWizard (main component)
 // ---------------------------------------------------------------------------
 
@@ -651,31 +793,12 @@ export function NewFormWizard() {
         )}
 
         {step === 3 && (
-          <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold" style={{ color: '#1a3a5c' }}>
-              Step 3: Recipients
-            </h2>
-            <p className="text-sm text-slate-500">
-              This step will be implemented in a future task.
-            </p>
-            <div className="flex justify-between">
-              <button
-                onClick={() => setStep(2)}
-                className="flex items-center gap-2 rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all duration-150"
-              >
-                <ChevronLeft className="size-4" />
-                Back
-              </button>
-              <button
-                onClick={() => setStep(4)}
-                className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150"
-                style={{ backgroundColor: '#1a3a5c' }}
-              >
-                Go to: Send
-                <ChevronRight className="size-4" />
-              </button>
-            </div>
-          </div>
+          <Step3Recipients
+            data={data}
+            onUpdate={update}
+            onNext={() => setStep(4)}
+            onBack={() => setStep(2)}
+          />
         )}
 
         {step === 4 && (
