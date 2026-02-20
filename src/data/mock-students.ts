@@ -1825,6 +1825,22 @@ export interface ClassGroup {
 
 export const groupedClassOptions: Array<ClassGroup> = [
   {
+    level: 'Secondary 5',
+    classes: [
+      { value: '5A', label: '5A' },
+      { value: '5B', label: '5B' },
+    ],
+  },
+  {
+    level: 'Secondary 4',
+    classes: [
+      { value: '4A', label: '4A' },
+      { value: '4B', label: '4B' },
+      { value: '4C', label: '4C' },
+      { value: '4D', label: '4D' },
+    ],
+  },
+  {
     level: 'Secondary 3',
     classes: [
       { value: '3A', label: '3A' },

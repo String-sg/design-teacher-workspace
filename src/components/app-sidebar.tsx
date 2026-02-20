@@ -111,7 +111,7 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
             <item.icon className="size-4" />
             <span>{item.title}</span>
             {item.conceptTag && (
-              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground group-data-[collapsible=icon]:hidden">
+              <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-900 group-data-[collapsible=icon]:hidden">
                 Concept
               </span>
             )}
@@ -130,6 +130,9 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
 export function AppSidebar() {
   const location = useLocation()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
+  const [reportsHidden, setReportsHidden] = React.useState(false)
+  const clickCountRef = React.useRef(0)
+  const clickTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const announcementsEnabled = useFeatureFlag('announcements')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
@@ -137,22 +140,38 @@ export function AppSidebar() {
   const filteredItems = navigationItems.filter((item) => {
     if (!item.featureFlag) return true
     if (item.featureFlag === 'announcements') return announcementsEnabled
-    if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
+    if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled && !reportsHidden
     return true
   })
+
+  function handleTitleClick() {
+    clickCountRef.current += 1
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current)
+    clickTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0
+    }, 600)
+    if (clickCountRef.current === 3) {
+      clickCountRef.current = 0
+      if (clickTimerRef.current) clearTimeout(clickTimerRef.current)
+      setReportsHidden((prev) => !prev)
+    }
+  }
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-0">
         <div className="flex h-14 items-center justify-center gap-2 px-4 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0">
-          <span className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0">
+          <span
+            className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0 select-none cursor-default"
+            onClick={handleTitleClick}
+          >
             Teacher Workspace
           </span>
           <SidebarTrigger />
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className={reportsHidden ? 'pb-0' : ''}>
           <SidebarGroupContent>
             <SidebarMenuItems
               items={filteredItems}
@@ -160,7 +179,7 @@ export function AppSidebar() {
             />
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
+        <SidebarGroup className={reportsHidden ? 'pt-0' : ''}>
           <SidebarGroupLabel>Student Insight</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenuItems

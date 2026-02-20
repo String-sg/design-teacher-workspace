@@ -39,18 +39,20 @@ export function StudentOverviewCards({ student }: StudentOverviewCardsProps) {
               <span className="text-xs font-medium">Stable</span>
             </div>
           </div>
-          <div className="flex items-start gap-6">
+          <div className="flex items-end gap-6">
             <div className="flex flex-col">
               <span className="text-3xl font-semibold">
                 {student.overallPercentage}%
               </span>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-sm whitespace-nowrap">
                 Overall score
               </span>
             </div>
             <div className="flex flex-col">
               <span className="text-3xl font-semibold">32</span>
-              <span className="text-sm text-muted-foreground">Class rank</span>
+              <span className="text-muted-foreground text-sm whitespace-nowrap">
+                Class rank
+              </span>
             </div>
           </div>
         </CardContent>

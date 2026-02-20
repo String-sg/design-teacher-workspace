@@ -2,12 +2,13 @@ export function AttendanceRing({
   percentage,
   size = 120,
   label,
+  strokeWidth = 10,
 }: {
   percentage: number
   size?: number
   label?: string
+  strokeWidth?: number
 }) {
-  const strokeWidth = 10
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (percentage / 100) * circumference

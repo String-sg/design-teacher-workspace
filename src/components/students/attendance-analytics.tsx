@@ -3,12 +3,9 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   LabelList,
   Line,
   LineChart,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -20,13 +17,30 @@ import { Maximize2, X } from 'lucide-react'
 const CURRENT_ATTENDANCE = {
   present: 10,
   total: 12,
-  breakdown: [
-    { name: 'Absent pending reason', value: 1, color: '#e03131' },
-    { name: 'Absent (excl pending reason)', value: 1, color: '#f08c00' },
-    { name: 'Late', value: 1, color: '#2f9e44' },
-    { name: 'Present', value: 9, color: '#e9ecef' },
-  ],
 }
+
+const RING_SIZE = 140
+const RING_STROKE = 22
+const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2
+const RING_C = 2 * Math.PI * RING_RADIUS
+
+const RING_SEGMENTS = (() => {
+  const total = CURRENT_ATTENDANCE.total
+  let acc = 0
+  return [
+    { name: 'Present', value: 9, color: '#12b886' },
+    { name: 'Late', value: 1, color: '#a7aab5' },
+    { name: 'Absent pending reason', value: 1, color: '#e03131' },
+    { name: 'Absent (excl pending reason)', value: 1, color: '#f26c47' },
+  ].map((seg) => {
+    const len = (seg.value / total) * RING_C
+    const dashoffset = acc === 0 ? 0 : RING_C - acc
+    acc += len
+    return { ...seg, len, dashoffset }
+  })
+})()
+
+const RING_LEGEND = RING_SEGMENTS.filter((s) => s.name !== 'Present')
 
 const WEEKLY_RATE = [
   { week: 'Week 1', rate: 100 },
@@ -148,7 +162,7 @@ const ABSENCE_DETAILS = [
   {
     date: 'Sunday, 11 January 2026',
     type: 'Late',
-    typeColor: '#2f9e44',
+    typeColor: '#a7aab5',
     subReason: '—',
     remarks: 'Noted',
   },
@@ -162,24 +176,24 @@ const ABSENCE_DETAILS = [
 ]
 
 const BAR_CATEGORIES = [
-  { key: 'latecoming', label: 'Latecoming', color: '#1971c2' },
+  { key: 'latecoming', label: 'Latecoming', color: '#228be6' },        // blue
   {
     key: 'absentNoValid',
     label: 'Absent without valid reason',
-    color: '#74c0fc',
+    color: '#a7aab5',                                                    // gray
   },
   {
     key: 'absentValidPrivate',
     label: 'Absent with valid reason (Private)',
-    color: '#69db7c',
+    color: '#7c3aed',                                                    // violet
   },
   {
     key: 'absentValidOfficial',
     label: 'Absent with valid reason (Official)',
-    color: '#2f9e44',
+    color: '#12b886',                                                    // teal
   },
-  { key: 'absentMC', label: 'Absent with MC', color: '#40c057' },
-  { key: 'pendingReason', label: 'Absence pending reason', color: '#1a1a2e' },
+  { key: 'absentMC', label: 'Absent with MC', color: '#0891b2' },      // cyan
+  { key: 'pendingReason', label: 'Absence pending reason', color: '#6366f1' }, // indigo
 ]
 
 const CHART_COMMON_PROPS = {
@@ -253,23 +267,6 @@ function AbsenceLegend() {
 export function AttendanceAnalytics() {
   const [chartExpanded, setChartExpanded] = useState(false)
 
-  const pieData = CURRENT_ATTENDANCE.breakdown.filter(
-    (d) => d.name !== 'Present',
-  )
-  const presentSlice = {
-    name: 'Present',
-    value:
-      CURRENT_ATTENDANCE.present - pieData.reduce((s, d) => s + d.value, 0),
-    color: '#e9ecef',
-  }
-  const allPieData = [
-    ...pieData,
-    {
-      ...presentSlice,
-      value: Math.max(0, CURRENT_ATTENDANCE.present - pieData.length),
-    },
-  ]
-
   return (
     <div className="mt-6 space-y-8 border-t pt-6">
       {/* 1. Current Attendance */}
@@ -278,41 +275,41 @@ export function AttendanceAnalytics() {
           Current Attendance
         </h3>
         <div className="flex items-center gap-8">
-          <div className="relative shrink-0">
-            <PieChart width={120} height={120}>
-              <Pie
-                data={allPieData}
-                cx={55}
-                cy={55}
-                innerRadius={40}
-                outerRadius={55}
-                startAngle={90}
-                endAngle={-270}
-                dataKey="value"
-                stroke="none"
-              >
-                {allPieData.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xl font-bold leading-none">
+          <div
+            className="relative shrink-0"
+            style={{ width: RING_SIZE, height: RING_SIZE }}
+          >
+            <svg width={RING_SIZE} height={RING_SIZE} className="-rotate-90">
+              {RING_SEGMENTS.map((seg) => (
+                <circle
+                  key={seg.name}
+                  cx={RING_SIZE / 2}
+                  cy={RING_SIZE / 2}
+                  r={RING_RADIUS}
+                  fill="none"
+                  stroke={seg.color}
+                  strokeWidth={RING_STROKE}
+                  strokeDasharray={`${seg.len} ${RING_C - seg.len}`}
+                  strokeDashoffset={seg.dashoffset}
+                  strokeLinecap="butt"
+                />
+              ))}
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center leading-tight">
+              <span className="text-2xl font-bold leading-none">
                 {CURRENT_ATTENDANCE.present}
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-sm text-muted-foreground">
                 /{CURRENT_ATTENDANCE.total}
               </span>
             </div>
           </div>
           <div className="space-y-2">
-            {pieData.map((item) => (
+            {RING_LEGEND.map((item) => (
               <div key={item.name} className="flex items-center gap-2 text-sm">
-                <span
-                  className="h-3 w-3 shrink-0 rounded-sm"
-                  style={{ backgroundColor: item.color }}
-                />
-                <span className="font-medium">{item.value}</span>
+                <span className="text-base font-bold" style={{ color: item.color }}>
+                  {item.value}
+                </span>
                 <span className="text-muted-foreground">{item.name}</span>
               </div>
             ))}

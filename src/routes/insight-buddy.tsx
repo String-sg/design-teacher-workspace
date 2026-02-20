@@ -269,7 +269,7 @@ function PerformancePerSubjectChart() {
   return (
     <div className="rounded-xl border bg-background p-6 shadow-sm">
       <div className="mb-6">
-        <h3 className="text-base font-semibold">Performance per Subject</h3>
+        <h3 className="text-base font-semibold">Results over time</h3>
         <p className="mt-0.5 text-sm text-muted-foreground">
           Weighted assessment comparison: this term vs last term
         </p>
@@ -514,7 +514,7 @@ function InsightBuddyPage() {
         <div className="flex h-14 items-center gap-2 border-b px-4">
           <Sparkles className="size-4 text-primary" />
           <span className="font-semibold">Insight Buddy</span>
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
             Concept illustration
           </span>
         </div>

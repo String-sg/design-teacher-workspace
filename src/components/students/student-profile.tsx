@@ -19,7 +19,11 @@ import { AcademicAnalytics } from './academic-analytics'
 import { AttendanceAnalytics } from './attendance-analytics'
 import type { Student } from '@/types/student'
 import type { HolisticReport, ReviewStatus, Term } from '@/types/report'
-import { TERMS, filterReports } from '@/data/mock-reports'
+import {
+  TERMS,
+  filterReports,
+  getStudentGradeCounts,
+} from '@/data/mock-reports'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -67,17 +71,7 @@ interface FieldProps {
 function Field({ label, value, tooltip, className }: FieldProps) {
   return (
     <div className={cn('flex flex-col gap-1', className)}>
-      <dt className="flex items-center gap-1 text-sm text-muted-foreground">
-        {label}
-        {tooltip && (
-          <span
-            className="cursor-help text-xs text-muted-foreground/60"
-            title={tooltip}
-          >
-            (?)
-          </span>
-        )}
-      </dt>
+      <dt className="text-sm text-muted-foreground">{label}</dt>
       <dd className="text-sm font-medium">{value ?? '-'}</dd>
     </div>
   )
@@ -92,17 +86,7 @@ interface RemarksFieldProps {
 function RemarksField({ label, value, tooltip }: RemarksFieldProps) {
   return (
     <div className="flex flex-col gap-1">
-      <dt className="flex items-center gap-1 text-sm text-muted-foreground">
-        {label}
-        {tooltip && (
-          <span
-            className="cursor-help text-xs text-muted-foreground/60"
-            title={tooltip}
-          >
-            (?)
-          </span>
-        )}
-      </dt>
+      <dt className="text-sm text-muted-foreground">{label}</dt>
       <dd className="text-sm text-foreground">
         {value || (
           <span className="text-muted-foreground">No remarks available</span>
@@ -171,6 +155,7 @@ export function StudentProfile({
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [academicAnalyticsOpen, setAcademicAnalyticsOpen] = useState(false)
 
+  const gradeCounts = getStudentGradeCounts(student)
   const studentReports = filterReports({ studentId: student.id })
   const existingTerms = new Set(studentReports.map((r) => r.term))
   const missingTerms = TERMS.filter((t): t is Term => !existingTerms.has(t))
@@ -331,6 +316,15 @@ export function StudentProfile({
             <Field label="Class rank" value="8 / 35" />
             <Field label="Class percentile" value="77th" />
             <Field label="No. of subjects" value="6" />
+            {gradeCounts !== null && (
+              <>
+                <Field
+                  label="No. of Distinctions"
+                  value={gradeCounts.distinctions}
+                />
+                <Field label="No. of Passes" value={gradeCounts.passes} />
+              </>
+            )}
             <Field
               label="Learning support"
               value={student.learningSupport || '-'}
