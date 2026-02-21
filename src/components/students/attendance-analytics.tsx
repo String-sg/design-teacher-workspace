@@ -176,23 +176,23 @@ const ABSENCE_DETAILS = [
 ]
 
 const BAR_CATEGORIES = [
-  { key: 'latecoming', label: 'Latecoming', color: '#228be6' },        // blue
+  { key: 'latecoming', label: 'Latecoming', color: '#228be6' }, // blue
   {
     key: 'absentNoValid',
     label: 'Absent without valid reason',
-    color: '#a7aab5',                                                    // gray
+    color: '#a7aab5', // gray
   },
   {
     key: 'absentValidPrivate',
     label: 'Absent with valid reason (Private)',
-    color: '#7c3aed',                                                    // violet
+    color: '#7c3aed', // violet
   },
   {
     key: 'absentValidOfficial',
     label: 'Absent with valid reason (Official)',
-    color: '#12b886',                                                    // teal
+    color: '#12b886', // teal
   },
-  { key: 'absentMC', label: 'Absent with MC', color: '#0891b2' },      // cyan
+  { key: 'absentMC', label: 'Absent with MC', color: '#0891b2' }, // cyan
   { key: 'pendingReason', label: 'Absence pending reason', color: '#6366f1' }, // indigo
 ]
 
@@ -307,7 +307,10 @@ export function AttendanceAnalytics() {
           <div className="space-y-2">
             {RING_LEGEND.map((item) => (
               <div key={item.name} className="flex items-center gap-2 text-sm">
-                <span className="text-base font-bold" style={{ color: item.color }}>
+                <span
+                  className="text-base font-bold"
+                  style={{ color: item.color }}
+                >
                   {item.value}
                 </span>
                 <span className="text-muted-foreground">{item.name}</span>

@@ -33,6 +33,7 @@ export function ClassSelector({
   const [search, setSearch] = useState('')
 
   const selectedLevel = useMemo(() => {
+    if (value === 'all') return 'School'
     for (const group of groupedClassOptions) {
       if (group.classes.some((c) => c.value === value)) {
         return group.level
@@ -93,7 +94,10 @@ export function ClassSelector({
         {selectedLevel}
         <ChevronDown className="h-5 w-5 text-muted-foreground" />
       </PopoverTrigger>
-      <PopoverContent className="w-64 overflow-hidden rounded-2xl p-0" align="start">
+      <PopoverContent
+        className="w-64 overflow-hidden rounded-2xl p-0"
+        align="start"
+      >
         {/* Search input */}
         <div className="p-2">
           <div className="relative">
@@ -111,9 +115,17 @@ export function ClassSelector({
         {/* Scrollable list */}
         <div className="max-h-72 overflow-y-auto p-1">
           {/* School group header */}
-          <div className="rounded-lg bg-muted/60 px-3 py-2 text-xs font-medium text-muted-foreground">
-            School
-          </div>
+          <button
+            type="button"
+            onClick={() => handleSelect('all')}
+            className={cn(
+              'inline-flex w-full items-center gap-2 rounded-lg p-2 text-base font-medium leading-6 text-muted-foreground outline-none hover:bg-accent hover:text-accent-foreground',
+              value === 'all' && 'bg-accent text-accent-foreground',
+            )}
+          >
+            <span className="line-clamp-1 flex-1 text-left">School</span>
+            {value === 'all' && <Check className="ml-auto h-4 w-4 shrink-0" />}
+          </button>
 
           {filteredGroups.map((group, index) => (
             <div key={group.level}>
@@ -124,13 +136,15 @@ export function ClassSelector({
                 type="button"
                 onClick={() => handleSelect(group.level)}
                 className={cn(
-                  'flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm outline-none hover:bg-accent',
+                  'inline-flex w-full items-center gap-2 rounded-lg p-2 text-base font-normal leading-6 outline-none hover:bg-accent',
                   value === group.level && 'bg-accent font-semibold',
                 )}
               >
-                {group.level}
+                <span className="line-clamp-1 flex-1 text-left">
+                  {group.level}
+                </span>
                 {value === group.level && (
-                  <Check className="h-4 w-4 shrink-0" />
+                  <Check className="ml-auto h-4 w-4 shrink-0" />
                 )}
               </button>
 
@@ -143,12 +157,16 @@ export function ClassSelector({
                     type="button"
                     onClick={() => handleSelect(classOption.value)}
                     className={cn(
-                      'flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm outline-none hover:bg-accent',
+                      'inline-flex w-full items-center gap-2 rounded-lg p-2 text-base font-normal leading-6 outline-none hover:bg-accent',
                       isSelected && 'bg-accent font-semibold',
                     )}
                   >
-                    {getClassLabel(group.level, classOption.value)}
-                    {isSelected && <Check className="h-4 w-4 shrink-0" />}
+                    <span className="line-clamp-1 flex-1 text-left">
+                      {getClassLabel(group.level, classOption.value)}
+                    </span>
+                    {isSelected && (
+                      <Check className="ml-auto h-4 w-4 shrink-0" />
+                    )}
                   </button>
                 )
               })}
