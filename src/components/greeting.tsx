@@ -17,7 +17,7 @@ export function Greeting({ userName = 'Mr. Tan' }: GreetingProps) {
   const greeting = getGreeting()
 
   return (
-    <h1 className="pt-[80px] text-center text-2xl font-semibold text-foreground">
+    <h1 className="py-0 text-center text-2xl font-semibold text-foreground">
       {greeting}, {userName}
     </h1>
   )
