@@ -16,7 +16,7 @@ export function AppSection({ title, description, apps }: AppSectionProps) {
           <p className="text-sm text-muted-foreground">{description}</p>
         )}
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 rounded-2xl sm:grid-cols-2 lg:grid-cols-3">
         {apps.map((app) => (
           <AppCard
             key={app.id}
