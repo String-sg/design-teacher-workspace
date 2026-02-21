@@ -140,7 +140,8 @@ export function AppSidebar() {
   const filteredItems = navigationItems.filter((item) => {
     if (!item.featureFlag) return true
     if (item.featureFlag === 'announcements') return announcementsEnabled
-    if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled && !reportsHidden
+    if (item.featureFlag === 'holistic-reports')
+      return holisticReportsEnabled && !reportsHidden
     return true
   })
 

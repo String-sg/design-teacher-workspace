@@ -13,12 +13,13 @@ import {
 import {
   Check,
   ChevronDown,
-  ChevronRight,
+  FileText,
   Maximize2,
   Search,
   SlidersHorizontal,
   X,
 } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -38,6 +39,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  TooltipContent,
+  TooltipTrigger,
+  Tooltip as TooltipUI,
+} from '@/components/ui/tooltip'
 import { groupedClassOptions } from '@/data/mock-students'
 
 // ---------------------------------------------------------------------------
@@ -54,12 +60,54 @@ const SUBJECTS_BANDING = [
 ]
 
 const PERFORMANCE_DATA = [
-  { subject: 'Geography', term1WA: 60, term2WA: 64, term3WA: 65, endOfYear: 64, overall: 63 },
-  { subject: 'Mother Tongue', term1WA: 92, term2WA: 94, term3WA: 88, endOfYear: 88, overall: 85 },
-  { subject: 'English', term1WA: 89, term2WA: 85, term3WA: 81, endOfYear: 79, overall: 80 },
-  { subject: 'Mathematics', term1WA: 73, term2WA: 80, term3WA: 74, endOfYear: 70, overall: 70 },
-  { subject: 'Science', term1WA: 92, term2WA: 92, term3WA: 87, endOfYear: 81, overall: 86 },
-  { subject: 'History', term1WA: 76, term2WA: 75, term3WA: 68, endOfYear: 72, overall: 72 },
+  {
+    subject: 'Geography',
+    term1WA: 60,
+    term2WA: 64,
+    term3WA: 65,
+    endOfYear: 64,
+    overall: 63,
+  },
+  {
+    subject: 'Mother Tongue',
+    term1WA: 92,
+    term2WA: 94,
+    term3WA: 88,
+    endOfYear: 88,
+    overall: 85,
+  },
+  {
+    subject: 'English',
+    term1WA: 89,
+    term2WA: 85,
+    term3WA: 81,
+    endOfYear: 79,
+    overall: 80,
+  },
+  {
+    subject: 'Mathematics',
+    term1WA: 73,
+    term2WA: 80,
+    term3WA: 74,
+    endOfYear: 70,
+    overall: 70,
+  },
+  {
+    subject: 'Science',
+    term1WA: 92,
+    term2WA: 92,
+    term3WA: 87,
+    endOfYear: 81,
+    overall: 86,
+  },
+  {
+    subject: 'History',
+    term1WA: 76,
+    term2WA: 75,
+    term3WA: 68,
+    endOfYear: 72,
+    overall: 72,
+  },
 ]
 
 const G2_COUNT = 2
@@ -186,10 +234,14 @@ const GRADE_DATA = [
 ]
 
 const GRADE_FILL: Record<string, string> = {
-  A1: '#228be6', A2: '#74c0fc',
-  B3: '#12b886', B4: '#63e6be',
-  C5: '#fd7e14', C6: '#ffa94d',
-  D7: '#fa5252', VR: '#adb5bd',
+  A1: '#228be6',
+  A2: '#74c0fc',
+  B3: '#12b886',
+  B4: '#63e6be',
+  C5: '#fd7e14',
+  C6: '#ffa94d',
+  D7: '#fa5252',
+  VR: '#adb5bd',
 }
 
 const GRADE_BADGE: Record<string, string> = {
@@ -211,52 +263,75 @@ const BOX_PLOT_DATA = [
 ]
 
 const MOCK_CANDIDATES = [
-  { id: '1',  name: 'Alice Tan Wei Lin',      class: '4A', score: 92, grade: 'A1' },
-  { id: '2',  name: 'Marcus Lim Kai Jun',     class: '4A', score: 88, grade: 'A2' },
-  { id: '3',  name: 'Rachel Ng Hui Shan',     class: '4B', score: 85, grade: 'A2' },
-  { id: '4',  name: 'Jordan Chua Zhi Wei',    class: '4A', score: 83, grade: 'A2' },
-  { id: '5',  name: 'Sophia Wong Mei Li',     class: '4C', score: 79, grade: 'B3' },
-  { id: '6',  name: 'Ethan Loh Jian Ming',    class: '4B', score: 77, grade: 'B3' },
-  { id: '7',  name: 'Chloe Chan Xin Yi',      class: '4A', score: 75, grade: 'B3' },
-  { id: '8',  name: 'Ryan Goh Kian Huat',     class: '4D', score: 73, grade: 'B3' },
-  { id: '9',  name: 'Isabelle Tay Hui Min',   class: '4B', score: 71, grade: 'B4' },
-  { id: '10', name: 'Darren Sim Wei Xian',    class: '4C', score: 68, grade: 'B4' },
-  { id: '11', name: 'Natalie Ong Shu Ting',   class: '4A', score: 66, grade: 'B4' },
-  { id: '12', name: 'Kevin Ho Zi Yang',        class: '4D', score: 64, grade: 'C5' },
-  { id: '13', name: 'Priya Pillai',            class: '4B', score: 62, grade: 'C5' },
-  { id: '14', name: 'Alicia Koh Jia Xuan',    class: '4C', score: 60, grade: 'C5' },
-  { id: '15', name: 'Jonathan Yee Boon Heng', class: '4D', score: 58, grade: 'C5' },
-  { id: '16', name: 'Michelle Tan Pei Ling',  class: '4A', score: 55, grade: 'C6' },
-  { id: '17', name: 'Brandon Lee Wei Jie',    class: '4B', score: 53, grade: 'C6' },
-  { id: '18', name: 'Sarah Seah Xin Yi',      class: '4C', score: 50, grade: 'C6' },
-  { id: '19', name: 'Jaden Toh Rui Han',      class: '4D', score: 47, grade: 'D7' },
-  { id: '20', name: 'Amanda Phua Yun Qing',   class: '4A', score: 44, grade: 'D7' },
+  { id: '1', name: 'Alice Tan Wei Lin', class: '4A', score: 92, grade: 'A1' },
+  { id: '2', name: 'Marcus Lim Kai Jun', class: '4A', score: 88, grade: 'A2' },
+  { id: '3', name: 'Rachel Ng Hui Shan', class: '4B', score: 85, grade: 'A2' },
+  { id: '4', name: 'Jordan Chua Zhi Wei', class: '4A', score: 83, grade: 'A2' },
+  { id: '5', name: 'Sophia Wong Mei Li', class: '4C', score: 79, grade: 'B3' },
+  { id: '6', name: 'Ethan Loh Jian Ming', class: '4B', score: 77, grade: 'B3' },
+  { id: '7', name: 'Chloe Chan Xin Yi', class: '4A', score: 75, grade: 'B3' },
+  { id: '8', name: 'Ryan Goh Kian Huat', class: '4D', score: 73, grade: 'B3' },
+  {
+    id: '9',
+    name: 'Isabelle Tay Hui Min',
+    class: '4B',
+    score: 71,
+    grade: 'B4',
+  },
+  {
+    id: '10',
+    name: 'Darren Sim Wei Xian',
+    class: '4C',
+    score: 68,
+    grade: 'B4',
+  },
+  {
+    id: '11',
+    name: 'Natalie Ong Shu Ting',
+    class: '4A',
+    score: 66,
+    grade: 'B4',
+  },
+  { id: '12', name: 'Kevin Ho Zi Yang', class: '4D', score: 64, grade: 'C5' },
+  { id: '13', name: 'Priya Pillai', class: '4B', score: 62, grade: 'C5' },
+  {
+    id: '14',
+    name: 'Alicia Koh Jia Xuan',
+    class: '4C',
+    score: 60,
+    grade: 'C5',
+  },
+  {
+    id: '15',
+    name: 'Jonathan Yee Boon Heng',
+    class: '4D',
+    score: 58,
+    grade: 'C5',
+  },
+  {
+    id: '16',
+    name: 'Michelle Tan Pei Ling',
+    class: '4A',
+    score: 55,
+    grade: 'C6',
+  },
+  {
+    id: '17',
+    name: 'Brandon Lee Wei Jie',
+    class: '4B',
+    score: 53,
+    grade: 'C6',
+  },
+  { id: '18', name: 'Sarah Seah Xin Yi', class: '4C', score: 50, grade: 'C6' },
+  { id: '19', name: 'Jaden Toh Rui Han', class: '4D', score: 47, grade: 'D7' },
+  {
+    id: '20',
+    name: 'Amanda Phua Yun Qing',
+    class: '4A',
+    score: 44,
+    grade: 'D7',
+  },
 ]
-
-// ---------------------------------------------------------------------------
-// Label helpers
-// ---------------------------------------------------------------------------
-
-function getSubjectLabel(value: string) {
-  for (const grp of MOE_SUBJECT_GROUPS) {
-    const found = grp.subjects.find((s) => s.value === value)
-    if (found) return found.label
-  }
-  return value
-}
-
-function getAssessmentLabel(value: string) {
-  return ASSESSMENT_OPTIONS.find((a) => a.value === value)?.label ?? value
-}
-
-function getLevelLabel(value: string) {
-  for (const grp of groupedClassOptions) {
-    if (grp.level === value) return grp.level
-    const cls = grp.classes.find((c) => c.value === value)
-    if (cls) return `${grp.level} ${cls.label}`
-  }
-  return value
-}
 
 // ---------------------------------------------------------------------------
 // Shared sub-components — Trends charts
@@ -272,9 +347,27 @@ function PerformanceBarChart({ barSize }: { barSize?: number }) {
       barSize={barSize}
     >
       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e9ecef" />
-      <XAxis dataKey="subject" tick={{ fontSize: 12, fill: '#868e96' }} axisLine={false} tickLine={false} />
-      <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tick={{ fontSize: 12, fill: '#868e96' }} axisLine={false} tickLine={false} />
-      <Tooltip formatter={CHART_TOOLTIP_FORMATTER} contentStyle={{ fontSize: 12, borderRadius: 6, border: '1px solid #dee2e6' }} />
+      <XAxis
+        dataKey="subject"
+        tick={{ fontSize: 12, fill: '#868e96' }}
+        axisLine={false}
+        tickLine={false}
+      />
+      <YAxis
+        domain={[0, 100]}
+        ticks={[0, 25, 50, 75, 100]}
+        tick={{ fontSize: 12, fill: '#868e96' }}
+        axisLine={false}
+        tickLine={false}
+      />
+      <Tooltip
+        formatter={CHART_TOOLTIP_FORMATTER}
+        contentStyle={{
+          fontSize: 12,
+          borderRadius: 6,
+          border: '1px solid #dee2e6',
+        }}
+      />
       <Bar dataKey="term1WA" fill={BAR_COLORS.term1WA} radius={[2, 2, 0, 0]}>
         <LabelList position="top" style={{ fontSize: 10, fill: '#495057' }} />
       </Bar>
@@ -284,7 +377,11 @@ function PerformanceBarChart({ barSize }: { barSize?: number }) {
       <Bar dataKey="term3WA" fill={BAR_COLORS.term3WA} radius={[2, 2, 0, 0]}>
         <LabelList position="top" style={{ fontSize: 10, fill: '#495057' }} />
       </Bar>
-      <Bar dataKey="endOfYear" fill={BAR_COLORS.endOfYear} radius={[2, 2, 0, 0]}>
+      <Bar
+        dataKey="endOfYear"
+        fill={BAR_COLORS.endOfYear}
+        radius={[2, 2, 0, 0]}
+      >
         <LabelList position="top" style={{ fontSize: 10, fill: '#495057' }} />
       </Bar>
       <Bar dataKey="overall" fill={BAR_COLORS.overall} radius={[2, 2, 0, 0]}>
@@ -299,7 +396,10 @@ function PerformanceLegend() {
     <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
       {LEGEND_ITEMS.map((item) => (
         <div key={item.key} className="flex items-center gap-1.5">
-          <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: item.color }} />
+          <span
+            className="h-3 w-3 shrink-0 rounded-sm"
+            style={{ backgroundColor: item.color }}
+          />
           <span className="text-muted-foreground">{item.label}</span>
         </div>
       ))}
@@ -335,7 +435,7 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
         render={
           <button
             type="button"
-            className="border-input bg-input/30 hover:bg-muted/60 flex h-8 items-center gap-1.5 rounded-[var(--radius-input)] border px-3 text-sm transition-colors outline-none"
+            className="border-border bg-white hover:bg-muted flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors outline-none"
           />
         }
       >
@@ -352,27 +452,37 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
             <div key={group.level}>
               <button
                 type="button"
-                onClick={() => { onValueChange(group.level); setOpen(false) }}
+                onClick={() => {
+                  onValueChange(group.level)
+                  setOpen(false)
+                }}
                 className={cn(
                   'flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-semibold hover:bg-accent',
                   value === group.level && 'bg-accent',
                 )}
               >
                 {group.level}
-                {value === group.level && <Check className="h-4 w-4 text-foreground" />}
+                {value === group.level && (
+                  <Check className="h-4 w-4 text-foreground" />
+                )}
               </button>
               {group.classes.map((cls) => (
                 <button
                   key={cls.value}
                   type="button"
-                  onClick={() => { onValueChange(cls.value); setOpen(false) }}
+                  onClick={() => {
+                    onValueChange(cls.value)
+                    setOpen(false)
+                  }}
                   className={cn(
                     'flex w-full items-center justify-between rounded-md py-2 pl-6 pr-3 text-sm hover:bg-accent',
                     value === cls.value && 'bg-accent',
                   )}
                 >
                   {cls.label}
-                  {value === cls.value && <Check className="h-4 w-4 text-foreground" />}
+                  {value === cls.value && (
+                    <Check className="h-4 w-4 text-foreground" />
+                  )}
                 </button>
               ))}
             </div>
@@ -385,8 +495,8 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
 
 // Indicator multi-select
 interface IndicatorDropdownProps {
-  value: string[]
-  onValueChange: (v: string[]) => void
+  value: Array<string>
+  onValueChange: (v: Array<string>) => void
 }
 
 function IndicatorDropdown({ value, onValueChange }: IndicatorDropdownProps) {
@@ -413,12 +523,14 @@ function IndicatorDropdown({ value, onValueChange }: IndicatorDropdownProps) {
         render={
           <button
             type="button"
-            className="border-input bg-input/30 hover:bg-muted/60 flex h-8 items-center gap-1.5 rounded-[var(--radius-input)] border px-3 text-sm transition-colors outline-none"
+            className="border-border bg-white hover:bg-muted flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors outline-none"
           />
         }
       >
         <span className="text-muted-foreground">Indicator:</span>
-        <span className={cn(value.length === 0 && 'text-muted-foreground')}>{label}</span>
+        <span className={cn(value.length === 0 && 'text-muted-foreground')}>
+          {label}
+        </span>
         <ChevronDown className="text-muted-foreground ml-0.5 h-4 w-4 shrink-0" />
       </PopoverTrigger>
       <PopoverContent className="w-44 gap-0 p-2" align="start">
@@ -429,7 +541,10 @@ function IndicatorDropdown({ value, onValueChange }: IndicatorDropdownProps) {
             onClick={() => toggle(option)}
             className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm hover:bg-accent"
           >
-            <Checkbox checked={value.includes(option)} className="pointer-events-none" />
+            <Checkbox
+              checked={value.includes(option)}
+              className="pointer-events-none"
+            />
             {option}
           </button>
         ))}
@@ -447,11 +562,24 @@ function GradeDistChart() {
       barCategoryGap="25%"
     >
       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e9ecef" />
-      <XAxis dataKey="grade" tick={{ fontSize: 12, fill: '#868e96' }} axisLine={false} tickLine={false} />
-      <YAxis tick={{ fontSize: 11, fill: '#868e96' }} axisLine={false} tickLine={false} />
+      <XAxis
+        dataKey="grade"
+        tick={{ fontSize: 12, fill: '#868e96' }}
+        axisLine={false}
+        tickLine={false}
+      />
+      <YAxis
+        tick={{ fontSize: 11, fill: '#868e96' }}
+        axisLine={false}
+        tickLine={false}
+      />
       <Tooltip
         formatter={(v: number) => [v, 'Students']}
-        contentStyle={{ fontSize: 12, borderRadius: 6, border: '1px solid #dee2e6' }}
+        contentStyle={{
+          fontSize: 12,
+          borderRadius: 6,
+          border: '1px solid #dee2e6',
+        }}
       />
       <Bar dataKey="count" radius={[3, 3, 0, 0]} isAnimationActive={false}>
         {GRADE_DATA.map((entry) => (
@@ -467,62 +595,127 @@ function GradeDistChart() {
   )
 }
 
-// Box plot — pure SVG rendered via ResponsiveContainer
-function BoxPlotSVGInner({ width = 400, height = 220 }: { width?: number; height?: number }) {
-  const ml = 36, mr = 12, mt = 12, mb = 28
+// Box plot — horizontal, pure SVG rendered via ResponsiveContainer
+function BoxPlotSVGInner({
+  width = 400,
+  height = 280,
+}: {
+  width?: number
+  height?: number
+}) {
+  const ml = 48,
+    mr = 8,
+    mt = 16,
+    mb = 32
   const innerW = width - ml - mr
   const innerH = height - mt - mb
-  const toY = (v: number) => mt + innerH * (1 - v / 100)
+  const toX = (v: number) => ml + (v / 100) * innerW
 
-  const slotW = innerW / BOX_PLOT_DATA.length
-  const bw = Math.max(slotW * 0.42, 20)
-  const capW = 7
-  const ticks = [0, 25, 50, 75, 100]
+  const rowH = innerH / BOX_PLOT_DATA.length
+  const bh = Math.max(rowH * 0.58, 16)
+  const capH = 5
+  const ticks = [0, 20, 40, 60, 80, 100]
 
   return (
     <svg width={width} height={height}>
-      {/* Grid lines */}
+      {/* Vertical grid lines */}
       {ticks.map((t) => (
         <line
           key={t}
-          x1={ml} y1={toY(t)}
-          x2={width - mr} y2={toY(t)}
-          stroke="#e9ecef" strokeDasharray="3 3"
+          x1={toX(t)}
+          y1={mt}
+          x2={toX(t)}
+          y2={height - mb}
+          stroke="#e9ecef"
+          strokeDasharray="3 3"
         />
       ))}
-      {/* Y axis labels */}
+      {/* X axis labels */}
       {ticks.map((t) => (
-        <text key={t} x={ml - 5} y={toY(t) + 4} textAnchor="end" fontSize={11} fill="#868e96">
+        <text
+          key={t}
+          x={toX(t)}
+          y={height - mb + 16}
+          textAnchor="middle"
+          fontSize={11}
+          fill="#868e96"
+        >
           {t}
         </text>
       ))}
-      {/* Box plots */}
+      {/* Horizontal box plots */}
       {BOX_PLOT_DATA.map((d, i) => {
-        const cx = ml + slotW * i + slotW / 2
-        const q3y = toY(d.q3)
-        const q1y = toY(d.q1)
-        const medy = toY(d.median)
-        const maxY = toY(d.max)
-        const minY = toY(d.min)
+        const cy = mt + rowH * i + rowH / 2
+        const xMin = toX(d.min)
+        const xQ1 = toX(d.q1)
+        const xMed = toX(d.median)
+        const xQ3 = toX(d.q3)
+        const xMax = toX(d.max)
 
         return (
           <g key={d.class}>
-            {/* Upper whisker */}
-            <line x1={cx} y1={q3y} x2={cx} y2={maxY} stroke="#868e96" strokeWidth={1.5} />
-            <line x1={cx - capW} y1={maxY} x2={cx + capW} y2={maxY} stroke="#868e96" strokeWidth={1.5} />
+            {/* Left whisker */}
+            <line
+              x1={xMin}
+              y1={cy}
+              x2={xQ1}
+              y2={cy}
+              stroke="#868e96"
+              strokeWidth={1.5}
+            />
+            <line
+              x1={xMin}
+              y1={cy - capH}
+              x2={xMin}
+              y2={cy + capH}
+              stroke="#868e96"
+              strokeWidth={1.5}
+            />
             {/* IQR box */}
             <rect
-              x={cx - bw / 2} y={q3y}
-              width={bw} height={q1y - q3y}
-              fill="rgba(34,139,230,0.1)" stroke="#228be6" strokeWidth={1.5} rx={2}
+              x={xQ1}
+              y={cy - bh / 2}
+              width={xQ3 - xQ1}
+              height={bh}
+              fill="rgba(34,139,230,0.1)"
+              stroke="#228be6"
+              strokeWidth={1.5}
+              rx={2}
             />
             {/* Median line */}
-            <line x1={cx - bw / 2} y1={medy} x2={cx + bw / 2} y2={medy} stroke="#228be6" strokeWidth={2.5} />
-            {/* Lower whisker */}
-            <line x1={cx} y1={q1y} x2={cx} y2={minY} stroke="#868e96" strokeWidth={1.5} />
-            <line x1={cx - capW} y1={minY} x2={cx + capW} y2={minY} stroke="#868e96" strokeWidth={1.5} />
-            {/* X label */}
-            <text x={cx} y={height - mb + 16} textAnchor="middle" fontSize={12} fill="#868e96">
+            <line
+              x1={xMed}
+              y1={cy - bh / 2}
+              x2={xMed}
+              y2={cy + bh / 2}
+              stroke="#228be6"
+              strokeWidth={2.5}
+            />
+            {/* Right whisker */}
+            <line
+              x1={xQ3}
+              y1={cy}
+              x2={xMax}
+              y2={cy}
+              stroke="#868e96"
+              strokeWidth={1.5}
+            />
+            <line
+              x1={xMax}
+              y1={cy - capH}
+              x2={xMax}
+              y2={cy + capH}
+              stroke="#868e96"
+              strokeWidth={1.5}
+            />
+            {/* Class label */}
+            <text
+              x={ml - 8}
+              y={cy + 4}
+              textAnchor="end"
+              fontSize={12}
+              fill="#868e96"
+            >
               {d.class}
             </text>
           </g>
@@ -550,15 +743,23 @@ export function AcademicAnalytics() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/40">
-                <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">Subject</th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">Current grades</th>
+                <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Subject
+                </th>
+                <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Current grades
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {SUBJECTS_BANDING.map((row) => (
                 <tr key={row.subject} className="bg-white">
-                  <td className="px-4 py-3 text-sm text-foreground">{row.subject}</td>
-                  <td className="px-4 py-3 text-sm text-foreground">{row.grade}</td>
+                  <td className="px-4 py-3 text-sm text-foreground">
+                    {row.subject}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-foreground">
+                    {row.grade}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -569,7 +770,9 @@ export function AcademicAnalytics() {
       {/* 2. Results over time */}
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-foreground">Results over time</h3>
+          <h3 className="text-sm font-semibold text-foreground">
+            Results over time
+          </h3>
           <button
             onClick={() => setChartExpanded(true)}
             className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -581,7 +784,10 @@ export function AcademicAnalytics() {
         <ResponsiveContainer width="100%" height={300}>
           <PerformanceBarChart />
         </ResponsiveContainer>
-        <div className="flex gap-2" style={{ paddingLeft: 28, paddingRight: 8 }}>
+        <div
+          className="flex gap-2"
+          style={{ paddingLeft: 28, paddingRight: 8 }}
+        >
           <div className="flex flex-1 items-center justify-center border-t border-muted-foreground/30 py-1.5">
             <span className="text-xs font-semibold text-foreground">G2</span>
           </div>
@@ -595,11 +801,19 @@ export function AcademicAnalytics() {
       {/* Expanded overlay */}
       {chartExpanded && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setChartExpanded(false)} />
+          <div
+            className="fixed inset-0 z-40 bg-black/20"
+            onClick={() => setChartExpanded(false)}
+          />
           <div className="fixed inset-6 z-50 flex flex-col rounded-xl border bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground">Results over time</h3>
-              <button onClick={() => setChartExpanded(false)} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+              <h3 className="text-sm font-semibold text-foreground">
+                Results over time
+              </h3>
+              <button
+                onClick={() => setChartExpanded(false)}
+                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -608,12 +822,19 @@ export function AcademicAnalytics() {
                 <PerformanceBarChart barSize={16} />
               </ResponsiveContainer>
             </div>
-            <div className="flex gap-2" style={{ paddingLeft: 28, paddingRight: 8 }}>
+            <div
+              className="flex gap-2"
+              style={{ paddingLeft: 28, paddingRight: 8 }}
+            >
               <div className="flex flex-1 items-center justify-center border-t border-muted-foreground/30 py-1.5">
-                <span className="text-xs font-semibold text-foreground">G2</span>
+                <span className="text-xs font-semibold text-foreground">
+                  G2
+                </span>
               </div>
               <div className="flex flex-[2] items-center justify-center border-t border-muted-foreground/30 py-1.5">
-                <span className="text-xs font-semibold text-foreground">G3</span>
+                <span className="text-xs font-semibold text-foreground">
+                  G3
+                </span>
               </div>
             </div>
             <PerformanceLegend />
@@ -635,7 +856,10 @@ export function MonitoringAcademicAnalytics() {
   const [level, setLevel] = useState('Secondary 4')
   const [subject, setSubject] = useState('el-g3')
   const [assessment, setAssessment] = useState('term1wa')
-  const [indicators, setIndicators] = useState<string[]>(['Distinction', 'Pass'])
+  const [indicators, setIndicators] = useState<Array<string>>([
+    'Distinction',
+    'Pass',
+  ])
 
   // Candidates table search
   const [candidateSearch, setCandidateSearch] = useState('')
@@ -651,24 +875,14 @@ export function MonitoringAcademicAnalytics() {
       : MOCK_CANDIDATES
   }, [candidateSearch])
 
-  const selectionChips = [
-    getLevelLabel(level),
-    getSubjectLabel(subject),
-    getAssessmentLabel(assessment),
-    indicators.length === 0 || indicators.length === INDICATOR_OPTIONS.length
-      ? 'All indicators'
-      : indicators.join(', '),
-  ]
-
   return (
     <div className="mt-6 space-y-10 border-t pt-6">
-
       {/* ================================================================
           Section 1 — Distribution of subject performance
           ================================================================ */}
       <div>
         <h3 className="mb-4 text-xl font-semibold text-foreground">
-          Distribution of subject performance
+          Breakdown of subject performance
         </h3>
 
         {/* Filter controls */}
@@ -676,7 +890,10 @@ export function MonitoringAcademicAnalytics() {
           <LevelDropdown value={level} onValueChange={setLevel} />
 
           <Select value={subject} onValueChange={setSubject}>
-            <SelectTrigger size="sm" className="h-8 w-auto gap-1.5">
+            <SelectTrigger
+              size="sm"
+              className="h-8 w-auto gap-1.5 rounded-full border-border bg-white"
+            >
               <span className="text-muted-foreground text-sm">Subject:</span>
               <SelectValue />
             </SelectTrigger>
@@ -685,7 +902,9 @@ export function MonitoringAcademicAnalytics() {
                 <SelectGroup key={grp.group}>
                   <SelectLabel>{grp.group}</SelectLabel>
                   {grp.subjects.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
                   ))}
                 </SelectGroup>
               ))}
@@ -693,13 +912,18 @@ export function MonitoringAcademicAnalytics() {
           </Select>
 
           <Select value={assessment} onValueChange={setAssessment}>
-            <SelectTrigger size="sm" className="h-8 w-auto gap-1.5">
+            <SelectTrigger
+              size="sm"
+              className="h-8 w-auto gap-1.5 rounded-full border-border bg-white"
+            >
               <span className="text-muted-foreground text-sm">Assessment:</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="start">
               {ASSESSMENT_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -707,62 +931,51 @@ export function MonitoringAcademicAnalytics() {
           <IndicatorDropdown value={indicators} onValueChange={setIndicators} />
         </div>
 
-        {/* Selection summary chips */}
-        <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">Showing:</span>
-          {selectionChips.map((chip, i) => (
-            <span
-              key={i}
-              className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-800"
-            >
-              {chip}
-            </span>
-          ))}
-        </div>
-
         {/* ── Quick stats ─────────────────────────────────────────────── */}
         <div className="mt-6 grid grid-cols-3 gap-4">
           <div className="rounded-lg border bg-white p-4">
             <p className="text-xs text-muted-foreground">No. of students sat</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{QUICK_STATS.total}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">
+              {QUICK_STATS.total}
+            </p>
           </div>
           <div className="rounded-lg border bg-white p-4">
-            <p className="text-xs text-muted-foreground">Students with distinction</p>
-            <p className="mt-1 text-2xl font-bold text-blue-600">{QUICK_STATS.distinction}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {Math.round((QUICK_STATS.distinction / QUICK_STATS.total) * 100)}% of cohort
+            <p className="text-xs text-muted-foreground">
+              Students with distinction
+            </p>
+            <p className="mt-1 text-2xl font-bold text-foreground">
+              {Math.round((QUICK_STATS.distinction / QUICK_STATS.total) * 100)}%
             </p>
           </div>
           <div className="rounded-lg border bg-white p-4">
             <p className="text-xs text-muted-foreground">Students with pass</p>
-            <p className="mt-1 text-2xl font-bold text-teal-600">{QUICK_STATS.pass}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {Math.round((QUICK_STATS.pass / QUICK_STATS.total) * 100)}% of cohort
+            <p className="mt-1 text-2xl font-bold text-foreground">
+              {Math.round((QUICK_STATS.pass / QUICK_STATS.total) * 100)}%
             </p>
           </div>
         </div>
 
         {/* ── Charts row ──────────────────────────────────────────────── */}
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* No. of students per grade */}
+        <div className="mt-4 grid grid-cols-1 gap-4">
+          {/* No. of students in each grade */}
           <div className="rounded-lg border bg-white p-4">
             <p className="mb-3 text-sm font-semibold text-foreground">
-              No. of students per grade
+              No. of students in each grade
             </p>
             <ResponsiveContainer width="100%" height={200}>
               <GradeDistChart />
             </ResponsiveContainer>
           </div>
 
-          {/* Scores distribution by class */}
+          {/* Scores by class */}
           <div className="rounded-lg border bg-white p-4">
-            <p className="mb-1 text-sm font-semibold text-foreground">
-              Scores distribution by class
+            <p className="mb-3 text-sm font-semibold text-foreground">
+              Scores by class
             </p>
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={280}>
               <BoxPlotSVGInner />
             </ResponsiveContainer>
-            <div className="mt-1 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <span className="inline-block h-3 w-4 rounded-sm border border-blue-400 bg-blue-400/10" />
                 IQR (Q1–Q3)
@@ -779,10 +992,10 @@ export function MonitoringAcademicAnalytics() {
           </div>
         </div>
 
-        {/* ── Candidates sorted by results ────────────────────────────── */}
+        {/* ── Students sorted by results ──────────────────────────────── */}
         <div className="mt-4 rounded-lg border bg-white p-4">
           <p className="mb-3 text-sm font-semibold text-foreground">
-            Candidates sorted by results
+            Students sorted by results
           </p>
 
           {/* Search + filter bar */}
@@ -804,46 +1017,66 @@ export function MonitoringAcademicAnalytics() {
 
           {/* Table */}
           <div className="overflow-hidden rounded-lg border">
-            <table className="w-full text-sm">
+            <table className="w-full table-fixed text-sm">
               <thead>
                 <tr className="border-b bg-muted/40">
-                  <th className="w-10 px-3 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground" />
-                  <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">Name</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">Class</th>
-                  <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">Score</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">Grade</th>
+                  <th className="w-2/5 px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Name
+                  </th>
+                  <th className="w-[15%] px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Class
+                  </th>
+                  <th className="w-[15%] px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Score
+                  </th>
+                  <th className="w-[15%] px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Grade
+                  </th>
+                  <th className="w-[15%] px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    View profile
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {filteredCandidates.map((c) => (
-                  <tr key={c.id} className="bg-white transition-colors hover:bg-muted/30">
-                    <td className="px-3 py-2.5">
-                      <button
-                        type="button"
-                        title="View student profile"
-                        className="flex items-center justify-center rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
+                  <tr
+                    key={c.id}
+                    className="bg-white transition-colors hover:bg-muted/30"
+                  >
+                    <td className="w-2/5 px-4 py-2.5 font-medium text-foreground">
+                      {c.name}
                     </td>
-                    <td className="px-4 py-2.5 font-medium text-foreground">{c.name}</td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{c.class}</td>
-                    <td className="px-4 py-2.5 text-right tabular-nums">{c.score}</td>
-                    <td className="px-4 py-2.5">
-                      <span
-                        className={cn(
-                          'rounded-full px-2 py-0.5 text-xs font-medium',
-                          GRADE_BADGE[c.grade] ?? 'bg-gray-100 text-gray-600',
-                        )}
-                      >
-                        {c.grade}
-                      </span>
+                    <td className="w-[15%] px-4 py-2.5 text-muted-foreground">
+                      {c.class}
+                    </td>
+                    <td className="w-[15%] px-4 py-2.5 text-right tabular-nums">
+                      {c.score}
+                    </td>
+                    <td className="w-[15%] px-4 py-2.5 text-right text-muted-foreground">
+                      {c.grade}
+                    </td>
+                    <td className="w-[15%] px-4 py-2.5">
+                      <TooltipUI>
+                        <TooltipTrigger>
+                          <Link
+                            to="/students/$id"
+                            params={{ id: c.id }}
+                            className="flex items-center justify-center rounded p-0.5 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                          >
+                            <FileText className="h-4 w-4" />
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>View student profile</TooltipContent>
+                      </TooltipUI>
                     </td>
                   </tr>
                 ))}
                 {filteredCandidates.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                    <td
+                      colSpan={5}
+                      className="px-4 py-8 text-center text-sm text-muted-foreground"
+                    >
                       No candidates match your search.
                     </td>
                   </tr>
@@ -872,15 +1105,23 @@ export function MonitoringAcademicAnalytics() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/40">
-                    <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">Subject</th>
-                    <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">Current grades</th>
+                    <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Subject
+                    </th>
+                    <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Current grades
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {SUBJECTS_BANDING.map((row) => (
                     <tr key={row.subject} className="bg-white">
-                      <td className="px-4 py-3 text-sm text-foreground">{row.subject}</td>
-                      <td className="px-4 py-3 text-sm text-foreground">{row.grade}</td>
+                      <td className="px-4 py-3 text-sm text-foreground">
+                        {row.subject}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-foreground">
+                        {row.grade}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -891,7 +1132,9 @@ export function MonitoringAcademicAnalytics() {
           {/* 2b. Results over time */}
           <div>
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-medium text-muted-foreground">Results over time</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Results over time
+              </p>
               <button
                 onClick={() => setTrendsChartExpanded(true)}
                 className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -908,13 +1151,17 @@ export function MonitoringAcademicAnalytics() {
                 className="flex items-center justify-center border-t border-r border-muted-foreground/30 py-1.5"
                 style={{ width: `${(G2_COUNT / TOTAL_SUBJECTS) * 100}%` }}
               >
-                <span className="text-xs font-semibold text-foreground">G2</span>
+                <span className="text-xs font-semibold text-foreground">
+                  G2
+                </span>
               </div>
               <div
                 className="flex items-center justify-center border-t border-muted-foreground/30 py-1.5"
                 style={{ width: `${(G3_COUNT / TOTAL_SUBJECTS) * 100}%` }}
               >
-                <span className="text-xs font-semibold text-foreground">G3</span>
+                <span className="text-xs font-semibold text-foreground">
+                  G3
+                </span>
               </div>
             </div>
             <PerformanceLegend />
@@ -925,11 +1172,19 @@ export function MonitoringAcademicAnalytics() {
       {/* Expanded trends overlay */}
       {trendsChartExpanded && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setTrendsChartExpanded(false)} />
+          <div
+            className="fixed inset-0 z-40 bg-black/20"
+            onClick={() => setTrendsChartExpanded(false)}
+          />
           <div className="fixed inset-6 z-50 flex flex-col rounded-xl border bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm font-medium text-muted-foreground">Results over time</p>
-              <button onClick={() => setTrendsChartExpanded(false)} className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+              <p className="text-sm font-medium text-muted-foreground">
+                Results over time
+              </p>
+              <button
+                onClick={() => setTrendsChartExpanded(false)}
+                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -938,12 +1193,19 @@ export function MonitoringAcademicAnalytics() {
                 <PerformanceBarChart barSize={16} />
               </ResponsiveContainer>
             </div>
-            <div className="flex gap-2" style={{ paddingLeft: 28, paddingRight: 8 }}>
+            <div
+              className="flex gap-2"
+              style={{ paddingLeft: 28, paddingRight: 8 }}
+            >
               <div className="flex flex-1 items-center justify-center border-t border-muted-foreground/30 py-1.5">
-                <span className="text-xs font-semibold text-foreground">G2</span>
+                <span className="text-xs font-semibold text-foreground">
+                  G2
+                </span>
               </div>
               <div className="flex flex-[2] items-center justify-center border-t border-muted-foreground/30 py-1.5">
-                <span className="text-xs font-semibold text-foreground">G3</span>
+                <span className="text-xs font-semibold text-foreground">
+                  G3
+                </span>
               </div>
             </div>
             <PerformanceLegend />

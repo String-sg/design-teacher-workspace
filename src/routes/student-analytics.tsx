@@ -3,12 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Clock } from 'lucide-react'
 
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MonitoringAcademicAnalytics } from '@/components/students/academic-analytics'
 import { cn } from '@/lib/utils'
 
@@ -57,9 +52,24 @@ function StudentAnalyticsPage() {
       {/* Main tabs */}
       <Tabs defaultValue="academic" className="mt-6">
         <TabsList variant="line">
-          <TabsTrigger value="academic" className="after:bg-blue-600! data-active:text-blue-600">Academic</TabsTrigger>
-          <TabsTrigger value="attendance" className="after:bg-blue-600! data-active:text-blue-600">Attendance</TabsTrigger>
-          <TabsTrigger value="wellbeing" className="after:bg-blue-600! data-active:text-blue-600">Wellbeing</TabsTrigger>
+          <TabsTrigger
+            value="academic"
+            className="after:bg-blue-600! data-active:text-blue-600"
+          >
+            Academic
+          </TabsTrigger>
+          <TabsTrigger
+            value="attendance"
+            className="after:bg-blue-600! data-active:text-blue-600"
+          >
+            Attendance
+          </TabsTrigger>
+          <TabsTrigger
+            value="wellbeing"
+            className="after:bg-blue-600! data-active:text-blue-600"
+          >
+            Wellbeing
+          </TabsTrigger>
         </TabsList>
 
         {/* Academic tab */}
