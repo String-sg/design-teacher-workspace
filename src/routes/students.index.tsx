@@ -62,7 +62,7 @@ function matchesCondition(student: Student, filter: FilterCriterion): boolean {
 }
 
 function StudentsPage() {
-  useSetBreadcrumbs([{ label: 'Student dashboard', href: '/students' }])
+  useSetBreadcrumbs([{ label: 'Students', href: '/students' }])
 
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [searchQuery, setSearchQuery] = useState('')
@@ -210,7 +210,7 @@ function StudentsPage() {
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
         <div className="px-6">
-          <h1 className="text-2xl font-semibold">Student dashboard</h1>
+          <h1 className="text-2xl font-semibold">Students</h1>
           <p className="text-muted-foreground">
             Key data to understand your students holistically
           </p>
