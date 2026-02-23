@@ -419,6 +419,7 @@ interface LevelDropdownProps {
 
 function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
 
   const displayLabel = (() => {
     for (const group of groupedClassOptions) {
@@ -428,6 +429,30 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
     }
     return value
   })()
+
+  const filteredGroups = useMemo(() => {
+    if (!search) return groupedClassOptions
+    const query = search.toLowerCase()
+    return groupedClassOptions
+      .map((group) => {
+        const levelMatches = group.level.toLowerCase().includes(query)
+        const matchingClasses = group.classes.filter(
+          (c) =>
+            c.label.toLowerCase().includes(query) ||
+            c.value.toLowerCase().includes(query),
+        )
+        if (levelMatches) return group
+        if (matchingClasses.length > 0) return { ...group, classes: matchingClasses }
+        return null
+      })
+      .filter(Boolean) as typeof groupedClassOptions
+  }, [search])
+
+  const handleSelect = (v: string) => {
+    onValueChange(v)
+    setOpen(false)
+    setSearch('')
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -443,46 +468,46 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
         <span>{displayLabel}</span>
         <ChevronDown className="text-muted-foreground ml-0.5 h-4 w-4 shrink-0" />
       </PopoverTrigger>
-      <PopoverContent className="w-64 gap-0 p-0" align="start">
-        <div className="max-h-72 overflow-y-auto px-1 py-2">
-          <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            School
+      <PopoverContent className="w-64 overflow-hidden rounded-2xl p-0" align="start">
+        <div className="p-2">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search filters"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+              autoFocus
+            />
           </div>
-          {groupedClassOptions.map((group) => (
+        </div>
+        <div className="max-h-72 overflow-y-auto p-1">
+          {filteredGroups.map((group, index) => (
             <div key={group.level}>
+              {index > 0 && <div className="my-1 h-px bg-border/50" />}
               <button
                 type="button"
-                onClick={() => {
-                  onValueChange(group.level)
-                  setOpen(false)
-                }}
+                onClick={() => handleSelect(group.level)}
                 className={cn(
-                  'flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-semibold hover:bg-accent',
-                  value === group.level && 'bg-accent',
+                  'inline-flex w-full items-center gap-2 rounded-lg p-2 text-base font-normal leading-6 outline-none hover:bg-accent',
+                  value === group.level && 'bg-accent font-semibold',
                 )}
               >
-                {group.level}
-                {value === group.level && (
-                  <Check className="h-4 w-4 text-foreground" />
-                )}
+                <span className="line-clamp-1 flex-1 text-left">{group.level}</span>
+                {value === group.level && <Check className="ml-auto h-4 w-4 shrink-0" />}
               </button>
               {group.classes.map((cls) => (
                 <button
                   key={cls.value}
                   type="button"
-                  onClick={() => {
-                    onValueChange(cls.value)
-                    setOpen(false)
-                  }}
+                  onClick={() => handleSelect(cls.value)}
                   className={cn(
-                    'flex w-full items-center justify-between rounded-md py-2 pl-6 pr-3 text-sm hover:bg-accent',
-                    value === cls.value && 'bg-accent',
+                    'inline-flex w-full items-center gap-2 rounded-lg p-2 text-base font-normal leading-6 outline-none hover:bg-accent',
+                    value === cls.value && 'bg-accent font-semibold',
                   )}
                 >
-                  {cls.label}
-                  {value === cls.value && (
-                    <Check className="h-4 w-4 text-foreground" />
-                  )}
+                  <span className="line-clamp-1 flex-1 text-left">{cls.label}</span>
+                  {value === cls.value && <Check className="ml-auto h-4 w-4 shrink-0" />}
                 </button>
               ))}
             </div>
@@ -895,9 +920,11 @@ export function MonitoringAcademicAnalytics() {
               className="h-8 w-auto gap-1.5 rounded-full border-border bg-white"
             >
               <span className="text-muted-foreground text-sm">Subject:</span>
-              <SelectValue />
+              <SelectValue>
+                {MOE_SUBJECT_GROUPS.flatMap((g) => g.subjects).find((s) => s.value === subject)?.label ?? subject}
+              </SelectValue>
             </SelectTrigger>
-            <SelectContent align="start">
+            <SelectContent align="start" alignItemWithTrigger={false}>
               {MOE_SUBJECT_GROUPS.map((grp) => (
                 <SelectGroup key={grp.group}>
                   <SelectLabel>{grp.group}</SelectLabel>
@@ -917,9 +944,11 @@ export function MonitoringAcademicAnalytics() {
               className="h-8 w-auto gap-1.5 rounded-full border-border bg-white"
             >
               <span className="text-muted-foreground text-sm">Assessment:</span>
-              <SelectValue />
+              <SelectValue>
+                {ASSESSMENT_OPTIONS.find((o) => o.value === assessment)?.label ?? assessment}
+              </SelectValue>
             </SelectTrigger>
-            <SelectContent align="start">
+            <SelectContent align="start" alignItemWithTrigger={false}>
               {ASSESSMENT_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
                   {opt.label}
