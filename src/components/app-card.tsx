@@ -4,30 +4,43 @@ import type { LucideIcon } from 'lucide-react'
 import type { AppColor } from '@/data/apps'
 import { cn } from '@/lib/utils'
 
-const colorVariants: Record<AppColor, string> = {
-  pink: 'bg-pink-500',
-  blue: 'bg-twblue-9',
-  orange: 'bg-orange-500',
-  green: 'bg-green-500',
-  purple: 'bg-purple-500',
+const iconColorVariants: Record<AppColor, string> = {
+  pink: 'text-pink-500',
+  blue: 'text-twblue-9',
+  orange: 'text-orange-500',
+  green: 'text-green-500',
+  purple: 'text-purple-500',
 }
 
 interface AppIconProps {
-  icon: LucideIcon
+  icon: LucideIcon | string
   color: AppColor
   className?: string
 }
 
-export function AppIcon({ icon: Icon, color, className }: AppIconProps) {
+export function AppIcon({ icon, color, className }: AppIconProps) {
+  if (typeof icon === 'string') {
+    return (
+      <div
+        className={cn(
+          'flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border bg-white',
+          className,
+        )}
+      >
+        <img src={icon} alt="" className="size-12 object-contain" />
+      </div>
+    )
+  }
+
+  const Icon = icon
   return (
     <div
       className={cn(
-        'flex size-16 shrink-0 items-center justify-center rounded-3xl',
-        colorVariants[color],
+        'flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border bg-white',
         className,
       )}
     >
-      <Icon className="size-8 text-white" />
+      <Icon className={cn('size-8', iconColorVariants[color])} />
     </div>
   )
 }
@@ -35,7 +48,7 @@ export function AppIcon({ icon: Icon, color, className }: AppIconProps) {
 interface AppCardProps {
   name: string
   description: string
-  icon: LucideIcon
+  icon: LucideIcon | string
   color: AppColor
   href: string
   className?: string
@@ -71,7 +84,7 @@ export function AppCard({
 interface FeaturedAppCardProps {
   name: string
   description: string
-  icon: LucideIcon
+  icon: LucideIcon | string
   color: AppColor
   href: string
   className?: string
