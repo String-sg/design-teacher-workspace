@@ -12,22 +12,30 @@ const iconColorVariants: Record<AppColor, string> = {
   purple: 'text-purple-500',
 }
 
+const iconPaddingVariants = {
+  none: 'p-1',
+  sm: 'p-1.5',
+  md: 'p-3',
+} as const
+
 interface AppIconProps {
   icon: LucideIcon | string
   color: AppColor
+  iconPadding?: 'none' | 'sm' | 'md'
   className?: string
 }
 
-export function AppIcon({ icon, color, className }: AppIconProps) {
+export function AppIcon({ icon, color, iconPadding = 'sm', className }: AppIconProps) {
   if (typeof icon === 'string') {
     return (
       <div
         className={cn(
           'flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border bg-white',
+          iconPaddingVariants[iconPadding],
           className,
         )}
       >
-        <img src={icon} alt="" className="size-12 object-contain" />
+        <img src={icon} alt="" className="h-full w-full object-contain" />
       </div>
     )
   }
@@ -51,6 +59,7 @@ interface AppCardProps {
   icon: LucideIcon | string
   color: AppColor
   href: string
+  iconPadding?: 'none' | 'sm' | 'md'
   className?: string
 }
 
@@ -60,6 +69,7 @@ export function AppCard({
   icon,
   color,
   href,
+  iconPadding,
   className,
 }: AppCardProps) {
   return (
@@ -70,7 +80,7 @@ export function AppCard({
         className,
       )}
     >
-      <AppIcon icon={icon} color={color} />
+      <AppIcon icon={icon} color={color} iconPadding={iconPadding} />
       <div className="flex flex-col gap-2">
         <h3 className="font-semibold text-foreground">{name}</h3>
         <p className="line-clamp-2 text-sm text-muted-foreground">
@@ -87,6 +97,7 @@ interface FeaturedAppCardProps {
   icon: LucideIcon | string
   color: AppColor
   href: string
+  iconPadding?: 'none' | 'sm' | 'md'
   className?: string
 }
 
@@ -96,6 +107,7 @@ export function FeaturedAppCard({
   icon,
   color,
   href,
+  iconPadding,
   className,
 }: FeaturedAppCardProps) {
   return (
@@ -106,7 +118,7 @@ export function FeaturedAppCard({
         className,
       )}
     >
-      <AppIcon icon={icon} color={color} />
+      <AppIcon icon={icon} color={color} iconPadding={iconPadding} />
       <div className="flex flex-1 flex-col gap-2">
         <h3 className="font-semibold text-foreground">{name}</h3>
         <p className="text-sm text-muted-foreground">{description}</p>
