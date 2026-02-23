@@ -65,7 +65,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         {process.env.NODE_ENV === 'development' && (
           <TanStackDevtools
             config={{
-              position: 'bottom-right',
+              position: 'bottom-left',
             }}
             plugins={[
               {

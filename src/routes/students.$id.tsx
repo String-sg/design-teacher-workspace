@@ -1,10 +1,17 @@
+import { useEffect } from 'react'
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { ArrowLeft, ChevronLeft, ChevronRight, Download } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { StudentProfile } from '@/components/students/student-profile'
+import { InsightBuddy } from '@/components/insight-buddy'
 import { getStudentById, mockStudents } from '@/data/mock-students'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
+
+const PROFILE_PROMPTS = [
+  "Summarise this student's academic performance",
+  'What are the key risk factors for this student?',
+]
 
 export const Route = createFileRoute('/students/$id')({
   component: StudentProfilePage,
@@ -33,6 +40,10 @@ export const Route = createFileRoute('/students/$id')({
 
 function StudentProfilePage() {
   const { student, prevStudentId, nextStudentId } = Route.useLoaderData()
+
+  useEffect(() => {
+    document.querySelector('[data-scroll-container]')?.scrollTo({ top: 0 })
+  }, [student.id])
 
   useSetBreadcrumbs([
     { label: 'Home', href: '/' },
@@ -92,11 +103,14 @@ function StudentProfilePage() {
   )
 
   return (
-    <main className="flex flex-col gap-4 p-6">
-      {/* Centered content container */}
-      <div className="mx-auto w-full max-w-[860px]">
+    <main className="flex gap-6 p-6">
+      {/* Main profile content */}
+      <div className="min-w-0 flex-1">
         <StudentProfile student={student} headerControls={headerControls} />
       </div>
+
+      {/* Insight Buddy side panel */}
+      <InsightBuddy examplePrompts={PROFILE_PROMPTS} />
     </main>
   )
 }

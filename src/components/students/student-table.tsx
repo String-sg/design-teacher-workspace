@@ -644,11 +644,8 @@ export function StudentTable({
                           <div className="flex items-center gap-2">
                             {student.name}
                             <Link
-                              to="/reports"
-                              search={{
-                                studentId: student.id,
-                                groupBy: 'student',
-                              }}
+                              to="/students/$id"
+                              params={{ id: student.id }}
                               className="text-muted-foreground hover:text-foreground"
                               onClick={(e) => e.stopPropagation()}
                             >

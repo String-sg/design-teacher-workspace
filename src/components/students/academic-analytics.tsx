@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Bar,
   BarChart,
@@ -262,71 +262,138 @@ const BOX_PLOT_DATA = [
   { class: '4D', min: 35, q1: 48, median: 57, q3: 68, max: 85 },
 ]
 
+// ---------------------------------------------------------------------------
+// Helpers — derive breakdown data from filter selection
+// ---------------------------------------------------------------------------
+
+function hashFilters(s: string): number {
+  let h = 5381
+  for (let i = 0; i < s.length; i++) {
+    h = ((h << 5) + h) ^ s.charCodeAt(i)
+  }
+  return Math.abs(h)
+}
+
+const BASE_GRADE_COUNTS = [15, 27, 22, 18, 16, 12, 7, 3]
+
+type BreakdownData = {
+  quickStats: { total: number; distinction: number; pass: number }
+  gradeData: Array<{ grade: string; count: number }>
+  boxPlotData: typeof BOX_PLOT_DATA
+}
+
+function computeBreakdownData(
+  level: string,
+  subject: string,
+  assessment: string,
+): BreakdownData {
+  const h = hashFilters(`${level}:${subject}:${assessment}`)
+
+  const gradeData = GRADE_DATA.map((g, i) => ({
+    grade: g.grade,
+    count: Math.max(1, BASE_GRADE_COUNTS[i] + (((h >> (i * 4)) & 0xf) - 7)),
+  }))
+
+  const total = gradeData.reduce((sum, g) => sum + g.count, 0)
+  const distinction = gradeData[0].count + gradeData[1].count
+  const pass = gradeData.slice(0, 6).reduce((sum, g) => sum + g.count, 0)
+
+  const offset = (h & 0x1f) - 15
+  const boxPlotData = BOX_PLOT_DATA.map((d) => ({
+    class: d.class,
+    min: Math.max(0, d.min + offset),
+    q1: Math.max(0, d.q1 + offset),
+    median: Math.max(0, d.median + offset),
+    q3: Math.min(100, d.q3 + offset),
+    max: Math.min(100, d.max + offset),
+  }))
+
+  return { quickStats: { total, distinction, pass }, gradeData, boxPlotData }
+}
+
 const MOCK_CANDIDATES = [
-  { id: '1', name: 'Alice Tan Wei Lin', class: '4A', score: 92, grade: 'A1' },
-  { id: '2', name: 'Marcus Lim Kai Jun', class: '4A', score: 88, grade: 'A2' },
-  { id: '3', name: 'Rachel Ng Hui Shan', class: '4B', score: 85, grade: 'A2' },
-  { id: '4', name: 'Jordan Chua Zhi Wei', class: '4A', score: 83, grade: 'A2' },
-  { id: '5', name: 'Sophia Wong Mei Li', class: '4C', score: 79, grade: 'B3' },
-  { id: '6', name: 'Ethan Loh Jian Ming', class: '4B', score: 77, grade: 'B3' },
-  { id: '7', name: 'Chloe Chan Xin Yi', class: '4A', score: 75, grade: 'B3' },
-  { id: '8', name: 'Ryan Goh Kian Huat', class: '4D', score: 73, grade: 'B3' },
+  { id: '1', name: 'Chen Teo Jun Kai', class: '4A', score: 92, grade: 'A1' },
+  { id: '2', name: 'Vincent Koh Xin Yi', class: '4A', score: 88, grade: 'A2' },
+  { id: '3', name: 'Xiao Lam Wei Jie', class: '4B', score: 85, grade: 'A2' },
+  { id: '4', name: 'Sarah Chan Jun Kai', class: '4A', score: 83, grade: 'A2' },
+  { id: '5', name: 'Yusuf Koh Xin Yi', class: '4C', score: 79, grade: 'B3' },
+  { id: '6', name: 'Liang Lim Wei Jie', class: '4B', score: 77, grade: 'B3' },
+  { id: '7', name: 'Sarah Tan Jun Kai', class: '4A', score: 75, grade: 'B3' },
+  { id: '8', name: 'Harish Cheng Xin Yi', class: '4D', score: 73, grade: 'B3' },
   {
     id: '9',
-    name: 'Isabelle Tay Hui Min',
+    name: 'Tan Lam Wei Jie',
     class: '4B',
     score: 71,
     grade: 'B4',
   },
   {
     id: '10',
-    name: 'Darren Sim Wei Xian',
+    name: 'Jason Chua Jun Kai',
     class: '4C',
     score: 68,
     grade: 'B4',
   },
   {
     id: '11',
-    name: 'Natalie Ong Shu Ting',
+    name: 'Ahmad Bin Hassan',
     class: '4A',
     score: 66,
     grade: 'B4',
   },
-  { id: '12', name: 'Kevin Ho Zi Yang', class: '4D', score: 64, grade: 'C5' },
-  { id: '13', name: 'Priya Pillai', class: '4B', score: 62, grade: 'C5' },
+  {
+    id: '12',
+    name: 'Rachel Wong Mei Ling',
+    class: '4D',
+    score: 64,
+    grade: 'C5',
+  },
+  { id: '13', name: 'Kevin Ng Wei Ming', class: '4B', score: 62, grade: 'C5' },
   {
     id: '14',
-    name: 'Alicia Koh Jia Xuan',
+    name: 'Priya Sharma',
     class: '4C',
     score: 60,
     grade: 'C5',
   },
   {
     id: '15',
-    name: 'Jonathan Yee Boon Heng',
+    name: 'Muhammad Farhan',
     class: '4D',
     score: 58,
     grade: 'C5',
   },
   {
     id: '16',
-    name: 'Michelle Tan Pei Ling',
+    name: 'Emily Tan Shu Wen',
     class: '4A',
     score: 55,
     grade: 'C6',
   },
   {
     id: '17',
-    name: 'Brandon Lee Wei Jie',
+    name: 'Ryan Lim Zhi Hao',
     class: '4B',
     score: 53,
     grade: 'C6',
   },
-  { id: '18', name: 'Sarah Seah Xin Yi', class: '4C', score: 50, grade: 'C6' },
-  { id: '19', name: 'Jaden Toh Rui Han', class: '4D', score: 47, grade: 'D7' },
+  {
+    id: '18',
+    name: 'Nurul Izzah Binte Kamal',
+    class: '4C',
+    score: 50,
+    grade: 'C6',
+  },
+  {
+    id: '19',
+    name: 'Joshua Lee Wei Xuan',
+    class: '4D',
+    score: 47,
+    grade: 'D7',
+  },
   {
     id: '20',
-    name: 'Amanda Phua Yun Qing',
+    name: 'Siti Aminah Binte Rahman',
     class: '4A',
     score: 44,
     grade: 'D7',
@@ -442,7 +509,8 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
             c.value.toLowerCase().includes(query),
         )
         if (levelMatches) return group
-        if (matchingClasses.length > 0) return { ...group, classes: matchingClasses }
+        if (matchingClasses.length > 0)
+          return { ...group, classes: matchingClasses }
         return null
       })
       .filter(Boolean) as typeof groupedClassOptions
@@ -468,7 +536,10 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
         <span>{displayLabel}</span>
         <ChevronDown className="text-muted-foreground ml-0.5 h-4 w-4 shrink-0" />
       </PopoverTrigger>
-      <PopoverContent className="w-64 overflow-hidden rounded-2xl p-0" align="start">
+      <PopoverContent
+        className="w-64 overflow-hidden rounded-2xl p-0"
+        align="start"
+      >
         <div className="p-2">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -493,8 +564,12 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
                   value === group.level && 'bg-accent font-semibold',
                 )}
               >
-                <span className="line-clamp-1 flex-1 text-left">{group.level}</span>
-                {value === group.level && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                <span className="line-clamp-1 flex-1 text-left">
+                  {group.level}
+                </span>
+                {value === group.level && (
+                  <Check className="ml-auto h-4 w-4 shrink-0" />
+                )}
               </button>
               {group.classes.map((cls) => (
                 <button
@@ -506,8 +581,12 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
                     value === cls.value && 'bg-accent font-semibold',
                   )}
                 >
-                  <span className="line-clamp-1 flex-1 text-left">{cls.label}</span>
-                  {value === cls.value && <Check className="ml-auto h-4 w-4 shrink-0" />}
+                  <span className="line-clamp-1 flex-1 text-left">
+                    {cls.label}
+                  </span>
+                  {value === cls.value && (
+                    <Check className="ml-auto h-4 w-4 shrink-0" />
+                  )}
                 </button>
               ))}
             </div>
@@ -579,10 +658,10 @@ function IndicatorDropdown({ value, onValueChange }: IndicatorDropdownProps) {
 }
 
 // Grade distribution bar chart
-function GradeDistChart() {
+function GradeDistChart({ data }: { data: BreakdownData['gradeData'] }) {
   return (
     <BarChart
-      data={GRADE_DATA}
+      data={data}
       margin={{ top: 20, right: 8, left: -20, bottom: 4 }}
       barCategoryGap="25%"
     >
@@ -607,7 +686,7 @@ function GradeDistChart() {
         }}
       />
       <Bar dataKey="count" radius={[3, 3, 0, 0]} isAnimationActive={false}>
-        {GRADE_DATA.map((entry) => (
+        {data.map((entry) => (
           <Cell key={entry.grade} fill={GRADE_FILL[entry.grade] ?? '#adb5bd'} />
         ))}
         <LabelList
@@ -624,19 +703,21 @@ function GradeDistChart() {
 function BoxPlotSVGInner({
   width = 400,
   height = 280,
+  data = BOX_PLOT_DATA,
 }: {
   width?: number
   height?: number
+  data?: BreakdownData['boxPlotData']
 }) {
   const ml = 48,
-    mr = 8,
+    mr = 20,
     mt = 16,
     mb = 32
   const innerW = width - ml - mr
   const innerH = height - mt - mb
   const toX = (v: number) => ml + (v / 100) * innerW
 
-  const rowH = innerH / BOX_PLOT_DATA.length
+  const rowH = innerH / data.length
   const bh = Math.max(rowH * 0.58, 16)
   const capH = 5
   const ticks = [0, 20, 40, 60, 80, 100]
@@ -669,7 +750,7 @@ function BoxPlotSVGInner({
         </text>
       ))}
       {/* Horizontal box plots */}
-      {BOX_PLOT_DATA.map((d, i) => {
+      {data.map((d, i) => {
         const cy = mt + rowH * i + rowH / 2
         const xMin = toX(d.min)
         const xQ1 = toX(d.q1)
@@ -875,8 +956,6 @@ export function AcademicAnalytics() {
 // ---------------------------------------------------------------------------
 
 export function MonitoringAcademicAnalytics() {
-  const [trendsChartExpanded, setTrendsChartExpanded] = useState(false)
-
   // Distribution filters
   const [level, setLevel] = useState('Secondary 4')
   const [subject, setSubject] = useState('el-g3')
@@ -885,6 +964,50 @@ export function MonitoringAcademicAnalytics() {
     'Distinction',
     'Pass',
   ])
+
+  // Trends filters
+  const [trendsLevel, setTrendsLevel] = useState('Secondary 4')
+  const [trendsSubject, setTrendsSubject] = useState('el-g3')
+
+  // Derived breakdown data — recomputes when filters change
+  const breakdown = useMemo(
+    () => computeBreakdownData(level, subject, assessment),
+    [level, subject, assessment],
+  )
+
+  // Trend data — recomputes when trends filters change
+  const trendData = useMemo(
+    () =>
+      ASSESSMENT_OPTIONS.map(({ value: assessKey, label }) => {
+        const { quickStats } = computeBreakdownData(
+          trendsLevel,
+          trendsSubject,
+          assessKey,
+        )
+        return {
+          assessment: label,
+          distinction: Math.round(
+            (quickStats.distinction / quickStats.total) * 100,
+          ),
+          pass: Math.round((quickStats.pass / quickStats.total) * 100),
+        }
+      }),
+    [trendsLevel, trendsSubject],
+  )
+
+  // Box plot container width
+  const boxPlotContainerRef = useRef<HTMLDivElement>(null)
+  const [boxPlotWidth, setBoxPlotWidth] = useState(400)
+  useEffect(() => {
+    const el = boxPlotContainerRef.current
+    if (!el) return
+    setBoxPlotWidth(el.offsetWidth)
+    const observer = new ResizeObserver(([entry]) => {
+      setBoxPlotWidth(entry.contentRect.width)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   // Candidates table search
   const [candidateSearch, setCandidateSearch] = useState('')
@@ -921,7 +1044,9 @@ export function MonitoringAcademicAnalytics() {
             >
               <span className="text-muted-foreground text-sm">Subject:</span>
               <SelectValue>
-                {MOE_SUBJECT_GROUPS.flatMap((g) => g.subjects).find((s) => s.value === subject)?.label ?? subject}
+                {MOE_SUBJECT_GROUPS.flatMap((g) => g.subjects).find(
+                  (s) => s.value === subject,
+                )?.label ?? subject}
               </SelectValue>
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
@@ -945,7 +1070,8 @@ export function MonitoringAcademicAnalytics() {
             >
               <span className="text-muted-foreground text-sm">Assessment:</span>
               <SelectValue>
-                {ASSESSMENT_OPTIONS.find((o) => o.value === assessment)?.label ?? assessment}
+                {ASSESSMENT_OPTIONS.find((o) => o.value === assessment)
+                  ?.label ?? assessment}
               </SelectValue>
             </SelectTrigger>
             <SelectContent align="start" alignItemWithTrigger={false}>
@@ -965,7 +1091,7 @@ export function MonitoringAcademicAnalytics() {
           <div className="rounded-lg border bg-white p-4">
             <p className="text-xs text-muted-foreground">No. of students sat</p>
             <p className="mt-1 text-2xl font-bold text-foreground">
-              {QUICK_STATS.total}
+              {breakdown.quickStats.total}
             </p>
           </div>
           <div className="rounded-lg border bg-white p-4">
@@ -973,13 +1099,21 @@ export function MonitoringAcademicAnalytics() {
               Students with distinction
             </p>
             <p className="mt-1 text-2xl font-bold text-foreground">
-              {Math.round((QUICK_STATS.distinction / QUICK_STATS.total) * 100)}%
+              {Math.round(
+                (breakdown.quickStats.distinction /
+                  breakdown.quickStats.total) *
+                  100,
+              )}
+              %
             </p>
           </div>
           <div className="rounded-lg border bg-white p-4">
             <p className="text-xs text-muted-foreground">Students with pass</p>
             <p className="mt-1 text-2xl font-bold text-foreground">
-              {Math.round((QUICK_STATS.pass / QUICK_STATS.total) * 100)}%
+              {Math.round(
+                (breakdown.quickStats.pass / breakdown.quickStats.total) * 100,
+              )}
+              %
             </p>
           </div>
         </div>
@@ -992,19 +1126,23 @@ export function MonitoringAcademicAnalytics() {
               No. of students in each grade
             </p>
             <ResponsiveContainer width="100%" height={200}>
-              <GradeDistChart />
+              <GradeDistChart data={breakdown.gradeData} />
             </ResponsiveContainer>
           </div>
 
           {/* Scores by class */}
-          <div className="rounded-lg border bg-white p-4">
-            <p className="mb-3 text-sm font-semibold text-foreground">
+          <div className="rounded-lg border bg-white overflow-hidden">
+            <p className="px-4 pt-4 pb-3 text-sm font-semibold text-foreground">
               Scores by class
             </p>
-            <ResponsiveContainer width="100%" height={280}>
-              <BoxPlotSVGInner />
-            </ResponsiveContainer>
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+            <div ref={boxPlotContainerRef} className="w-full">
+              <BoxPlotSVGInner
+                width={boxPlotWidth}
+                height={280}
+                data={breakdown.boxPlotData}
+              />
+            </div>
+            <div className="px-4 pb-4 mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <span className="inline-block h-3 w-4 rounded-sm border border-blue-400 bg-blue-400/10" />
                 IQR (Q1–Q3)
@@ -1116,6 +1254,9 @@ export function MonitoringAcademicAnalytics() {
         </div>
       </div>
 
+      {/* Divider */}
+      <hr className="border-border" />
+
       {/* ================================================================
           Section 2 — Trends of subject performance
           ================================================================ */}
@@ -1124,123 +1265,113 @@ export function MonitoringAcademicAnalytics() {
           Trends of subject performance
         </h3>
 
-        <div className="space-y-8">
-          {/* 2a. Subjects taken and current grades */}
-          <div>
-            <p className="mb-3 text-sm font-medium text-muted-foreground">
-              Subjects taken and current grades
-            </p>
-            <div className="overflow-hidden rounded-lg border">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/40">
-                    <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Subject
-                    </th>
-                    <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Current grades
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {SUBJECTS_BANDING.map((row) => (
-                    <tr key={row.subject} className="bg-white">
-                      <td className="px-4 py-3 text-sm text-foreground">
-                        {row.subject}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-foreground">
-                        {row.grade}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        {/* Filter controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          <LevelDropdown value={trendsLevel} onValueChange={setTrendsLevel} />
 
-          {/* 2b. Results over time */}
-          <div>
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-medium text-muted-foreground">
-                Results over time
-              </p>
-              <button
-                onClick={() => setTrendsChartExpanded(true)}
-                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                title="Expand chart"
-              >
-                <Maximize2 className="h-4 w-4" />
-              </button>
+          <Select value={trendsSubject} onValueChange={setTrendsSubject}>
+            <SelectTrigger
+              size="sm"
+              className="h-8 w-auto gap-1.5 rounded-full border-border bg-white"
+            >
+              <span className="text-muted-foreground text-sm">Subject:</span>
+              <SelectValue>
+                {MOE_SUBJECT_GROUPS.flatMap((g) => g.subjects).find(
+                  (s) => s.value === trendsSubject,
+                )?.label ?? trendsSubject}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent align="start" alignItemWithTrigger={false}>
+              {MOE_SUBJECT_GROUPS.map((grp) => (
+                <SelectGroup key={grp.group}>
+                  <SelectLabel>{grp.group}</SelectLabel>
+                  {grp.subjects.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Subject performance over time */}
+        <div className="mt-4 rounded-lg border bg-white p-4">
+          <p className="mb-3 text-sm font-semibold text-foreground">
+            Subject performance over time
+          </p>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart
+              data={trendData}
+              margin={{ top: 20, right: 8, left: -10, bottom: 4 }}
+              barCategoryGap="30%"
+              barGap={2}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#e9ecef"
+              />
+              <XAxis
+                dataKey="assessment"
+                tick={{ fontSize: 12, fill: '#868e96' }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                domain={[0, 100]}
+                ticks={[0, 25, 50, 75, 100]}
+                tick={{ fontSize: 12, fill: '#868e96' }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v: number) => `${v}%`}
+              />
+              <Tooltip
+                formatter={(value: number, name: string) => [
+                  `${value}%`,
+                  name === 'distinction' ? '% with distinction' : '% with pass',
+                ]}
+                contentStyle={{
+                  fontSize: 12,
+                  borderRadius: 6,
+                  border: '1px solid #dee2e6',
+                }}
+              />
+              <Bar dataKey="distinction" fill="#228be6" radius={[2, 2, 0, 0]}>
+                <LabelList
+                  position="top"
+                  formatter={(v: number) => `${v}%`}
+                  style={{ fontSize: 10, fill: '#495057' }}
+                />
+              </Bar>
+              <Bar dataKey="pass" fill="#12b886" radius={[2, 2, 0, 0]}>
+                <LabelList
+                  position="top"
+                  formatter={(v: number) => `${v}%`}
+                  style={{ fontSize: 10, fill: '#495057' }}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+          <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
+            <div className="flex items-center gap-1.5">
+              <span
+                className="h-3 w-3 shrink-0 rounded-sm"
+                style={{ backgroundColor: '#228be6' }}
+              />
+              <span className="text-muted-foreground">% with distinction</span>
             </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <PerformanceBarChart />
-            </ResponsiveContainer>
-            <div className="flex" style={{ paddingLeft: 28, paddingRight: 8 }}>
-              <div
-                className="flex items-center justify-center border-t border-r border-muted-foreground/30 py-1.5"
-                style={{ width: `${(G2_COUNT / TOTAL_SUBJECTS) * 100}%` }}
-              >
-                <span className="text-xs font-semibold text-foreground">
-                  G2
-                </span>
-              </div>
-              <div
-                className="flex items-center justify-center border-t border-muted-foreground/30 py-1.5"
-                style={{ width: `${(G3_COUNT / TOTAL_SUBJECTS) * 100}%` }}
-              >
-                <span className="text-xs font-semibold text-foreground">
-                  G3
-                </span>
-              </div>
+            <div className="flex items-center gap-1.5">
+              <span
+                className="h-3 w-3 shrink-0 rounded-sm"
+                style={{ backgroundColor: '#12b886' }}
+              />
+              <span className="text-muted-foreground">% with pass</span>
             </div>
-            <PerformanceLegend />
           </div>
         </div>
       </div>
-
-      {/* Expanded trends overlay */}
-      {trendsChartExpanded && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black/20"
-            onClick={() => setTrendsChartExpanded(false)}
-          />
-          <div className="fixed inset-6 z-50 flex flex-col rounded-xl border bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm font-medium text-muted-foreground">
-                Results over time
-              </p>
-              <button
-                onClick={() => setTrendsChartExpanded(false)}
-                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="min-h-0 flex-1">
-              <ResponsiveContainer width="100%" height="100%">
-                <PerformanceBarChart barSize={16} />
-              </ResponsiveContainer>
-            </div>
-            <div
-              className="flex gap-2"
-              style={{ paddingLeft: 28, paddingRight: 8 }}
-            >
-              <div className="flex flex-1 items-center justify-center border-t border-muted-foreground/30 py-1.5">
-                <span className="text-xs font-semibold text-foreground">
-                  G2
-                </span>
-              </div>
-              <div className="flex flex-[2] items-center justify-center border-t border-muted-foreground/30 py-1.5">
-                <span className="text-xs font-semibold text-foreground">
-                  G3
-                </span>
-              </div>
-            </div>
-            <PerformanceLegend />
-          </div>
-        </>
-      )}
     </div>
   )
 }

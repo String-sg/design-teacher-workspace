@@ -5,7 +5,13 @@ import { Clock } from 'lucide-react'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MonitoringAcademicAnalytics } from '@/components/students/academic-analytics'
+import { InsightBuddy } from '@/components/insight-buddy'
 import { cn } from '@/lib/utils'
+
+const ANALYTICS_PROMPTS = [
+  'How did Sec 4 (EL-G3) do for Term 1 WA?',
+  'What does this chart mean?',
+]
 
 export const Route = createFileRoute('/student-analytics')({
   component: StudentAnalyticsPage,
@@ -38,85 +44,90 @@ function StudentAnalyticsPage() {
 
   return (
     <div className="flex flex-col p-6">
-      {/* Page header */}
-      <div className="flex items-center gap-2">
-        <h1 className="text-2xl font-semibold">Student Analytics</h1>
-        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
-          Concept illustration
-        </span>
+      <div className="w-full max-w-[860px]">
+        {/* Page header */}
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold">Student Analytics</h1>
+          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
+            Concept illustration
+          </span>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Monitor trends and explore student data
+        </p>
+
+        {/* Main tabs */}
+        <Tabs defaultValue="academic" className="mt-6">
+          <TabsList variant="line">
+            <TabsTrigger
+              value="academic"
+              className="after:bg-blue-600! data-active:text-blue-600"
+            >
+              Academic
+            </TabsTrigger>
+            <TabsTrigger
+              value="attendance"
+              className="after:bg-blue-600! data-active:text-blue-600"
+            >
+              Attendance
+            </TabsTrigger>
+            <TabsTrigger
+              value="wellbeing"
+              className="after:bg-blue-600! data-active:text-blue-600"
+            >
+              Wellbeing
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Academic tab */}
+          <TabsContent value="academic">
+            {/* Segmented control */}
+            <div className="mt-4 flex w-fit rounded-full bg-muted p-1">
+              <button
+                onClick={() => setAcademicView('monitoring')}
+                className={cn(
+                  'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
+                  academicView === 'monitoring'
+                    ? 'bg-background/90 text-foreground shadow-xs'
+                    : 'text-foreground/50 hover:text-foreground/80',
+                )}
+              >
+                Monitoring
+              </button>
+              <button
+                onClick={() => setAcademicView('benchmark')}
+                className={cn(
+                  'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
+                  academicView === 'benchmark'
+                    ? 'bg-background/90 text-foreground shadow-xs'
+                    : 'text-foreground/50 hover:text-foreground/80',
+                )}
+              >
+                Benchmark reports
+              </button>
+            </div>
+
+            {academicView === 'benchmark' ? (
+              <ComingSoon description="Benchmark reports are being prepared. They'll appear here once ready." />
+            ) : (
+              <MonitoringAcademicAnalytics />
+            )}
+          </TabsContent>
+
+          {/* Attendance tab */}
+          <TabsContent value="attendance">
+            <ComingSoon description="Attendance trends and insights across your classes are on their way." />
+          </TabsContent>
+
+          {/* Wellbeing tab */}
+          <TabsContent value="wellbeing">
+            <ComingSoon description="Wellbeing analytics to help you support your students are on their way." />
+          </TabsContent>
+        </Tabs>
       </div>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Monitor trends and explore student data
-      </p>
 
-      {/* Main tabs */}
-      <Tabs defaultValue="academic" className="mt-6">
-        <TabsList variant="line">
-          <TabsTrigger
-            value="academic"
-            className="after:bg-blue-600! data-active:text-blue-600"
-          >
-            Academic
-          </TabsTrigger>
-          <TabsTrigger
-            value="attendance"
-            className="after:bg-blue-600! data-active:text-blue-600"
-          >
-            Attendance
-          </TabsTrigger>
-          <TabsTrigger
-            value="wellbeing"
-            className="after:bg-blue-600! data-active:text-blue-600"
-          >
-            Wellbeing
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Academic tab */}
-        <TabsContent value="academic">
-          {/* Segmented control */}
-          <div className="mt-4 flex w-fit rounded-full bg-muted p-1">
-            <button
-              onClick={() => setAcademicView('monitoring')}
-              className={cn(
-                'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
-                academicView === 'monitoring'
-                  ? 'bg-background/90 text-foreground shadow-xs'
-                  : 'text-foreground/50 hover:text-foreground/80',
-              )}
-            >
-              Monitoring
-            </button>
-            <button
-              onClick={() => setAcademicView('benchmark')}
-              className={cn(
-                'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
-                academicView === 'benchmark'
-                  ? 'bg-background/90 text-foreground shadow-xs'
-                  : 'text-foreground/50 hover:text-foreground/80',
-              )}
-            >
-              Benchmark reports
-            </button>
-          </div>
-
-          {academicView === 'benchmark' ? (
-            <ComingSoon description="Benchmark reports are being prepared. They'll appear here once ready." />
-          ) : (
-            <MonitoringAcademicAnalytics />
-          )}
-        </TabsContent>
-
-        {/* Attendance tab */}
-        <TabsContent value="attendance">
-          <ComingSoon description="Attendance trends and insights across your classes are on their way." />
-        </TabsContent>
-
-        {/* Wellbeing tab */}
-        <TabsContent value="wellbeing">
-          <ComingSoon description="Wellbeing analytics to help you support your students are on their way." />
-        </TabsContent>
-      </Tabs>
+      {/* Insight Buddy — floating FAB + overlay (does not affect page layout) */}
+      <InsightBuddy examplePrompts={ANALYTICS_PROMPTS} floating />
     </div>
   )
 }
