@@ -20,14 +20,6 @@ import { Toaster } from '@/components/ui/sonner'
 import { FeatureFlagProvider } from '@/lib/feature-flags'
 import { BreadcrumbProvider } from '@/hooks/use-breadcrumbs'
 
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  import('react-grab').then(() =>
-    import('@react-grab/claude-code/client').then(({ attachAgent }) =>
-      attachAgent(),
-    ),
-  )
-}
-
 export const Route = createRootRoute({
   head: () => ({
     meta: [
