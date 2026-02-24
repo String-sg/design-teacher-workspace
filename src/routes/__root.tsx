@@ -14,6 +14,7 @@ import { DirectEdit } from 'made-refine'
 import appCss from '../styles.css?url'
 import { AppHeader } from '@/components/app-header'
 import { AppSidebar } from '@/components/app-sidebar'
+import { WelcomeModal } from '@/components/welcome-modal'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
@@ -110,6 +111,7 @@ function RootComponent() {
                 </div>
               </SidebarInset>
               <Toaster position="bottom-center" />
+              <WelcomeModal />
             </SidebarProvider>
           </BreadcrumbProvider>
         </FeatureFlagProvider>

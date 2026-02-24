@@ -117,7 +117,7 @@ export function FeaturedAppCard({
     <Link
       to={href}
       className={cn(
-        'group flex items-center gap-6 rounded-3xl border bg-muted/30 p-4 transition-colors hover:bg-muted/50',
+        'group flex h-[132px] items-center gap-4 rounded-3xl border border-[#C8C8C8] bg-white p-4 transition-colors hover:bg-muted/50',
         className,
       )}
     >
@@ -126,7 +126,7 @@ export function FeaturedAppCard({
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-foreground">{name}</h3>
           {badge && (
-            <span className="rounded-full bg-twblue-3 px-2 py-0.5 text-xs font-medium text-twblue-9">
+            <span className="rounded-full border border-[#006CD0] bg-twblue-3 px-2 py-0.5 text-xs font-medium text-twblue-9">
               {badge}
             </span>
           )}

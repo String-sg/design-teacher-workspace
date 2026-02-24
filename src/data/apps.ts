@@ -5,7 +5,6 @@ import {
   CircleDollarSign,
   ClipboardCheck,
   Gift,
-  GraduationCap,
   LayoutDashboard,
   Wrench,
 } from 'lucide-react'
@@ -32,12 +31,14 @@ export interface AppCategory {
 }
 
 export const featuredApp: App = {
-  id: 'featured-1',
-  name: 'School Cockpit',
-  description: 'Your central hub for school management and daily operations.',
-  icon: LayoutDashboard,
-  color: 'blue',
-  href: '/school-cockpit',
+  id: 'featured-students',
+  name: 'Students',
+  description: 'Key data to understand your students holistically.',
+  icon: '/logos/sdt-logo-22-oct-2025-transparent.png',
+  color: 'purple',
+  href: '/students',
+  badge: 'Beta',
+  iconPadding: 'none',
 }
 
 export const appCategories: Array<AppCategory> = [
@@ -67,15 +68,16 @@ export const appCategories: Array<AppCategory> = [
         id: 'sls',
         name: 'SLS',
         description: 'Transforming learning through technology',
-        icon: GraduationCap,
+        icon: '/logos/sls.png',
         color: 'green',
         href: '/sls',
+        iconPadding: 'none',
       },
       {
         id: 'parents-gateway',
         name: 'Parents Gateway',
         description: 'Connecting parents and schools seamlessly',
-        icon: '/logos/pg-messages.png',
+        icon: '/logos/parentsgateway.webp',
         color: 'purple',
         href: '/parents-gateway',
       },
@@ -105,12 +107,12 @@ export const appCategories: Array<AppCategory> = [
       },
       {
         id: 'sdt-data-tool',
-        name: 'SDT Data Tool',
-        description: 'View and manage student information at a glance',
+        name: 'Students',
+        description: 'Key data to understand your students holistically',
         icon: '/logos/sdt-logo-22-oct-2025-transparent.png',
         color: 'blue',
-        href: '/sdt-data-tool',
-        iconPadding: 'none',
+        href: '/students',
+        iconPadding: 'sm',
       },
       {
         id: 'seconnect',
@@ -270,14 +272,6 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/glow-symbol.png',
         color: 'blue',
         href: '/glow',
-      },
-      {
-        id: 'nlds',
-        name: 'nLDS',
-        description: 'Advancing educational innovation',
-        icon: '/logos/nlds-logo.png',
-        color: 'blue',
-        href: '/nlds',
       },
     ],
   },
