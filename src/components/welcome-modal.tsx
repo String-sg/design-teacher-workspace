@@ -7,16 +7,26 @@ import {
   DialogDescription,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { useAuth } from '@/lib/auth'
 
+const SESSION_KEY = 'tw_welcome_seen'
 
 export function WelcomeModal() {
+  const { isLoggedIn } = useAuth()
   const [open, setOpen] = React.useState(false)
 
   React.useEffect(() => {
-    setOpen(true)
-  }, [])
+    if (isLoggedIn) {
+      setOpen(false)
+      return
+    }
+    if (!sessionStorage.getItem(SESSION_KEY)) {
+      setOpen(true)
+    }
+  }, [isLoggedIn])
 
   function handleDismiss() {
+    sessionStorage.setItem(SESSION_KEY, '1')
     setOpen(false)
   }
 

@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 
+import { useAuth } from '@/lib/auth'
+import { Button } from '@/components/ui/button'
 import type {
   FilterCriterion,
   FilterField,
@@ -63,6 +65,8 @@ function matchesCondition(student: Student, filter: FilterCriterion): boolean {
 
 function StudentsPage() {
   useSetBreadcrumbs([{ label: 'Students', href: '/students' }])
+
+  const { isLoggedIn } = useAuth()
 
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [searchQuery, setSearchQuery] = useState('')
@@ -203,6 +207,33 @@ function StudentsPage() {
   }, [classStudents, matchedIds, hasActiveFilters])
 
   const metrics = useMemo(() => getMetrics(matchedStudents), [matchedStudents])
+
+  if (!isLoggedIn) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <div className="flex w-[467px] flex-col items-center gap-6 text-center">
+          <img
+            src="/students-illustration.png"
+            alt=""
+            className="size-[380px] object-cover"
+          />
+          <div className="flex flex-col gap-3">
+            <h1 className="text-[23px] font-semibold text-slate-12">
+              Students
+            </h1>
+            <p className="text-base text-slate-11">
+              View your student profiles in one place. Sign in to see the
+              complete list of your students and their details.{' '}
+              <span className="font-semibold text-[#0797b9]">Learn more</span>
+            </p>
+          </div>
+          <Button render={<Link to="/login" />}>
+            Sign In to View Students
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col">

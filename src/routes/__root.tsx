@@ -19,6 +19,7 @@ import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { FeatureFlagProvider } from '@/lib/feature-flags'
+import { AuthProvider } from '@/lib/auth'
 import { BreadcrumbProvider } from '@/hooks/use-breadcrumbs'
 
 export const Route = createRootRoute({
@@ -84,9 +85,11 @@ function RootComponent() {
     return (
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <ErrorBoundary>
-            <Outlet />
-          </ErrorBoundary>
+          <AuthProvider>
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
+          </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     )
@@ -95,6 +98,7 @@ function RootComponent() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
+        <AuthProvider>
         <FeatureFlagProvider>
           <BreadcrumbProvider>
             <SidebarProvider>
@@ -115,6 +119,7 @@ function RootComponent() {
             </SidebarProvider>
           </BreadcrumbProvider>
         </FeatureFlagProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   )

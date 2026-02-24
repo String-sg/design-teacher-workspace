@@ -126,7 +126,7 @@ export function FeaturedAppCard({
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-foreground">{name}</h3>
           {badge && (
-            <span className="rounded-full border border-[#006CD0] bg-twblue-3 px-2 py-0.5 text-xs font-medium text-twblue-9">
+            <span className="rounded-full border-0 bg-twblue-3 px-2 py-0.5 text-xs font-medium text-twblue-9">
               {badge}
             </span>
           )}

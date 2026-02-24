@@ -65,7 +65,12 @@
   --chart-4: var(--twblue-9);
   --chart-5: var(--twblue-11);
   --radius: 0.625rem;
-  --radius-input: 0.5rem;
+  --radius-input: 14px;
+  --shadow-xs-x: 0px;
+  --shadow-xs-y: 1px;
+  --shadow-xs-blur: 2px;
+  --shadow-xs-spread: 0px;
+  --color-shadow-xs: rgb(0 0 0 / 0.05);
   --sidebar: var(--slate-2);
   --sidebar-foreground: var(--slate-12);
   --sidebar-primary: var(--twblue-9);
