@@ -915,15 +915,8 @@ function GradeDistChart({
       margin={{ top: 20, right: 8, left: -20, bottom: 4 }}
       barCategoryGap="25%"
       style={{ cursor: 'pointer' }}
-      onClick={(chartData) => {
-        const grade = (
-          chartData.activePayload?.[0]?.payload as
-            | { grade?: string }
-            | undefined
-        )?.grade
-        if (grade) onGradeClick(grade)
-      }}
       onMouseLeave={() => setHoveredGrade(null)}
+      onMouseDown={(e: React.MouseEvent) => e.preventDefault()}
     >
       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e9ecef" />
       <XAxis
@@ -955,8 +948,10 @@ function GradeDistChart({
           <Cell
             key={entry.grade}
             fill={GRADE_FILL[entry.grade] ?? '#adb5bd'}
-            opacity={selectedGrade && selectedGrade !== entry.grade ? 0.4 : 1}
-            style={{ cursor: 'pointer' }}
+            opacity={1}
+            style={{ cursor: 'pointer', outline: 'none' }}
+            tabIndex={-1}
+            onClick={() => onGradeClick(entry.grade)}
           />
         ))}
         <LabelList
@@ -997,7 +992,7 @@ function GradeDistChart({
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fontSize={9}
-                  fill="#9ca3af"
+                  fill="#687076"
                   fontWeight={500}
                 >
                   View
@@ -1008,7 +1003,7 @@ function GradeDistChart({
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fontSize={9}
-                  fill="#9ca3af"
+                  fill="#687076"
                   fontWeight={500}
                 >
                   students

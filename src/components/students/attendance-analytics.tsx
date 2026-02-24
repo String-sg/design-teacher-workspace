@@ -29,9 +29,9 @@ const RING_SEGMENTS = (() => {
   let acc = 0
   return [
     { name: 'Present', value: 9, color: '#12b886' },
-    { name: 'Late', value: 1, color: '#a7aab5' },
-    { name: 'Absent pending reason', value: 1, color: '#e03131' },
-    { name: 'Absent (excl pending reason)', value: 1, color: '#f26c47' },
+    { name: 'Late', value: 1, color: '#fd7e14' },
+    { name: 'Absent pending reason', value: 1, color: '#fa5252' },
+    { name: 'Absent (excl pending reason)', value: 1, color: '#ffa94d' },
   ].map((seg) => {
     const len = (seg.value / total) * RING_C
     const dashoffset = acc === 0 ? 0 : RING_C - acc
@@ -148,28 +148,28 @@ const ABSENCE_DETAILS = [
   {
     date: 'Tuesday, 6 January 2026',
     type: 'Absent without valid reason',
-    typeColor: '#e03131',
+    typeColor: '#fa5252',
     subReason: '—',
     remarks: 'Follow-up required',
   },
   {
     date: 'Wednesday, 7 January 2026',
     type: 'Absent without valid reason',
-    typeColor: '#e03131',
+    typeColor: '#fa5252',
     subReason: '—',
     remarks: 'Follow-up required',
   },
   {
     date: 'Sunday, 11 January 2026',
     type: 'Late',
-    typeColor: '#a7aab5',
+    typeColor: '#fd7e14',
     subReason: '—',
     remarks: 'Noted',
   },
   {
     date: 'Monday, 19 January 2026',
     type: 'Absent without valid reason',
-    typeColor: '#e03131',
+    typeColor: '#fa5252',
     subReason: '—',
     remarks: 'Parent informed',
   },

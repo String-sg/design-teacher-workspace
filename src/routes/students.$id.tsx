@@ -103,7 +103,7 @@ function StudentProfilePage() {
   )
 
   return (
-    <main className="p-6">
+    <main className="mx-auto max-w-5xl p-6">
       {/* Main profile content */}
       <StudentProfile student={student} headerControls={headerControls} />
 
