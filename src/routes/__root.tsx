@@ -6,12 +6,11 @@ import {
   useRouterState,
 } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
 import * as React from 'react'
 
 import { DirectEdit } from 'made-refine'
 import appCss from '../styles.css?url'
+import { DraggableTanStackDevtools } from '@/components/draggable-tanstack-devtools'
 import { AppHeader } from '@/components/app-header'
 import { AppSidebar } from '@/components/app-sidebar'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
@@ -63,17 +62,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         {process.env.NODE_ENV === 'development' && (
-          <TanStackDevtools
-            config={{
-              position: 'bottom-left',
-            }}
-            plugins={[
-              {
-                name: 'Tanstack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-            ]}
-          />
+          <DraggableTanStackDevtools />
         )}
         {process.env.NODE_ENV === 'development' && <DirectEdit />}
         <Scripts />

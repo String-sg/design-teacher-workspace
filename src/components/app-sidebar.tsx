@@ -46,6 +46,7 @@ interface MenuItem {
   badge?: number
   featureFlag?: FeatureFlagKey
   conceptTag?: boolean
+  transparent?: boolean
 }
 
 const navigationItems: Array<MenuItem> = [
@@ -60,12 +61,6 @@ const navigationItems: Array<MenuItem> = [
     title: 'Home',
     url: '/',
     icon: Home,
-  },
-  {
-    title: 'Reports',
-    url: '/reports',
-    icon: FileText,
-    featureFlag: 'holistic-reports',
   },
 ]
 
@@ -88,6 +83,12 @@ const studentInsightItems: Array<MenuItem> = [
     icon: Bot,
     conceptTag: true,
   },
+  {
+    title: 'Reports',
+    url: '/reports',
+    icon: FileText,
+    transparent: true,
+  },
 ]
 
 interface SidebarMenuItemsProps {
@@ -99,7 +100,10 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
   return (
     <SidebarMenu>
       {items.map((item) => (
-        <SidebarMenuItem key={item.title}>
+        <SidebarMenuItem
+          key={item.title}
+          className={item.transparent ? 'opacity-0 pointer-events-none' : ''}
+        >
           <SidebarMenuButton
             render={<Link to={item.url} />}
             isActive={
@@ -130,49 +134,26 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
 export function AppSidebar() {
   const location = useLocation()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
-  const [reportsHidden, setReportsHidden] = React.useState(false)
-  const clickCountRef = React.useRef(0)
-  const clickTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
-
   const announcementsEnabled = useFeatureFlag('announcements')
-  const holisticReportsEnabled = useFeatureFlag('holistic-reports')
 
   const filteredItems = navigationItems.filter((item) => {
     if (!item.featureFlag) return true
     if (item.featureFlag === 'announcements') return announcementsEnabled
-    if (item.featureFlag === 'holistic-reports')
-      return holisticReportsEnabled && !reportsHidden
     return true
   })
-
-  function handleTitleClick() {
-    clickCountRef.current += 1
-    if (clickTimerRef.current) clearTimeout(clickTimerRef.current)
-    clickTimerRef.current = setTimeout(() => {
-      clickCountRef.current = 0
-    }, 600)
-    if (clickCountRef.current === 3) {
-      clickCountRef.current = 0
-      if (clickTimerRef.current) clearTimeout(clickTimerRef.current)
-      setReportsHidden((prev) => !prev)
-    }
-  }
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-0">
         <div className="flex h-14 items-center justify-center gap-2 px-4 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0">
-          <span
-            className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0 select-none cursor-default"
-            onClick={handleTitleClick}
-          >
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0 select-none cursor-default">
             Teacher Workspace
           </span>
           <SidebarTrigger />
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup className={reportsHidden ? 'pb-0' : ''}>
+        <SidebarGroup className="pb-0">
           <SidebarGroupContent>
             <SidebarMenuItems
               items={filteredItems}
@@ -180,7 +161,7 @@ export function AppSidebar() {
             />
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup className={reportsHidden ? 'pt-0' : ''}>
+        <SidebarGroup className="pt-0">
           <SidebarGroupLabel>Student Insight</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenuItems

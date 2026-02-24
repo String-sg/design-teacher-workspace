@@ -13,6 +13,8 @@ import {
 import {
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   Maximize2,
   Search,
@@ -313,91 +315,302 @@ function computeBreakdownData(
 
 const MOCK_CANDIDATES = [
   { id: '1', name: 'Chen Teo Jun Kai', class: '4A', score: 92, grade: 'A1' },
-  { id: '2', name: 'Vincent Koh Xin Yi', class: '4A', score: 88, grade: 'A2' },
-  { id: '3', name: 'Xiao Lam Wei Jie', class: '4B', score: 85, grade: 'A2' },
-  { id: '4', name: 'Sarah Chan Jun Kai', class: '4A', score: 83, grade: 'A2' },
-  { id: '5', name: 'Yusuf Koh Xin Yi', class: '4C', score: 79, grade: 'B3' },
-  { id: '6', name: 'Liang Lim Wei Jie', class: '4B', score: 77, grade: 'B3' },
-  { id: '7', name: 'Sarah Tan Jun Kai', class: '4A', score: 75, grade: 'B3' },
-  { id: '8', name: 'Harish Cheng Xin Yi', class: '4D', score: 73, grade: 'B3' },
+  { id: '2', name: 'Vincent Koh Xin Yi', class: '4A', score: 91, grade: 'A1' },
+  { id: '3', name: 'Mei Lin Huang', class: '4B', score: 90, grade: 'A1' },
   {
-    id: '9',
-    name: 'Tan Lam Wei Jie',
-    class: '4B',
-    score: 71,
-    grade: 'B4',
+    id: '4',
+    name: 'Darren Ong Wei Sheng',
+    class: '4C',
+    score: 89,
+    grade: 'A1',
   },
+  {
+    id: '5',
+    name: 'Isabelle Tay Hui Xian',
+    class: '4A',
+    score: 88,
+    grade: 'A1',
+  },
+  { id: '6', name: 'Marcus Loh Jian Hao', class: '4D', score: 87, grade: 'A1' },
+  {
+    id: '7',
+    name: 'Felicia Kwan Mei Yan',
+    class: '4B',
+    score: 86,
+    grade: 'A1',
+  },
+  { id: '8', name: 'Ethan Goh Zhi Wei', class: '4C', score: 85, grade: 'A1' },
+  { id: '9', name: 'Natasha Sim Jing Yi', class: '4A', score: 84, grade: 'A1' },
   {
     id: '10',
-    name: 'Jason Chua Jun Kai',
-    class: '4C',
-    score: 68,
-    grade: 'B4',
-  },
-  {
-    id: '11',
-    name: 'Ahmad Bin Hassan',
-    class: '4A',
-    score: 66,
-    grade: 'B4',
-  },
-  {
-    id: '12',
-    name: 'Rachel Wong Mei Ling',
+    name: 'Brandon Lee Yong Jun',
     class: '4D',
-    score: 64,
-    grade: 'C5',
+    score: 83,
+    grade: 'A1',
   },
-  { id: '13', name: 'Kevin Ng Wei Ming', class: '4B', score: 62, grade: 'C5' },
-  {
-    id: '14',
-    name: 'Priya Sharma',
-    class: '4C',
-    score: 60,
-    grade: 'C5',
-  },
-  {
-    id: '15',
-    name: 'Muhammad Farhan',
-    class: '4D',
-    score: 58,
-    grade: 'C5',
-  },
-  {
-    id: '16',
-    name: 'Emily Tan Shu Wen',
-    class: '4A',
-    score: 55,
-    grade: 'C6',
-  },
-  {
-    id: '17',
-    name: 'Ryan Lim Zhi Hao',
-    class: '4B',
-    score: 53,
-    grade: 'C6',
-  },
+  { id: '11', name: 'Aisha Binte Yusof', class: '4B', score: 82, grade: 'A1' },
+  { id: '12', name: 'Jing Wei Tan', class: '4C', score: 81, grade: 'A1' },
+  { id: '13', name: 'Ryan Seah Kok Wee', class: '4A', score: 80, grade: 'A1' },
+  { id: '14', name: 'Preet Kaur Sandhu', class: '4D', score: 79, grade: 'A1' },
+  { id: '15', name: 'Zachary Ng Jun Hao', class: '4B', score: 78, grade: 'A1' },
+  { id: '16', name: 'Sarah Chan Jun Kai', class: '4A', score: 77, grade: 'A2' },
+  { id: '17', name: 'Xiao Lam Wei Jie', class: '4B', score: 76, grade: 'A2' },
   {
     id: '18',
-    name: 'Nurul Izzah Binte Kamal',
+    name: 'Jessica Foo Mei Ling',
     class: '4C',
-    score: 50,
-    grade: 'C6',
+    score: 75,
+    grade: 'A2',
   },
   {
     id: '19',
+    name: 'Kenji Tan Yong Xian',
+    class: '4D',
+    score: 74,
+    grade: 'A2',
+  },
+  { id: '20', name: 'Lena Chua Shu Min', class: '4A', score: 73, grade: 'A2' },
+  { id: '21', name: 'Daniel Woo Kai Xin', class: '4B', score: 72, grade: 'A2' },
+  { id: '22', name: 'Tricia Ho Yan Ling', class: '4C', score: 71, grade: 'A2' },
+  { id: '23', name: 'Muhammad Rizwan', class: '4D', score: 70, grade: 'A2' },
+  { id: '24', name: 'Chloe Lim Jia Hui', class: '4A', score: 69, grade: 'A2' },
+  { id: '25', name: 'Wei Jie Pang', class: '4B', score: 68, grade: 'A2' },
+  {
+    id: '26',
+    name: 'Jonathan Yeo Zhi Heng',
+    class: '4C',
+    score: 67,
+    grade: 'A2',
+  },
+  { id: '27', name: 'Yusuf Koh Xin Yi', class: '4C', score: 66, grade: 'B3' },
+  { id: '28', name: 'Liang Lim Wei Jie', class: '4B', score: 65, grade: 'B3' },
+  { id: '29', name: 'Sarah Tan Jun Kai', class: '4A', score: 64, grade: 'B3' },
+  {
+    id: '30',
+    name: 'Harish Cheng Xin Yi',
+    class: '4D',
+    score: 63,
+    grade: 'B3',
+  },
+  {
+    id: '31',
+    name: 'Amanda Koh Shu Ling',
+    class: '4A',
+    score: 62,
+    grade: 'B3',
+  },
+  {
+    id: '32',
+    name: 'Nicholas Tan Wei Xin',
+    class: '4B',
+    score: 61,
+    grade: 'B3',
+  },
+  { id: '33', name: 'Farhan Bin Osman', class: '4C', score: 60, grade: 'B3' },
+  {
+    id: '34',
+    name: 'Joanne Lau Hui Shan',
+    class: '4D',
+    score: 59,
+    grade: 'B3',
+  },
+  {
+    id: '35',
+    name: 'Javier Phua Boon Kiat',
+    class: '4A',
+    score: 58,
+    grade: 'B3',
+  },
+  {
+    id: '36',
+    name: 'Valerie Chia Mei Xuan',
+    class: '4B',
+    score: 57,
+    grade: 'B3',
+  },
+  {
+    id: '37',
+    name: 'Derrick Seow Jun Rui',
+    class: '4C',
+    score: 56,
+    grade: 'B3',
+  },
+  {
+    id: '38',
+    name: 'Humaira Binte Salleh',
+    class: '4D',
+    score: 55,
+    grade: 'B3',
+  },
+  { id: '39', name: 'Tan Lam Wei Jie', class: '4B', score: 54, grade: 'B4' },
+  { id: '40', name: 'Jason Chua Jun Kai', class: '4C', score: 53, grade: 'B4' },
+  { id: '41', name: 'Ahmad Bin Hassan', class: '4A', score: 52, grade: 'B4' },
+  {
+    id: '42',
+    name: 'Cheryl Wong Xiu Min',
+    class: '4D',
+    score: 51,
+    grade: 'B4',
+  },
+  { id: '43', name: 'Kelvin Ho Jia Ren', class: '4A', score: 50, grade: 'B4' },
+  { id: '44', name: 'Sze Ying Ong', class: '4B', score: 49, grade: 'B4' },
+  {
+    id: '45',
+    name: 'Reuben Lim Beng Seng',
+    class: '4C',
+    score: 48,
+    grade: 'B4',
+  },
+  { id: '46', name: 'Nadia Tan Zhi Ling', class: '4D', score: 47, grade: 'B4' },
+  { id: '47', name: 'Farrukh Bin Rashid', class: '4A', score: 46, grade: 'B4' },
+  { id: '48', name: 'Lim Xin Ying', class: '4B', score: 45, grade: 'B4' },
+  {
+    id: '49',
+    name: 'Timothy Goh Kai Hong',
+    class: '4C',
+    score: 44,
+    grade: 'B4',
+  },
+  { id: '50', name: 'Priya Sharma', class: '4C', score: 43, grade: 'C5' },
+  {
+    id: '51',
+    name: 'Rachel Wong Mei Ling',
+    class: '4D',
+    score: 42,
+    grade: 'C5',
+  },
+  { id: '52', name: 'Kevin Ng Wei Ming', class: '4B', score: 41, grade: 'C5' },
+  { id: '53', name: 'Muhammad Farhan', class: '4D', score: 40, grade: 'C5' },
+  {
+    id: '54',
+    name: 'Serene Chua Jia Lin',
+    class: '4A',
+    score: 39,
+    grade: 'C5',
+  },
+  { id: '55', name: 'Edwin Toh Kah Meng', class: '4B', score: 38, grade: 'C5' },
+  {
+    id: '56',
+    name: 'Nur Ain Binte Azhar',
+    class: '4C',
+    score: 37,
+    grade: 'C5',
+  },
+  {
+    id: '57',
+    name: 'Gabriel Tan Jing Wei',
+    class: '4D',
+    score: 36,
+    grade: 'C5',
+  },
+  {
+    id: '58',
+    name: 'Beatrice Kok Shu Xian',
+    class: '4A',
+    score: 35,
+    grade: 'C5',
+  },
+  { id: '59', name: 'Alvin Png Wei Hao', class: '4B', score: 34, grade: 'C5' },
+  { id: '60', name: 'Soph Yeo Jia Ning', class: '4C', score: 33, grade: 'C5' },
+  { id: '61', name: 'Deon Lim Kang Wen', class: '4D', score: 32, grade: 'C5' },
+  {
+    id: '62',
+    name: 'Samantha Quek Hui Ping',
+    class: '4A',
+    score: 31,
+    grade: 'C5',
+  },
+  { id: '63', name: 'Lucas Wee Jun Xian', class: '4B', score: 30, grade: 'C5' },
+  { id: '64', name: 'Tariq Bin Anwar', class: '4C', score: 29, grade: 'C5' },
+  { id: '65', name: 'Hui Ying Chan', class: '4D', score: 28, grade: 'C5' },
+  { id: '66', name: 'Emily Tan Shu Wen', class: '4A', score: 27, grade: 'C6' },
+  { id: '67', name: 'Ryan Lim Zhi Hao', class: '4B', score: 26, grade: 'C6' },
+  {
+    id: '68',
+    name: 'Nurul Izzah Binte Kamal',
+    class: '4C',
+    score: 25,
+    grade: 'C6',
+  },
+  {
+    id: '69',
+    name: 'Stanley Foo Boon Tiong',
+    class: '4D',
+    score: 24,
+    grade: 'C6',
+  },
+  { id: '70', name: 'Peiyi Tan Hui Jing', class: '4A', score: 23, grade: 'C6' },
+  { id: '71', name: 'Rizky Bin Ahmad', class: '4B', score: 22, grade: 'C6' },
+  {
+    id: '72',
+    name: 'Clarissa Ho Jia Hui',
+    class: '4C',
+    score: 21,
+    grade: 'C6',
+  },
+  { id: '73', name: 'Wayne Sng Tze Wei', class: '4D', score: 20, grade: 'C6' },
+  {
+    id: '74',
+    name: 'Jasmine Koh Wei Lin',
+    class: '4A',
+    score: 19,
+    grade: 'C6',
+  },
+  { id: '75', name: 'Bryan Tan Jia Jun', class: '4B', score: 18, grade: 'C6' },
+  {
+    id: '76',
+    name: 'Nur Syahirah Binte Ramlan',
+    class: '4C',
+    score: 17,
+    grade: 'C6',
+  },
+  {
+    id: '77',
+    name: 'Malcolm Lee Zheng Yi',
+    class: '4D',
+    score: 16,
+    grade: 'C6',
+  },
+  {
+    id: '78',
     name: 'Joshua Lee Wei Xuan',
     class: '4D',
-    score: 47,
+    score: 15,
     grade: 'D7',
   },
   {
-    id: '20',
+    id: '79',
     name: 'Siti Aminah Binte Rahman',
     class: '4A',
-    score: 44,
+    score: 14,
     grade: 'D7',
   },
+  {
+    id: '80',
+    name: 'Ivan Chow Jun Sheng',
+    class: '4B',
+    score: 13,
+    grade: 'D7',
+  },
+  { id: '81', name: 'Mei Qi Chia', class: '4C', score: 12, grade: 'D7' },
+  { id: '82', name: 'Azlan Bin Mustafa', class: '4D', score: 11, grade: 'D7' },
+  {
+    id: '83',
+    name: 'Yolanda Sim Jia Hui',
+    class: '4A',
+    score: 10,
+    grade: 'D7',
+  },
+  {
+    id: '84',
+    name: 'Patrick Chng Boon Seng',
+    class: '4B',
+    score: 9,
+    grade: 'D7',
+  },
+  { id: '85', name: 'Fiona Loh Xiu Ting', class: '4C', score: 8, grade: 'VR' },
+  { id: '86', name: 'Rafi Bin Idris', class: '4D', score: 7, grade: 'VR' },
+  { id: '87', name: 'Cheryl Ang Mei Kuan', class: '4A', score: 6, grade: 'VR' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -657,13 +870,60 @@ function IndicatorDropdown({ value, onValueChange }: IndicatorDropdownProps) {
   )
 }
 
+// Custom tooltip for grade dist chart — shows "View X students" hint
+function GradeDistTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean
+  payload?: Array<{ payload: { grade: string; count: number } }>
+}) {
+  if (!active || !payload?.length) return null
+  const { grade, count } = payload[0].payload
+  return (
+    <div
+      style={{
+        fontSize: 12,
+        borderRadius: 6,
+        border: '1px solid #dee2e6',
+        background: '#fff',
+        padding: '6px 10px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      }}
+    >
+      <div className="font-semibold text-foreground">{grade}</div>
+      <div className="text-muted-foreground">{count} students</div>
+    </div>
+  )
+}
+
 // Grade distribution bar chart
-function GradeDistChart({ data }: { data: BreakdownData['gradeData'] }) {
+function GradeDistChart({
+  data,
+  selectedGrade,
+  onGradeClick,
+}: {
+  data: BreakdownData['gradeData']
+  selectedGrade: string | null
+  onGradeClick: (grade: string) => void
+}) {
+  const [hoveredGrade, setHoveredGrade] = useState<string | null>(null)
+
   return (
     <BarChart
       data={data}
       margin={{ top: 20, right: 8, left: -20, bottom: 4 }}
       barCategoryGap="25%"
+      style={{ cursor: 'pointer' }}
+      onClick={(chartData) => {
+        const grade = (
+          chartData.activePayload?.[0]?.payload as
+            | { grade?: string }
+            | undefined
+        )?.grade
+        if (grade) onGradeClick(grade)
+      }}
+      onMouseLeave={() => setHoveredGrade(null)}
     >
       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e9ecef" />
       <XAxis
@@ -678,21 +938,84 @@ function GradeDistChart({ data }: { data: BreakdownData['gradeData'] }) {
         tickLine={false}
       />
       <Tooltip
-        formatter={(v: number) => [v, 'Students']}
-        contentStyle={{
-          fontSize: 12,
-          borderRadius: 6,
-          border: '1px solid #dee2e6',
-        }}
+        content={<GradeDistTooltip />}
+        cursor={{ fill: 'transparent', strokeWidth: 0 }}
       />
-      <Bar dataKey="count" radius={[3, 3, 0, 0]} isAnimationActive={false}>
+      <Bar
+        dataKey="count"
+        radius={[3, 3, 0, 0]}
+        isAnimationActive={false}
+        onMouseEnter={(barData: unknown) => {
+          const grade = (barData as { grade?: string }).grade
+          if (grade) setHoveredGrade(grade)
+        }}
+        onMouseLeave={() => setHoveredGrade(null)}
+      >
         {data.map((entry) => (
-          <Cell key={entry.grade} fill={GRADE_FILL[entry.grade] ?? '#adb5bd'} />
+          <Cell
+            key={entry.grade}
+            fill={GRADE_FILL[entry.grade] ?? '#adb5bd'}
+            opacity={selectedGrade && selectedGrade !== entry.grade ? 0.4 : 1}
+            style={{ cursor: 'pointer' }}
+          />
         ))}
         <LabelList
           dataKey="count"
           position="top"
           style={{ fontSize: 11, fill: '#495057', fontWeight: 500 }}
+        />
+        <LabelList
+          dataKey="count"
+          content={(props) => {
+            const {
+              x = 0,
+              y = 0,
+              width = 0,
+              height = 0,
+              index = 0,
+            } = props as {
+              x?: number
+              y?: number
+              width?: number
+              height?: number
+              index?: number
+            }
+            const entry = data[index]
+            if (
+              height < 30 ||
+              hoveredGrade === null ||
+              entry.grade !== hoveredGrade
+            )
+              return <g />
+            const cx = x + width / 2
+            const cy = y + height / 2
+            return (
+              <g style={{ pointerEvents: 'none' }}>
+                <text
+                  x={cx}
+                  y={cy - 6}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize={9}
+                  fill="#9ca3af"
+                  fontWeight={500}
+                >
+                  View
+                </text>
+                <text
+                  x={cx}
+                  y={cy + 6}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize={9}
+                  fill="#9ca3af"
+                  fontWeight={500}
+                >
+                  students
+                </text>
+              </g>
+            )
+          }}
         />
       </Bar>
     </BarChart>
@@ -955,6 +1278,11 @@ export function AcademicAnalytics() {
 // MonitoringAcademicAnalytics — Student Analytics monitoring tab
 // ---------------------------------------------------------------------------
 
+const PAGE_SIZE = 10
+
+const ALL_CLASSES = ['4A', '4B', '4C', '4D']
+const ALL_GRADES = ['A1', 'A2', 'B3', 'B4', 'C5', 'C6', 'D7', 'VR']
+
 export function MonitoringAcademicAnalytics() {
   // Distribution filters
   const [level, setLevel] = useState('Secondary 4')
@@ -968,6 +1296,10 @@ export function MonitoringAcademicAnalytics() {
   // Trends filters
   const [trendsLevel, setTrendsLevel] = useState('Secondary 4')
   const [trendsSubject, setTrendsSubject] = useState('el-g3')
+
+  // Grade drill-down state
+  const [selectedGrade, setSelectedGrade] = useState<string | null>(null)
+  const candidatesTableRef = useRef<HTMLDivElement>(null)
 
   // Derived breakdown data — recomputes when filters change
   const breakdown = useMemo(
@@ -1009,19 +1341,77 @@ export function MonitoringAcademicAnalytics() {
     return () => observer.disconnect()
   }, [])
 
-  // Candidates table search
+  // Candidates table — search + column filters
   const [candidateSearch, setCandidateSearch] = useState('')
+  const [filterClass, setFilterClass] = useState<string>('all')
+  const [filterGrade, setFilterGrade] = useState<string>('all')
+  const [filterScoreMin, setFilterScoreMin] = useState('')
+  const [filterScoreMax, setFilterScoreMax] = useState('')
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [page, setPage] = useState(1)
+
+  // Sync selectedGrade → filterGrade
+  const handleGradeClick = (grade: string) => {
+    const next = selectedGrade === grade ? null : grade
+    setSelectedGrade(next)
+    setFilterGrade(next ?? 'all')
+    setPage(1)
+    setTimeout(() => {
+      candidatesTableRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }, 50)
+  }
 
   const filteredCandidates = useMemo(() => {
     const q = candidateSearch.toLowerCase()
-    return q
-      ? MOCK_CANDIDATES.filter(
-          (c) =>
-            c.name.toLowerCase().includes(q) ||
-            c.class.toLowerCase().includes(q),
-        )
-      : MOCK_CANDIDATES
-  }, [candidateSearch])
+    const minScore = filterScoreMin !== '' ? Number(filterScoreMin) : null
+    const maxScore = filterScoreMax !== '' ? Number(filterScoreMax) : null
+    return MOCK_CANDIDATES.filter((c) => {
+      if (
+        q &&
+        !c.name.toLowerCase().includes(q) &&
+        !c.class.toLowerCase().includes(q)
+      )
+        return false
+      if (filterClass !== 'all' && c.class !== filterClass) return false
+      if (filterGrade !== 'all' && c.grade !== filterGrade) return false
+      if (minScore !== null && c.score < minScore) return false
+      if (maxScore !== null && c.score > maxScore) return false
+      return true
+    })
+  }, [
+    candidateSearch,
+    filterClass,
+    filterGrade,
+    filterScoreMin,
+    filterScoreMax,
+  ])
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredCandidates.length / PAGE_SIZE),
+  )
+  const pagedCandidates = filteredCandidates.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE,
+  )
+
+  const hasActiveTableFilters =
+    filterClass !== 'all' ||
+    filterGrade !== 'all' ||
+    filterScoreMin !== '' ||
+    filterScoreMax !== ''
+
+  const clearTableFilters = () => {
+    setFilterClass('all')
+    setFilterGrade('all')
+    setFilterScoreMin('')
+    setFilterScoreMax('')
+    setSelectedGrade(null)
+    setPage(1)
+  }
 
   return (
     <div className="mt-6 space-y-10 border-t pt-6">
@@ -1121,12 +1511,16 @@ export function MonitoringAcademicAnalytics() {
         {/* ── Charts row ──────────────────────────────────────────────── */}
         <div className="mt-4 grid grid-cols-1 gap-4">
           {/* No. of students in each grade */}
-          <div className="rounded-lg border bg-white p-4">
+          <div className="rounded-lg border bg-white p-4 [&_svg:focus]:outline-none [&_svg]:outline-none">
             <p className="mb-3 text-sm font-semibold text-foreground">
               No. of students in each grade
             </p>
             <ResponsiveContainer width="100%" height={200}>
-              <GradeDistChart data={breakdown.gradeData} />
+              <GradeDistChart
+                data={breakdown.gradeData}
+                selectedGrade={selectedGrade}
+                onGradeClick={handleGradeClick}
+              />
             </ResponsiveContainer>
           </div>
 
@@ -1160,26 +1554,193 @@ export function MonitoringAcademicAnalytics() {
         </div>
 
         {/* ── Students sorted by results ──────────────────────────────── */}
-        <div className="mt-4 rounded-lg border bg-white p-4">
-          <p className="mb-3 text-sm font-semibold text-foreground">
-            Students sorted by results
-          </p>
+        <div
+          ref={candidatesTableRef}
+          className="mt-4 scroll-mt-8 rounded-lg border bg-white p-4"
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold text-foreground">
+                Students sorted by results
+              </p>
+              {selectedGrade && (
+                <span
+                  className={cn(
+                    'rounded-full px-2 py-0.5 text-xs font-medium',
+                    GRADE_BADGE[selectedGrade] ?? 'bg-gray-100 text-gray-600',
+                  )}
+                >
+                  {selectedGrade} — {filteredCandidates.length} students
+                </span>
+              )}
+            </div>
+          </div>
 
           {/* Search + filter bar */}
           <div className="mb-3 flex items-center gap-2">
             <div className="relative max-w-xs flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search name or class…"
+                placeholder="Search name…"
                 value={candidateSearch}
-                onChange={(e) => setCandidateSearch(e.target.value)}
+                onChange={(e) => {
+                  setCandidateSearch(e.target.value)
+                  setPage(1)
+                }}
                 className="h-8 pl-9 text-sm"
               />
             </div>
-            <Button variant="outline" size="sm" className="h-8 gap-1.5">
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-              Filter
-            </Button>
+
+            <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    className={cn(
+                      'border-border flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors outline-none',
+                      hasActiveTableFilters
+                        ? 'bg-blue-50 border-blue-300 text-blue-700'
+                        : 'bg-white hover:bg-muted',
+                    )}
+                  />
+                }
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                Filter
+                {hasActiveTableFilters && (
+                  <span className="ml-0.5 rounded-full bg-blue-600 px-1.5 py-0.5 text-[10px] font-medium text-white leading-none">
+                    {
+                      [
+                        filterClass !== 'all',
+                        filterGrade !== 'all',
+                        filterScoreMin !== '',
+                        filterScoreMax !== '',
+                      ].filter(Boolean).length
+                    }
+                  </span>
+                )}
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4" align="end">
+                <div className="space-y-4">
+                  <p className="text-sm font-semibold">Filter students</p>
+
+                  {/* Class filter */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Class
+                    </label>
+                    <Select
+                      value={filterClass}
+                      onValueChange={(v) => {
+                        setFilterClass(v)
+                        setPage(1)
+                      }}
+                    >
+                      <SelectTrigger size="sm" className="h-8 w-full">
+                        <SelectValue>
+                          {filterClass === 'all' ? 'All classes' : filterClass}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All classes</SelectItem>
+                        {ALL_CLASSES.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Grade filter */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Grade
+                    </label>
+                    <Select
+                      value={filterGrade}
+                      onValueChange={(v) => {
+                        setFilterGrade(v)
+                        setSelectedGrade(v === 'all' ? null : v)
+                        setPage(1)
+                      }}
+                    >
+                      <SelectTrigger size="sm" className="h-8 w-full">
+                        <SelectValue>
+                          {filterGrade === 'all' ? 'All grades' : filterGrade}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All grades</SelectItem>
+                        {ALL_GRADES.map((g) => (
+                          <SelectItem key={g} value={g}>
+                            {g}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Score range */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Score range
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Min"
+                        value={filterScoreMin}
+                        onChange={(e) => {
+                          setFilterScoreMin(e.target.value)
+                          setPage(1)
+                        }}
+                        className="h-8 text-sm"
+                        type="number"
+                        min={0}
+                        max={100}
+                      />
+                      <span className="text-muted-foreground text-xs">–</span>
+                      <Input
+                        placeholder="Max"
+                        value={filterScoreMax}
+                        onChange={(e) => {
+                          setFilterScoreMax(e.target.value)
+                          setPage(1)
+                        }}
+                        className="h-8 text-sm"
+                        type="number"
+                        min={0}
+                        max={100}
+                      />
+                    </div>
+                  </div>
+
+                  {hasActiveTableFilters && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-full text-xs text-muted-foreground"
+                      onClick={() => {
+                        clearTableFilters()
+                        setFilterOpen(false)
+                      }}
+                    >
+                      <X className="mr-1 h-3 w-3" />
+                      Clear all filters
+                    </Button>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {hasActiveTableFilters && (
+              <button
+                onClick={clearTableFilters}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Clear
+              </button>
+            )}
           </div>
 
           {/* Table */}
@@ -1205,7 +1766,7 @@ export function MonitoringAcademicAnalytics() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {filteredCandidates.map((c) => (
+                {pagedCandidates.map((c) => (
                   <tr
                     key={c.id}
                     className="bg-white transition-colors hover:bg-muted/30"
@@ -1238,19 +1799,79 @@ export function MonitoringAcademicAnalytics() {
                     </td>
                   </tr>
                 ))}
-                {filteredCandidates.length === 0 && (
+                {pagedCandidates.length === 0 && (
                   <tr>
                     <td
                       colSpan={5}
                       className="px-4 py-8 text-center text-sm text-muted-foreground"
                     >
-                      No candidates match your search.
+                      No students match your filters.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-3 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground text-xs">
+                {filteredCandidates.length} students · Page {page} of{' '}
+                {totalPages}
+              </span>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => p - 1)}
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(
+                    (p) =>
+                      p === 1 || p === totalPages || Math.abs(p - page) <= 1,
+                  )
+                  .reduce<Array<number | '…'>>((acc, p, i, arr) => {
+                    if (i > 0 && p - arr[i - 1] > 1) acc.push('…')
+                    acc.push(p)
+                    return acc
+                  }, [])
+                  .map((p, i) =>
+                    p === '…' ? (
+                      <span
+                        key={`ellipsis-${i}`}
+                        className="px-1 text-muted-foreground"
+                      >
+                        …
+                      </span>
+                    ) : (
+                      <Button
+                        key={p}
+                        variant={p === page ? 'default' : 'outline'}
+                        size="icon"
+                        className="h-7 w-7 text-xs"
+                        onClick={() => setPage(p)}
+                      >
+                        {p}
+                      </Button>
+                    ),
+                  )}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={page === totalPages}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

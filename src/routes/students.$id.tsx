@@ -9,7 +9,7 @@ import { getStudentById, mockStudents } from '@/data/mock-students'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 const PROFILE_PROMPTS = [
-  "Summarise this student's academic performance",
+  "Summarise this student's wellbeing",
   'What are the key risk factors for this student?',
 ]
 
@@ -103,14 +103,16 @@ function StudentProfilePage() {
   )
 
   return (
-    <main className="flex gap-6 p-6">
+    <main className="p-6">
       {/* Main profile content */}
-      <div className="min-w-0 flex-1">
-        <StudentProfile student={student} headerControls={headerControls} />
-      </div>
+      <StudentProfile student={student} headerControls={headerControls} />
 
-      {/* Insight Buddy side panel */}
-      <InsightBuddy examplePrompts={PROFILE_PROMPTS} />
+      {/* Insight Buddy floating */}
+      <InsightBuddy
+        examplePrompts={PROFILE_PROMPTS}
+        student={student}
+        floating
+      />
     </main>
   )
 }

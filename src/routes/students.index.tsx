@@ -234,17 +234,20 @@ function StudentsPage() {
           <DataCard
             label="Attendance"
             value={`${metrics.absenteeismRate}%`}
-            description="Absenteeism"
+            description="Current term"
+            trend="declining"
           />
           <DataCard
             label="Attendance"
             value={metrics.lateComing}
             description="Late-coming"
+            trend="improving"
           />
           <DataCard
             label="Tier 2-3"
             value={metrics.tier2_3Students}
             description="Students needing support"
+            trend="stable"
           />
         </div>
 

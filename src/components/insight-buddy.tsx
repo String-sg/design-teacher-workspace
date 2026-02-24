@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { ImagePlus, Send, Sparkles, X } from 'lucide-react'
+import { ArrowUp, Plus, Sparkles, X } from 'lucide-react'
 
+import type { Student } from '@/types/student'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -12,7 +14,6 @@ type Message = {
   id: string
   role: 'user' | 'assistant'
   content: string
-  imageUrl?: string
 }
 
 export interface InsightBuddyProps {
@@ -20,6 +21,8 @@ export interface InsightBuddyProps {
   /** When true, renders as a FAB + fixed overlay (analytics page).
    *  When false (default), renders as a sticky in-flow panel (profile page). */
   floating?: boolean
+  /** Optional student context — enables student-specific responses (Student 360). */
+  student?: Student
 }
 
 // ---------------------------------------------------------------------------
@@ -60,23 +63,139 @@ const SCORES_BY_CLASS_RESPONSE = `Here's what the **Scores by class** chart show
 
 const GENERIC_RESPONSE = `I'm here to help with analytics questions. Try asking about student performance, grade distributions, or trends — or paste a chart screenshot for an explanation.`
 
+// ---------------------------------------------------------------------------
+// Student-specific response generators
+// ---------------------------------------------------------------------------
+
+function getWellbeingResponse(student: Student): string {
+  const counselling =
+    student.counsellingSessions === 0
+      ? 'No sessions recorded this term'
+      : `${student.counsellingSessions} session(s) this term`
+
+  const mood = student.lowMoodFlagged
+    ? `Low mood flagged (${student.lowMoodFlagged})`
+    : 'No concerns flagged'
+
+  const riskNote =
+    student.riskIndicators >= 3
+      ? ` — elevated concern`
+      : student.riskIndicators === 0
+        ? ` — no active concerns`
+        : ''
+
+  const socialNote = student.socialLinks <= 1 ? ` — limited social support` : ''
+
+  const agencies = student.externalAgencies ?? 'None'
+
+  return `Here's a wellbeing summary for **${student.name}**:
+
+**Counselling**
+• ${counselling}
+
+**Social Links**
+• ${student.socialLinks} peer connection(s) recorded${socialNote}
+
+**Risk Indicators**
+• ${student.riskIndicators} risk indicator(s) flagged${riskNote}
+
+**Mood**
+• ${mood}
+
+**External Agencies**
+• ${agencies}`
+}
+
+function getRiskFactorsResponse(student: Student): string {
+  const flags: Array<string> = []
+
+  const attendancePct = Math.round(
+    (student.daysPresent / student.totalSchoolDays) * 100,
+  )
+  if (attendancePct < 50) {
+    flags.push(
+      `⚠️ **School attendance is ${attendancePct}%** (below 50%) — ${student.daysPresent}/${student.totalSchoolDays} days present`,
+    )
+  }
+
+  if (student.ccaMissed >= 5) {
+    flags.push(
+      `⚠️ **CCA attendance concern** — ${student.ccaMissed} session(s) missed this term`,
+    )
+  }
+
+  if (student.conduct === 'Poor' || student.offences >= 3) {
+    flags.push(
+      `⚠️ **Behavioural risk** — Conduct: ${student.conduct}, ${student.offences} offence(s) recorded`,
+    )
+  }
+
+  if (student.riskIndicators >= 3) {
+    flags.push(
+      `⚠️ **${student.riskIndicators} risk indicator(s) flagged** — multiple concerns active`,
+    )
+  }
+
+  if (student.counsellingSessions > 2) {
+    flags.push(
+      `⚠️ **Rise in counselling** — ${student.counsellingSessions} session(s) this term`,
+    )
+  }
+
+  if (student.lowMoodFlagged) {
+    flags.push(`⚠️ **Low mood flagged** — ${student.lowMoodFlagged}`)
+  }
+
+  if (student.overallPercentage < 30) {
+    flags.push(
+      `⚠️ **Overall score is ${student.overallPercentage}%** (below 30%)`,
+    )
+  }
+
+  if (student.fas) {
+    flags.push(`ℹ️ **Financial Assistance (FAS)** — ${student.fas}`)
+  }
+
+  if (flags.length === 0) {
+    return `No significant risk factors identified for **${student.name}** at this time.
+
+Key indicators:
+• Attendance: ${attendancePct}%
+• Overall score: ${student.overallPercentage}%
+• Conduct: ${student.conduct}
+• Risk indicators: ${student.riskIndicators}`
+  }
+
+  return `Here are the key risk factors for **${student.name}**:
+
+${flags.join('\n')}
+
+**Recommended:** Review with HOD and consider targeted intervention.`
+}
+
 function getBotResponse(
   text: string,
-  imageUrl: string | undefined,
   history: Array<Message>,
+  student?: Student,
 ): string {
   const lower = text.toLowerCase()
+
+  // Student-specific responses (Student 360)
+  if (student) {
+    if (lower.includes('wellbeing')) {
+      return getWellbeingResponse(student)
+    }
+    if (lower.includes('risk factor')) {
+      return getRiskFactorsResponse(student)
+    }
+  }
+
   const lastAssistant = [...history]
     .reverse()
     .find((m) => m.role === 'assistant')
   const prevAskedAboutChart = lastAssistant?.content.includes(
     'Which chart are you looking at?',
   )
-
-  // Image pasted → always explain Scores by class (demo)
-  if (imageUrl) {
-    return SCORES_BY_CLASS_RESPONSE
-  }
 
   // After asking about the chart, user types the chart name
   if (
@@ -144,12 +263,9 @@ interface PanelContentProps {
   examplePrompts: Array<string>
   input: string
   setInput: (v: string) => void
-  pendingImage: string | null
-  setPendingImage: (v: string | null) => void
-  sendMessage: (text: string, imageUrl?: string) => void
+  sendMessage: (text: string) => void
   onClose?: () => void
   messagesEndRef: React.RefObject<HTMLDivElement | null>
-  fileInputRef: React.RefObject<HTMLInputElement | null>
 }
 
 function PanelContent({
@@ -157,40 +273,16 @@ function PanelContent({
   examplePrompts,
   input,
   setInput,
-  pendingImage,
-  setPendingImage,
   sendMessage,
   onClose,
   messagesEndRef,
-  fileInputRef,
 }: PanelContentProps) {
   const isEmpty = messages.length === 0
-
-  function handlePaste(e: React.ClipboardEvent) {
-    const items = e.clipboardData.items
-    for (const item of items) {
-      if (item.type.startsWith('image/')) {
-        const file = item.getAsFile()
-        if (file) {
-          setPendingImage(URL.createObjectURL(file))
-          e.preventDefault()
-        }
-      }
-    }
-  }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      sendMessage(input.trim(), pendingImage ?? undefined)
-    }
-  }
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) {
-      setPendingImage(URL.createObjectURL(file))
-      e.target.value = ''
+      sendMessage(input.trim())
     }
   }
 
@@ -232,9 +324,10 @@ function PanelContent({
                 key={prompt}
                 type="button"
                 onClick={() => sendMessage(prompt)}
-                className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-left text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 active:scale-[0.98]"
+                className="flex items-center gap-3 rounded-xl border bg-background px-4 py-3 text-left text-sm transition-colors hover:bg-muted/60 active:bg-muted"
               >
-                {prompt}
+                <Plus className="size-4 shrink-0 text-muted-foreground" />
+                <span className="text-foreground">{prompt}</span>
               </button>
             ))}
             {examplePrompts.length === 0 && (
@@ -268,13 +361,6 @@ function PanelContent({
                       : 'rounded-tl-sm bg-muted/70 text-foreground',
                   )}
                 >
-                  {msg.imageUrl && (
-                    <img
-                      src={msg.imageUrl}
-                      alt="screenshot"
-                      className="mb-2 max-w-full rounded-lg"
-                    />
-                  )}
                   <MessageContent content={msg.content} />
                 </div>
               </div>
@@ -286,65 +372,23 @@ function PanelContent({
 
       {/* Input area */}
       <div className="border-t bg-white p-3">
-        {/* Pending image preview */}
-        {pendingImage && (
-          <div className="relative mb-2 inline-block">
-            <img
-              src={pendingImage}
-              alt="preview"
-              className="h-14 w-14 rounded-lg border object-cover"
-            />
-            <button
-              type="button"
-              onClick={() => setPendingImage(null)}
-              className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-gray-600 text-white hover:bg-gray-700"
-            >
-              <X className="h-2.5 w-2.5" />
-            </button>
-          </div>
-        )}
-
-        {/* Textarea — full width, clearly visible */}
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onPaste={handlePaste}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask about your data… (Shift+Enter for new line)"
-          rows={3}
-          className="w-full resize-none rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs leading-relaxed text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
-        />
-
-        {/* Action row */}
-        <div className="mt-2 flex items-center justify-between">
-          {/* Hidden file input + attach button */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
+        <div className="relative flex items-center gap-2 rounded-2xl border bg-background px-3 py-2 focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask insight buddy..."
+            className="max-h-32 min-h-0 flex-1 resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
+            rows={1}
           />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-            title="Attach image"
-          >
-            <ImagePlus className="h-3.5 w-3.5" />
-            Attach image
-          </button>
-
-          {/* Send button */}
           <Button
             type="button"
-            onClick={() => sendMessage(input.trim(), pendingImage ?? undefined)}
-            size="sm"
-            disabled={!input.trim() && !pendingImage}
-            className="h-7 gap-1.5 bg-blue-600 px-3 text-xs hover:bg-blue-700 disabled:opacity-40"
+            size="icon-sm"
+            onClick={() => sendMessage(input.trim())}
+            disabled={!input.trim()}
+            className="shrink-0"
           >
-            Send
-            <Send className="h-3 w-3" />
+            <ArrowUp className="size-4" />
           </Button>
         </div>
       </div>
@@ -359,29 +403,27 @@ function PanelContent({
 export function InsightBuddy({
   examplePrompts = [],
   floating = false,
+  student,
 }: InsightBuddyProps) {
   const [messages, setMessages] = useState<Array<Message>>([])
   const [input, setInput] = useState('')
-  const [pendingImage, setPendingImage] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false) // only used in floating mode
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  function sendMessage(text: string, imageUrl?: string) {
-    if (!text.trim() && !imageUrl) return
+  function sendMessage(text: string) {
+    if (!text.trim()) return
 
     const userMsg: Message = {
       id: `${Date.now()}-u`,
       role: 'user',
       content: text,
-      imageUrl,
     }
 
-    const botResponse = getBotResponse(text, imageUrl, messages)
+    const botResponse = getBotResponse(text, messages, student)
     const assistantMsg: Message = {
       id: `${Date.now()}-a`,
       role: 'assistant',
@@ -390,7 +432,6 @@ export function InsightBuddy({
 
     setMessages((prev) => [...prev, userMsg, assistantMsg])
     setInput('')
-    setPendingImage(null)
   }
 
   const panelProps: PanelContentProps = {
@@ -398,11 +439,8 @@ export function InsightBuddy({
     examplePrompts,
     input,
     setInput,
-    pendingImage,
-    setPendingImage,
     sendMessage,
     messagesEndRef,
-    fileInputRef,
   }
 
   // ── Floating mode: FAB + fixed overlay ─────────────────────────────────────

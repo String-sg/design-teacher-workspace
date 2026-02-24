@@ -567,7 +567,7 @@ function InsightBuddyPage() {
 
         {/* Input */}
         <div className="border-t p-3">
-          <div className="relative flex items-end gap-2 rounded-2xl border bg-background px-3 py-2 focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+          <div className="relative flex items-center gap-2 rounded-2xl border bg-background px-3 py-2 focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}

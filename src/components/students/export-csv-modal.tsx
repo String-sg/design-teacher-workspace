@@ -118,9 +118,6 @@ export function ExportCsvModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
           <Button onClick={handleExport}>
             <Download className="mr-1.5 size-4" />
             Export CSV
