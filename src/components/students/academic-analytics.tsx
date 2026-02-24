@@ -46,7 +46,10 @@ import {
   TooltipTrigger,
   Tooltip as TooltipUI,
 } from '@/components/ui/tooltip'
-import { groupedClassOptions } from '@/data/mock-students'
+import { groupedClassOptions, mockStudents } from '@/data/mock-students'
+
+// Build a name → student ID lookup from the real student roster
+const studentIdByName = new Map(mockStudents.map((s) => [s.name, s.id]))
 
 // ---------------------------------------------------------------------------
 // Data constants — Trends section
@@ -1779,18 +1782,31 @@ export function MonitoringAcademicAnalytics() {
                       {c.grade}
                     </td>
                     <td className="w-[15%] px-4 py-2.5">
-                      <TooltipUI>
-                        <TooltipTrigger>
-                          <Link
-                            to="/students/$id"
-                            params={{ id: c.id }}
-                            className="flex items-center justify-center rounded p-0.5 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
-                          >
-                            <FileText className="h-4 w-4" />
-                          </Link>
-                        </TooltipTrigger>
-                        <TooltipContent>View student profile</TooltipContent>
-                      </TooltipUI>
+                      {(() => {
+                        const realId = studentIdByName.get(c.name)
+                        return (
+                          <TooltipUI>
+                            <TooltipTrigger>
+                              {realId ? (
+                                <Link
+                                  to="/students/$id"
+                                  params={{ id: realId }}
+                                  className="flex items-center justify-center rounded p-0.5 text-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                                >
+                                  <FileText className="h-4 w-4" />
+                                </Link>
+                              ) : (
+                                <span className="flex items-center justify-center rounded p-0.5 text-muted-foreground">
+                                  <FileText className="h-4 w-4" />
+                                </span>
+                              )}
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {realId ? 'View student profile' : 'Profile not available'}
+                            </TooltipContent>
+                          </TooltipUI>
+                        )
+                      })()}
                     </td>
                   </tr>
                 ))}
