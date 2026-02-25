@@ -700,7 +700,7 @@ interface LevelDropdownProps {
   onValueChange: (v: string) => void
 }
 
-function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
+export function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -755,6 +755,7 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
       <PopoverContent
         className="w-64 overflow-hidden rounded-2xl p-0"
         align="start"
+        collisionAvoidance={{ fallbackAxisSide: 'none' }}
       >
         <div className="p-2">
           <div className="relative">
@@ -769,6 +770,26 @@ function LevelDropdown({ value, onValueChange }: LevelDropdownProps) {
           </div>
         </div>
         <div className="max-h-72 overflow-y-auto p-1">
+          {(!search || 'school'.includes(search.toLowerCase())) && (
+            <>
+              <button
+                type="button"
+                onClick={() => handleSelect('School')}
+                className={cn(
+                  'inline-flex w-full items-center gap-2 rounded-lg p-2 text-base font-normal leading-6 outline-none hover:bg-accent',
+                  value === 'School' && 'bg-accent font-semibold',
+                )}
+              >
+                <span className="line-clamp-1 flex-1 text-left">School</span>
+                {value === 'School' && (
+                  <Check className="ml-auto h-4 w-4 shrink-0" />
+                )}
+              </button>
+              {filteredGroups.length > 0 && (
+                <div className="my-1 h-px bg-border/50" />
+              )}
+            </>
+          )}
           {filteredGroups.map((group, index) => (
             <div key={group.level}>
               {index > 0 && <div className="my-1 h-px bg-border/50" />}
@@ -1802,7 +1823,9 @@ export function MonitoringAcademicAnalytics() {
                               )}
                             </TooltipTrigger>
                             <TooltipContent>
-                              {realId ? 'View student profile' : 'Profile not available'}
+                              {realId
+                                ? 'View student profile'
+                                : 'Profile not available'}
                             </TooltipContent>
                           </TooltipUI>
                         )

@@ -66,7 +66,7 @@ const navigationItems: Array<MenuItem> = [
 
 const studentInsightItems: Array<MenuItem> = [
   {
-    title: 'Student 360',
+    title: 'Student Profile',
     url: '/students',
     icon: Users,
     conceptTag: true,

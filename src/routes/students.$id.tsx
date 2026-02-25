@@ -47,7 +47,7 @@ function StudentProfilePage() {
 
   useSetBreadcrumbs([
     { label: 'Home', href: '/' },
-    { label: 'Student 360', href: '/students' },
+    { label: 'Student Profile', href: '/students' },
     { label: student.name, href: `/students/${student.id}` },
   ])
 

@@ -1873,7 +1873,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 45,
     totalSchoolDays: 47,
-    teacherObservations: 'Strong analytical skills. Can improve on time management.',
+    teacherObservations:
+      'Strong analytical skills. Can improve on time management.',
     nextSteps: 'Explore poly options',
   },
   {
@@ -2341,7 +2342,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 44,
     totalSchoolDays: 47,
-    teacherObservations: 'Quiet but attentive. Needs encouragement to participate.',
+    teacherObservations:
+      'Quiet but attentive. Needs encouragement to participate.',
     nextSteps: 'Build confidence in classroom',
   },
   {
@@ -2629,7 +2631,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 44,
     totalSchoolDays: 47,
-    teacherObservations: 'Engaged when topic interests her. Needs broader motivation.',
+    teacherObservations:
+      'Engaged when topic interests her. Needs broader motivation.',
     nextSteps: 'Academic counselling recommended',
   },
   {
@@ -2665,7 +2668,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 43,
     totalSchoolDays: 47,
-    teacherObservations: 'Inconsistent effort. Responds well to individual attention.',
+    teacherObservations:
+      'Inconsistent effort. Responds well to individual attention.',
     nextSteps: 'Monitor behaviour and attendance',
   },
   {
@@ -2773,7 +2777,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 43,
     totalSchoolDays: 47,
-    teacherObservations: 'Potential not yet fully realised. Respond well to encouragement.',
+    teacherObservations:
+      'Potential not yet fully realised. Respond well to encouragement.',
     nextSteps: 'Mentoring programme recommended',
   },
   {
@@ -2809,7 +2814,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 43,
     totalSchoolDays: 47,
-    teacherObservations: 'Tries hard. Needs additional support in core subjects.',
+    teacherObservations:
+      'Tries hard. Needs additional support in core subjects.',
     nextSteps: 'Arrange remedial classes',
   },
   {
@@ -2845,7 +2851,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 42,
     totalSchoolDays: 47,
-    teacherObservations: 'Needs closer supervision. Responds to structured support.',
+    teacherObservations:
+      'Needs closer supervision. Responds to structured support.',
     nextSteps: 'Behaviour intervention plan',
   },
   {
@@ -2881,7 +2888,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 42,
     totalSchoolDays: 47,
-    teacherObservations: 'Quiet but tries hard. Home situation requires monitoring.',
+    teacherObservations:
+      'Quiet but tries hard. Home situation requires monitoring.',
     nextSteps: 'Welfare support and bursary application',
   },
   {
@@ -2917,7 +2925,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 42,
     totalSchoolDays: 47,
-    teacherObservations: 'Friendly disposition. Academic performance needs improvement.',
+    teacherObservations:
+      'Friendly disposition. Academic performance needs improvement.',
     nextSteps: 'Subject-specific support needed',
   },
   {
@@ -2989,7 +2998,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 41,
     totalSchoolDays: 47,
-    teacherObservations: 'Erratic performance. Benefits from structured routine.',
+    teacherObservations:
+      'Erratic performance. Benefits from structured routine.',
     nextSteps: 'Study skills workshop',
   },
   {
@@ -3025,7 +3035,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 41,
     totalSchoolDays: 47,
-    teacherObservations: 'LSM support in place. Progressing slowly but steadily.',
+    teacherObservations:
+      'LSM support in place. Progressing slowly but steadily.',
     nextSteps: 'Continue LSM and monitor progress',
   },
   {
@@ -3061,7 +3072,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 40,
     totalSchoolDays: 47,
-    teacherObservations: 'Attendance issue affecting performance. Engaged when present.',
+    teacherObservations:
+      'Attendance issue affecting performance. Engaged when present.',
     nextSteps: 'Attendance intervention and parent engagement',
   },
   {
@@ -3097,7 +3109,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 40,
     totalSchoolDays: 47,
-    teacherObservations: 'At-risk student. Low mood flagged last term. Ongoing support.',
+    teacherObservations:
+      'At-risk student. Low mood flagged last term. Ongoing support.',
     nextSteps: 'Continue counselling and SSO referral',
   },
   {
@@ -3133,7 +3146,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 40,
     totalSchoolDays: 47,
-    teacherObservations: 'LSM support ongoing. Struggles with reading comprehension.',
+    teacherObservations:
+      'LSM support ongoing. Struggles with reading comprehension.',
     nextSteps: 'Literacy support programme',
   },
   {
@@ -3277,7 +3291,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 38,
     totalSchoolDays: 47,
-    teacherObservations: 'Financial hardship impacting attendance. Mood issues flagged.',
+    teacherObservations:
+      'Financial hardship impacting attendance. Mood issues flagged.',
     nextSteps: 'Holistic welfare and academic support plan',
   },
   {
@@ -3601,7 +3616,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 35,
     totalSchoolDays: 47,
-    teacherObservations: 'LSM support insufficient. Further intervention needed.',
+    teacherObservations:
+      'LSM support insufficient. Further intervention needed.',
     nextSteps: 'Alternative pathways discussion',
   },
   {
@@ -3709,7 +3725,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 34,
     totalSchoolDays: 47,
-    teacherObservations: 'High-priority welfare case. Mood flagged for 2 terms.',
+    teacherObservations:
+      'High-priority welfare case. Mood flagged for 2 terms.',
     nextSteps: 'Urgent MSF and counselling escalation',
   },
   {
@@ -3745,7 +3762,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 33,
     totalSchoolDays: 47,
-    teacherObservations: 'Very low engagement. Requires urgent academic intervention.',
+    teacherObservations:
+      'Very low engagement. Requires urgent academic intervention.',
     nextSteps: 'Alternative education pathway review',
   },
   {
@@ -3817,7 +3835,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 33,
     totalSchoolDays: 47,
-    teacherObservations: 'Priority wellbeing case. Active SSO and counselling support.',
+    teacherObservations:
+      'Priority wellbeing case. Active SSO and counselling support.',
     nextSteps: 'Sustained multi-party monitoring',
   },
   {
@@ -3889,7 +3908,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 32,
     totalSchoolDays: 47,
-    teacherObservations: 'Complex home situation. Needs compassionate and consistent support.',
+    teacherObservations:
+      'Complex home situation. Needs compassionate and consistent support.',
     nextSteps: 'Ongoing MSF coordination',
   },
   {
@@ -3925,7 +3945,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 31,
     totalSchoolDays: 47,
-    teacherObservations: 'Chronically disengaged. Requires urgent alternative pathway planning.',
+    teacherObservations:
+      'Chronically disengaged. Requires urgent alternative pathway planning.',
     nextSteps: 'ITE early transition review',
   },
   {
@@ -3997,7 +4018,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 30,
     totalSchoolDays: 47,
-    teacherObservations: 'Significant learning gaps. Needs targeted remediation.',
+    teacherObservations:
+      'Significant learning gaps. Needs targeted remediation.',
     nextSteps: 'Alternative pathway assessment',
   },
   {
@@ -4033,7 +4055,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 30,
     totalSchoolDays: 47,
-    teacherObservations: 'Priority case. Multiple risk flags across all domains.',
+    teacherObservations:
+      'Priority case. Multiple risk flags across all domains.',
     nextSteps: 'Full case conference with HOD and external agencies',
   },
   {
@@ -4141,7 +4164,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 28,
     totalSchoolDays: 47,
-    teacherObservations: 'Ungraded result. Welfare and academic crisis. Requires immediate intervention.',
+    teacherObservations:
+      'Ungraded result. Welfare and academic crisis. Requires immediate intervention.',
     nextSteps: 'Emergency case conference',
   },
   {
@@ -4177,7 +4201,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 27,
     totalSchoolDays: 47,
-    teacherObservations: 'Severe disengagement. Full support network activated.',
+    teacherObservations:
+      'Severe disengagement. Full support network activated.',
     nextSteps: 'VP-level intervention and ITE transition',
   },
   {
@@ -4213,7 +4238,8 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 27,
     totalSchoolDays: 47,
-    teacherObservations: 'Ungraded result. Persistent low mood and absenteeism. Priority welfare case.',
+    teacherObservations:
+      'Ungraded result. Persistent low mood and absenteeism. Priority welfare case.',
     nextSteps: 'Immediate SSO intervention and pathway review',
   },
 ]

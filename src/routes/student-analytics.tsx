@@ -5,6 +5,7 @@ import { Clock } from 'lucide-react'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MonitoringAcademicAnalytics } from '@/components/students/academic-analytics'
+import { AttendanceLevelAnalytics } from '@/components/students/attendance-analytics'
 import { InsightBuddy } from '@/components/insight-buddy'
 import { cn } from '@/lib/utils'
 
@@ -57,19 +58,19 @@ function StudentAnalyticsPage() {
         </p>
 
         {/* Main tabs */}
-        <Tabs defaultValue="academic" className="mt-6">
+        <Tabs defaultValue="attendance" className="mt-6">
           <TabsList variant="line">
-            <TabsTrigger
-              value="academic"
-              className="after:bg-blue-600! data-active:text-blue-600"
-            >
-              Academic
-            </TabsTrigger>
             <TabsTrigger
               value="attendance"
               className="after:bg-blue-600! data-active:text-blue-600"
             >
               Attendance
+            </TabsTrigger>
+            <TabsTrigger
+              value="academic"
+              className="after:bg-blue-600! data-active:text-blue-600"
+            >
+              Academic
             </TabsTrigger>
             <TabsTrigger
               value="wellbeing"
@@ -78,6 +79,11 @@ function StudentAnalyticsPage() {
               Wellbeing
             </TabsTrigger>
           </TabsList>
+
+          {/* Attendance tab */}
+          <TabsContent value="attendance">
+            <AttendanceLevelAnalytics />
+          </TabsContent>
 
           {/* Academic tab */}
           <TabsContent value="academic">
@@ -112,11 +118,6 @@ function StudentAnalyticsPage() {
             ) : (
               <MonitoringAcademicAnalytics />
             )}
-          </TabsContent>
-
-          {/* Attendance tab */}
-          <TabsContent value="attendance">
-            <ComingSoon description="Attendance trends and insights across your classes are on their way." />
           </TabsContent>
 
           {/* Wellbeing tab */}
