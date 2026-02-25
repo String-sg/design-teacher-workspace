@@ -29,6 +29,7 @@ import { Route as GuestLoginRouteImport } from './routes/_guest.login'
 import { Route as AllearsAllearsRouteImport } from './routes/_allears.allears'
 import { Route as AllearsAllearsIndexRouteImport } from './routes/_allears.allears.index'
 import { Route as GuestReportViewTokenRouteImport } from './routes/_guest.report-view.$token'
+import { Route as AllearsAllearsResponsesRouteImport } from './routes/_allears.allears.responses'
 import { Route as AllearsAllearsQuestionsRouteImport } from './routes/_allears.allears.questions'
 
 const StudentsRoute = StudentsRouteImport.update({
@@ -129,6 +130,11 @@ const GuestReportViewTokenRoute = GuestReportViewTokenRouteImport.update({
   path: '/report-view/$token',
   getParentRoute: () => GuestRoute,
 } as any)
+const AllearsAllearsResponsesRoute = AllearsAllearsResponsesRouteImport.update({
+  id: '/responses',
+  path: '/responses',
+  getParentRoute: () => AllearsAllearsRoute,
+} as any)
 const AllearsAllearsQuestionsRoute = AllearsAllearsQuestionsRouteImport.update({
   id: '/questions',
   path: '/questions',
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
   '/allears/questions': typeof AllearsAllearsQuestionsRoute
+  '/allears/responses': typeof AllearsAllearsResponsesRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
   '/allears/': typeof AllearsAllearsIndexRoute
 }
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsIndexRoute
   '/students': typeof StudentsIndexRoute
   '/allears/questions': typeof AllearsAllearsQuestionsRoute
+  '/allears/responses': typeof AllearsAllearsResponsesRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
   '/allears': typeof AllearsAllearsIndexRoute
 }
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
   '/_allears/allears/questions': typeof AllearsAllearsQuestionsRoute
+  '/_allears/allears/responses': typeof AllearsAllearsResponsesRoute
   '/_guest/report-view/$token': typeof GuestReportViewTokenRoute
   '/_allears/allears/': typeof AllearsAllearsIndexRoute
 }
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/students/'
     | '/allears/questions'
+    | '/allears/responses'
     | '/report-view/$token'
     | '/allears/'
   fileRoutesByTo: FileRoutesByTo
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/students'
     | '/allears/questions'
+    | '/allears/responses'
     | '/report-view/$token'
     | '/allears'
   id:
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/reports/'
     | '/students/'
     | '/_allears/allears/questions'
+    | '/_allears/allears/responses'
     | '/_guest/report-view/$token'
     | '/_allears/allears/'
   fileRoutesById: FileRoutesById
@@ -413,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestReportViewTokenRouteImport
       parentRoute: typeof GuestRoute
     }
+    '/_allears/allears/responses': {
+      id: '/_allears/allears/responses'
+      path: '/responses'
+      fullPath: '/allears/responses'
+      preLoaderRoute: typeof AllearsAllearsResponsesRouteImport
+      parentRoute: typeof AllearsAllearsRoute
+    }
     '/_allears/allears/questions': {
       id: '/_allears/allears/questions'
       path: '/questions'
@@ -425,11 +444,13 @@ declare module '@tanstack/react-router' {
 
 interface AllearsAllearsRouteChildren {
   AllearsAllearsQuestionsRoute: typeof AllearsAllearsQuestionsRoute
+  AllearsAllearsResponsesRoute: typeof AllearsAllearsResponsesRoute
   AllearsAllearsIndexRoute: typeof AllearsAllearsIndexRoute
 }
 
 const AllearsAllearsRouteChildren: AllearsAllearsRouteChildren = {
   AllearsAllearsQuestionsRoute: AllearsAllearsQuestionsRoute,
+  AllearsAllearsResponsesRoute: AllearsAllearsResponsesRoute,
   AllearsAllearsIndexRoute: AllearsAllearsIndexRoute,
 }
 

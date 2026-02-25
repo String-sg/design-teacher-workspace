@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 const tabs = [
   { label: 'AUDIENCE', href: '/allears' },
   { label: 'QUESTIONS', href: '/allears/questions' },
-  { label: 'RESPONSES', href: undefined },
+  { label: 'RESPONSES', href: '/allears/responses' },
   { label: 'COLLABORATORS', href: undefined },
 ] as const
 
