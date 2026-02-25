@@ -79,7 +79,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const [queryClient] = React.useState(() => new QueryClient())
   const matches = useRouterState({ select: (s) => s.matches })
-  const isGuestRoute = matches.some((m) => m.routeId === '/_guest')
+  const isGuestRoute = matches.some(
+    (m) => m.routeId === '/_guest' || m.routeId === '/_allears',
+  )
 
   if (isGuestRoute) {
     return (
