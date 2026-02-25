@@ -3,6 +3,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import {
   ArrowUpRight,
   CircleHelp,
+  ClipboardList,
   FileText,
   Home,
   Megaphone,
@@ -61,6 +62,11 @@ const navigationItems: Array<MenuItem> = [
     title: 'Students',
     url: '/students',
     icon: Users,
+  },
+  {
+    title: 'Forms',
+    url: '/forms',
+    icon: ClipboardList,
   },
   {
     title: 'Reports',

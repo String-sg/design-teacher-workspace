@@ -11,19 +11,25 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentsRouteImport } from './routes/students'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as FormsRouteImport } from './routes/forms'
 import { Route as FlagsRouteImport } from './routes/flags'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as GuestRouteImport } from './routes/_guest'
+import { Route as AllearsRouteImport } from './routes/_allears'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsIndexRouteImport } from './routes/students.index'
 import { Route as ReportsIndexRouteImport } from './routes/reports.index'
+import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
+import { Route as AllearsAllearsRouteImport } from './routes/_allears.allears'
+import { Route as AllearsAllearsIndexRouteImport } from './routes/_allears.allears.index'
 import { Route as GuestReportViewTokenRouteImport } from './routes/_guest.report-view.$token'
+import { Route as AllearsAllearsQuestionsRouteImport } from './routes/_allears.allears.questions'
 
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
@@ -33,6 +39,11 @@ const StudentsRoute = StudentsRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FormsRoute = FormsRouteImport.update({
+  id: '/forms',
+  path: '/forms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FlagsRoute = FlagsRouteImport.update({
@@ -47,6 +58,10 @@ const AnnouncementsRoute = AnnouncementsRouteImport.update({
 } as any)
 const GuestRoute = GuestRouteImport.update({
   id: '/_guest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AllearsRoute = AllearsRouteImport.update({
+  id: '/_allears',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplatRoute = SplatRouteImport.update({
@@ -68,6 +83,11 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ReportsRoute,
+} as any)
+const FormsIndexRoute = FormsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FormsRoute,
 } as any)
 const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
   id: '/',
@@ -94,10 +114,25 @@ const GuestLoginRoute = GuestLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => GuestRoute,
 } as any)
+const AllearsAllearsRoute = AllearsAllearsRouteImport.update({
+  id: '/allears',
+  path: '/allears',
+  getParentRoute: () => AllearsRoute,
+} as any)
+const AllearsAllearsIndexRoute = AllearsAllearsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AllearsAllearsRoute,
+} as any)
 const GuestReportViewTokenRoute = GuestReportViewTokenRouteImport.update({
   id: '/report-view/$token',
   path: '/report-view/$token',
   getParentRoute: () => GuestRoute,
+} as any)
+const AllearsAllearsQuestionsRoute = AllearsAllearsQuestionsRouteImport.update({
+  id: '/questions',
+  path: '/questions',
+  getParentRoute: () => AllearsAllearsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -105,16 +140,21 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
+  '/forms': typeof FormsRouteWithChildren
   '/reports': typeof ReportsRouteWithChildren
   '/students': typeof StudentsRouteWithChildren
+  '/allears': typeof AllearsAllearsRouteWithChildren
   '/login': typeof GuestLoginRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/forms/': typeof FormsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
+  '/allears/questions': typeof AllearsAllearsQuestionsRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
+  '/allears/': typeof AllearsAllearsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,27 +165,36 @@ export interface FileRoutesByTo {
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
+  '/forms': typeof FormsIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/students': typeof StudentsIndexRoute
+  '/allears/questions': typeof AllearsAllearsQuestionsRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
+  '/allears': typeof AllearsAllearsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/_allears': typeof AllearsRouteWithChildren
   '/_guest': typeof GuestRouteWithChildren
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
+  '/forms': typeof FormsRouteWithChildren
   '/reports': typeof ReportsRouteWithChildren
   '/students': typeof StudentsRouteWithChildren
+  '/_allears/allears': typeof AllearsAllearsRouteWithChildren
   '/_guest/login': typeof GuestLoginRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/forms/': typeof FormsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
+  '/_allears/allears/questions': typeof AllearsAllearsQuestionsRoute
   '/_guest/report-view/$token': typeof GuestReportViewTokenRoute
+  '/_allears/allears/': typeof AllearsAllearsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -154,16 +203,21 @@ export interface FileRouteTypes {
     | '/$'
     | '/announcements'
     | '/flags'
+    | '/forms'
     | '/reports'
     | '/students'
+    | '/allears'
     | '/login'
     | '/announcements/$id'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
+    | '/forms/'
     | '/reports/'
     | '/students/'
+    | '/allears/questions'
     | '/report-view/$token'
+    | '/allears/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -174,34 +228,45 @@ export interface FileRouteTypes {
     | '/reports/$id'
     | '/students/$id'
     | '/announcements'
+    | '/forms'
     | '/reports'
     | '/students'
+    | '/allears/questions'
     | '/report-view/$token'
+    | '/allears'
   id:
     | '__root__'
     | '/'
     | '/$'
+    | '/_allears'
     | '/_guest'
     | '/announcements'
     | '/flags'
+    | '/forms'
     | '/reports'
     | '/students'
+    | '/_allears/allears'
     | '/_guest/login'
     | '/announcements/$id'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
+    | '/forms/'
     | '/reports/'
     | '/students/'
+    | '/_allears/allears/questions'
     | '/_guest/report-view/$token'
+    | '/_allears/allears/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  AllearsRoute: typeof AllearsRouteWithChildren
   GuestRoute: typeof GuestRouteWithChildren
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
+  FormsRoute: typeof FormsRouteWithChildren
   ReportsRoute: typeof ReportsRouteWithChildren
   StudentsRoute: typeof StudentsRouteWithChildren
 }
@@ -220,6 +285,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forms': {
+      id: '/forms'
+      path: '/forms'
+      fullPath: '/forms'
+      preLoaderRoute: typeof FormsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/flags': {
@@ -241,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof GuestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_allears': {
+      id: '/_allears'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AllearsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -270,6 +349,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/'
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof ReportsRoute
+    }
+    '/forms/': {
+      id: '/forms/'
+      path: '/'
+      fullPath: '/forms/'
+      preLoaderRoute: typeof FormsIndexRouteImport
+      parentRoute: typeof FormsRoute
     }
     '/announcements/': {
       id: '/announcements/'
@@ -306,6 +392,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestLoginRouteImport
       parentRoute: typeof GuestRoute
     }
+    '/_allears/allears': {
+      id: '/_allears/allears'
+      path: '/allears'
+      fullPath: '/allears'
+      preLoaderRoute: typeof AllearsAllearsRouteImport
+      parentRoute: typeof AllearsRoute
+    }
+    '/_allears/allears/': {
+      id: '/_allears/allears/'
+      path: '/'
+      fullPath: '/allears/'
+      preLoaderRoute: typeof AllearsAllearsIndexRouteImport
+      parentRoute: typeof AllearsAllearsRoute
+    }
     '/_guest/report-view/$token': {
       id: '/_guest/report-view/$token'
       path: '/report-view/$token'
@@ -313,8 +413,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestReportViewTokenRouteImport
       parentRoute: typeof GuestRoute
     }
+    '/_allears/allears/questions': {
+      id: '/_allears/allears/questions'
+      path: '/questions'
+      fullPath: '/allears/questions'
+      preLoaderRoute: typeof AllearsAllearsQuestionsRouteImport
+      parentRoute: typeof AllearsAllearsRoute
+    }
   }
 }
+
+interface AllearsAllearsRouteChildren {
+  AllearsAllearsQuestionsRoute: typeof AllearsAllearsQuestionsRoute
+  AllearsAllearsIndexRoute: typeof AllearsAllearsIndexRoute
+}
+
+const AllearsAllearsRouteChildren: AllearsAllearsRouteChildren = {
+  AllearsAllearsQuestionsRoute: AllearsAllearsQuestionsRoute,
+  AllearsAllearsIndexRoute: AllearsAllearsIndexRoute,
+}
+
+const AllearsAllearsRouteWithChildren = AllearsAllearsRoute._addFileChildren(
+  AllearsAllearsRouteChildren,
+)
+
+interface AllearsRouteChildren {
+  AllearsAllearsRoute: typeof AllearsAllearsRouteWithChildren
+}
+
+const AllearsRouteChildren: AllearsRouteChildren = {
+  AllearsAllearsRoute: AllearsAllearsRouteWithChildren,
+}
+
+const AllearsRouteWithChildren =
+  AllearsRoute._addFileChildren(AllearsRouteChildren)
 
 interface GuestRouteChildren {
   GuestLoginRoute: typeof GuestLoginRoute
@@ -341,6 +473,16 @@ const AnnouncementsRouteChildren: AnnouncementsRouteChildren = {
 const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
   AnnouncementsRouteChildren,
 )
+
+interface FormsRouteChildren {
+  FormsIndexRoute: typeof FormsIndexRoute
+}
+
+const FormsRouteChildren: FormsRouteChildren = {
+  FormsIndexRoute: FormsIndexRoute,
+}
+
+const FormsRouteWithChildren = FormsRoute._addFileChildren(FormsRouteChildren)
 
 interface ReportsRouteChildren {
   ReportsIdRoute: typeof ReportsIdRoute
@@ -372,9 +514,11 @@ const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  AllearsRoute: AllearsRouteWithChildren,
   GuestRoute: GuestRouteWithChildren,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
   FlagsRoute: FlagsRoute,
+  FormsRoute: FormsRouteWithChildren,
   ReportsRoute: ReportsRouteWithChildren,
   StudentsRoute: StudentsRouteWithChildren,
 }
