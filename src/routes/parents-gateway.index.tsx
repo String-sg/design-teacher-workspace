@@ -210,15 +210,15 @@ function ParentsGatewayPage() {
             description="Try adjusting your search or filter, or create a new announcement."
           />
         ) : (
-          <Table className="[&_table]:table-fixed [&_table]:w-[940px]">
+          <Table>
             <TableHeader className="border-b bg-white">
               <TableRow className="border-0 hover:bg-transparent">
-                <TableHead className="w-[360px]">Title</TableHead>
-                <TableHead className="w-[110px]">Date</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="w-[90px]">Owner</TableHead>
-                <TableHead className="w-[130px]">To Parents Of</TableHead>
-                <TableHead className="w-[150px]">Read</TableHead>
+                <TableHead className="min-w-[250px]">Title</TableHead>
+                <TableHead className="min-w-[110px]">Date</TableHead>
+                <TableHead className="min-w-[100px]">Status</TableHead>
+                <TableHead className="min-w-[90px]">Owner</TableHead>
+                <TableHead className="min-w-[130px]">To Parents Of</TableHead>
+                <TableHead className="min-w-[150px]">Read</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
