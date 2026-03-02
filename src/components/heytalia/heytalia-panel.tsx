@@ -23,12 +23,12 @@ import { useIsMobile } from '@/hooks/use-mobile'
 // Colour constants
 // ---------------------------------------------------------------------------
 const HT = {
-  primary: '#9575CD',
-  hover: '#7E57C2',
-  ultraLight: '#F5F0FF',
-  light: '#EDE7F6',
-  border: '#D1C4E9',
-  text: '#6D4799',
+  primary: 'var(--twblue-9)',
+  hover: 'var(--twblue-10)',
+  ultraLight: 'var(--twblue-2)',
+  light: 'var(--twblue-3)',
+  border: 'var(--twblue-5)',
+  text: 'var(--twblue-11)',
 } as const
 
 // Width presets
@@ -459,26 +459,24 @@ export function HeyTaliaPanel() {
             onMouseDown={startResize}
           >
             {/* Visible indicator line */}
-            <div className="h-full w-0.5 translate-x-0.5 bg-transparent transition-colors group-hover:bg-[#D1C4E9] group-active:bg-[#9575CD]" />
+            <div className="h-full w-0.5 translate-x-0.5 bg-transparent transition-colors group-hover:bg-border group-active:bg-twblue-9" />
           </div>
         )}
 
         {/* ── Header ── */}
-        <div
-          className="flex h-14 shrink-0 items-center gap-3 px-3"
-          style={{ background: HT.primary }}
-        >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
-            <HeyTaliaLogo size={28} uid={headerUid} />
+        <div className="flex h-14 shrink-0 items-center gap-3 border-b bg-background px-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
+            <img
+              src="/logos/heytalia-icon.png"
+              alt="HeyTalia"
+              className="h-5 w-5"
+            />
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold text-white">HeyTalia</span>
-              <span
-                className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
-                style={{ background: 'rgba(255,255,255,0.22)' }}
-              >
+              <span className="text-sm font-semibold text-foreground">HeyTalia</span>
+              <span className="rounded-full bg-twblue-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-twblue-9">
                 Beta
               </span>
             </div>
@@ -487,20 +485,27 @@ export function HeyTaliaPanel() {
           {/* 2 icons only: expand toggle + close */}
           <div className="flex items-center">
             {!isMobile && (
-              <HdrBtn
+              <button
+                type="button"
                 title={isExpanded ? 'Restore default width' : 'Expand panel'}
                 onClick={toggleWidth}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 {isExpanded ? (
                   <Minimize2 className="h-3.5 w-3.5" />
                 ) : (
                   <Maximize2 className="h-3.5 w-3.5" />
                 )}
-              </HdrBtn>
+              </button>
             )}
-            <HdrBtn title="Close" onClick={() => setView('closed')}>
+            <button
+              type="button"
+              title="Close"
+              onClick={() => setView('closed')}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
               <Minus className="h-3.5 w-3.5" />
-            </HdrBtn>
+            </button>
           </div>
         </div>
 
@@ -524,10 +529,7 @@ export function HeyTaliaPanel() {
 
         {/* ── Input footer ── */}
         <div className="shrink-0 border-t bg-white px-3 pb-3 pt-2.5">
-          <div
-            className="flex h-9 items-center gap-2 rounded-4xl border border-border bg-background px-3 transition-all focus-within:ring-[3px]"
-            style={{ '--tw-ring-color': HT.border } as React.CSSProperties}
-          >
+          <div className="relative flex h-9 items-center">
             <input
               ref={inputRef}
               type="text"
@@ -540,14 +542,13 @@ export function HeyTaliaPanel() {
                 }
               }}
               placeholder="Ask HeyTalia…"
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              className="h-9 w-full rounded-[var(--radius-input)] border border-input bg-white pr-10 pl-3 text-sm shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
             />
             <button
               type="button"
               onClick={() => sendMessage(input)}
               disabled={!input.trim()}
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white transition-all disabled:opacity-40"
-              style={{ background: HT.primary }}
+              className="absolute right-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-twblue-9 text-white transition-all disabled:opacity-40"
             >
               <svg
                 className="h-3 w-3"
@@ -622,11 +623,12 @@ function MessageBubble({
   return (
     <div className={cn('flex gap-2', !isAI && 'flex-row-reverse')}>
       {isAI && (
-        <div
-          className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-          style={{ background: HT.light }}
-        >
-          <HeyTaliaLogo size={18} uid={avatarUid} />
+        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twblue-3">
+          <img
+            src="/logos/heytalia-icon.png"
+            alt="HeyTalia"
+            className="h-4 w-4"
+          />
         </div>
       )}
 
@@ -644,7 +646,7 @@ function MessageBubble({
               ? 'rounded-tl-sm border border-border bg-white text-foreground shadow-xs'
               : 'rounded-tr-sm text-white',
           )}
-          style={!isAI ? { background: HT.primary } : undefined}
+          style={!isAI ? { background: 'var(--twblue-9)' } : undefined}
         >
           <MarkdownText text={msg.text} isUser={!isAI} />
         </div>
@@ -668,20 +670,7 @@ function MessageBubble({
                 key={chip}
                 type="button"
                 onClick={() => onChipClick(chip)}
-                className="inline-flex h-8 items-center rounded-4xl border px-3.5 text-sm font-medium transition-colors"
-                style={{
-                  borderColor: HT.border,
-                  background: HT.light,
-                  color: HT.text,
-                }}
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLButtonElement).style.background =
-                    '#DDD6FE'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLButtonElement).style.background =
-                    HT.light
-                }}
+                className="inline-flex h-8 items-center rounded-4xl border border-twblue-5 bg-twblue-3 px-3.5 text-sm font-medium text-twblue-11 transition-colors hover:bg-twblue-4"
               >
                 {chip}
               </button>
@@ -789,23 +778,14 @@ function DraftCard({
         <div className="ml-auto flex items-center gap-1.5">
           <button
             type="button"
-            className="inline-flex h-7 items-center gap-1 rounded-4xl border bg-white px-2.5 text-xs font-medium transition-colors"
-            style={{ borderColor: HT.primary, color: HT.primary }}
-            onMouseEnter={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.background =
-                HT.ultraLight
-            }}
-            onMouseLeave={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.background = 'white'
-            }}
+            className="inline-flex h-7 items-center gap-1 rounded-4xl border border-twblue-9 bg-white px-2.5 text-xs font-medium text-twblue-9 transition-colors hover:bg-twblue-2"
           >
             <Mail className="h-3 w-3" />
             Send email
           </button>
           <button
             type="button"
-            className="inline-flex h-7 items-center gap-1 rounded-4xl px-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
-            style={{ background: HT.primary }}
+            className="inline-flex h-7 items-center gap-1 rounded-4xl bg-twblue-9 px-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
           >
             <svg
               className="h-3 w-3"
@@ -846,8 +826,12 @@ function DraftIconBtn({
       type="button"
       title={title}
       onClick={onClick}
-      className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-      style={active ? { background: HT.primary, color: 'white' } : undefined}
+      className={cn(
+        'flex h-6 w-6 items-center justify-center rounded-md transition-colors',
+        active
+          ? 'bg-twblue-9 text-white'
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+      )}
     >
       {children}
     </button>
@@ -888,21 +872,21 @@ function DraftBody({ body }: { body: string }) {
 // Typing indicator
 // ---------------------------------------------------------------------------
 function TypingIndicator() {
-  const uid = useId()
   return (
     <div className="flex items-center gap-2">
-      <div
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-        style={{ background: HT.light }}
-      >
-        <HeyTaliaLogo size={18} uid={uid} />
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twblue-3">
+        <img
+          src="/logos/heytalia-icon.png"
+          alt="HeyTalia"
+          className="h-4 w-4"
+        />
       </div>
       <div className="flex items-center gap-1 rounded-xl rounded-tl-sm border border-border bg-white px-3.5 py-2.5 shadow-xs">
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="h-1.5 w-1.5 animate-bounce rounded-full"
-            style={{ background: HT.primary, animationDelay: `${i * 0.15}s` }}
+            className="h-1.5 w-1.5 animate-bounce rounded-full bg-twblue-9"
+            style={{ animationDelay: `${i * 0.15}s` }}
           />
         ))}
       </div>
