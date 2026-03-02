@@ -292,7 +292,7 @@ function NewAnnouncementPage() {
     : undefined
 
   useSetBreadcrumbs([
-    { label: 'Parents Gateway', href: '/parents-gateway' },
+    { label: 'Announcement', href: '/parents-gateway' },
     {
       label: isEditing ? 'Edit Announcement' : 'New Announcement',
       href: '/parents-gateway/new',

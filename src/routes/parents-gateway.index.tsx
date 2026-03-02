@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EmptyState } from '@/components/empty-state'
 
 export const Route = createFileRoute('/parents-gateway/')({
@@ -68,7 +69,7 @@ function ParentsGatewayPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<PGFilters>(EMPTY_PG_FILTERS)
 
-  useSetBreadcrumbs([{ label: 'Parents Gateway', href: '/parents-gateway' }])
+  useSetBreadcrumbs([{ label: 'Announcement', href: '/parents-gateway' }])
   const navigate = useNavigate()
 
   const filtered = useMemo(() => {
@@ -142,64 +143,67 @@ function ParentsGatewayPage() {
 
   return (
     <div className="flex flex-col">
-      <div className="shrink-0 space-y-6 pt-6">
-        {/* Page Header */}
-        <div className="flex items-center justify-between px-6">
-          <div>
-            <h1 className="text-2xl font-semibold">Parents Gateway</h1>
-            <p className="text-muted-foreground">
-              Send announcements to parents and track who has read them
-            </p>
-          </div>
-          <Button render={<Link to="/parents-gateway/new" />}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Announcement
-          </Button>
+      {/* Page Header */}
+      <div className="flex items-center justify-between px-6 pt-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Announcement</h1>
+          <p className="text-muted-foreground">
+            Send announcements to parents and track who has read them
+          </p>
         </div>
-
-        {/* Metrics */}
-        <div className="grid grid-cols-2 gap-4 px-6 md:grid-cols-5">
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">Total</div>
-            <div className="text-2xl font-semibold">{metrics.total}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">Draft</div>
-            <div className="text-2xl font-semibold">{metrics.drafts}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">Posted</div>
-            <div className="text-2xl font-semibold">{metrics.posted}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">Scheduled</div>
-            <div className="text-2xl font-semibold">{metrics.scheduled}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">Avg Read Rate</div>
-            <div className="text-2xl font-semibold">{metrics.avgReadRate}%</div>
-          </div>
-        </div>
-
-        {/* Search & Filter */}
-        <div className="flex items-center gap-3 px-6 pb-2">
-          <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search announcements"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 md:w-[240px]"
-              aria-label="Search announcements"
-            />
-          </div>
-          <PGFilterBar filters={filters} onChange={setFilters} />
-        </div>
+        <Button render={<Link to="/parents-gateway/new" />}>
+          <Plus className="mr-2 h-4 w-4" />
+          New Announcement
+        </Button>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto px-6">
+      <Tabs defaultValue="for-parents" className="mt-6 w-full">
+        <TabsList variant="line" className="px-6">
+          <TabsTrigger value="for-parents">For Parents</TabsTrigger>
+        </TabsList>
+        <TabsContent value="for-parents" className="space-y-6 pt-6">
+          {/* Metrics */}
+          <div className="grid grid-cols-2 gap-4 px-6 md:grid-cols-5">
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-sm text-muted-foreground">Total</div>
+              <div className="text-2xl font-semibold">{metrics.total}</div>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-sm text-muted-foreground">Draft</div>
+              <div className="text-2xl font-semibold">{metrics.drafts}</div>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-sm text-muted-foreground">Posted</div>
+              <div className="text-2xl font-semibold">{metrics.posted}</div>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-sm text-muted-foreground">Scheduled</div>
+              <div className="text-2xl font-semibold">{metrics.scheduled}</div>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-sm text-muted-foreground">Avg Read Rate</div>
+              <div className="text-2xl font-semibold">{metrics.avgReadRate}%</div>
+            </div>
+          </div>
+
+          {/* Search & Filter */}
+          <div className="flex items-center gap-3 px-6 pb-2">
+            <div className="relative flex-1 md:flex-none">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search announcements"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 md:w-[240px]"
+                aria-label="Search announcements"
+              />
+            </div>
+            <PGFilterBar filters={filters} onChange={setFilters} />
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto px-6">
         {filtered.length === 0 ? (
           <EmptyState
             title="No announcements found"
@@ -316,8 +320,10 @@ function ParentsGatewayPage() {
               })}
             </TableBody>
           </Table>
-        )}
-      </div>
+          )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

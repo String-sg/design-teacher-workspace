@@ -74,7 +74,7 @@ export const appCategories: Array<AppCategory> = [
       },
       {
         id: 'parents-gateway',
-        name: 'Parents Gateway',
+        name: 'Announcement',
         description: 'Connecting parents and schools seamlessly',
         icon: '/logos/parentsgateway.webp',
         color: 'purple',

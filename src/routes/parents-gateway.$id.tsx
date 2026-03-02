@@ -134,7 +134,7 @@ function AnnouncementDetailPage() {
   const contentLocked = announcement.status === 'posted'
 
   useSetBreadcrumbs([
-    { label: 'Parents Gateway', href: '/parents-gateway' },
+    { label: 'Announcement', href: '/parents-gateway' },
     { label: announcement.title, href: `/parents-gateway/${announcement.id}` },
   ])
 

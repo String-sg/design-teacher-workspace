@@ -66,7 +66,7 @@ const navigationItems: Array<MenuItem> = [
     icon: Users,
   },
   {
-    title: 'Parents Gateway',
+    title: 'Announcement',
     url: '/parents-gateway',
     icon: Send,
     featureFlag: 'parents-gateway',
