@@ -15,7 +15,7 @@ import {
 
 import type { Student } from '@/types/student'
 import type { HolisticReport, ReviewStatus, Term } from '@/types/report'
-import { filterReports, TERMS } from '@/data/mock-reports'
+import { TERMS, filterReports } from '@/data/mock-reports'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -167,9 +167,7 @@ export function StudentProfile({
 
   const studentReports = filterReports({ studentId: student.id })
   const existingTerms = new Set(studentReports.map((r) => r.term))
-  const missingTerms = TERMS.filter(
-    (t): t is Term => !existingTerms.has(t),
-  )
+  const missingTerms = TERMS.filter((t): t is Term => !existingTerms.has(t))
 
   const sections = [
     { id: 'behaviour', label: 'Behaviour' },
@@ -367,10 +365,7 @@ export function StudentProfile({
           {studentReports.length > 0 ? (
             <div className="space-y-2">
               {studentReports
-                .sort(
-                  (a, b) =>
-                    TERMS.indexOf(a.term) - TERMS.indexOf(b.term),
-                )
+                .sort((a, b) => TERMS.indexOf(a.term) - TERMS.indexOf(b.term))
                 .map((report) => (
                   <ReportRow key={report.id} report={report} />
                 ))}

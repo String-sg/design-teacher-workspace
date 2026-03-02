@@ -7,7 +7,7 @@ export interface AudienceType {
   defaultSelected?: boolean
 }
 
-export const audienceTypes: AudienceType[] = [
+export const audienceTypes: Array<AudienceType> = [
   {
     id: 'all',
     title: 'All',

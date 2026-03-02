@@ -113,9 +113,7 @@ function FormsPage() {
             <div className="text-2xl font-semibold">{metrics.activeForms}</div>
           </div>
           <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">
-              Completion Rate
-            </div>
+            <div className="text-sm text-muted-foreground">Completion Rate</div>
             <div className="text-2xl font-semibold">
               {metrics.completionRate}%
             </div>
@@ -167,15 +165,15 @@ function FormsPage() {
       </div>
 
       {/* Forms Table */}
-      <div className="px-6">
+      <div className="max-w-full overflow-x-auto bg-white">
         <Table>
           <TableHeader className="border-b bg-white">
             <TableRow className="border-0 hover:bg-transparent">
-              <TableHead className="min-w-[250px]">Form Title</TableHead>
+              <TableHead className="min-w-[250px] pl-6">Form Title</TableHead>
               <TableHead className="min-w-[100px]">Status</TableHead>
               <TableHead className="min-w-[80px]">Sent</TableHead>
               <TableHead className="min-w-[100px]">Completed</TableHead>
-              <TableHead className="min-w-[100px]">Created</TableHead>
+              <TableHead className="min-w-[100px] pr-6">Created</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -190,7 +188,7 @@ function FormsPage() {
             ) : (
               filteredForms.map((form) => (
                 <TableRow key={form.id} className="cursor-pointer">
-                  <TableCell>
+                  <TableCell className="pl-6">
                     <div className="font-medium">{form.title}</div>
                     <div className="text-sm text-muted-foreground">
                       {form.description}
@@ -199,7 +197,7 @@ function FormsPage() {
                   <TableCell>{getStatusBadge(form.status)}</TableCell>
                   <TableCell>{form.recipientCount}</TableCell>
                   <TableCell>{form.completedCount}</TableCell>
-                  <TableCell>
+                  <TableCell className="pr-6">
                     {new Date(form.createdAt).toLocaleDateString('en-SG', {
                       day: 'numeric',
                       month: 'short',

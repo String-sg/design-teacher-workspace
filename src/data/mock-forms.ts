@@ -4,7 +4,8 @@ export const mockForms: Array<Form> = [
   {
     id: 'form-1',
     title: 'Parent-Teacher Conference Preferences',
-    description: 'Collect preferred time slots for upcoming parent-teacher meetings',
+    description:
+      'Collect preferred time slots for upcoming parent-teacher meetings',
     status: 'active',
     createdAt: '2026-02-20',
     recipientCount: 120,
@@ -13,7 +14,8 @@ export const mockForms: Array<Form> = [
   {
     id: 'form-2',
     title: 'School Trip Consent Form',
-    description: 'Permission slip for the Secondary 3 learning journey to Science Centre',
+    description:
+      'Permission slip for the Secondary 3 learning journey to Science Centre',
     status: 'active',
     createdAt: '2026-02-18',
     recipientCount: 38,
@@ -40,7 +42,8 @@ export const mockForms: Array<Form> = [
   {
     id: 'form-5',
     title: 'End-of-Year Feedback Survey',
-    description: 'Gather parent feedback on school programmes and communication',
+    description:
+      'Gather parent feedback on school programmes and communication',
     status: 'closed',
     createdAt: '2025-11-15',
     recipientCount: 150,
@@ -49,7 +52,8 @@ export const mockForms: Array<Form> = [
   {
     id: 'form-6',
     title: 'Mother Tongue Language Option',
-    description: 'Select Mother Tongue language variant for incoming Primary 1 students',
+    description:
+      'Select Mother Tongue language variant for incoming Primary 1 students',
     status: 'draft',
     createdAt: '2026-02-22',
     recipientCount: 0,
@@ -58,7 +62,8 @@ export const mockForms: Array<Form> = [
   {
     id: 'form-7',
     title: 'Health & Dietary Requirements',
-    description: 'Update student health information and dietary restrictions for camp',
+    description:
+      'Update student health information and dietary restrictions for camp',
     status: 'draft',
     createdAt: '2026-02-24',
     recipientCount: 0,

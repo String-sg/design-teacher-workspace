@@ -25,7 +25,9 @@ export function EmailPreviewDialog({
   onSend,
 }: EmailPreviewDialogProps) {
   const isParent = recipientType === 'parent'
-  const firstName = report.studentName.split(' ').filter((p) => p.length > 0)[0] ?? report.studentName
+  const firstName =
+    report.studentName.split(' ').filter((p) => p.length > 0)[0] ??
+    report.studentName
 
   const fromAddress = 'Bandung School <noreply@bandung.edu.sg>'
   const toAddress = isParent
@@ -66,15 +68,21 @@ export function EmailPreviewDialog({
         {/* Email header fields */}
         <div className="space-y-0 border-b bg-gray-50 px-5 py-3 text-sm">
           <div className="flex gap-2 py-0.5">
-            <span className="w-14 shrink-0 font-medium text-muted-foreground">From</span>
+            <span className="w-14 shrink-0 font-medium text-muted-foreground">
+              From
+            </span>
             <span className="text-foreground">{fromAddress}</span>
           </div>
           <div className="flex gap-2 py-0.5">
-            <span className="w-14 shrink-0 font-medium text-muted-foreground">To</span>
+            <span className="w-14 shrink-0 font-medium text-muted-foreground">
+              To
+            </span>
             <span className="text-foreground">{toAddress}</span>
           </div>
           <div className="flex gap-2 py-0.5">
-            <span className="w-14 shrink-0 font-medium text-muted-foreground">Subject</span>
+            <span className="w-14 shrink-0 font-medium text-muted-foreground">
+              Subject
+            </span>
             <span className="font-medium text-foreground">{subject}</span>
           </div>
         </div>

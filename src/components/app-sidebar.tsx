@@ -9,6 +9,8 @@ import {
   Megaphone,
   MessageSquare,
   ScrollText,
+  Mail,
+  Settings,
   Users,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -20,6 +22,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
@@ -45,7 +48,7 @@ interface MenuItem {
   featureFlag?: FeatureFlagKey
 }
 
-const navigationItems: Array<MenuItem> = [
+const mainNavItems: Array<MenuItem> = [
   {
     title: 'Announcements',
     url: '/announcements',
@@ -62,6 +65,15 @@ const navigationItems: Array<MenuItem> = [
     title: 'Students',
     url: '/students',
     icon: Users,
+  },
+]
+
+const parentsCommItems: Array<MenuItem> = [
+  {
+    title: 'Announcement',
+    url: '/parents-gateway',
+    icon: Mail,
+    featureFlag: 'parents-gateway',
   },
   {
     title: 'Forms',
@@ -111,13 +123,19 @@ export function AppSidebar() {
 
   const announcementsEnabled = useFeatureFlag('announcements')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
+  const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
 
-  const filteredItems = navigationItems.filter((item) => {
-    if (!item.featureFlag) return true
-    if (item.featureFlag === 'announcements') return announcementsEnabled
-    if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
-    return true
-  })
+  const filterItems = (items: Array<MenuItem>) =>
+    items.filter((item) => {
+      if (!item.featureFlag) return true
+      if (item.featureFlag === 'announcements') return announcementsEnabled
+      if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
+      if (item.featureFlag === 'parents-gateway') return parentsGatewayEnabled
+      return true
+    })
+
+  const filteredMainItems = filterItems(mainNavItems)
+  const filteredParentsItems = filterItems(parentsCommItems)
 
   return (
     <Sidebar collapsible="icon">
@@ -125,7 +143,9 @@ export function AppSidebar() {
         <div className="flex h-14 items-center justify-center gap-2 px-4 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0">
           <span className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0">
             Teacher Workspace
-            <span className="ml-1.5 rounded-full bg-twblue-3 px-1.5 py-0.5 text-xs font-medium text-twblue-9">Beta</span>
+            <span className="ml-1.5 rounded-full bg-twblue-3 px-1.5 py-0.5 text-xs font-medium text-twblue-9">
+              Beta
+            </span>
           </span>
           <SidebarTrigger />
         </div>
@@ -134,14 +154,35 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenuItems
-              items={filteredItems}
+              items={filteredMainItems}
               currentPath={location.pathname}
             />
           </SidebarGroupContent>
+          {filteredParentsItems.length > 0 && (
+            <>
+              <SidebarGroupLabel className="mt-2">Parents Comm</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenuItems
+                  items={filteredParentsItems}
+                  currentPath={location.pathname}
+                />
+              </SidebarGroupContent>
+            </>
+          )}
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link to="/settings" />}
+              isActive={location.pathname === '/settings'}
+              tooltip="Settings"
+            >
+              <Settings className="size-4" />
+              <span>Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger

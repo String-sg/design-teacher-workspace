@@ -1,4 +1,4 @@
-import { Info, Award } from 'lucide-react'
+import { Award, Info } from 'lucide-react'
 import { RadarChart } from './radar-chart'
 import type { CoreValue, CoreValueLevel } from '@/types/report'
 import { cn } from '@/lib/utils'

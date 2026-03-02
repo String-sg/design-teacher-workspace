@@ -1,8 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 
-import { useAuth } from '@/lib/auth'
-import { Button } from '@/components/ui/button'
 import type {
   FilterCriterion,
   FilterField,
@@ -11,6 +9,8 @@ import type {
   Student,
 } from '@/types/student'
 import type { ColumnConfig } from '@/components/students/column-visibility-popover'
+import { useAuth } from '@/lib/auth'
+import { Button } from '@/components/ui/button'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { filterFieldConfigs } from '@/data/filter-config'
 import { DataCard } from '@/components/data-card'
@@ -81,9 +81,11 @@ function StudentsPage() {
     // Filter by class or level
     if (selectedClass !== 'all') {
       if (selectedClass.startsWith('Secondary')) {
-        // Extract level number and filter by classes starting with that number
         const levelNum = selectedClass.replace('Secondary ', '')
-        students = students.filter((s) => s.class.startsWith(levelNum))
+        students = students.filter((s) => s.class.startsWith(`Sec ${levelNum}`))
+      } else if (selectedClass.startsWith('Primary')) {
+        const levelNum = selectedClass.replace('Primary ', '')
+        students = students.filter((s) => s.class.startsWith(`P${levelNum}`))
       } else {
         students = students.filter((s) => s.class === selectedClass)
       }

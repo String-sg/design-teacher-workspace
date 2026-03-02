@@ -3,13 +3,13 @@ import {
   CheckCircle2,
   ChevronRight,
   Copy,
+  Flag,
   GripVertical,
   Home,
   RefreshCw,
   Send,
   ToggleLeft,
   Trash2,
-  Flag,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -230,7 +230,9 @@ function QuestionsPage() {
               <h2 className="mt-2 text-lg font-bold text-slate-900">
                 Questions for Parents
               </h2>
-              <p className="text-sm text-slate-500">Trip Participation & Arrangements</p>
+              <p className="text-sm text-slate-500">
+                Trip Participation & Arrangements
+              </p>
             </div>
 
             {/* Yes/No Question Cards */}

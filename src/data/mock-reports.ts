@@ -94,38 +94,82 @@ function generateConsistentStatuses(
   if (!isSecondary) {
     // Primary: no student delivery, parent goes through pipeline directly
     if (stage <= 5) {
-      return { reviewStatus: 'approved', studentStatus: 'not_sent', parentStatus: 'not_sent' }
+      return {
+        reviewStatus: 'approved',
+        studentStatus: 'not_sent',
+        parentStatus: 'not_sent',
+      }
     }
     if (stage <= 7) {
-      return { reviewStatus: 'approved', studentStatus: 'not_sent', parentStatus: 'sent' }
+      return {
+        reviewStatus: 'approved',
+        studentStatus: 'not_sent',
+        parentStatus: 'sent',
+      }
     }
     if (stage <= 9) {
-      return { reviewStatus: 'approved', studentStatus: 'not_sent', parentStatus: 'viewed' }
+      return {
+        reviewStatus: 'approved',
+        studentStatus: 'not_sent',
+        parentStatus: 'viewed',
+      }
     }
-    return { reviewStatus: 'approved', studentStatus: 'not_sent', parentStatus: 'acknowledged' }
+    return {
+      reviewStatus: 'approved',
+      studentStatus: 'not_sent',
+      parentStatus: 'acknowledged',
+    }
   }
 
   // Secondary: student first → then parent
   if (stage === 4) {
-    return { reviewStatus: 'approved', studentStatus: 'not_sent', parentStatus: 'not_sent' }
+    return {
+      reviewStatus: 'approved',
+      studentStatus: 'not_sent',
+      parentStatus: 'not_sent',
+    }
   }
   if (stage === 5) {
-    return { reviewStatus: 'approved', studentStatus: 'sent', parentStatus: 'not_sent' }
+    return {
+      reviewStatus: 'approved',
+      studentStatus: 'sent',
+      parentStatus: 'not_sent',
+    }
   }
   if (stage === 6) {
-    return { reviewStatus: 'approved', studentStatus: 'viewed', parentStatus: 'not_sent' }
+    return {
+      reviewStatus: 'approved',
+      studentStatus: 'viewed',
+      parentStatus: 'not_sent',
+    }
   }
   if (stage === 7) {
-    return { reviewStatus: 'approved', studentStatus: 'acknowledged', parentStatus: 'not_sent' }
+    return {
+      reviewStatus: 'approved',
+      studentStatus: 'acknowledged',
+      parentStatus: 'not_sent',
+    }
   }
   if (stage === 8) {
-    return { reviewStatus: 'approved', studentStatus: 'sent_to_parents', parentStatus: 'sent' }
+    return {
+      reviewStatus: 'approved',
+      studentStatus: 'sent_to_parents',
+      parentStatus: 'sent',
+    }
   }
   if (stage === 9) {
-    return { reviewStatus: 'approved', studentStatus: 'sent_to_parents', parentStatus: 'viewed' }
+    return {
+      reviewStatus: 'approved',
+      studentStatus: 'sent_to_parents',
+      parentStatus: 'viewed',
+    }
   }
   // stages 10–11
-  return { reviewStatus: 'approved', studentStatus: 'sent_to_parents', parentStatus: 'acknowledged' }
+  return {
+    reviewStatus: 'approved',
+    studentStatus: 'sent_to_parents',
+    parentStatus: 'acknowledged',
+  }
 }
 
 function seededPick<T>(arr: Array<T>, seed: number): T {

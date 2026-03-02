@@ -122,183 +122,183 @@ function ReportDetailPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-8">
-        <div className="flex items-center gap-4">
-          <Link
-            to="/reports"
-            className={buttonVariants({ variant: 'ghost', size: 'icon' })}
+      <div className="flex items-center gap-4">
+        <Link
+          to="/reports"
+          className={buttonVariants({ variant: 'ghost', size: 'icon' })}
+        >
+          <ArrowLeft className="size-4" />
+        </Link>
+        <Avatar size="lg">
+          <AvatarFallback>{getInitials(report.studentName)}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <h1 className="text-2xl font-semibold">
+            {report.studentName}
+            <span className="text-muted-foreground ml-2 text-base font-normal">
+              {report.studentClass}
+            </span>
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Issued{' '}
+            {report.generatedAt.toLocaleDateString('en-SG', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-10 rounded-full"
+            disabled={!prevId}
+            render={
+              prevId ? (
+                <Link to="/reports/$id" params={{ id: prevId }} />
+              ) : undefined
+            }
           >
-            <ArrowLeft className="size-4" />
-          </Link>
-          <Avatar size="lg">
-            <AvatarFallback>{getInitials(report.studentName)}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <h1 className="text-2xl font-semibold">
-              {report.studentName}
-              <span className="text-muted-foreground ml-2 text-base font-normal">
-                {report.studentClass}
-              </span>
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Issued{' '}
-              {report.generatedAt.toLocaleDateString('en-SG', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-10 rounded-full"
-              disabled={!prevId}
-              render={
-                prevId ? (
-                  <Link to="/reports/$id" params={{ id: prevId }} />
-                ) : undefined
-              }
-            >
-              <ChevronLeft className="size-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-10 rounded-full"
-              disabled={!nextId}
-              render={
-                nextId ? (
-                  <Link to="/reports/$id" params={{ id: nextId }} />
-                ) : undefined
-              }
-            >
-              <ChevronRight className="size-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="size-10 rounded-full"
-              onClick={handleSaveAsPdf}
-            >
-              <Download className="size-4" />
-            </Button>
-          </div>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as string)}>
-          <TabsList variant="line">
-            <TabsTrigger
-              value="overview"
-              className="data-active:text-[#f26c47] data-active:after:bg-[#f26c47]"
-            >
-              Overview
-            </TabsTrigger>
-            <TabsTrigger
-              value="academic"
-              className="data-active:text-[#f26c47] data-active:after:bg-[#f26c47]"
-            >
-              Academic
-            </TabsTrigger>
-            <TabsTrigger
-              value="holistic"
-              className="data-active:text-[#f26c47] data-active:after:bg-[#f26c47]"
-            >
-              Holistic
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="overview">
-            <ReportOverviewTab
-              report={report}
-              onViewHolistic={() => setActiveTab('holistic')}
-            />
-          </TabsContent>
-          <TabsContent value="academic">
-            <AcademicTab
-              data={report.academic}
-              secondaryData={report.secondaryAcademic}
-              schoolLevel={schoolLevel}
-            />
-          </TabsContent>
-          <TabsContent value="holistic">
-            <HolisticTab
-              data={report.holistic}
-              studentFirstName={getFirstName(report.studentName)}
-            />
-          </TabsContent>
-        </Tabs>
-
-        <div className="sticky bottom-0 flex gap-3 border-t bg-white py-4">
-          <Button variant="outline" className="flex-1" onClick={handlePreview}>
-            <Eye className="mr-2 size-4" />
-            {isPrimary ? 'Preview as Parent' : 'Preview as Student'}
+            <ChevronLeft className="size-4" />
           </Button>
-          {!isPrimary && (
-            <Button
-              className="flex-1 bg-[#f26c47] text-white hover:bg-[#e05a37]"
-              onClick={handleSendToStudent}
-            >
-              <Send className="mr-2 size-4" />
-              Send to Student
-            </Button>
-          )}
-          {isPrimary && (
-            <Button
-              className="flex-1 bg-[#f26c47] text-white hover:bg-[#e05a37]"
-              onClick={handleSendViaPg}
-            >
-              <Send className="mr-2 size-4" />
-              Send to Parents via PG
-            </Button>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button variant="outline" size="icon">
-                  <MoreVertical className="size-4" />
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="end">
-              {!isPrimary && (
-                <DropdownMenuItem onClick={handleSendViaPg}>
-                  <Send className="mr-2 size-4" />
-                  Send to Parents via PG
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={handleSaveAsPdf}>
-                <Download className="mr-2 size-4" />
-                Save as PDF
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-10 rounded-full"
+            disabled={!nextId}
+            render={
+              nextId ? (
+                <Link to="/reports/$id" params={{ id: nextId }} />
+              ) : undefined
+            }
+          >
+            <ChevronRight className="size-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-10 rounded-full"
+            onClick={handleSaveAsPdf}
+          >
+            <Download className="size-4" />
+          </Button>
         </div>
+      </div>
 
-        <ParentPreviewDialog
-          report={report}
-          open={previewOpen}
-          onOpenChange={setPreviewOpen}
-          studentFirstName={getFirstName(report.studentName)}
-          previewMode={previewMode}
-          schoolLevel={schoolLevel}
-        />
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as string)}>
+        <TabsList variant="line">
+          <TabsTrigger
+            value="overview"
+            className="data-active:text-[#f26c47] data-active:after:bg-[#f26c47]"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="academic"
+            className="data-active:text-[#f26c47] data-active:after:bg-[#f26c47]"
+          >
+            Academic
+          </TabsTrigger>
+          <TabsTrigger
+            value="holistic"
+            className="data-active:text-[#f26c47] data-active:after:bg-[#f26c47]"
+          >
+            Holistic
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview">
+          <ReportOverviewTab
+            report={report}
+            onViewHolistic={() => setActiveTab('holistic')}
+          />
+        </TabsContent>
+        <TabsContent value="academic">
+          <AcademicTab
+            data={report.academic}
+            secondaryData={report.secondaryAcademic}
+            schoolLevel={schoolLevel}
+          />
+        </TabsContent>
+        <TabsContent value="holistic">
+          <HolisticTab
+            data={report.holistic}
+            studentFirstName={getFirstName(report.studentName)}
+          />
+        </TabsContent>
+      </Tabs>
 
-        <EmailPreviewDialog
-          report={report}
-          open={emailPreviewOpen}
-          onOpenChange={setEmailPreviewOpen}
-          recipientType="student"
-          onSend={handleConfirmSend}
-        />
+      <div className="sticky bottom-0 flex gap-3 border-t bg-white py-4">
+        <Button variant="outline" className="flex-1" onClick={handlePreview}>
+          <Eye className="mr-2 size-4" />
+          {isPrimary ? 'Preview as Parent' : 'Preview as Student'}
+        </Button>
+        {!isPrimary && (
+          <Button
+            className="flex-1 bg-[#f26c47] text-white hover:bg-[#e05a37]"
+            onClick={handleSendToStudent}
+          >
+            <Send className="mr-2 size-4" />
+            Send to Student
+          </Button>
+        )}
+        {isPrimary && (
+          <Button
+            className="flex-1 bg-[#f26c47] text-white hover:bg-[#e05a37]"
+            onClick={handleSendViaPg}
+          >
+            <Send className="mr-2 size-4" />
+            Send to Parents via PG
+          </Button>
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="outline" size="icon">
+                <MoreVertical className="size-4" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent align="end">
+            {!isPrimary && (
+              <DropdownMenuItem onClick={handleSendViaPg}>
+                <Send className="mr-2 size-4" />
+                Send to Parents via PG
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={handleSaveAsPdf}>
+              <Download className="mr-2 size-4" />
+              Save as PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
-        <PgPreviewDialog
-          report={report}
-          open={pgPreviewOpen}
-          onOpenChange={setPgPreviewOpen}
-          onSend={handleConfirmPgSend}
-          studentFirstName={getFirstName(report.studentName)}
-          schoolLevel={schoolLevel}
-        />
+      <ParentPreviewDialog
+        report={report}
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        studentFirstName={getFirstName(report.studentName)}
+        previewMode={previewMode}
+        schoolLevel={schoolLevel}
+      />
+
+      <EmailPreviewDialog
+        report={report}
+        open={emailPreviewOpen}
+        onOpenChange={setEmailPreviewOpen}
+        recipientType="student"
+        onSend={handleConfirmSend}
+      />
+
+      <PgPreviewDialog
+        report={report}
+        open={pgPreviewOpen}
+        onOpenChange={setPgPreviewOpen}
+        onSend={handleConfirmPgSend}
+        studentFirstName={getFirstName(report.studentName)}
+        schoolLevel={schoolLevel}
+      />
     </main>
   )
 }

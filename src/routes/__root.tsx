@@ -6,8 +6,6 @@ import {
   useRouterState,
 } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
 import * as React from 'react'
 
 import { DirectEdit } from 'made-refine'
@@ -21,6 +19,8 @@ import { Toaster } from '@/components/ui/sonner'
 import { FeatureFlagProvider } from '@/lib/feature-flags'
 import { AuthProvider } from '@/lib/auth'
 import { BreadcrumbProvider } from '@/hooks/use-breadcrumbs'
+import { HeyTaliaPanel } from '@/components/heytalia/heytalia-panel'
+import { HeyTaliaProvider } from '@/components/heytalia/heytalia-context'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -56,19 +56,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        {process.env.NODE_ENV === 'development' && (
-          <TanStackDevtools
-            config={{
-              position: 'bottom-right',
-            }}
-            plugins={[
-              {
-                name: 'Tanstack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-            ]}
-          />
-        )}
         {process.env.NODE_ENV === 'development' && <DirectEdit />}
         <Scripts />
       </body>
@@ -101,26 +88,29 @@ function RootComponent() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-        <FeatureFlagProvider>
-          <BreadcrumbProvider>
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset className="h-screen overflow-hidden">
-                <AppHeader />
-                <div
-                  data-scroll-container
-                  className="flex min-h-0 flex-1 flex-col overflow-auto bg-slate-1"
-                >
-                  <ErrorBoundary>
-                    <Outlet />
-                  </ErrorBoundary>
-                </div>
-              </SidebarInset>
-              <Toaster position="bottom-center" />
-              <WelcomeModal />
-            </SidebarProvider>
-          </BreadcrumbProvider>
-        </FeatureFlagProvider>
+          <FeatureFlagProvider>
+            <BreadcrumbProvider>
+              <HeyTaliaProvider>
+                <SidebarProvider>
+                  <AppSidebar />
+                  <SidebarInset className="h-screen overflow-hidden">
+                    <AppHeader />
+                    <div
+                      data-scroll-container
+                      className="flex min-h-0 flex-1 flex-col overflow-auto bg-slate-1"
+                    >
+                      <ErrorBoundary>
+                        <Outlet />
+                      </ErrorBoundary>
+                    </div>
+                  </SidebarInset>
+                  <HeyTaliaPanel />
+                  <Toaster position="bottom-center" />
+                  <WelcomeModal />
+                </SidebarProvider>
+              </HeyTaliaProvider>
+            </BreadcrumbProvider>
+          </FeatureFlagProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>

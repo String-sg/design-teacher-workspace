@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Eye } from 'lucide-react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ReportOverviewTab } from './report-overview-tab'
 import { AcademicTab } from './academic-tab'
 import { CoreValuesSection } from './core-values-section'
@@ -8,6 +7,7 @@ import { PhysicalFitnessSection } from './physical-fitness-section'
 import { VIASection } from './via-section'
 import { CCASection } from './cca-section'
 import type { HolisticReport, SchoolLevel } from '@/types/report'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 function getFirstName(name: string): string {
   return name.split(' ').filter((part) => part.length > 0)[0] ?? name
@@ -42,10 +42,7 @@ export function HdpPreviewStep({
         </span>
       </div>
 
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as string)}
-      >
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as string)}>
         <TabsList variant="line">
           <TabsTrigger
             value="overview"
