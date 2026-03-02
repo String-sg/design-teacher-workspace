@@ -203,7 +203,7 @@ function ParentsGatewayPage() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto px-6">
+          <div className="max-w-full overflow-x-auto bg-white">
         {filtered.length === 0 ? (
           <EmptyState
             title="No announcements found"
@@ -213,12 +213,12 @@ function ParentsGatewayPage() {
           <Table>
             <TableHeader className="border-b bg-white">
               <TableRow className="border-0 hover:bg-transparent">
-                <TableHead className="min-w-[250px]">Title</TableHead>
+                <TableHead className="min-w-[250px] pl-6">Title</TableHead>
                 <TableHead className="min-w-[110px]">Date</TableHead>
                 <TableHead className="min-w-[100px]">Status</TableHead>
                 <TableHead className="min-w-[90px]">Owner</TableHead>
                 <TableHead className="min-w-[130px]">To Parents Of</TableHead>
-                <TableHead className="min-w-[150px]">Read</TableHead>
+                <TableHead className="min-w-[150px] pr-6">Read</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -252,7 +252,7 @@ function ParentsGatewayPage() {
                       })
                     }
                   >
-                    <TableCell>
+                    <TableCell className="pl-6">
                       <div className="flex items-start gap-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
@@ -305,7 +305,7 @@ function ParentsGatewayPage() {
                         ? '—'
                         : getUniqueClasses(announcement.recipients)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="pr-6">
                       {announcement.status === 'posted' ? (
                         <PGReadRate
                           readCount={readCount}
