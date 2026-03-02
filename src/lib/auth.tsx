@@ -10,8 +10,8 @@ export interface User {
 }
 
 const MOCK_USER: User = {
-  name: 'Ms. Johnson',
-  email: 'johnson@school.edu',
+  name: 'Daniel Tan',
+  email: 'daniel_tan@school.moe.sg',
   role: 'Teacher',
   avatar: null,
 }

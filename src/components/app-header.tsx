@@ -75,6 +75,9 @@ export function AppHeader() {
                 <DropdownMenuLabel>daniel_tan@school.moe.sg</DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
+              <DropdownMenuItem render={<Link to="/settings" />}>
+                Settings
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={logout}>Sign out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
