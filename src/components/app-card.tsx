@@ -35,13 +35,13 @@ export function AppIcon({
     return (
       <div
         className={cn(
-          'relative isolate flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border bg-white',
+          'relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border bg-white',
           iconPaddingVariants[iconPadding],
           className,
         )}
       >
         <img src={icon} alt="" className="h-full w-full object-contain" />
-        <div className="absolute inset-0 bg-[#0064ff] mix-blend-color transition-opacity duration-200 group-hover:opacity-0" />
+        <div className="pointer-events-none absolute inset-0 bg-[#0064ff] mix-blend-color transition-opacity duration-200 will-change-[opacity] group-hover:opacity-0" />
       </div>
     )
   }
@@ -70,6 +70,7 @@ interface AppCardProps {
   icon: LucideIcon | string
   color: AppColor
   href: string
+  onClick?: () => void
   iconPadding?: 'none' | 'sm' | 'md'
   className?: string
 }
@@ -80,17 +81,17 @@ export function AppCard({
   icon,
   color,
   href,
+  onClick,
   iconPadding,
   className,
 }: AppCardProps) {
-  return (
-    <Link
-      to={href}
-      className={cn(
-        'group flex flex-col gap-4 rounded-3xl border bg-background p-4 transition-colors hover:bg-muted/50',
-        className,
-      )}
-    >
+  const cardClassName = cn(
+    'group flex flex-col gap-4 rounded-3xl border bg-background p-4 transition-colors hover:bg-muted/50 text-left',
+    className,
+  )
+
+  const content = (
+    <>
       <AppIcon icon={icon} color={color} iconPadding={iconPadding} />
       <div className="flex flex-col gap-2">
         <h3 className="font-semibold text-foreground">{name}</h3>
@@ -98,6 +99,20 @@ export function AppCard({
           {description}
         </p>
       </div>
+    </>
+  )
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={cardClassName}>
+        {content}
+      </button>
+    )
+  }
+
+  return (
+    <Link to={href} className={cardClassName}>
+      {content}
     </Link>
   )
 }

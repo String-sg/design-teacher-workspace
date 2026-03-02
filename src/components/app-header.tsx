@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { ChevronRight, MessageCircle } from 'lucide-react'
+import { ChevronRight, MessageCircle, Plus } from 'lucide-react'
 
 import { NotificationPopover } from '@/components/notifications/notification-popover'
 import { useHeyTalia } from '@/components/heytalia/heytalia-context'
@@ -117,7 +117,7 @@ export function AppHeader() {
             {AGENTS.map((agent) => (
               <DropdownMenuItem
                 key={agent.id}
-                onSelect={() => setView('chat')}
+                onClick={() => setView('chat')}
                 className="flex items-center gap-3 px-3 py-2.5"
               >
                 <div
@@ -154,6 +154,18 @@ export function AppHeader() {
                 <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
               </DropdownMenuItem>
             ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="flex items-center gap-3 px-3 py-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-dashed border-muted-foreground/30">
+                <Plus className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-sm font-medium">Add new agents</span>
+                <p className="text-xs text-muted-foreground">
+                  Browse and add more assistants
+                </p>
+              </div>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
