@@ -66,15 +66,15 @@ const navigationItems: Array<MenuItem> = [
 
 const studentInsightItems: Array<MenuItem> = [
   {
-    title: 'Student Profile',
-    url: '/students',
-    icon: Users,
+    title: 'Analytics',
+    url: '/student-analytics',
+    icon: BarChart3,
     conceptTag: true,
   },
   {
-    title: 'Student Analytics',
-    url: '/student-analytics',
-    icon: BarChart3,
+    title: 'Profiles',
+    url: '/students',
+    icon: Users,
     conceptTag: true,
   },
   {
@@ -162,7 +162,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup className="pt-0">
-          <SidebarGroupLabel>Student Insight</SidebarGroupLabel>
+          <SidebarGroupLabel>Students</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenuItems
               items={studentInsightItems}

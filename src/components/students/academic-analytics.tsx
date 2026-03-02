@@ -971,7 +971,7 @@ function GradeDistChart({
         {data.map((entry) => (
           <Cell
             key={entry.grade}
-            fill={GRADE_FILL[entry.grade] ?? '#adb5bd'}
+            fill="#228be6"
             opacity={1}
             style={{ cursor: 'pointer', outline: 'none' }}
             tabIndex={-1}

@@ -9,9 +9,11 @@ import {
   GraduationCap,
   Heart,
   Home,
-  MoreHorizontal,
+  Info,
+  PanelRight,
   Plus,
   User,
+  X,
 } from 'lucide-react'
 
 import { StudentOverviewCards } from './student-overview-cards'
@@ -28,6 +30,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { GenerateHdpWizard } from '@/components/reports/generate-hdp-wizard'
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 
 interface StudentProfileProps {
   student: Student
@@ -71,7 +80,10 @@ interface FieldProps {
 function Field({ label, value, tooltip, className }: FieldProps) {
   return (
     <div className={cn('flex flex-col gap-1', className)}>
-      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dt className="flex items-center gap-1 text-sm text-muted-foreground">
+        {label}
+        {tooltip && <Info className="h-3.5 w-3.5 shrink-0" />}
+      </dt>
       <dd className="text-sm font-medium">{value ?? '-'}</dd>
     </div>
   )
@@ -86,7 +98,10 @@ interface RemarksFieldProps {
 function RemarksField({ label, value, tooltip }: RemarksFieldProps) {
   return (
     <div className="flex flex-col gap-1">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dt className="flex items-center gap-1 text-sm text-muted-foreground">
+        {label}
+        {tooltip && <Info className="h-3.5 w-3.5 shrink-0" />}
+      </dt>
       <dd className="text-sm text-foreground">
         {value || (
           <span className="text-muted-foreground">No remarks available</span>
@@ -95,6 +110,99 @@ function RemarksField({ label, value, tooltip }: RemarksFieldProps) {
     </div>
   )
 }
+
+interface FieldWithDetailsProps {
+  label: string
+  value: React.ReactNode
+  tooltip: string
+  sideSheetTitle: string
+  sideSheetContent: React.ReactNode
+  className?: string
+}
+
+function FieldWithDetails({
+  label,
+  value,
+  tooltip,
+  sideSheetTitle,
+  sideSheetContent,
+  className,
+}: FieldWithDetailsProps) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <div
+        className={cn(
+          'group relative flex cursor-pointer flex-col gap-1 rounded-xl p-3 -m-3 transition-colors',
+          isOpen ? 'bg-muted' : 'hover:bg-muted',
+          className,
+        )}
+        onClick={() => setIsOpen(true)}
+      >
+        <dt className="flex items-center gap-1 text-sm text-muted-foreground">
+          {label}
+          <Info className="h-3.5 w-3.5 shrink-0" />
+        </dt>
+        <dd className="text-sm font-medium">{value ?? '-'}</dd>
+
+        {isOpen ? (
+          <button
+            className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1.5 rounded-xl bg-background px-3 py-2 text-sm text-foreground shadow-sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsOpen(false)
+            }}
+          >
+            <X className="h-3.5 w-3.5" />
+            Close
+          </button>
+        ) : (
+          <span className="invisible absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1.5 rounded-xl bg-background px-3 py-2 text-sm text-foreground shadow-sm group-hover:visible">
+            <PanelRight className="h-3.5 w-3.5" />
+            View
+          </span>
+        )}
+      </div>
+
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetContent showOverlay={false} showCloseButton={false} className="sm:max-w-xs">
+          <SheetHeader className="border-b pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border">
+                <Info className="h-3.5 w-3.5" />
+              </div>
+              <SheetTitle className="flex-1">{sideSheetTitle}</SheetTitle>
+              <SheetClose
+                render={
+                  <button className="text-muted-foreground transition-colors hover:text-foreground" />
+                }
+              >
+                <X className="h-5 w-5" />
+              </SheetClose>
+            </div>
+          </SheetHeader>
+          <div className="space-y-5 p-6">{sideSheetContent}</div>
+        </SheetContent>
+      </Sheet>
+    </>
+  )
+}
+
+// Subject data used to compute Overall % across selected subjects
+const SUBJECT_COMPUTATION = [
+  { subject: 'EL', band: 'G3', percentage: 80 },
+  { subject: 'MT', band: 'G2', percentage: 85 },
+  { subject: 'Maths', band: 'G3', percentage: 70 },
+  { subject: 'Sci', band: 'G3', percentage: 86 },
+  { subject: 'Geog', band: 'G2', percentage: 63 },
+  { subject: 'Hist', band: 'G3', percentage: 72 },
+]
+
+const COMPUTED_OVERALL_PERCENTAGE = Math.round(
+  SUBJECT_COMPUTATION.reduce((sum, s) => sum + s.percentage, 0) /
+    SUBJECT_COMPUTATION.length,
+)
 
 const REVIEW_STATUS_CONFIG: Record<
   ReviewStatus,
@@ -147,6 +255,13 @@ function ReportRow({ report }: { report: HolisticReport }) {
   )
 }
 
+function formatTermList(terms: string[]): string {
+  if (terms.length === 0) return 'None'
+  if (terms.length === 1) return terms[0]
+  const nums = terms.map((t) => t.replace('Term ', ''))
+  return `Term ${nums.slice(0, -1).join(', ')} and ${nums[nums.length - 1]}`
+}
+
 export function StudentProfile({
   student,
   headerControls,
@@ -182,7 +297,9 @@ export function StudentProfile({
           </div>
           <div>
             <h1 className="text-xl font-semibold">{student.name}</h1>
-            <p className="text-muted-foreground">Class {student.class}</p>
+            <p className="text-muted-foreground">
+              Class {student.class} · {student.cca}
+            </p>
           </div>
         </div>
 
@@ -233,10 +350,41 @@ export function StudentProfile({
           iconClassName="bg-indigo-100 text-indigo-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
-            <Field
+            <FieldWithDetails
               label="Offences"
               value={student.offences}
-              tooltip="Total disciplinary offences"
+              tooltip="Total disciplinary offences this year"
+              sideSheetTitle="Offences"
+              sideSheetContent={
+                <div className="space-y-5">
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Offences</p>
+                    <div className="rounded-lg bg-muted px-4 py-3">
+                      <ul className="space-y-1 text-sm">
+                        <li className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                          {student.offences}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  {student.offenceDetails && student.offenceDetails.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Remarks</p>
+                      <div className="rounded-lg bg-muted px-4 py-3">
+                        <ul className="space-y-1.5 text-sm">
+                          {student.offenceDetails.map((d, i) => (
+                            <li key={i} className="flex items-center gap-2">
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                              {d.type} x {d.count} (latest {d.latestDate})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              }
             />
             <Field
               label="CCA attendance(%)"
@@ -253,7 +401,6 @@ export function StudentProfile({
             <RemarksField
               label="Teacher's remarks"
               value={student.teacherObservations}
-              tooltip="Form teacher observations"
             />
             <RemarksField label="Next steps" value={student.nextSteps} />
           </div>
@@ -267,26 +414,208 @@ export function StudentProfile({
           iconClassName="bg-pink-100 text-pink-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
-            <Field
+            <FieldWithDetails
               label="Counselling"
               value={student.counsellingSessions}
-              tooltip="Number of counselling sessions"
+              tooltip="Number of counselling sessions this year"
+              sideSheetTitle="Counselling"
+              sideSheetContent={
+                <div className="space-y-5">
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Counselling</p>
+                    <div className="rounded-lg bg-muted px-4 py-3">
+                      <ul className="space-y-1 text-sm">
+                        <li className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                          {student.counsellingSessions}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  {student.counsellingCases && student.counsellingCases.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Remarks</p>
+                      <div className="rounded-lg bg-muted px-4 py-3">
+                        <ul className="space-y-1.5 text-sm">
+                          {student.counsellingCases.map((c, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                              {c.subcases && c.subcases.length > 0 ? (
+                                <span>
+                                  {c.category}:{' '}
+                                  {c.subcases
+                                    .map(
+                                      (s) =>
+                                        `${s.name} x${s.count} (latest ${s.latestDate})`,
+                                    )
+                                    .join(', ')}
+                                </span>
+                              ) : (
+                                <span>
+                                  {c.category} x{c.count} (latest {c.latestDate})
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              }
             />
             <Field label="SEN" value={student.sen || '-'} />
-            <Field
+            <FieldWithDetails
               label="Social links"
               value={student.socialLinks}
               tooltip="Number of positive peer connections"
+              sideSheetTitle="Social links"
+              sideSheetContent={
+                <div className="space-y-5">
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Social links</p>
+                    <div className="rounded-lg bg-muted px-4 py-3">
+                      <ul className="space-y-1 text-sm">
+                        <li className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                          {student.socialLinks} peer connection(s)
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Remarks</p>
+                    <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                      <div>
+                        <p className="font-medium mb-1.5">Selected by</p>
+                        {student.selectedBy && student.selectedBy.length > 0 ? (
+                          <ul className="space-y-1.5">
+                            {student.selectedBy.map((person, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                {person.name} ({person.class}, closeness rating:{' '}
+                                {person.closenessRating != null
+                                  ? `${person.closenessRating}/5`
+                                  : 'N/A'}
+                                )
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-muted-foreground">None</p>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium mb-1.5">Selected friends</p>
+                        {student.selectedFriends && student.selectedFriends.length > 0 ? (
+                          <ul className="space-y-1.5">
+                            {student.selectedFriends.map((person, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                {person.name} ({person.class}, closeness rating:{' '}
+                                {person.closenessRating != null
+                                  ? `${person.closenessRating}/5`
+                                  : 'N/A'}
+                                )
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-muted-foreground">None</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
             />
-            <Field
+            <FieldWithDetails
               label="Risk indicators"
               value={student.riskIndicators}
-              tooltip="Number of risk factors identified"
+              tooltip="Risk indicators from TCI survey"
+              sideSheetTitle="Risk indicators"
+              sideSheetContent={
+                <div className="space-y-5">
+                  <div>
+                    <p className="mb-1 text-sm font-medium">Risk indicators</p>
+                    <p className="mb-2 text-xs text-muted-foreground">
+                      No. of risk indicators flagged in the latest Termly
+                      Check-In Survey (All Ears)
+                    </p>
+                    <div className="rounded-lg bg-muted px-4 py-3">
+                      <ul className="space-y-1 text-sm">
+                        <li className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                          {student.riskIndicators}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  {student.riskIndicatorHistory &&
+                    student.riskIndicatorHistory.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-sm font-medium">Remarks</p>
+                        <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                          {student.riskIndicatorHistory.map((record, i) => (
+                            <div key={i}>
+                              <p className="font-medium mb-1.5">
+                                {record.year}, {record.term}
+                              </p>
+                              <ul className="space-y-1.5">
+                                {record.indicators.map((indicator, j) => (
+                                  <li key={j} className="flex items-start gap-2">
+                                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                    {indicator}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              }
             />
-            <Field
+            <FieldWithDetails
               label="Low mood flagged 2+ terms"
               value={student.lowMoodFlagged || 'No'}
               tooltip="Flagged for persistent low mood"
+              sideSheetTitle="Low mood flagged 2+ terms"
+              sideSheetContent={
+                <div className="space-y-5">
+                  <div>
+                    <p className="mb-1 text-sm font-medium">
+                      Low mood flagged 2+ terms
+                    </p>
+                    <p className="mb-2 text-xs text-muted-foreground">
+                      Flagged in at least 2 terms in the past year, based on
+                      Termly Check-In Survey (All Ears).
+                    </p>
+                    <div className="rounded-lg bg-muted px-4 py-3">
+                      <ul className="space-y-1 text-sm">
+                        <li className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                          {student.lowMoodFlagged || 'No'}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  {student.lowMoodTerms && student.lowMoodTerms.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Remarks</p>
+                      <div className="rounded-lg bg-muted px-4 py-3">
+                        <ul className="space-y-1.5 text-sm">
+                          <li className="flex items-start gap-2">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            {formatTermList(student.lowMoodTerms)}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              }
             />
           </dl>
 
@@ -312,7 +641,43 @@ export function StudentProfile({
           iconClassName="bg-blue-100 text-blue-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
-            <Field label="Overall %" value={student.overallPercentage} />
+            <FieldWithDetails
+              label="Overall % across selected subjects"
+              value={`${COMPUTED_OVERALL_PERCENTAGE}%`}
+              tooltip="Average percentage across subjects selected for computation"
+              sideSheetTitle="Overall % across selected subjects"
+              sideSheetContent={
+                <div className="space-y-5">
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Overall % across selected subjects</p>
+                    <div className="rounded-lg bg-muted px-4 py-3">
+                      <ul className="space-y-1 text-sm">
+                        <li className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                          {COMPUTED_OVERALL_PERCENTAGE}%
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Remarks</p>
+                    <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                      <div>
+                        <p className="font-medium mb-1.5">Selected subjects</p>
+                        <ul className="space-y-1.5">
+                          {SUBJECT_COMPUTATION.map((item, i) => (
+                            <li key={i} className="flex items-center gap-2">
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                              {item.subject} - {item.band} ({item.percentage}%)
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            />
             <Field label="Class rank" value="8 / 35" />
             <Field label="Class percentile" value="77th" />
             <Field label="No. of subjects" value="6" />
@@ -366,10 +731,17 @@ export function StudentProfile({
               }
             />
             <Field label="Custody" value={student.custody || '-'} />
-            <Field label="Siblings" value={student.siblings} />
             <Field
-              label="External agencies"
-              value={student.externalAgencies || '-'}
+              label="Siblings"
+              value={
+                student.siblingDetails && student.siblingDetails.length > 0
+                  ? student.siblingDetails
+                      .map((s) => `${s.name} (${s.class})`)
+                      .join(', ')
+                  : student.siblings > 0
+                    ? student.siblings
+                    : '-'
+              }
             />
           </dl>
         </Section>

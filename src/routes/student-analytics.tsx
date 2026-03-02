@@ -38,7 +38,7 @@ type AcademicView = 'monitoring' | 'benchmark'
 
 function StudentAnalyticsPage() {
   useSetBreadcrumbs([
-    { label: 'Student Analytics', href: '/student-analytics' },
+    { label: 'Analytics', href: '/student-analytics' },
   ])
 
   const [academicView, setAcademicView] = useState<AcademicView>('monitoring')
@@ -48,7 +48,7 @@ function StudentAnalyticsPage() {
       <div className="w-full max-w-[860px]">
         {/* Page header */}
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold">Student Analytics</h1>
+          <h1 className="text-2xl font-semibold">Analytics</h1>
           <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
             Concept illustration
           </span>

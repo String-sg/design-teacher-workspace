@@ -120,7 +120,7 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   // Academic Performance
   {
     field: 'overallPercentage',
-    label: 'Overall %',
+    label: 'Overall % across selected subjects',
     type: 'numeric',
     group: 'academic',
     defaultOperator: 'lte',

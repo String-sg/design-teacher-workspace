@@ -1,7 +1,39 @@
+export interface OffenceDetail {
+  type: string
+  count: number
+  latestDate: string
+}
+
+export interface CounsellingSubcase {
+  name: string
+  count: number
+  latestDate: string
+}
+
+export interface CounsellingCase {
+  category: string
+  subcases?: CounsellingSubcase[]
+  count?: number
+  latestDate?: string
+}
+
+export interface RiskIndicatorRecord {
+  year: number
+  term: string
+  indicators: string[]
+}
+
+export interface SocialLinkPerson {
+  name: string
+  class: string
+  closenessRating: number | null
+}
+
 export interface Student {
   id: string
   name: string
   class: string
+  cca: string
   attentionTags: Array<AttentionTag>
   // Academic Performance
   overallPercentage: number
@@ -10,14 +42,20 @@ export interface Student {
   postSecEligibility: string
   // Behaviour & Discipline
   offences: number
+  offenceDetails?: OffenceDetail[]
   absences: number
   lateComing: number
   ccaMissed: number
   // Wellbeing
   riskIndicators: number
+  riskIndicatorHistory?: RiskIndicatorRecord[]
   lowMoodFlagged: string | null
+  lowMoodTerms?: string[]
   socialLinks: number
+  selectedBy?: SocialLinkPerson[]
+  selectedFriends?: SocialLinkPerson[]
   counsellingSessions: number
+  counsellingCases?: CounsellingCase[]
   sen: string | null
   fas: string | null
   // Family, Housing, Finance
@@ -26,6 +64,7 @@ export interface Student {
   custody: string | null
   custodyDetails: string | null
   siblings: number
+  siblingDetails?: Array<{ name: string; class: string }>
   externalAgencies: string | null
   // School
   schoolName?: string

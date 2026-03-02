@@ -266,6 +266,18 @@ export function StudentTable({
           className="min-w-[90px]"
         />
       )}
+      {isVisible('cca') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'cca')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[130px]"
+        />
+      )}
       {isVisible('attentionTags') && (
         <ColumnHeaderMenu
           column={columns.find((c) => c.id === 'attentionTags')!}
@@ -656,6 +668,9 @@ export function StudentTable({
                       )}
                       {isVisible('class') && (
                         <TableCell>{student.class}</TableCell>
+                      )}
+                      {isVisible('cca') && (
+                        <TableCell>{student.cca}</TableCell>
                       )}
                       {isVisible('attentionTags') && (
                         <TableCell>

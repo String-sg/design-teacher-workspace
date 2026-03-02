@@ -3,22 +3,26 @@ export function AttendanceRing({
   size = 120,
   label,
   strokeWidth = 10,
+  color,
 }: {
   percentage: number
   size?: number
   label?: string
   strokeWidth?: number
+  color?: string
 }) {
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (percentage / 100) * circumference
 
-  const color =
-    percentage >= 90
-      ? 'text-[#12b886]'
-      : percentage >= 75
-        ? 'text-amber-500'
-        : 'text-red-500'
+  const colorClass =
+    color != null
+      ? undefined
+      : percentage >= 90
+        ? 'text-[#12b886]'
+        : percentage >= 75
+          ? 'text-amber-500'
+          : 'text-red-500'
 
   return (
     <div
@@ -40,12 +44,12 @@ export function AttendanceRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="currentColor"
+          stroke={color ?? 'currentColor'}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className={color}
+          className={colorClass}
         />
       </svg>
       <span className="absolute text-xl font-semibold">

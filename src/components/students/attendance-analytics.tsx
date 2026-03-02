@@ -44,6 +44,7 @@ import {
 } from '@/components/ui/tooltip'
 import { mockStudents } from '@/data/mock-students'
 import { LevelDropdown } from '@/components/students/academic-analytics'
+import { AttendanceRing } from '@/components/reports/attendance-ring'
 
 const studentIdByName = new Map(mockStudents.map((s) => [s.name, s.id]))
 
@@ -1268,60 +1269,35 @@ export function AttendanceLevelAnalytics() {
             <p className="mb-4 text-sm font-semibold text-foreground">
               Current Attendance
             </p>
-            <div className="flex items-center gap-8">
-              <div
-                className="relative shrink-0"
-                style={{ width: RING_SIZE, height: RING_SIZE }}
-              >
-                <svg
-                  width={RING_SIZE}
-                  height={RING_SIZE}
-                  className="-rotate-90"
-                >
-                  {ringSegments.map((seg) => (
-                    <circle
-                      key={seg.name}
-                      cx={RING_SIZE / 2}
-                      cy={RING_SIZE / 2}
-                      r={RING_RADIUS}
-                      fill="none"
-                      stroke={seg.color}
-                      strokeWidth={RING_STROKE}
-                      strokeDasharray={`${seg.len} ${RING_C - seg.len}`}
-                      strokeDashoffset={seg.dashoffset}
-                      strokeLinecap="butt"
-                    />
-                  ))}
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center leading-tight">
-                  <span className="text-2xl font-bold leading-none">
-                    {attendance.present}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    /{attendance.total}
-                  </span>
+            <div className="flex items-center gap-6">
+              <AttendanceRing
+                percentage={presentPct}
+                size={100}
+                color="#228be6"
+              />
+              <div className="flex items-center gap-5">
+                <div>
+                  <p className="text-xs text-muted-foreground">Term 4</p>
+                  <p className="text-2xl font-semibold">
+                    {attendance.present} / {attendance.total}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Students present</p>
                 </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <span className="w-16 text-muted-foreground">Present</span>
-                  <span
-                    className="text-base font-bold"
-                    style={{ color: '#12b886' }}
-                  >
-                    {attendance.present}
-                  </span>
-                  <span className="text-muted-foreground">({presentPct}%)</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <span className="w-16 text-muted-foreground">LTA</span>
-                  <span
-                    className="text-base font-bold"
-                    style={{ color: '#fd7e14' }}
-                  >
-                    {attendance.lta}
-                  </span>
-                  <span className="text-muted-foreground">({ltaPct}%)</span>
+                <div className="space-y-1.5 border-l pl-5 text-xs">
+                  <p className="flex items-baseline gap-2">
+                    <span className="w-8 text-right font-semibold tabular-nums text-foreground">
+                      {attendance.present}
+                    </span>
+                    <span className="text-muted-foreground">
+                      Present ({presentPct}%)
+                    </span>
+                  </p>
+                  <p className="flex items-baseline gap-2">
+                    <span className="w-8 text-right font-semibold tabular-nums text-foreground">
+                      {attendance.lta}
+                    </span>
+                    <span className="text-muted-foreground">LTA ({ltaPct}%)</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -1391,53 +1367,35 @@ export function AttendanceAnalytics() {
 
   return (
     <div className="mt-6 space-y-8 border-t pt-6">
-      {/* 1. Current Attendance */}
+      {/* 1. Current term */}
       <div>
         <h3 className="mb-4 text-sm font-semibold text-foreground">
-          Current Attendance
+          Current attendance
         </h3>
-        <div className="flex items-center gap-8">
-          <div
-            className="relative shrink-0"
-            style={{ width: RING_SIZE, height: RING_SIZE }}
-          >
-            <svg width={RING_SIZE} height={RING_SIZE} className="-rotate-90">
-              {RING_SEGMENTS.map((seg) => (
-                <circle
-                  key={seg.name}
-                  cx={RING_SIZE / 2}
-                  cy={RING_SIZE / 2}
-                  r={RING_RADIUS}
-                  fill="none"
-                  stroke={seg.color}
-                  strokeWidth={RING_STROKE}
-                  strokeDasharray={`${seg.len} ${RING_C - seg.len}`}
-                  strokeDashoffset={seg.dashoffset}
-                  strokeLinecap="butt"
-                />
-              ))}
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center leading-tight">
-              <span className="text-2xl font-bold leading-none">
-                {CURRENT_ATTENDANCE.present}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                /{CURRENT_ATTENDANCE.total}
-              </span>
+        <div className="flex items-center gap-6">
+          <AttendanceRing
+            percentage={
+              (CURRENT_ATTENDANCE.present / CURRENT_ATTENDANCE.total) * 100
+            }
+            size={100}
+            color="#228be6"
+          />
+          <div className="flex items-center gap-5">
+            <div>
+              <p className="text-xs text-muted-foreground">Attendance</p>
+              <p className="text-2xl font-semibold">
+                {CURRENT_ATTENDANCE.present} / {CURRENT_ATTENDANCE.total}
+              </p>
+              <p className="text-xs text-muted-foreground">Days present</p>
             </div>
-          </div>
-          <div className="space-y-2">
-            {RING_LEGEND.map((item) => (
-              <div key={item.name} className="flex items-center gap-2 text-sm">
-                <span
-                  className="text-base font-bold"
-                  style={{ color: item.color }}
-                >
-                  {item.value}
-                </span>
-                <span className="text-muted-foreground">{item.name}</span>
-              </div>
-            ))}
+            <div className="space-y-1 border-l pl-5 text-xs text-muted-foreground">
+              {RING_SEGMENTS.filter((s) => s.name !== 'Present').map((s) => (
+                <p key={s.name} className="flex items-baseline gap-2">
+                  <span className="font-semibold text-foreground">{s.value}</span>
+                  {s.name}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
       </div>

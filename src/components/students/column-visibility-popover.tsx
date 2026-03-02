@@ -51,6 +51,13 @@ export const defaultColumns: Array<ColumnConfig> = [
     filterField: 'class',
   },
   {
+    id: 'cca',
+    label: 'CCA',
+    visible: true,
+    sortable: true,
+    filterable: false,
+  },
+  {
     id: 'attentionTags',
     label: 'Attention tag',
     visible: true,
@@ -59,7 +66,7 @@ export const defaultColumns: Array<ColumnConfig> = [
   },
   {
     id: 'overallPercentage',
-    label: 'Overall %',
+    label: 'Overall % across selected subjects',
     visible: true,
     sortable: true,
     filterable: true,
