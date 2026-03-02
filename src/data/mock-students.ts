@@ -2478,28 +2478,28 @@ export const groupedClassOptions: Array<ClassGroup> = [
   {
     level: 'Secondary 3',
     classes: [
-      { value: '3A', label: '3A' },
-      { value: '3B', label: '3B' },
-      { value: '3C', label: '3C' },
-      { value: '3D', label: '3D' },
+      { value: 'Sec 3A', label: '3A' },
+      { value: 'Sec 3B', label: '3B' },
+      { value: 'Sec 3C', label: '3C' },
+      { value: 'Sec 3D', label: '3D' },
     ],
   },
   {
     level: 'Secondary 2',
     classes: [
-      { value: '2A', label: '2A' },
-      { value: '2B', label: '2B' },
-      { value: '2C', label: '2C' },
-      { value: '2D', label: '2D' },
+      { value: 'Sec 2A', label: '2A' },
+      { value: 'Sec 2B', label: '2B' },
+      { value: 'Sec 2C', label: '2C' },
+      { value: 'Sec 2D', label: '2D' },
     ],
   },
   {
     level: 'Secondary 1',
     classes: [
-      { value: '1A', label: '1A' },
-      { value: '1B', label: '1B' },
-      { value: '1C', label: '1C' },
-      { value: '1D', label: '1D' },
+      { value: 'Sec 1A', label: '1A' },
+      { value: 'Sec 1B', label: '1B' },
+      { value: 'Sec 1C', label: '1C' },
+      { value: 'Sec 1D', label: '1D' },
     ],
   },
   {

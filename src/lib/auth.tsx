@@ -2,10 +2,26 @@ import * as React from 'react'
 
 const AUTH_STORAGE_KEY = 'tw_mock_auth'
 
+export interface User {
+  name: string
+  email: string
+  role: string
+  avatar: string | null
+}
+
+const MOCK_USER: User = {
+  name: 'Ms. Johnson',
+  email: 'johnson@school.edu',
+  role: 'Teacher',
+  avatar: null,
+}
+
 interface AuthContextValue {
   isLoggedIn: boolean
+  user: User
   login: () => void
   logout: () => void
+  updateUser: (updates: Partial<User>) => void
 }
 
 const AuthContext = React.createContext<AuthContextValue | null>(null)
@@ -21,6 +37,7 @@ function loadAuth(): boolean {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false)
+  const [user, setUser] = React.useState<User>(MOCK_USER)
 
   React.useEffect(() => {
     setIsLoggedIn(loadAuth())
@@ -40,9 +57,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, [])
 
+  const updateUser = React.useCallback((updates: Partial<User>) => {
+    setUser((prev) => ({ ...prev, ...updates }))
+  }, [])
+
   const value = React.useMemo(
-    () => ({ isLoggedIn, login, logout }),
-    [isLoggedIn, login, logout],
+    () => ({ isLoggedIn, user, login, logout, updateUser }),
+    [isLoggedIn, user, login, logout, updateUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -81,9 +81,11 @@ function StudentsPage() {
     // Filter by class or level
     if (selectedClass !== 'all') {
       if (selectedClass.startsWith('Secondary')) {
-        // Extract level number and filter by classes starting with that number
         const levelNum = selectedClass.replace('Secondary ', '')
-        students = students.filter((s) => s.class.startsWith(levelNum))
+        students = students.filter((s) => s.class.startsWith(`Sec ${levelNum}`))
+      } else if (selectedClass.startsWith('Primary')) {
+        const levelNum = selectedClass.replace('Primary ', '')
+        students = students.filter((s) => s.class.startsWith(`P${levelNum}`))
       } else {
         students = students.filter((s) => s.class === selectedClass)
       }
