@@ -31,8 +31,16 @@ export function WelcomeModal() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) handleDismiss() }}>
-      <DialogContent showCloseButton={false} className="max-w-xs p-0 overflow-hidden gap-0 bg-white">
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) handleDismiss()
+      }}
+    >
+      <DialogContent
+        showCloseButton={false}
+        className="max-w-xs p-0 overflow-hidden gap-0 bg-white"
+      >
         <div className="flex flex-col items-start gap-4 p-6">
           <div className="w-full flex justify-center">
             <div className="w-[256px] overflow-hidden rounded-2xl bg-slate-1 shrink-0">
@@ -62,8 +70,8 @@ export function WelcomeModal() {
             </DialogDescription>
             <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
               Early access for selected teachers. Share your thoughts via the{' '}
-              <strong className="text-foreground font-medium">Help</strong>{' '}
-              icon in the sidebar.
+              <strong className="text-foreground font-medium">Help</strong> icon
+              in the sidebar.
             </DialogDescription>
           </div>
 

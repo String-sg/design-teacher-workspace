@@ -25,7 +25,12 @@ interface AppIconProps {
   className?: string
 }
 
-export function AppIcon({ icon, color, iconPadding = 'sm', className }: AppIconProps) {
+export function AppIcon({
+  icon,
+  color,
+  iconPadding = 'sm',
+  className,
+}: AppIconProps) {
   if (typeof icon === 'string') {
     return (
       <div
@@ -49,7 +54,12 @@ export function AppIcon({ icon, color, iconPadding = 'sm', className }: AppIconP
         className,
       )}
     >
-      <Icon className={cn('size-8 text-[#0064ff] transition-colors duration-200', iconHoverColorVariants[color])} />
+      <Icon
+        className={cn(
+          'size-8 text-[#0064ff] transition-colors duration-200',
+          iconHoverColorVariants[color],
+        )}
+      />
     </div>
   )
 }

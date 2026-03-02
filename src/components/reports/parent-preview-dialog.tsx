@@ -121,7 +121,10 @@ export function ParentPreviewDialog({
               </>
             )}
 
-            <Tabs defaultValue="overview" className={isStudentPreview ? '' : 'mt-4'}>
+            <Tabs
+              defaultValue="overview"
+              className={isStudentPreview ? '' : 'mt-4'}
+            >
               <TabsList variant="line">
                 <TabsTrigger
                   value="overview"

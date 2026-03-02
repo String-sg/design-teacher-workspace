@@ -1,19 +1,19 @@
 import {
-  User,
+  Activity,
   ClipboardCheck,
   GraduationCap,
+  Heart,
+  Info,
   MessageSquare,
   Star,
-  Activity,
-  Heart,
   Trophy,
-  Info,
+  User,
 } from 'lucide-react'
+import { TEMPLATES } from './hdp-template-step'
+import type { TemplateId } from './hdp-template-step'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import type { TemplateId } from './hdp-template-step'
-import { TEMPLATES } from './hdp-template-step'
 
 interface SectionDef {
   key: string
@@ -28,7 +28,7 @@ const SECTION_DEFS: Array<SectionDef> = [
   {
     key: 'studentInfo',
     label: 'Student Information',
-    description: "Name, class, index number, form teacher",
+    description: 'Name, class, index number, form teacher',
     icon: <User className="size-4 text-blue-600" />,
     iconBg: 'bg-blue-50',
     required: true,

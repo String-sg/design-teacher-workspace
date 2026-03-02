@@ -9,6 +9,7 @@ import {
   Megaphone,
   MessageSquare,
   ScrollText,
+  Send,
   Users,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -64,6 +65,12 @@ const navigationItems: Array<MenuItem> = [
     icon: Users,
   },
   {
+    title: 'Parents Gateway',
+    url: '/parents-gateway',
+    icon: Send,
+    featureFlag: 'parents-gateway',
+  },
+  {
     title: 'Forms',
     url: '/forms',
     icon: ClipboardList,
@@ -111,11 +118,13 @@ export function AppSidebar() {
 
   const announcementsEnabled = useFeatureFlag('announcements')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
+  const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
 
   const filteredItems = navigationItems.filter((item) => {
     if (!item.featureFlag) return true
     if (item.featureFlag === 'announcements') return announcementsEnabled
     if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
+    if (item.featureFlag === 'parents-gateway') return parentsGatewayEnabled
     return true
   })
 
@@ -125,7 +134,9 @@ export function AppSidebar() {
         <div className="flex h-14 items-center justify-center gap-2 px-4 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0">
           <span className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0">
             Teacher Workspace
-            <span className="ml-1.5 rounded-full bg-twblue-3 px-1.5 py-0.5 text-xs font-medium text-twblue-9">Beta</span>
+            <span className="ml-1.5 rounded-full bg-twblue-3 px-1.5 py-0.5 text-xs font-medium text-twblue-9">
+              Beta
+            </span>
           </span>
           <SidebarTrigger />
         </div>

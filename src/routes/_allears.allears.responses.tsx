@@ -32,7 +32,10 @@ function ResponsesPage() {
                 <Inbox className="h-9 w-9 text-blue-300" strokeWidth={1.5} />
               </div>
               <div className="absolute -bottom-1.5 -right-1.5 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-100 shadow-sm">
-                <Send className="h-3.5 w-3.5 -translate-x-px text-slate-400" strokeWidth={2} />
+                <Send
+                  className="h-3.5 w-3.5 -translate-x-px text-slate-400"
+                  strokeWidth={2}
+                />
               </div>
             </div>
 

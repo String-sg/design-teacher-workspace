@@ -56,7 +56,15 @@ export function AppHeader() {
         {showNotifications && <NotificationPopover />}
         {isLoggedIn ? (
           <DropdownMenu>
-            <DropdownMenuTrigger render={<Button variant="outline" size="icon-sm" className="rounded-full" />}>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  className="rounded-full"
+                />
+              }
+            >
               <Avatar size="xs">
                 <AvatarImage src="" alt="User avatar" />
                 <AvatarFallback>D</AvatarFallback>
@@ -71,7 +79,11 @@ export function AppHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button variant="outline" className="rounded-full" render={<Link to="/login" />}>
+          <Button
+            variant="outline"
+            className="rounded-full"
+            render={<Link to="/login" />}
+          >
             Sign in
           </Button>
         )}

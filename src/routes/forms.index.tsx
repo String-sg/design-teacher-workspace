@@ -113,9 +113,7 @@ function FormsPage() {
             <div className="text-2xl font-semibold">{metrics.activeForms}</div>
           </div>
           <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">
-              Completion Rate
-            </div>
+            <div className="text-sm text-muted-foreground">Completion Rate</div>
             <div className="text-2xl font-semibold">
               {metrics.completionRate}%
             </div>

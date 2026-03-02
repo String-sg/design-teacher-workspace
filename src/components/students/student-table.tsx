@@ -645,7 +645,10 @@ export function StudentTable({
                             {student.name}
                             <Link
                               to="/reports"
-                              search={{ studentId: student.id, groupBy: 'student' }}
+                              search={{
+                                studentId: student.id,
+                                groupBy: 'student',
+                              }}
                               className="text-muted-foreground hover:text-foreground"
                               onClick={(e) => e.stopPropagation()}
                             >

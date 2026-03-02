@@ -48,7 +48,8 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'school-cockpit',
         name: 'School Cockpit',
-        description: 'Your central hub for school management and daily operations',
+        description:
+          'Your central hub for school management and daily operations',
         icon: '/logos/School-cockpit.svg',
         color: 'blue',
         href: '/school-cockpit',

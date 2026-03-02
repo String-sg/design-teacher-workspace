@@ -1,4 +1,4 @@
-import { Star, Award } from 'lucide-react'
+import { Award, Star } from 'lucide-react'
 import { AttendanceRing } from './attendance-ring'
 import type { CCAInfo } from '@/types/report'
 
