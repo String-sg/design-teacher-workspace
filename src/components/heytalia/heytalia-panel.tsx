@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
+import { useHeyTalia } from './heytalia-context'
 import { useRouterState } from '@tanstack/react-router'
 import {
   Check,
@@ -11,6 +12,7 @@ import {
   Minimize2,
   Minus,
   Pencil,
+  Sparkles,
   ThumbsDown,
   ThumbsUp,
 } from 'lucide-react'
@@ -259,8 +261,31 @@ const SEED: Record<
 // ---------------------------------------------------------------------------
 // Panel
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Agent definitions
+// ---------------------------------------------------------------------------
+export interface AgentDef {
+  id: string
+  name: string
+  description: string
+  icon: string
+  color: string
+  tag?: string
+}
+
+export const AGENTS: Array<AgentDef> = [
+  {
+    id: 'heytalia',
+    name: 'HeyTalia',
+    description: 'Draft announcements, forms, and parent communications',
+    icon: '/logos/heytalia-icon.png',
+    color: '#9575CD',
+    tag: 'Beta',
+  },
+]
+
 export function HeyTaliaPanel() {
-  const [isOpen, setIsOpen] = useState(false)
+  const { view, setView } = useHeyTalia()
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<Array<Message>>([])
   const [isTyping, setIsTyping] = useState(false)
@@ -282,6 +307,9 @@ export function HeyTaliaPanel() {
   const seed = SEED[ctx]
   const isMobile = useIsMobile()
 
+  const isOpen = view === 'chat'
+  const isPickerOpen = view === 'picker'
+
   // Effective panel width: full-screen on mobile, state-driven on desktop
   const effectiveWidth = isMobile ? '100vw' : panelWidth
 
@@ -295,8 +323,8 @@ export function HeyTaliaPanel() {
   }, [messages, isTyping])
 
   useEffect(() => {
-    if (isOpen) setTimeout(() => inputRef.current?.focus(), 150)
-  }, [isOpen])
+    if (view === 'chat') setTimeout(() => inputRef.current?.focus(), 150)
+  }, [view])
 
   // ── Drag-to-resize ──────────────────────────────────────────────────────
   function startResize(e: React.MouseEvent) {
@@ -400,13 +428,17 @@ export function HeyTaliaPanel() {
     }))
   }
 
+  function handleSelectAgent(_agentId: string) {
+    setView('chat')
+  }
+
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — dark on mobile for chat, transparent for picker */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/20 lg:hidden"
-          onClick={() => setIsOpen(false)}
+          onClick={() => setView('closed')}
         />
       )}
 
@@ -466,7 +498,7 @@ export function HeyTaliaPanel() {
                 )}
               </HdrBtn>
             )}
-            <HdrBtn title="Close" onClick={() => setIsOpen(false)}>
+            <HdrBtn title="Close" onClick={() => setView('closed')}>
               <Minus className="h-3.5 w-3.5" />
             </HdrBtn>
           </div>
@@ -536,27 +568,6 @@ export function HeyTaliaPanel() {
         </div>
       </div>
 
-      {/* ── Floating trigger ── */}
-      {!isOpen && (
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex h-10 items-center gap-2 rounded-4xl border border-transparent px-3 text-sm font-medium text-white shadow-md transition-all active:scale-95"
-          style={{ background: HT.primary }}
-          onMouseEnter={(e) =>
-            ((e.currentTarget as HTMLButtonElement).style.background = HT.hover)
-          }
-          onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLButtonElement).style.background =
-              HT.primary)
-          }
-        >
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white">
-            <HeyTaliaLogo size={18} uid={triggerUid} />
-          </span>
-          HeyTalia
-        </button>
-      )}
     </>
   )
 }

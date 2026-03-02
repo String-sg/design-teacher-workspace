@@ -9,7 +9,7 @@ import {
   Megaphone,
   MessageSquare,
   ScrollText,
-  Send,
+  Mail,
   Settings,
   Users,
 } from 'lucide-react'
@@ -72,7 +72,7 @@ const parentsCommItems: Array<MenuItem> = [
   {
     title: 'Announcement',
     url: '/parents-gateway',
-    icon: Send,
+    icon: Mail,
     featureFlag: 'parents-gateway',
   },
   {
