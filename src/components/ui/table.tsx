@@ -2,12 +2,19 @@ import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
-function Table({ className, ...props }: React.ComponentProps<'table'>) {
+function Table({
+  className,
+  tableClassName,
+  ...props
+}: React.ComponentProps<'table'> & { tableClassName?: string }) {
   return (
     <div data-slot="table-container" className={cn('relative', className)}>
       <table
         data-slot="table"
-        className="w-max min-w-full caption-bottom text-sm"
+        className={cn(
+          'w-max min-w-full caption-bottom text-sm',
+          tableClassName,
+        )}
         {...props}
       />
     </div>

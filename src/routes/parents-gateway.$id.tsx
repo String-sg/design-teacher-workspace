@@ -568,32 +568,22 @@ function AnnouncementDetailPage() {
                 </div>
               ) : (
                 announcement.enquiryEmail && (
-                  <div className="flex items-center gap-2 border-t pt-3">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100">
-                      <Mail className="h-3.5 w-3.5 text-slate-500" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground">
-                        Enquiry contact
-                      </p>
-                      <a
-                        href={`mailto:${announcement.enquiryEmail}`}
-                        className="truncate text-sm font-medium hover:text-primary hover:underline"
-                      >
-                        {announcement.enquiryEmail}
-                      </a>
-                    </div>
+                  <div className="border-t pt-3">
+                    <p className="text-xs text-muted-foreground">
+                      Enquiry contact
+                    </p>
+                    <a
+                      href={`mailto:${announcement.enquiryEmail}`}
+                      className="truncate text-sm font-medium hover:text-primary hover:underline"
+                    >
+                      {announcement.enquiryEmail}
+                    </a>
                   </div>
                 )
               )}
 
               {/* Staff in charge — always editable */}
-              <div
-                className={cn(
-                  'border-t pt-3',
-                  isEditing ? '' : 'flex items-center gap-2',
-                )}
-              >
+              <div className="border-t pt-3">
                 {isEditing ? (
                   <div className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground">
@@ -611,19 +601,14 @@ function AnnouncementDetailPage() {
                   </div>
                 ) : (
                   announcement.staffInCharge && (
-                    <>
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100">
-                        <User className="h-3.5 w-3.5 text-slate-500" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs text-muted-foreground">
-                          Staff in charge
-                        </p>
-                        <p className="truncate text-sm font-medium">
-                          {announcement.staffInCharge}
-                        </p>
-                      </div>
-                    </>
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground">
+                        Staff in charge
+                      </p>
+                      <p className="truncate text-sm font-medium">
+                        {announcement.staffInCharge}
+                      </p>
+                    </div>
                   )
                 )}
               </div>
