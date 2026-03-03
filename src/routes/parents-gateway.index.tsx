@@ -219,15 +219,15 @@ function ParentsGatewayPage() {
             description="Try adjusting your search or filter, or create a new announcement."
           />
         ) : (
-          <Table>
+          <Table className="table-fixed w-full">
             <TableHeader className="border-b bg-white">
               <TableRow className="border-0 hover:bg-transparent">
-                <TableHead className="min-w-[250px] pl-6">Title</TableHead>
-                <TableHead className="min-w-[110px]">Date</TableHead>
-                <TableHead className="min-w-[100px]">Status</TableHead>
-                <TableHead className="min-w-[90px]">Owner</TableHead>
-                <TableHead className="min-w-[130px]">To Parents Of</TableHead>
-                <TableHead className="min-w-[150px] pr-6">Read</TableHead>
+                <TableHead className="w-[40%] pl-6">Title</TableHead>
+                <TableHead className="w-[110px]">Date</TableHead>
+                <TableHead className="w-[100px]">Status</TableHead>
+                <TableHead className="w-[90px]">Owner</TableHead>
+                <TableHead className="w-[130px]">To Parents Of</TableHead>
+                <TableHead className="w-[150px] pr-6">Read</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -261,21 +261,18 @@ function ParentsGatewayPage() {
                       })
                     }
                   >
-                    <TableCell className="pl-6">
-                      <div className="flex items-start gap-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="truncate font-medium">
-                              {announcement.title}
-                            </span>
-                            {showUrgency && (
-                              <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-                            )}
-                          </div>
-                          <div className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
-                            {/* Strip HTML tags for plain text preview */}
-                            {announcement.description.replace(/<[^>]*>/g, '')}
-                          </div>
+                    <TableCell className="pl-6 overflow-hidden whitespace-normal">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate font-medium">
+                            {announcement.title}
+                          </span>
+                          {showUrgency && (
+                            <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                          )}
+                        </div>
+                        <div className="mt-0.5 truncate text-sm text-muted-foreground">
+                          {announcement.description.replace(/<[^>]*>/g, '')}
                         </div>
                       </div>
                     </TableCell>
