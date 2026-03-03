@@ -11,11 +11,7 @@ const HeyTaliaContext = createContext<HeyTaliaContextValue | null>(null)
 
 export function HeyTaliaProvider({ children }: { children: React.ReactNode }) {
   const [view, setView] = useState<HeyTaliaView>('closed')
-  return (
-    <HeyTaliaContext value={{ view, setView }}>
-      {children}
-    </HeyTaliaContext>
-  )
+  return <HeyTaliaContext value={{ view, setView }}>{children}</HeyTaliaContext>
 }
 
 export function useHeyTalia() {

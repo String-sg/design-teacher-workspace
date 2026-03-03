@@ -97,9 +97,7 @@ export function AppHeader() {
         <div className="h-4 w-px bg-border" />
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={
-              <Button variant="outline" size="sm" className="gap-1.5" />
-            }
+            render={<Button variant="outline" size="sm" className="gap-1.5" />}
           >
             <MessageCircle className="h-3.5 w-3.5" />
             Assistant
@@ -132,9 +130,7 @@ export function AppHeader() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-medium">
-                      {agent.name}
-                    </span>
+                    <span className="text-sm font-medium">{agent.name}</span>
                     {agent.tag && (
                       <span
                         className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"

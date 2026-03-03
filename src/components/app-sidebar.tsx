@@ -6,10 +6,10 @@ import {
   ClipboardList,
   FileText,
   Home,
+  Mail,
   Megaphone,
   MessageSquare,
   ScrollText,
-  Mail,
   Settings,
   Users,
 } from 'lucide-react'
@@ -160,7 +160,9 @@ export function AppSidebar() {
           </SidebarGroupContent>
           {filteredParentsItems.length > 0 && (
             <>
-              <SidebarGroupLabel className="mt-2">Parents Comm</SidebarGroupLabel>
+              <SidebarGroupLabel className="mt-2">
+                Parents Comm
+              </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenuItems
                   items={filteredParentsItems}

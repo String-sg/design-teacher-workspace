@@ -215,7 +215,7 @@ function ParentsGatewayPage() {
               <Table tableClassName="table-fixed w-full">
                 <TableHeader className="border-b bg-white">
                   <TableRow className="border-0 hover:bg-transparent">
-                    <TableHead className="w-[250px] pl-6">Title</TableHead>
+                    <TableHead className="w-[500px] pl-6">Title</TableHead>
                     <TableHead className="w-[110px]">Date</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>
                     <TableHead className="w-[90px]">Owner</TableHead>
