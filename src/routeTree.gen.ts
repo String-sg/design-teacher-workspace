@@ -30,6 +30,7 @@ import { Route as ReportsIdRouteImport } from './routes/reports.$id'
 import { Route as ParentsGatewayNewRouteImport } from './routes/parents-gateway.new'
 import { Route as ParentsGatewayIdRouteImport } from './routes/parents-gateway.$id'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
+import { Route as GuestPreviewMenuRouteImport } from './routes/_guest.preview-menu'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
 import { Route as AllearsAllearsRouteImport } from './routes/_allears.allears'
 import { Route as AllearsAllearsIndexRouteImport } from './routes/_allears.allears.index'
@@ -140,6 +141,11 @@ const AnnouncementsIdRoute = AnnouncementsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AnnouncementsRoute,
 } as any)
+const GuestPreviewMenuRoute = GuestPreviewMenuRouteImport.update({
+  id: '/preview-menu',
+  path: '/preview-menu',
+  getParentRoute: () => GuestRoute,
+} as any)
 const GuestLoginRoute = GuestLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/students': typeof StudentsRouteWithChildren
   '/allears': typeof AllearsAllearsRouteWithChildren
   '/login': typeof GuestLoginRoute
+  '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
@@ -204,6 +211,7 @@ export interface FileRoutesByTo {
   '/flags': typeof FlagsRoute
   '/settings': typeof SettingsRoute
   '/login': typeof GuestLoginRoute
+  '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
@@ -234,6 +242,7 @@ export interface FileRoutesById {
   '/students': typeof StudentsRouteWithChildren
   '/_allears/allears': typeof AllearsAllearsRouteWithChildren
   '/_guest/login': typeof GuestLoginRoute
+  '/_guest/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
@@ -263,6 +272,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/allears'
     | '/login'
+    | '/preview-menu'
     | '/announcements/$id'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/flags'
     | '/settings'
     | '/login'
+    | '/preview-menu'
     | '/announcements/$id'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/_allears/allears'
     | '/_guest/login'
+    | '/_guest/preview-menu'
     | '/announcements/$id'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
@@ -492,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnouncementsIdRouteImport
       parentRoute: typeof AnnouncementsRoute
     }
+    '/_guest/preview-menu': {
+      id: '/_guest/preview-menu'
+      path: '/preview-menu'
+      fullPath: '/preview-menu'
+      preLoaderRoute: typeof GuestPreviewMenuRouteImport
+      parentRoute: typeof GuestRoute
+    }
     '/_guest/login': {
       id: '/_guest/login'
       path: '/login'
@@ -566,11 +585,13 @@ const AllearsRouteWithChildren =
 
 interface GuestRouteChildren {
   GuestLoginRoute: typeof GuestLoginRoute
+  GuestPreviewMenuRoute: typeof GuestPreviewMenuRoute
   GuestReportViewTokenRoute: typeof GuestReportViewTokenRoute
 }
 
 const GuestRouteChildren: GuestRouteChildren = {
   GuestLoginRoute: GuestLoginRoute,
+  GuestPreviewMenuRoute: GuestPreviewMenuRoute,
   GuestReportViewTokenRoute: GuestReportViewTokenRoute,
 }
 

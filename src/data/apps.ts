@@ -174,7 +174,7 @@ export const appCategories: Array<AppCategory> = [
         id: 'appraiser',
         name: 'Appraiser',
         description: 'AI-powered student testimonials in minutes',
-        icon: '/logos/appraiser-logo-no-words.png',
+        icon: '/logos/appraiser-logo.svg',
         color: 'blue',
         href: '/appraiser',
       },

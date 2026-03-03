@@ -145,11 +145,20 @@ function ParentsGatewayPage() {
     <div className="flex flex-col">
       {/* Page Header */}
       <div className="flex items-center justify-between px-6 pt-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Announcement</h1>
-          <p className="text-muted-foreground">
-            Send announcements to parents and track who has read them
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border bg-white p-1.5">
+            <img
+              src="/logos/parentsgateway.webp"
+              alt="Parents Gateway"
+              className="h-full w-full object-contain"
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold">Announcement</h1>
+            <p className="text-muted-foreground">
+              Send announcements to parents and track who has read them
+            </p>
+          </div>
         </div>
         <Button render={<Link to="/parents-gateway/new" />}>
           <Plus className="mr-2 h-4 w-4" />
