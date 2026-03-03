@@ -677,6 +677,7 @@ function MessageBubble({
             ))}
           </div>
         )}
+
       </div>
     </div>
   )
