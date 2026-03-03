@@ -166,14 +166,14 @@ function FormsPage() {
 
       {/* Forms Table */}
       <div className="max-w-full overflow-x-auto bg-white">
-        <Table tableClassName="table-fixed w-full">
+        <Table>
           <TableHeader className="border-b bg-white">
             <TableRow className="border-0 hover:bg-transparent">
-              <TableHead className="pl-6">Form Title</TableHead>
-              <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[80px]">Sent</TableHead>
-              <TableHead className="w-[100px]">Completed</TableHead>
-              <TableHead className="w-[100px] pr-6">Created</TableHead>
+              <TableHead className="min-w-[250px] pl-6">Form Title</TableHead>
+              <TableHead className="min-w-[100px]">Status</TableHead>
+              <TableHead className="min-w-[80px]">Sent</TableHead>
+              <TableHead className="min-w-[100px]">Completed</TableHead>
+              <TableHead className="min-w-[100px] pr-6">Created</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -188,7 +188,7 @@ function FormsPage() {
             ) : (
               filteredForms.map((form) => (
                 <TableRow key={form.id} className="cursor-pointer">
-                  <TableCell className="overflow-hidden whitespace-normal pl-6">
+                  <TableCell className="pl-6">
                     <div className="font-medium">{form.title}</div>
                     <div className="text-sm text-muted-foreground">
                       {form.description}
