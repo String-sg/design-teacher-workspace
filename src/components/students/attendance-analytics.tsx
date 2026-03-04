@@ -1281,7 +1281,9 @@ export function AttendanceLevelAnalytics() {
                   <p className="text-2xl font-semibold">
                     {attendance.present} / {attendance.total}
                   </p>
-                  <p className="text-xs text-muted-foreground">Students present</p>
+                  <p className="text-xs text-muted-foreground">
+                    Students present
+                  </p>
                 </div>
                 <div className="space-y-1.5 border-l pl-5 text-xs">
                   <p className="flex items-baseline gap-2">
@@ -1296,7 +1298,9 @@ export function AttendanceLevelAnalytics() {
                     <span className="w-8 text-right font-semibold tabular-nums text-foreground">
                       {attendance.lta}
                     </span>
-                    <span className="text-muted-foreground">LTA ({ltaPct}%)</span>
+                    <span className="text-muted-foreground">
+                      LTA ({ltaPct}%)
+                    </span>
                   </p>
                 </div>
               </div>
@@ -1391,7 +1395,9 @@ export function AttendanceAnalytics() {
             <div className="space-y-1 border-l pl-5 text-xs text-muted-foreground">
               {RING_SEGMENTS.filter((s) => s.name !== 'Present').map((s) => (
                 <p key={s.name} className="flex items-baseline gap-2">
-                  <span className="font-semibold text-foreground">{s.value}</span>
+                  <span className="font-semibold text-foreground">
+                    {s.value}
+                  </span>
                   {s.name}
                 </p>
               ))}

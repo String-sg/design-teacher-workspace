@@ -10,6 +10,7 @@ import {
   Heart,
   Home,
   Info,
+  Languages,
   PanelRight,
   Plus,
   User,
@@ -102,10 +103,8 @@ function RemarksField({ label, value, tooltip }: RemarksFieldProps) {
         {label}
         {tooltip && <Info className="h-3.5 w-3.5 shrink-0" />}
       </dt>
-      <dd className="text-sm text-foreground">
-        {value || (
-          <span className="text-muted-foreground">No remarks available</span>
-        )}
+      <dd className="text-sm font-medium">
+        {value || <span className="font-normal text-muted-foreground">-</span>}
       </dd>
     </div>
   )
@@ -166,7 +165,11 @@ function FieldWithDetails({
       </div>
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent showOverlay={false} showCloseButton={false} className="sm:max-w-xs">
+        <SheetContent
+          showOverlay={false}
+          showCloseButton={false}
+          className="sm:max-w-xs"
+        >
           <SheetHeader className="border-b pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border">
@@ -255,7 +258,7 @@ function ReportRow({ report }: { report: HolisticReport }) {
   )
 }
 
-function formatTermList(terms: string[]): string {
+function formatTermList(terms: Array<string>): string {
   if (terms.length === 0) return 'None'
   if (terms.length === 1) return terms[0]
   const nums = terms.map((t) => t.replace('Term ', ''))
@@ -281,6 +284,7 @@ export function StudentProfile({
     { id: 'wellbeing', label: 'Wellbeing' },
     { id: 'academic', label: 'Academic' },
     { id: 'family', label: 'Family' },
+    { id: 'personal', label: 'Personal' },
     { id: 'reports', label: 'Reports' },
   ]
 
@@ -326,6 +330,10 @@ export function StudentProfile({
             />
             <Field label="Late-coming(%)" value={student.lateComing} />
             <Field label="Non-VR absences(%)" value={student.absences} />
+            <Field
+              label="CCA attendance(%)"
+              value={`${100 - student.ccaMissed * 5}`}
+            />
           </dl>
 
           {analyticsOpen && <AttendanceAnalytics />}
@@ -368,27 +376,24 @@ export function StudentProfile({
                       </ul>
                     </div>
                   </div>
-                  {student.offenceDetails && student.offenceDetails.length > 0 && (
-                    <div>
-                      <p className="mb-2 text-sm font-medium">Remarks</p>
-                      <div className="rounded-lg bg-muted px-4 py-3">
-                        <ul className="space-y-1.5 text-sm">
-                          {student.offenceDetails.map((d, i) => (
-                            <li key={i} className="flex items-center gap-2">
-                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                              {d.type} x {d.count} (latest {d.latestDate})
-                            </li>
-                          ))}
-                        </ul>
+                  {student.offenceDetails &&
+                    student.offenceDetails.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-sm font-medium">Remarks</p>
+                        <div className="rounded-lg bg-muted px-4 py-3">
+                          <ul className="space-y-1.5 text-sm">
+                            {student.offenceDetails.map((d, i) => (
+                              <li key={i} className="flex items-center gap-2">
+                                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                {d.type} x {d.count} (latest {d.latestDate})
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               }
-            />
-            <Field
-              label="CCA attendance(%)"
-              value={`${100 - student.ccaMissed * 5}`}
             />
             <Field
               label="Conduct grade"
@@ -432,35 +437,37 @@ export function StudentProfile({
                       </ul>
                     </div>
                   </div>
-                  {student.counsellingCases && student.counsellingCases.length > 0 && (
-                    <div>
-                      <p className="mb-2 text-sm font-medium">Remarks</p>
-                      <div className="rounded-lg bg-muted px-4 py-3">
-                        <ul className="space-y-1.5 text-sm">
-                          {student.counsellingCases.map((c, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                              {c.subcases && c.subcases.length > 0 ? (
-                                <span>
-                                  {c.category}:{' '}
-                                  {c.subcases
-                                    .map(
-                                      (s) =>
-                                        `${s.name} x${s.count} (latest ${s.latestDate})`,
-                                    )
-                                    .join(', ')}
-                                </span>
-                              ) : (
-                                <span>
-                                  {c.category} x{c.count} (latest {c.latestDate})
-                                </span>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
+                  {student.counsellingCases &&
+                    student.counsellingCases.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-sm font-medium">Remarks</p>
+                        <div className="rounded-lg bg-muted px-4 py-3">
+                          <ul className="space-y-1.5 text-sm">
+                            {student.counsellingCases.map((c, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                {c.subcases && c.subcases.length > 0 ? (
+                                  <span>
+                                    {c.category}:{' '}
+                                    {c.subcases
+                                      .map(
+                                        (s) =>
+                                          `${s.name} x${s.count} (latest ${s.latestDate})`,
+                                      )
+                                      .join(', ')}
+                                  </span>
+                                ) : (
+                                  <span>
+                                    {c.category} x{c.count} (latest{' '}
+                                    {c.latestDate})
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               }
             />
@@ -507,7 +514,8 @@ export function StudentProfile({
                       </div>
                       <div>
                         <p className="font-medium mb-1.5">Selected friends</p>
-                        {student.selectedFriends && student.selectedFriends.length > 0 ? (
+                        {student.selectedFriends &&
+                        student.selectedFriends.length > 0 ? (
                           <ul className="space-y-1.5">
                             {student.selectedFriends.map((person, i) => (
                               <li key={i} className="flex items-start gap-2">
@@ -563,7 +571,10 @@ export function StudentProfile({
                               </p>
                               <ul className="space-y-1.5">
                                 {record.indicators.map((indicator, j) => (
-                                  <li key={j} className="flex items-start gap-2">
+                                  <li
+                                    key={j}
+                                    className="flex items-start gap-2"
+                                  >
                                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
                                     {indicator}
                                   </li>
@@ -649,7 +660,9 @@ export function StudentProfile({
               sideSheetContent={
                 <div className="space-y-5">
                   <div>
-                    <p className="mb-2 text-sm font-medium">Overall % across selected subjects</p>
+                    <p className="mb-2 text-sm font-medium">
+                      Overall % across selected subjects
+                    </p>
                     <div className="rounded-lg bg-muted px-4 py-3">
                       <ul className="space-y-1 text-sm">
                         <li className="flex items-center gap-2">
@@ -690,9 +703,14 @@ export function StudentProfile({
                 <Field label="No. of Passes" value={gradeCounts.passes} />
               </>
             )}
+            <Field label="Approved MTL" value={student.approvedMtl || '-'} />
             <Field
               label="Learning support"
               value={student.learningSupport || '-'}
+            />
+            <Field
+              label="Post-sec eligibility"
+              value={student.postSecEligibility || '-'}
             />
           </dl>
 
@@ -719,7 +737,54 @@ export function StudentProfile({
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <Field label="FAS" value={student.fas || '-'} />
-            <Field label="Housing" value={student.housing || '-'} />
+            <FieldWithDetails
+              label="Housing"
+              value={student.housing || '-'}
+              tooltip="Housing details"
+              sideSheetTitle="Housing"
+              sideSheetContent={
+                <div className="space-y-5">
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Housing</p>
+                    <div className="rounded-lg bg-muted px-4 py-3">
+                      <ul className="space-y-1 text-sm">
+                        <li className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                          {student.housing || '-'}
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Remarks</p>
+                    <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                      <div>
+                        <p className="font-medium mb-1.5">Address</p>
+                        <ul className="space-y-1">
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            Blk/Hse-1 #1-1 MOE St Singapore 111111
+                          </li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="font-medium mb-1.5">Living arrangement</p>
+                        <ul className="space-y-1">
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            Not staying with parents
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            Father deceased
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            />
             <Field
               label="Housing ownership"
               value={
@@ -732,6 +797,76 @@ export function StudentProfile({
             />
             <Field label="Custody" value={student.custody || '-'} />
             <Field
+              label="Commuter status"
+              value={student.commuterStatus || 'Non-commuter'}
+            />
+            <Field
+              label="After-school arrangement"
+              value={student.afterSchoolArrangement || 'No arrangement'}
+            />
+            <FieldWithDetails
+              label="Primary contact"
+              value="Mother"
+              tooltip="Primary emergency contact details"
+              sideSheetTitle="Primary contact"
+              sideSheetContent={
+                <div className="space-y-5">
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Primary contact</p>
+                    <div className="rounded-lg bg-muted px-4 py-3">
+                      <ul className="space-y-1 text-sm">
+                        <li className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                          Mother
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="mb-2 text-sm font-medium">Remarks</p>
+                    <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                      <div>
+                        <p className="font-medium mb-1.5">Name</p>
+                        <ul className="space-y-1">
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            Ai Mee Tiam
+                          </li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="font-medium mb-1.5">Mobile</p>
+                        <ul className="space-y-1">
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            +65 1111 1111
+                          </li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="font-medium mb-1.5">Home</p>
+                        <ul className="space-y-1">
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            +65 1111 1111
+                          </li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="font-medium mb-1.5">Email</p>
+                        <ul className="space-y-1">
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            test@gmail.com.sg
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            />
+            <Field
               label="Siblings"
               value={
                 student.siblingDetails && student.siblingDetails.length > 0
@@ -741,6 +876,45 @@ export function StudentProfile({
                   : student.siblings > 0
                     ? student.siblings
                     : '-'
+              }
+            />
+          </dl>
+        </Section>
+
+        {/* Personal Section */}
+        <Section
+          id="personal"
+          title="Personal"
+          icon={<Languages className="h-5 w-5" />}
+          iconClassName="bg-purple-100 text-purple-600"
+        >
+          <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
+            <Field label="Health alerts" value="1 from Parent, 1 from SHS" />
+            <Field label="Citizenship" value={student.citizenship ?? '-'} />
+            <Field
+              label="Language spoken"
+              value={student.languagesSpoken ?? '-'}
+            />
+            <Field
+              label="Age"
+              value={
+                student.birthday
+                  ? (() => {
+                      const [day, month, year] = student.birthday.split(' ')
+                      const birthYear = parseInt(year)
+                      const birthMonth = new Date(`${month} 1`).getMonth()
+                      const today = new Date(2026, 2, 4) // 2026-03-04
+                      let age = today.getFullYear() - birthYear
+                      if (
+                        today.getMonth() < birthMonth ||
+                        (today.getMonth() === birthMonth &&
+                          today.getDate() < parseInt(day))
+                      ) {
+                        age--
+                      }
+                      return `${age} years old (${student.birthday})`
+                    })()
+                  : '-'
               }
             />
           </dl>

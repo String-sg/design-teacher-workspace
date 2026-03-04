@@ -37,9 +37,7 @@ function ComingSoon({ description }: { description?: string }) {
 type AcademicView = 'monitoring' | 'benchmark'
 
 function StudentAnalyticsPage() {
-  useSetBreadcrumbs([
-    { label: 'Analytics', href: '/student-analytics' },
-  ])
+  useSetBreadcrumbs([{ label: 'Analytics', href: '/student-analytics' }])
 
   const [academicView, setAcademicView] = useState<AcademicView>('monitoring')
 
