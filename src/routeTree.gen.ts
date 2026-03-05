@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentsRouteImport } from './routes/students'
+import { Route as StudentAnalyticsRouteImport } from './routes/student-analytics'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ParentsGatewayRouteImport } from './routes/parents-gateway'
+import { Route as InsightBuddyRouteImport } from './routes/insight-buddy'
 import { Route as FormsRouteImport } from './routes/forms'
 import { Route as FlagsRouteImport } from './routes/flags'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
@@ -43,6 +45,11 @@ const StudentsRoute = StudentsRouteImport.update({
   path: '/students',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentAnalyticsRoute = StudentAnalyticsRouteImport.update({
+  id: '/student-analytics',
+  path: '/student-analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -56,6 +63,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const ParentsGatewayRoute = ParentsGatewayRouteImport.update({
   id: '/parents-gateway',
   path: '/parents-gateway',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightBuddyRoute = InsightBuddyRouteImport.update({
+  id: '/insight-buddy',
+  path: '/insight-buddy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FormsRoute = FormsRouteImport.update({
@@ -183,9 +195,11 @@ export interface FileRoutesByFullPath {
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
+  '/insight-buddy': typeof InsightBuddyRoute
   '/parents-gateway': typeof ParentsGatewayRouteWithChildren
   '/reports': typeof ReportsRouteWithChildren
   '/settings': typeof SettingsRoute
+  '/student-analytics': typeof StudentAnalyticsRoute
   '/students': typeof StudentsRouteWithChildren
   '/allears': typeof AllearsAllearsRouteWithChildren
   '/login': typeof GuestLoginRoute
@@ -209,7 +223,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/flags': typeof FlagsRoute
+  '/insight-buddy': typeof InsightBuddyRoute
   '/settings': typeof SettingsRoute
+  '/student-analytics': typeof StudentAnalyticsRoute
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
@@ -236,9 +252,11 @@ export interface FileRoutesById {
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
+  '/insight-buddy': typeof InsightBuddyRoute
   '/parents-gateway': typeof ParentsGatewayRouteWithChildren
   '/reports': typeof ReportsRouteWithChildren
   '/settings': typeof SettingsRoute
+  '/student-analytics': typeof StudentAnalyticsRoute
   '/students': typeof StudentsRouteWithChildren
   '/_allears/allears': typeof AllearsAllearsRouteWithChildren
   '/_guest/login': typeof GuestLoginRoute
@@ -266,9 +284,11 @@ export interface FileRouteTypes {
     | '/announcements'
     | '/flags'
     | '/forms'
+    | '/insight-buddy'
     | '/parents-gateway'
     | '/reports'
     | '/settings'
+    | '/student-analytics'
     | '/students'
     | '/allears'
     | '/login'
@@ -292,7 +312,9 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/flags'
+    | '/insight-buddy'
     | '/settings'
+    | '/student-analytics'
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
@@ -318,9 +340,11 @@ export interface FileRouteTypes {
     | '/announcements'
     | '/flags'
     | '/forms'
+    | '/insight-buddy'
     | '/parents-gateway'
     | '/reports'
     | '/settings'
+    | '/student-analytics'
     | '/students'
     | '/_allears/allears'
     | '/_guest/login'
@@ -349,9 +373,11 @@ export interface RootRouteChildren {
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
   FormsRoute: typeof FormsRouteWithChildren
+  InsightBuddyRoute: typeof InsightBuddyRoute
   ParentsGatewayRoute: typeof ParentsGatewayRouteWithChildren
   ReportsRoute: typeof ReportsRouteWithChildren
   SettingsRoute: typeof SettingsRoute
+  StudentAnalyticsRoute: typeof StudentAnalyticsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
 }
 
@@ -362,6 +388,13 @@ declare module '@tanstack/react-router' {
       path: '/students'
       fullPath: '/students'
       preLoaderRoute: typeof StudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student-analytics': {
+      id: '/student-analytics'
+      path: '/student-analytics'
+      fullPath: '/student-analytics'
+      preLoaderRoute: typeof StudentAnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -383,6 +416,13 @@ declare module '@tanstack/react-router' {
       path: '/parents-gateway'
       fullPath: '/parents-gateway'
       preLoaderRoute: typeof ParentsGatewayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insight-buddy': {
+      id: '/insight-buddy'
+      path: '/insight-buddy'
+      fullPath: '/insight-buddy'
+      preLoaderRoute: typeof InsightBuddyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forms': {
@@ -672,9 +712,11 @@ const rootRouteChildren: RootRouteChildren = {
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
   FlagsRoute: FlagsRoute,
   FormsRoute: FormsRouteWithChildren,
+  InsightBuddyRoute: InsightBuddyRoute,
   ParentsGatewayRoute: ParentsGatewayRouteWithChildren,
   ReportsRoute: ReportsRouteWithChildren,
   SettingsRoute: SettingsRoute,
+  StudentAnalyticsRoute: StudentAnalyticsRoute,
   StudentsRoute: StudentsRouteWithChildren,
 }
 export const routeTree = rootRouteImport

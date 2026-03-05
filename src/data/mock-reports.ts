@@ -885,6 +885,23 @@ function generateAllReports(): Array<HolisticReport> {
 
 export const mockReports: Array<HolisticReport> = generateAllReports()
 
+export function getStudentGradeCounts(
+  student: Student,
+): { distinctions: number; passes: number } | null {
+  if (getSchoolLevel(student.class) !== 'secondary') return null
+  const seed = student.id.charCodeAt(0)
+  const subjects = generateSecondarySubjects(student, seed)
+  const distinctions = subjects.filter(
+    (s) => s.currentGrade === 'A1' || s.currentGrade === 'A2',
+  ).length
+  const passes = subjects.filter((s) =>
+    (['B3', 'B4', 'C5', 'C6'] as Array<SecondaryGrade>).includes(
+      s.currentGrade,
+    ),
+  ).length
+  return { distinctions, passes }
+}
+
 export function addReport(report: HolisticReport): void {
   if (!mockReports.find((r) => r.id === report.id)) {
     mockReports.push(report)

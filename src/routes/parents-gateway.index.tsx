@@ -191,7 +191,9 @@ function ParentsGatewayPage() {
             </div>
             <div className="rounded-lg border bg-card p-4">
               <div className="text-sm text-muted-foreground">Avg Read Rate</div>
-              <div className="text-2xl font-semibold">{metrics.avgReadRate}%</div>
+              <div className="text-2xl font-semibold">
+                {metrics.avgReadRate}%
+              </div>
             </div>
           </div>
 
@@ -213,120 +215,122 @@ function ParentsGatewayPage() {
 
           {/* Table */}
           <div className="max-w-full overflow-x-auto bg-white">
-        {filtered.length === 0 ? (
-          <EmptyState
-            title="No announcements found"
-            description="Try adjusting your search or filter, or create a new announcement."
-          />
-        ) : (
-          <Table className="table-fixed w-full">
-            <TableHeader className="border-b bg-white">
-              <TableRow className="border-0 hover:bg-transparent">
-                <TableHead className="w-[40%] pl-6">Title</TableHead>
-                <TableHead className="w-[110px]">Date</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="w-[90px]">Owner</TableHead>
-                <TableHead className="w-[130px]">To Parents Of</TableHead>
-                <TableHead className="w-[150px] pr-6">Read</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((announcement) => {
-                const totalCount = announcement.recipients.length
-                const readCount = announcement.recipients.filter(
-                  (r) => r.readStatus === 'read',
-                ).length
-                const showUrgency = isLowReadRate(
-                  announcement.postedAt,
-                  readCount,
-                  totalCount,
-                )
-                const relevantDate = getRelevantDate(
-                  announcement.status,
-                  announcement.postedAt,
-                  announcement.scheduledAt,
-                  announcement.createdAt,
-                )
-                const isViewer = announcement.role === 'viewer'
-                const isShared = announcement.ownership === 'shared'
+            {filtered.length === 0 ? (
+              <EmptyState
+                title="No announcements found"
+                description="Try adjusting your search or filter, or create a new announcement."
+              />
+            ) : (
+              <Table className="table-fixed w-full">
+                <TableHeader className="border-b bg-white">
+                  <TableRow className="border-0 hover:bg-transparent">
+                    <TableHead className="w-[40%] pl-6">Title</TableHead>
+                    <TableHead className="w-[110px]">Date</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
+                    <TableHead className="w-[90px]">Owner</TableHead>
+                    <TableHead className="w-[130px]">To Parents Of</TableHead>
+                    <TableHead className="w-[150px] pr-6">Read</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((announcement) => {
+                    const totalCount = announcement.recipients.length
+                    const readCount = announcement.recipients.filter(
+                      (r) => r.readStatus === 'read',
+                    ).length
+                    const showUrgency = isLowReadRate(
+                      announcement.postedAt,
+                      readCount,
+                      totalCount,
+                    )
+                    const relevantDate = getRelevantDate(
+                      announcement.status,
+                      announcement.postedAt,
+                      announcement.scheduledAt,
+                      announcement.createdAt,
+                    )
+                    const isViewer = announcement.role === 'viewer'
+                    const isShared = announcement.ownership === 'shared'
 
-                return (
-                  <TableRow
-                    key={announcement.id}
-                    className="cursor-pointer"
-                    onClick={() =>
-                      navigate({
-                        to: '/parents-gateway/$id',
-                        params: { id: announcement.id },
-                      })
-                    }
-                  >
-                    <TableCell className="pl-6 overflow-hidden whitespace-normal">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="truncate font-medium">
-                            {announcement.title}
-                          </span>
-                          {showUrgency && (
-                            <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-                          )}
-                        </div>
-                        <div className="mt-0.5 truncate text-sm text-muted-foreground">
-                          {announcement.description.replace(/<[^>]*>/g, '')}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      <span
-                        className={
-                          announcement.status === 'scheduled'
-                            ? 'text-amber-600'
-                            : undefined
+                    return (
+                      <TableRow
+                        key={announcement.id}
+                        className="cursor-pointer"
+                        onClick={() =>
+                          navigate({
+                            to: '/parents-gateway/$id',
+                            params: { id: announcement.id },
+                          })
                         }
                       >
-                        {formatDate(relevantDate)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <PGStatusBadge status={announcement.status} />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        {isShared ? (
-                          <>
-                            <Users className="h-3.5 w-3.5 shrink-0" />
-                            <span>Shared</span>
-                            {isViewer && (
-                              <Lock className="h-3 w-3 shrink-0 text-slate-400" />
+                        <TableCell className="pl-6 overflow-hidden whitespace-normal">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="truncate font-medium">
+                                {announcement.title}
+                              </span>
+                              {showUrgency && (
+                                <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                              )}
+                            </div>
+                            <div className="mt-0.5 truncate text-sm text-muted-foreground">
+                              {announcement.description.replace(/<[^>]*>/g, '')}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          <span
+                            className={
+                              announcement.status === 'scheduled'
+                                ? 'text-amber-600'
+                                : undefined
+                            }
+                          >
+                            {formatDate(relevantDate)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <PGStatusBadge status={announcement.status} />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            {isShared ? (
+                              <>
+                                <Users className="h-3.5 w-3.5 shrink-0" />
+                                <span>Shared</span>
+                                {isViewer && (
+                                  <Lock className="h-3 w-3 shrink-0 text-slate-400" />
+                                )}
+                              </>
+                            ) : (
+                              <span>Mine</span>
                             )}
-                          </>
-                        ) : (
-                          <span>Mine</span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {announcement.status === 'draft' ||
-                      announcement.status === 'scheduled'
-                        ? '—'
-                        : getUniqueClasses(announcement.recipients)}
-                    </TableCell>
-                    <TableCell className="pr-6">
-                      {announcement.status === 'posted' ? (
-                        <PGReadRate
-                          readCount={readCount}
-                          totalCount={totalCount}
-                        />
-                      ) : (
-                        <span className="text-sm text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-          )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {announcement.status === 'draft' ||
+                          announcement.status === 'scheduled'
+                            ? '—'
+                            : getUniqueClasses(announcement.recipients)}
+                        </TableCell>
+                        <TableCell className="pr-6">
+                          {announcement.status === 'posted' ? (
+                            <PGReadRate
+                              readCount={readCount}
+                              totalCount={totalCount}
+                            />
+                          ) : (
+                            <span className="text-sm text-muted-foreground">
+                              —
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            )}
           </div>
         </TabsContent>
       </Tabs>

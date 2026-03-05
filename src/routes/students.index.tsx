@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 
 import type {
   FilterCriterion,
@@ -9,8 +9,6 @@ import type {
   Student,
 } from '@/types/student'
 import type { ColumnConfig } from '@/components/students/column-visibility-popover'
-import { useAuth } from '@/lib/auth'
-import { Button } from '@/components/ui/button'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { filterFieldConfigs } from '@/data/filter-config'
 import { DataCard } from '@/components/data-card'
@@ -64,9 +62,7 @@ function matchesCondition(student: Student, filter: FilterCriterion): boolean {
 }
 
 function StudentsPage() {
-  useSetBreadcrumbs([{ label: 'Students', href: '/students' }])
-
-  const { isLoggedIn } = useAuth()
+  useSetBreadcrumbs([{ label: 'Profile', href: '/students' }])
 
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [searchQuery, setSearchQuery] = useState('')
@@ -81,11 +77,9 @@ function StudentsPage() {
     // Filter by class or level
     if (selectedClass !== 'all') {
       if (selectedClass.startsWith('Secondary')) {
+        // Extract level number and filter by classes starting with that number
         const levelNum = selectedClass.replace('Secondary ', '')
-        students = students.filter((s) => s.class.startsWith(`Sec ${levelNum}`))
-      } else if (selectedClass.startsWith('Primary')) {
-        const levelNum = selectedClass.replace('Primary ', '')
-        students = students.filter((s) => s.class.startsWith(`P${levelNum}`))
+        students = students.filter((s) => s.class.startsWith(levelNum))
       } else {
         students = students.filter((s) => s.class === selectedClass)
       }
@@ -210,41 +204,19 @@ function StudentsPage() {
 
   const metrics = useMemo(() => getMetrics(matchedStudents), [matchedStudents])
 
-  if (!isLoggedIn) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="flex w-[467px] flex-col items-center gap-6 text-center">
-          <img
-            src="/students-illustration.png"
-            alt=""
-            className="size-[380px] object-cover"
-          />
-          <div className="flex flex-col gap-3">
-            <h1 className="text-[23px] font-semibold text-slate-12">
-              Students
-            </h1>
-            <p className="text-base text-slate-11">
-              View your student profiles in one place. Sign in to see the
-              complete list of your students and their details.{' '}
-              <span className="font-semibold text-[#0797b9]">Learn more</span>
-            </p>
-          </div>
-          <Button render={<Link to="/login" />}>
-            Sign In to View Students
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col">
       {/* Fixed content area */}
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
         <div className="px-6">
-          <h1 className="text-2xl font-semibold">Students</h1>
-          <p className="text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold">Profiles</h1>
+            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
+              Concept illustration
+            </span>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
             Key data to understand your students holistically
           </p>
         </div>
@@ -262,17 +234,20 @@ function StudentsPage() {
           <DataCard
             label="Attendance"
             value={`${metrics.absenteeismRate}%`}
-            description="Absenteeism"
+            description="Current term"
+            trend="declining"
           />
           <DataCard
             label="Attendance"
             value={metrics.lateComing}
             description="Late-coming"
+            trend="improving"
           />
           <DataCard
             label="Tier 2-3"
             value={metrics.tier2_3Students}
             description="Students needing support"
+            trend="stable"
           />
         </div>
 

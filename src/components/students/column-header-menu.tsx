@@ -169,48 +169,6 @@ export function ColumnHeaderMenu({
               )}
             </>
           )}
-
-          {/* Separator */}
-          {column.sortable && column.filterable && (
-            <div className="my-1 h-px bg-border" />
-          )}
-
-          {/* Filter option */}
-          {column.filterable && column.filterField && (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!hasActiveFilter) {
-                    onAddQuickFilter(column.filterField!)
-                    setOpen(false)
-                  }
-                }}
-                disabled={hasActiveFilter}
-                className={cn(
-                  'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent',
-                  hasActiveFilter && 'bg-accent cursor-default',
-                )}
-              >
-                <Filter className="h-4 w-4" />
-                {hasActiveFilter ? 'Filter active' : 'Filter by this column'}
-                {hasActiveFilter && <Check className="ml-auto h-4 w-4" />}
-              </button>
-              {hasActiveFilter && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClearFilter(column.filterField!)
-                    setOpen(false)
-                  }}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
-                >
-                  <X className="h-4 w-4" />
-                  Clear filter
-                </button>
-              )}
-            </>
-          )}
         </PopoverContent>
       </Popover>
     </TableHead>
