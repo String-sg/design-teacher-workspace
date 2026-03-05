@@ -22,6 +22,7 @@ import { AcademicAnalytics } from './academic-analytics'
 import { AttendanceAnalytics } from './attendance-analytics'
 import type { Student } from '@/types/student'
 import type { HolisticReport, ReviewStatus, Term } from '@/types/report'
+import { useFeatureFlag } from '@/hooks/use-feature-flag'
 import {
   TERMS,
   filterReports,
@@ -273,6 +274,8 @@ export function StudentProfile({
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [academicAnalyticsOpen, setAcademicAnalyticsOpen] = useState(false)
 
+  const holisticReportsEnabled = useFeatureFlag('holistic-reports')
+
   const gradeCounts = getStudentGradeCounts(student)
   const studentReports = filterReports({ studentId: student.id })
   const existingTerms = new Set(studentReports.map((r) => r.term))
@@ -285,7 +288,7 @@ export function StudentProfile({
     { id: 'academic', label: 'Academic' },
     { id: 'family', label: 'Family' },
     { id: 'personal', label: 'Personal' },
-    { id: 'reports', label: 'Reports' },
+    ...(holisticReportsEnabled ? [{ id: 'reports', label: 'Reports' }] : []),
   ]
 
   return (
@@ -921,72 +924,74 @@ export function StudentProfile({
         </Section>
 
         {/* Reports Section */}
-        <Section
-          id="reports"
-          title="Reports"
-          icon={<FileText className="h-5 w-5" />}
-          iconClassName="bg-red-100 text-red-600"
-        >
-          {studentReports.length > 0 ? (
-            <div className="space-y-2">
-              {studentReports
-                .sort((a, b) => TERMS.indexOf(a.term) - TERMS.indexOf(b.term))
-                .map((report) => (
-                  <ReportRow key={report.id} report={report} />
-                ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <FileText className="h-6 w-6 text-muted-foreground" />
+        {holisticReportsEnabled && (
+          <Section
+            id="reports"
+            title="Reports"
+            icon={<FileText className="h-5 w-5" />}
+            iconClassName="bg-red-100 text-red-600"
+          >
+            {studentReports.length > 0 ? (
+              <div className="space-y-2">
+                {studentReports
+                  .sort((a, b) => TERMS.indexOf(a.term) - TERMS.indexOf(b.term))
+                  .map((report) => (
+                    <ReportRow key={report.id} report={report} />
+                  ))}
               </div>
-              <div>
-                <p className="text-sm font-medium">No reports generated</p>
-                <p className="text-xs text-muted-foreground">
-                  Generate a Holistic Development Report for this student
-                </p>
+            ) : (
+              <div className="flex flex-col items-center gap-3 py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                  <FileText className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">No reports generated</p>
+                  <p className="text-xs text-muted-foreground">
+                    Generate a Holistic Development Report for this student
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {missingTerms.length > 0 && (
-            <div className="mt-4 flex items-center gap-2 border-t pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setWizardOpen(true)}
-              >
-                <Plus className="mr-1 h-4 w-4" />
-                Generate HDP
-              </Button>
-              <span className="text-xs text-muted-foreground">
-                {missingTerms.length === TERMS.length
-                  ? 'All terms'
-                  : missingTerms.join(', ')}{' '}
-                not yet generated
-              </span>
-            </div>
-          )}
+            {missingTerms.length > 0 && (
+              <div className="mt-4 flex items-center gap-2 border-t pt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setWizardOpen(true)}
+                >
+                  <Plus className="mr-1 h-4 w-4" />
+                  Generate HDP
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  {missingTerms.length === TERMS.length
+                    ? 'All terms'
+                    : missingTerms.join(', ')}{' '}
+                  not yet generated
+                </span>
+              </div>
+            )}
 
-          {studentReports.length > 0 && (
-            <div className="mt-4 border-t pt-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground"
-                render={
-                  <Link
-                    to="/reports"
-                    search={{ studentId: student.id, groupBy: 'student' }}
-                  />
-                }
-              >
-                <Eye className="mr-1 h-4 w-4" />
-                View all in Reports
-              </Button>
-            </div>
-          )}
-        </Section>
+            {studentReports.length > 0 && (
+              <div className="mt-4 border-t pt-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground"
+                  render={
+                    <Link
+                      to="/reports"
+                      search={{ studentId: student.id, groupBy: 'student' }}
+                    />
+                  }
+                >
+                  <Eye className="mr-1 h-4 w-4" />
+                  View all in Reports
+                </Button>
+              </div>
+            )}
+          </Section>
+        )}
       </div>
 
       {/* Jump to Navigation */}
