@@ -2,14 +2,16 @@ import * as React from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
 import {
   ArrowUpRight,
+  BarChart3,
+  Bot,
   CircleHelp,
   ClipboardList,
   FileText,
   Home,
+  Mail,
   Megaphone,
   MessageSquare,
   ScrollText,
-  Mail,
   Settings,
   Users,
 } from 'lucide-react'
@@ -46,6 +48,7 @@ interface MenuItem {
   icon: LucideIcon
   badge?: number
   featureFlag?: FeatureFlagKey
+  conceptTag?: boolean
 }
 
 const mainNavItems: Array<MenuItem> = [
@@ -65,6 +68,21 @@ const mainNavItems: Array<MenuItem> = [
     title: 'Students',
     url: '/students',
     icon: Users,
+  },
+]
+
+const studentInsightItems: Array<MenuItem> = [
+  {
+    title: 'Analytics',
+    url: '/student-analytics',
+    icon: BarChart3,
+    conceptTag: true,
+  },
+  {
+    title: 'Insight Buddy',
+    url: '/insight-buddy',
+    icon: Bot,
+    conceptTag: true,
   },
 ]
 
@@ -100,11 +118,19 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
         <SidebarMenuItem key={item.title}>
           <SidebarMenuButton
             render={<Link to={item.url} />}
-            isActive={currentPath === item.url}
+            isActive={
+              currentPath === item.url ||
+              (item.url !== '/' && currentPath.startsWith(item.url))
+            }
             tooltip={item.title}
           >
             <item.icon className="size-4" />
             <span>{item.title}</span>
+            {item.conceptTag && (
+              <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-900 group-data-[collapsible=icon]:hidden">
+                Concept
+              </span>
+            )}
           </SidebarMenuButton>
           {item.badge && (
             <SidebarMenuBadge className="bg-muted text-muted-foreground">
@@ -124,6 +150,7 @@ export function AppSidebar() {
   const announcementsEnabled = useFeatureFlag('announcements')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
   const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
+  const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
 
   const filterItems = (items: Array<MenuItem>) =>
     items.filter((item) => {
@@ -160,10 +187,25 @@ export function AppSidebar() {
           </SidebarGroupContent>
           {filteredParentsItems.length > 0 && (
             <>
-              <SidebarGroupLabel className="mt-2">Parents Comm</SidebarGroupLabel>
+              <SidebarGroupLabel className="mt-2">
+                Parents Comm
+              </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenuItems
                   items={filteredParentsItems}
+                  currentPath={location.pathname}
+                />
+              </SidebarGroupContent>
+            </>
+          )}
+          {studentAnalyticsEnabled && (
+            <>
+              <SidebarGroupLabel className="mt-2">
+                Student Insights
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenuItems
+                  items={studentInsightItems}
                   currentPath={location.pathname}
                 />
               </SidebarGroupContent>

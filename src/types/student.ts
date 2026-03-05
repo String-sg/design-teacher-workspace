@@ -1,23 +1,62 @@
+export interface OffenceDetail {
+  type: string
+  count: number
+  latestDate: string
+}
+
+export interface CounsellingSubcase {
+  name: string
+  count: number
+  latestDate: string
+}
+
+export interface CounsellingCase {
+  category: string
+  subcases?: Array<CounsellingSubcase>
+  count?: number
+  latestDate?: string
+}
+
+export interface RiskIndicatorRecord {
+  year: number
+  term: string
+  indicators: Array<string>
+}
+
+export interface SocialLinkPerson {
+  name: string
+  class: string
+  closenessRating: number | null
+}
+
 export interface Student {
   id: string
   name: string
   class: string
+  cca: string
   attentionTags: Array<AttentionTag>
   // Academic Performance
   overallPercentage: number
   conduct: ConductGrade
+  approvedMtl: string | null
   learningSupport: string | null
   postSecEligibility: string
   // Behaviour & Discipline
   offences: number
+  offenceDetails?: Array<OffenceDetail>
   absences: number
   lateComing: number
   ccaMissed: number
   // Wellbeing
   riskIndicators: number
+  riskIndicatorHistory?: Array<RiskIndicatorRecord>
   lowMoodFlagged: string | null
+  lowMoodTerms?: Array<string>
   socialLinks: number
+  selectedBy?: Array<SocialLinkPerson>
+  selectedFriends?: Array<SocialLinkPerson>
   counsellingSessions: number
+  counsellingCases?: Array<CounsellingCase>
   sen: string | null
   fas: string | null
   // Family, Housing, Finance
@@ -25,8 +64,15 @@ export interface Student {
   housingType: 'Owned' | 'Rented' | null
   custody: string | null
   custodyDetails: string | null
+  commuterStatus: string | null
+  afterSchoolArrangement: string | null
   siblings: number
+  siblingDetails?: Array<{ name: string; class: string }>
   externalAgencies: string | null
+  // Personal
+  birthday?: string
+  citizenship?: 'Singapore citizen' | 'Permanent resident' | 'Foreigner'
+  languagesSpoken?: string
   // School
   schoolName?: string
   // Student Identity

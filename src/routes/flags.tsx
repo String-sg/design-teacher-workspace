@@ -40,6 +40,12 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
     description:
       'Enable holistic development reports showing student progress across academic and character development',
   },
+  {
+    key: 'student-analytics',
+    label: 'Student Analytics (Research)',
+    description:
+      'Show Student Analytics and Insight Buddy in the sidebar — attendance cohort analytics, academic analytics, export CSV, and AI-powered student insights',
+  },
 ]
 
 function FeatureFlagsPage() {

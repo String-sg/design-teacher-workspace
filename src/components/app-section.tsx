@@ -29,9 +29,7 @@ export function AppSection({ title, description, apps }: AppSectionProps) {
             color={app.color}
             href={app.href}
             iconPadding={app.iconPadding}
-            onClick={
-              app.id === 'heytalia' ? () => setView('chat') : undefined
-            }
+            onClick={app.id === 'heytalia' ? () => setView('chat') : undefined}
           />
         ))}
       </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
-import { useHeyTalia } from './heytalia-context'
 import { useRouterState } from '@tanstack/react-router'
 import {
   Check,
@@ -19,6 +18,7 @@ import {
   ThumbsDown,
   ThumbsUp,
 } from 'lucide-react'
+import { useHeyTalia } from './heytalia-context'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/use-mobile'
 
@@ -483,7 +483,9 @@ export function HeyTaliaPanel() {
             </div>
             <div className="min-w-0 flex-1 text-left">
               <div className="flex items-center gap-1.5">
-                <span className="text-sm font-semibold text-foreground">HeyTalia</span>
+                <span className="text-sm font-semibold text-foreground">
+                  HeyTalia
+                </span>
                 <span className="rounded-full bg-twblue-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-twblue-9">
                   Beta
                 </span>
@@ -600,7 +602,6 @@ export function HeyTaliaPanel() {
           </p>
         </div>
       </div>
-
     </>
   )
 }
@@ -619,7 +620,9 @@ function AgentPickerDropdown({
     <div className="absolute left-3 right-3 top-[calc(100%+4px)] z-50 overflow-hidden rounded-xl border bg-white shadow-lg">
       {/* Header */}
       <div className="px-4 pt-3.5 pb-2.5">
-        <p className="text-sm font-semibold text-foreground">Teacher Assistant</p>
+        <p className="text-sm font-semibold text-foreground">
+          Teacher Assistant
+        </p>
         <p className="mt-0.5 text-xs text-muted-foreground">
           Choose an agent to help you
         </p>
@@ -788,7 +791,6 @@ function MessageBubble({
             ))}
           </div>
         )}
-
       </div>
     </div>
   )

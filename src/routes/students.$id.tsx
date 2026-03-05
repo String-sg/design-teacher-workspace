@@ -1,10 +1,18 @@
+import { useEffect } from 'react'
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { ArrowLeft, ChevronLeft, ChevronRight, Download } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { StudentProfile } from '@/components/students/student-profile'
+import { InsightBuddy } from '@/components/insight-buddy'
 import { getStudentById, mockStudents } from '@/data/mock-students'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
+import { useFeatureFlag } from '@/hooks/use-feature-flag'
+
+const PROFILE_PROMPTS = [
+  "Summarise this student's wellbeing",
+  'What are the key risk factors for this student?',
+]
 
 export const Route = createFileRoute('/students/$id')({
   component: StudentProfilePage,
@@ -33,10 +41,15 @@ export const Route = createFileRoute('/students/$id')({
 
 function StudentProfilePage() {
   const { student, prevStudentId, nextStudentId } = Route.useLoaderData()
+  const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
+
+  useEffect(() => {
+    document.querySelector('[data-scroll-container]')?.scrollTo({ top: 0 })
+  }, [student.id])
 
   useSetBreadcrumbs([
     { label: 'Home', href: '/' },
-    { label: 'Students', href: '/students' },
+    { label: 'Profile', href: '/students' },
     { label: student.name, href: `/students/${student.id}` },
   ])
 
@@ -92,11 +105,18 @@ function StudentProfilePage() {
   )
 
   return (
-    <main className="flex flex-col gap-4 p-6">
-      {/* Centered content container */}
-      <div className="mx-auto w-full max-w-[860px]">
-        <StudentProfile student={student} headerControls={headerControls} />
-      </div>
+    <main className="mx-auto max-w-5xl p-6">
+      {/* Main profile content */}
+      <StudentProfile student={student} headerControls={headerControls} />
+
+      {/* Insight Buddy floating — gated behind student-analytics flag */}
+      {studentAnalyticsEnabled && (
+        <InsightBuddy
+          examplePrompts={PROFILE_PROMPTS}
+          student={student}
+          floating
+        />
+      )}
     </main>
   )
 }

@@ -10,6 +10,7 @@ import * as React from 'react'
 
 import { DirectEdit } from 'made-refine'
 import appCss from '../styles.css?url'
+import { DraggableTanStackDevtools } from '@/components/draggable-tanstack-devtools'
 import { AppHeader } from '@/components/app-header'
 import { AppSidebar } from '@/components/app-sidebar'
 import { WelcomeModal } from '@/components/welcome-modal'
@@ -56,6 +57,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        {process.env.NODE_ENV === 'development' && (
+          <DraggableTanStackDevtools />
+        )}
         {process.env.NODE_ENV === 'development' && <DirectEdit />}
         <Scripts />
       </body>
