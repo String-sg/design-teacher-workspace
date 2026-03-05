@@ -1,43 +1,24 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Equal,
-  EqualNot,
-  Info,
-  ListFilter,
-  Pencil,
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  Plus,
   RotateCcw,
-  Save,
-  Trash2,
+  Search,
   X,
 } from 'lucide-react'
-import { toast } from 'sonner'
-import type { ReactNode } from 'react'
 
 import type {
   FilterCriterion,
   FilterField,
   FilterOperator,
+  FilterRangeValue,
 } from '@/types/student'
-import type { FilterFieldOption, OperatorOption } from '@/data/filter-config'
-import {
-  filterFieldConfigs,
-  groupLabels,
-  groupOrder,
-  textOperators,
-} from '@/data/filter-config'
+import type { FilterFieldOption } from '@/data/filter-config'
+import { filterFieldConfigs } from '@/data/filter-config'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
@@ -52,101 +33,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 
-// Operator options with icons (defined here since they include React components)
-const numericOperators: Array<OperatorOption> = [
-  {
-    value: 'gte',
-    label: 'Greater than or equal',
-    icon: <ChevronsRight className="h-4 w-4" />,
-  },
-  {
-    value: 'gt',
-    label: 'Greater than',
-    icon: <ChevronRight className="h-4 w-4" />,
-  },
-  {
-    value: 'lte',
-    label: 'Less than or equal to',
-    icon: <ChevronsLeft className="h-4 w-4" />,
-  },
-  {
-    value: 'lt',
-    label: 'Less than',
-    icon: <ChevronLeft className="h-4 w-4" />,
-  },
-  {
-    value: 'eq',
-    label: 'Equal to',
-    icon: <Equal className="h-4 w-4" />,
-  },
+// Plain-text operator labels matching the screenshot
+const numericOperatorOptions = [
+  { value: 'eq' as FilterOperator, label: 'equals' },
+  { value: 'neq' as FilterOperator, label: 'not equal to' },
+  { value: 'gt' as FilterOperator, label: 'greater than' },
+  { value: 'lt' as FilterOperator, label: 'less than' },
+  { value: 'gte' as FilterOperator, label: 'greater than or equal to' },
+  { value: 'lte' as FilterOperator, label: 'less than or equal to' },
+  { value: 'between' as FilterOperator, label: 'between' },
+  { value: 'not_between' as FilterOperator, label: 'not between' },
 ]
 
-const booleanOperators: Array<OperatorOption> = [
-  { value: 'is', label: 'is', icon: <Equal className="h-4 w-4" /> },
-  { value: 'is_not', label: 'is not', icon: <EqualNot className="h-4 w-4" /> },
+const booleanOperatorOptions = [
+  { value: 'is' as FilterOperator, label: 'is' },
+  { value: 'is_not' as FilterOperator, label: 'is not' },
 ]
 
-// Build filterFieldOptions from config, adding operator arrays based on field type
-const filterFieldOptions: Array<FilterFieldOption> = filterFieldConfigs.map(
+const textOperatorOptions = [
+  { value: 'contains' as FilterOperator, label: 'contains' },
+  { value: 'not_contains' as FilterOperator, label: 'does not contain' },
+  { value: 'is' as FilterOperator, label: 'is' },
+  { value: 'is_not' as FilterOperator, label: 'is not' },
+  { value: 'is_empty' as FilterOperator, label: 'is empty' },
+  { value: 'is_not_empty' as FilterOperator, label: 'is not empty' },
+]
+
+interface FilterFieldOption2 extends Omit<FilterFieldOption, 'operators'> {
+  operators: Array<{ value: FilterOperator; label: string }>
+}
+
+const filterFieldOptions: Array<FilterFieldOption2> = filterFieldConfigs.map(
   (config) => ({
     ...config,
     operators:
       config.type === 'numeric'
-        ? numericOperators
+        ? numericOperatorOptions
         : config.type === 'boolean' || config.type === 'enum'
-          ? booleanOperators
-          : textOperators,
+          ? booleanOperatorOptions
+          : textOperatorOptions,
   }),
 )
-
-interface FilterPreset {
-  id: string
-  label: string
-  description?: string
-  filters: Array<FilterCriterion>
-}
-
-const defaultPresets: Array<FilterPreset> = [
-  {
-    id: 'support',
-    label: 'Support',
-    description: 'Identify students for support',
-    filters: [
-      { id: '1', field: 'riskIndicators', operator: 'gte', value: 3 },
-      { id: '2', field: 'absences', operator: 'gte', value: 5 },
-      { id: '3', field: 'conduct', operator: 'is', value: 'Poor' },
-    ],
-  },
-  {
-    id: 'leadership',
-    label: 'Leadership',
-    description: 'Find potential leaders',
-    filters: [
-      { id: '1', field: 'conduct', operator: 'is', value: 'Excellent' },
-      { id: '2', field: 'overallPercentage', operator: 'gte', value: 70 },
-      { id: '3', field: 'offences', operator: 'eq', value: 0 },
-    ],
-  },
-]
-
-const customPresetOption = {
-  id: 'custom',
-  label: 'Custom',
-  description: 'Build your own criteria from scratch',
-}
-
-let presetIdCounter = 0
-const generatePresetId = () => `preset-${++presetIdCounter}`
 
 interface MultiFilterPopoverProps {
   filters: Array<FilterCriterion>
   onFiltersChange: (filters: Array<FilterCriterion>) => void
+  matchedCount?: number
+  totalCount?: number
   className?: string
 }
 
@@ -156,17 +90,49 @@ const generateId = () => `filter-${++filterIdCounter}`
 export function MultiFilterPopover({
   filters,
   onFiltersChange,
+  matchedCount,
+  totalCount,
   className,
 }: MultiFilterPopoverProps) {
   const [open, setOpen] = useState(false)
-  const [customPresets, setCustomPresets] = useState<Array<FilterPreset>>([])
-  const [saveDialogOpen, setSaveDialogOpen] = useState(false)
-  const [presetName, setPresetName] = useState('')
-  const [presetDescription, setPresetDescription] = useState('')
-  const [editingPresetId, setEditingPresetId] = useState<string | null>(null)
-  const [activePresetId, setActivePresetId] = useState<string | null>(null)
+  const [selectorOpen, setSelectorOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchRef = useRef<HTMLInputElement>(null)
 
-  const filterPresets = [...defaultPresets, ...customPresets]
+  // Per-row field selector combobox state
+  const [openFieldSelectorIndex, setOpenFieldSelectorIndex] = useState<
+    number | null
+  >(null)
+  const [fieldSelectorQuery, setFieldSelectorQuery] = useState('')
+  const fieldSelectorSearchRef = useRef<HTMLInputElement>(null)
+
+  // Auto-open selector when popover opens (only if no filters yet)
+  useEffect(() => {
+    if (open) {
+      if (filters.length === 0) setSelectorOpen(true)
+    } else {
+      setSelectorOpen(false)
+      setSearchQuery('')
+      setOpenFieldSelectorIndex(null)
+      setFieldSelectorQuery('')
+    }
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Focus search when "Select filter" selector opens
+  useEffect(() => {
+    if (selectorOpen) {
+      const t = setTimeout(() => searchRef.current?.focus(), 30)
+      return () => clearTimeout(t)
+    }
+  }, [selectorOpen])
+
+  // Focus search when per-row field selector opens
+  useEffect(() => {
+    if (openFieldSelectorIndex !== null) {
+      const t = setTimeout(() => fieldSelectorSearchRef.current?.focus(), 30)
+      return () => clearTimeout(t)
+    }
+  }, [openFieldSelectorIndex])
 
   const activeFields = useMemo(
     () => new Set(filters.map((f) => f.field)),
@@ -177,23 +143,35 @@ export function MultiFilterPopover({
     [activeFields],
   )
 
-  // Get selected preset from active ID
-  const selectedPreset = activePresetId
-    ? filterPresets.find((p) => p.id === activePresetId)
-    : null
+  const filteredFields = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return availableFields
+    return availableFields.filter((opt) => opt.label.toLowerCase().includes(q))
+  }, [availableFields, searchQuery])
+
+  const groupedFields = useMemo(() => {
+    return [{ group: '_all', label: '', fields: filteredFields }]
+  }, [filteredFields])
 
   const handleAddFilter = (field: FilterField) => {
     const fieldOption = filterFieldOptions.find((opt) => opt.field === field)
     if (!fieldOption) return
+    const operator =
+      fieldOption.type === 'numeric'
+        ? fieldOption.operators[0].value
+        : fieldOption.defaultOperator
+    const value = fieldOption.type === 'numeric' ? '' : fieldOption.defaultValue
     onFiltersChange([
       ...filters,
       {
         id: generateId(),
         field,
-        operator: fieldOption.defaultOperator,
-        value: fieldOption.defaultValue,
+        operator,
+        value,
       },
     ])
+    setSelectorOpen(false)
+    setSearchQuery('')
   }
 
   const handleRemoveFilter = (index: number) => {
@@ -203,27 +181,43 @@ export function MultiFilterPopover({
   const handleFieldChange = (index: number, field: FilterField) => {
     const fieldOption = filterFieldOptions.find((opt) => opt.field === field)
     if (!fieldOption) return
+    const operator =
+      fieldOption.type === 'numeric'
+        ? fieldOption.operators[0].value
+        : fieldOption.defaultOperator
+    const value = fieldOption.type === 'numeric' ? '' : fieldOption.defaultValue
     const newFilters = [...filters]
     newFilters[index] = {
       ...newFilters[index],
       field,
-      operator: fieldOption.defaultOperator,
-      value: fieldOption.defaultValue,
+      operator,
+      value,
     }
     onFiltersChange(newFilters)
   }
 
   const handleOperatorChange = (index: number, operator: FilterOperator) => {
     const newFilters = [...filters]
-    newFilters[index] = { ...newFilters[index], operator }
-    // Clear value for empty operators
-    if (operator === 'is_empty' || operator === 'is_not_empty') {
-      newFilters[index].value = ''
+    const prev = newFilters[index]
+    let value = prev.value
+    if (operator === 'between' || operator === 'not_between') {
+      // switching to range — seed from current single value if possible
+      const num = typeof value === 'number' ? value : 0
+      value = { min: num, max: num }
+    } else if (prev.operator === 'between' || prev.operator === 'not_between') {
+      // switching away from range — use min as the single value
+      value = typeof value === 'object' ? (value).min : ''
+    } else if (operator === 'is_empty' || operator === 'is_not_empty') {
+      value = ''
     }
+    newFilters[index] = { ...prev, operator, value }
     onFiltersChange(newFilters)
   }
 
-  const handleValueChange = (index: number, value: string | number) => {
+  const handleValueChange = (
+    index: number,
+    value: string | number | FilterRangeValue,
+  ) => {
     const newFilters = [...filters]
     newFilters[index] = { ...newFilters[index], value }
     onFiltersChange(newFilters)
@@ -231,79 +225,8 @@ export function MultiFilterPopover({
 
   const handleReset = () => {
     onFiltersChange([])
-    setActivePresetId(null)
-  }
-
-  const handleSavePreset = () => {
-    if (!presetName.trim() || filters.length === 0) return
-    const savedFilters = filters.map((f) => ({
-      field: f.field,
-      operator: f.operator,
-      value: f.value,
-    }))
-
-    let savedPresetId: string
-
-    if (editingPresetId) {
-      // Update existing preset
-      savedPresetId = editingPresetId
-      setCustomPresets(
-        customPresets.map((p) =>
-          p.id === editingPresetId
-            ? {
-                ...p,
-                label: presetName.trim(),
-                description: presetDescription.trim() || undefined,
-                filters: savedFilters,
-              }
-            : p,
-        ),
-      )
-      toast.success(`Preset "${presetName.trim()}" updated`)
-    } else {
-      // Create new preset
-      savedPresetId = generatePresetId()
-      const newPreset: FilterPreset = {
-        id: savedPresetId,
-        label: presetName.trim(),
-        description: presetDescription.trim() || undefined,
-        filters: savedFilters,
-      }
-      setCustomPresets([...customPresets, newPreset])
-      toast.success(`Preset "${newPreset.label}" saved`)
-    }
-
-    // Update current filters to match saved preset exactly
-    onFiltersChange(savedFilters.map((f) => ({ ...f, id: generateId() })))
-    setActivePresetId(savedPresetId)
-    setPresetName('')
-    setPresetDescription('')
-    setEditingPresetId(null)
-    setSaveDialogOpen(false)
-  }
-
-  const handleEditPreset = (presetId: string) => {
-    const preset = customPresets.find((p) => p.id === presetId)
-    if (preset) {
-      setPresetName(preset.label)
-      setPresetDescription(preset.description ?? '')
-      setEditingPresetId(presetId)
-      setActivePresetId(presetId)
-      // Load the preset's filters into the current view
-      onFiltersChange(preset.filters.map((f) => ({ ...f, id: generateId() })))
-      setSaveDialogOpen(true)
-    }
-  }
-
-  const handleDeletePreset = (presetId: string) => {
-    const preset = customPresets.find((p) => p.id === presetId)
-    setCustomPresets(customPresets.filter((p) => p.id !== presetId))
-    if (activePresetId === presetId) {
-      setActivePresetId(null)
-    }
-    if (preset) {
-      toast.success(`Preset "${preset.label}" deleted`)
-    }
+    setSelectorOpen(true)
+    setSearchQuery('')
   }
 
   const getFieldOption = (field: FilterField) =>
@@ -312,410 +235,392 @@ export function MultiFilterPopover({
   const needsValueInput = (operator: FilterOperator) =>
     !['is_empty', 'is_not_empty'].includes(operator)
 
+  const isRangeOperator = (operator: FilterOperator) =>
+    operator === 'between' || operator === 'not_between'
+
+  const showCount =
+    filters.length > 0 && matchedCount !== undefined && totalCount !== undefined
+
   return (
-    <>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger
-          render={
-            <Button
-              variant="outline"
-              className={cn('gap-2', className)}
-              aria-label="Filter students"
-              aria-expanded={open}
-            />
-          }
-        >
-          <ListFilter className="h-4 w-4" />
-          Filter
-          {filters.length > 0 && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-              {filters.length}
-            </span>
-          )}
-        </PopoverTrigger>
-        <PopoverContent className="w-[600px] gap-0 p-0" align="start">
-          {/* Preset Selector */}
-          <div className="border-b px-6 py-6">
-            <div className="mb-2 flex items-center gap-1.5">
-              <label className="text-sm font-medium">
-                Select filter preset
-              </label>
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <button
-                      type="button"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <Info className="h-3.5 w-3.5" />
-                    </button>
-                  }
-                />
-                <TooltipContent side="right">
-                  Quickly filter students using preset criteria
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <Select
-              value={activePresetId ?? 'custom'}
-              onValueChange={(presetId) => {
-                if (presetId === 'custom') {
-                  setActivePresetId(null)
-                  return
-                }
-                const preset = filterPresets.find((p) => p.id === presetId)
-                if (preset) {
-                  setActivePresetId(presetId)
-                  onFiltersChange(
-                    preset.filters.map((f) => ({ ...f, id: generateId() })),
-                  )
-                }
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue>{selectedPreset?.label ?? 'Custom'}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {defaultPresets.map((preset) => (
-                  <SelectItem key={preset.id} value={preset.id}>
-                    <div className="flex flex-col">
-                      <span>{preset.label}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {preset.description}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-                <SelectItem value="custom">
-                  <div className="flex flex-col">
-                    <span>{customPresetOption.label}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {customPresetOption.description}
-                    </span>
-                  </div>
-                </SelectItem>
-                {customPresets.length > 0 && (
-                  <>
-                    <div className="my-1 h-px bg-border" />
-                    <div className="py-1.5 pl-3 text-xs font-semibold text-muted-foreground">
-                      Saved presets
-                    </div>
-                    {customPresets.map((preset) => (
-                      <div
-                        key={preset.id}
-                        className="flex items-center justify-between gap-1 pr-2"
-                      >
-                        <SelectItem value={preset.id} className="flex-1">
-                          <div className="flex flex-col">
-                            <span>{preset.label}</span>
-                            {preset.description && (
-                              <span className="text-xs text-muted-foreground">
-                                {preset.description}
-                              </span>
-                            )}
-                          </div>
-                        </SelectItem>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleEditPreset(preset.id)
-                          }}
-                          className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeletePreset(preset.id)
-                          }}
-                          className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            className={cn('gap-2 aria-expanded:bg-white', className)}
+            aria-label="Filter students"
+            aria-expanded={open}
+          />
+        }
+      >
+        <Filter className="h-4 w-4" />
+        Filter
+        {filters.length > 0 && (
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+            {filters.length}
+          </span>
+        )}
+      </PopoverTrigger>
 
-          {/* Active Filters */}
-          {filters.length > 0 && (
-            <div className="px-6 py-6">
-              <div className="max-h-[280px] space-y-2 overflow-y-auto">
-                {filters.map((filter, index) => {
-                  const fieldOption = getFieldOption(filter.field)
-                  return (
-                    <div key={filter.id} className="flex items-center gap-2">
-                      {/* Field Selector */}
-                      <Select
-                        value={filter.field}
-                        onValueChange={(value) =>
-                          handleFieldChange(index, value as FilterField)
-                        }
+      <PopoverContent className="w-[660px] gap-0 p-0" align="start">
+        {/* Header */}
+        <div className="px-5 pb-3 pt-4">
+          <h3 className="text-sm font-semibold">
+            Show records
+            {showCount && (
+              <span className="ml-1.5 font-normal text-muted-foreground">
+                ({matchedCount} of {totalCount} found)
+              </span>
+            )}
+          </h3>
+        </div>
+
+        {/* Active filter rows */}
+        {filters.length > 0 && (
+          <div className="space-y-2 px-5 pb-3">
+            {filters.map((filter, index) => {
+              const fieldOption = getFieldOption(filter.field)
+              return (
+                <div key={filter.id} className="flex items-center gap-2">
+                  {/* Where / and label */}
+                  <span className="w-12 shrink-0 text-sm text-muted-foreground">
+                    {index === 0 ? 'Where' : 'and'}
+                  </span>
+
+                  {/* Field selector – same combobox as "Select filter" */}
+                  {(() => {
+                    const isOpen = openFieldSelectorIndex === index
+                    const rowFields = filterFieldOptions.filter(
+                      (opt) =>
+                        opt.field === filter.field ||
+                        !activeFields.has(opt.field),
+                    )
+                    const q = fieldSelectorQuery.trim().toLowerCase()
+                    const visibleFields = q
+                      ? rowFields.filter((opt) =>
+                          opt.label.toLowerCase().includes(q),
+                        )
+                      : rowFields
+                    return (
+                      <Popover
+                        open={isOpen}
+                        onOpenChange={(v) => {
+                          setOpenFieldSelectorIndex(v ? index : null)
+                          if (!v) setFieldSelectorQuery('')
+                        }}
                       >
-                        <SelectTrigger className="min-w-0 flex-1">
-                          <SelectValue>{fieldOption?.label}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="min-w-max">
-                          <SelectItem value={filter.field}>
+                        <PopoverTrigger
+                          render={
+                            <button
+                              type="button"
+                              className="border-input flex h-9 w-[152px] shrink-0 items-center justify-between gap-1.5 rounded-[var(--radius-input)] border bg-white px-3 text-sm outline-none"
+                            />
+                          }
+                        >
+                          <span className="flex-1 truncate text-left">
                             {fieldOption?.label}
-                          </SelectItem>
-                          {availableFields.map((opt) => (
-                            <SelectItem key={opt.field} value={opt.field}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                          </span>
+                          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-[480px] gap-0 p-3"
+                          align="start"
+                        >
+                          <div className="mb-1 flex items-center gap-2 rounded-lg border border-blue-400 px-3 py-2 focus-within:border-blue-500">
+                            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            <input
+                              ref={fieldSelectorSearchRef}
+                              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                              placeholder="Search filters"
+                              value={fieldSelectorQuery}
+                              onChange={(e) =>
+                                setFieldSelectorQuery(e.target.value)
+                              }
+                            />
+                          </div>
+                          <ScrollArea className="h-[220px]">
+                            <div className="py-1">
+                              {visibleFields.map((opt) => (
+                                <button
+                                  key={opt.field}
+                                  type="button"
+                                  onClick={() => {
+                                    handleFieldChange(index, opt.field)
+                                    setOpenFieldSelectorIndex(null)
+                                    setFieldSelectorQuery('')
+                                  }}
+                                  className={cn(
+                                    'w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent',
+                                    opt.field === filter.field && 'font-medium',
+                                  )}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                              {visibleFields.length === 0 && (
+                                <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                                  No filters found
+                                </div>
+                              )}
+                            </div>
+                          </ScrollArea>
+                        </PopoverContent>
+                      </Popover>
+                    )
+                  })()}
 
-                      {/* Operator Selector */}
-                      <Select
-                        value={filter.operator}
-                        onValueChange={(value) =>
-                          handleOperatorChange(index, value as FilterOperator)
+                  {/* Operator selector */}
+                  <Select
+                    value={filter.operator}
+                    onValueChange={(value) =>
+                      handleOperatorChange(index, value as FilterOperator)
+                    }
+                  >
+                    <SelectTrigger className="w-[104px] shrink-0 rounded-[14px] bg-white">
+                      <SelectValue>
+                        {
+                          fieldOption?.operators.find(
+                            (o) => o.value === filter.operator,
+                          )?.label
                         }
-                      >
-                        <SelectTrigger className="min-w-0 flex-1">
-                          <SelectValue>
-                            {(() => {
-                              const selectedOp = fieldOption?.operators.find(
-                                (o) => o.value === filter.operator,
-                              )
-                              return (
-                                <span className="flex items-center gap-2">
-                                  {selectedOp?.icon}
-                                  {selectedOp?.label}
-                                </span>
-                              )
-                            })()}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="min-w-max">
-                          {fieldOption?.operators.map((op) => (
-                            <SelectItem key={op.value} value={op.value}>
-                              <span className="flex items-center gap-2">
-                                {op.icon}
-                                {op.label}
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="min-w-max" align="start" alignItemWithTrigger={false}>
+                      {fieldOption?.operators.map((op) => (
+                        <SelectItem key={op.value} value={op.value}>
+                          {op.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-                      {/* Value Input */}
-                      <div className="min-w-0 flex-1">
-                        {needsValueInput(filter.operator) && (
-                          <>
-                            {fieldOption?.type === 'numeric' ? (
+                  {/* Value input */}
+                  <div className="w-[240px] shrink-0">
+                    {needsValueInput(filter.operator) && (
+                      <>
+                        {fieldOption?.type === 'numeric' ? (
+                          isRangeOperator(filter.operator) ? (
+                            // Numerical - range
+                            <div className="flex items-center gap-1.5">
                               <Input
                                 type="number"
-                                value={filter.value}
+                                value={
+                                  typeof filter.value === 'object'
+                                    ? (filter.value).min
+                                    : 0
+                                }
                                 onChange={(e) =>
-                                  handleValueChange(
-                                    index,
-                                    Number(e.target.value),
-                                  )
+                                  handleValueChange(index, {
+                                    ...(typeof filter.value === 'object'
+                                      ? (filter.value)
+                                      : { min: 0, max: 0 }),
+                                    min: Number(e.target.value),
+                                  })
                                 }
-                                className="w-full"
+                                placeholder="Enter number"
+                                className="w-full rounded-[14px]"
                               />
-                            ) : fieldOption?.type === 'boolean' ||
-                              fieldOption?.type === 'enum' ? (
-                              <Select
-                                value={String(filter.value)}
-                                onValueChange={(value) =>
-                                  handleValueChange(index, value)
-                                }
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {fieldOption.enumValues?.map((v) => (
-                                    <SelectItem key={v} value={v}>
-                                      {v}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            ) : (
+                              <span className="shrink-0 text-sm text-muted-foreground">
+                                –
+                              </span>
                               <Input
-                                type="text"
-                                value={String(filter.value)}
-                                onChange={(e) =>
-                                  handleValueChange(index, e.target.value)
+                                type="number"
+                                value={
+                                  typeof filter.value === 'object'
+                                    ? (filter.value).max
+                                    : 0
                                 }
-                                placeholder="Enter value"
-                                className="w-full"
+                                onChange={(e) =>
+                                  handleValueChange(index, {
+                                    ...(typeof filter.value === 'object'
+                                      ? (filter.value)
+                                      : { min: 0, max: 0 }),
+                                    max: Number(e.target.value),
+                                  })
+                                }
+                                placeholder="Enter number"
+                                className="w-full rounded-[14px]"
                               />
+                            </div>
+                          ) : (
+                            // Numerical - not range
+                            <Input
+                              type="number"
+                              value={
+                                typeof filter.value === 'number'
+                                  ? filter.value
+                                  : ''
+                              }
+                              onChange={(e) =>
+                                handleValueChange(
+                                  index,
+                                  e.target.value === ''
+                                    ? ''
+                                    : Number(e.target.value),
+                                )
+                              }
+                              placeholder="Enter number"
+                              className="w-full rounded-[14px]"
+                            />
+                          )
+                        ) : fieldOption?.type === 'boolean' ||
+                          fieldOption?.type === 'enum' ? (
+                          // Fixed option dropdown
+                          <Select
+                            value={String(filter.value)}
+                            onValueChange={(value) =>
+                              handleValueChange(index, value)
+                            }
+                          >
+                            <SelectTrigger className="w-full rounded-[14px] bg-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {fieldOption.enumValues?.map((v) => (
+                                <SelectItem key={v} value={v}>
+                                  {v}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          // Free text
+                          <Input
+                            type="text"
+                            value={String(filter.value)}
+                            onChange={(e) =>
+                              handleValueChange(index, e.target.value)
+                            }
+                            placeholder="Enter value"
+                            className="w-full rounded-[14px]"
+                          />
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Remove */}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFilter(index)}
+                    className="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Select filter row – shown when no filters or when adding */}
+        {(filters.length === 0 || selectorOpen) && (
+          <div
+            className={cn('px-5 pb-3', filters.length > 0 && 'pt-1')}
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-12 shrink-0 text-sm text-muted-foreground">
+                {filters.length === 0 ? 'Where' : 'and'}
+              </span>
+              <div className="w-[152px] shrink-0">
+                <Popover
+                  open={selectorOpen}
+                  onOpenChange={(v) => {
+                    setSelectorOpen(v)
+                    if (!v) setSearchQuery('')
+                  }}
+                >
+                  <PopoverTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between rounded-[14px] border px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent"
+                      />
+                    }
+                  >
+                    Select filter
+                    {selectorOpen ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[582px] gap-0 p-3" align="start">
+                    {/* Search */}
+                    <div className="mb-1 flex items-center gap-2 rounded-lg border border-blue-400 px-3 py-2 focus-within:border-blue-500">
+                      <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <input
+                        ref={searchRef}
+                        className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                        placeholder="Search filters"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+
+                    {/* List */}
+                    <ScrollArea className="h-[220px]">
+                      <div className="py-1">
+                        {groupedFields.map(({ group, label, fields }) => (
+                          <div key={group}>
+                            {label && (
+                              <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                                {label}
+                              </div>
                             )}
-                          </>
+                            {fields.map((opt) => (
+                              <button
+                                key={opt.field}
+                                type="button"
+                                onClick={() => handleAddFilter(opt.field)}
+                                className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        ))}
+                        {filteredFields.length === 0 && (
+                          <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                            No filters found
+                          </div>
                         )}
                       </div>
-
-                      {/* Remove Button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0"
-                        onClick={() => handleRemoveFilter(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )
-                })}
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Available Fields - Grouped by Section */}
-          {availableFields.length > 0 && (
-            <div className={filters.length > 0 ? 'border-t' : ''}>
-              <div className="bg-muted/50 px-6 py-2 text-sm font-medium text-muted-foreground">
-                Filter criteria
-              </div>
-              <ScrollArea className="h-[300px]">
-                <div className="px-3 py-3">
-                  {groupOrder.map((group) => {
-                    const groupFields = availableFields.filter(
-                      (opt) => opt.group === group,
-                    )
-                    if (groupFields.length === 0) return null
-                    return (
-                      <div key={group} className="mb-4 last:mb-0">
-                        <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                          {groupLabels[group]}
-                        </div>
-                        {groupFields.map((opt) => (
-                          <button
-                            key={opt.field}
-                            type="button"
-                            onClick={() => handleAddFilter(opt.field)}
-                            className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    )
-                  })}
-                </div>
-              </ScrollArea>
-            </div>
-          )}
-
-          {/* Footer Actions */}
-          <div className="flex items-center justify-between border-t px-6 py-4">
+        {/* Footer */}
+        <div className="flex items-center justify-between px-5 py-3">
+          {availableFields.length > 0 && !selectorOpen ? (
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
-              onClick={handleReset}
-              disabled={filters.length === 0}
-              className="-ml-2 gap-2 text-destructive hover:text-destructive disabled:text-muted-foreground"
+              className="-ml-2 gap-1.5 font-semibold"
+              onClick={() => setSelectorOpen(true)}
             >
-              <RotateCcw className="h-4 w-4" />
-              Reset
+              <Plus className="h-4 w-4 text-[var(--slate-11)]" />
+              Add filter
             </Button>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="gap-2"
-                onClick={() => {
-                  const isCustomPreset = customPresets.some(
-                    (p) => p.id === selectedPreset?.id,
-                  )
-                  if (isCustomPreset && selectedPreset) {
-                    setEditingPresetId(selectedPreset.id)
-                    setPresetName(selectedPreset.label)
-                  }
-                  setSaveDialogOpen(true)
-                }}
-                disabled={filters.length === 0}
-              >
-                <Save className="h-4 w-4" />
-                {selectedPreset &&
-                customPresets.some((p) => p.id === selectedPreset.id)
-                  ? 'Update preset'
-                  : 'Save as preset'}
-              </Button>
-              <Button size="sm" onClick={() => setOpen(false)}>
-                Done
-              </Button>
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-
-      {/* Save/Edit Preset Dialog */}
-      <Dialog
-        open={saveDialogOpen}
-        onOpenChange={(isOpen) => {
-          setSaveDialogOpen(isOpen)
-          if (!isOpen) {
-            setEditingPresetId(null)
-            setPresetName('')
-            setPresetDescription('')
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingPresetId ? 'Edit filter preset' : 'Save filter preset'}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Name</label>
-              <Input
-                placeholder="Enter preset name"
-                value={presetName}
-                onChange={(e) => setPresetName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Description{' '}
-                <span className="font-normal text-muted-foreground">
-                  (optional)
-                </span>
-              </label>
-              <Input
-                placeholder="Enter a brief description"
-                value={presetDescription}
-                onChange={(e) => setPresetDescription(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSavePreset()
-                  }
-                }}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSaveDialogOpen(false)
-                setEditingPresetId(null)
-                setPresetName('')
-                setPresetDescription('')
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleSavePreset} disabled={!presetName.trim()}>
-              {editingPresetId ? 'Update' : 'Save'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+          ) : (
+            <div />
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            disabled={filters.length === 0}
+            className="gap-2 text-sm font-medium text-[var(--slate-12)]"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }

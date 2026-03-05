@@ -29,6 +29,11 @@ export interface SocialLinkPerson {
   closenessRating: number | null
 }
 
+export interface SubjectScore {
+  subject: string
+  percentage: number
+}
+
 export interface Student {
   id: string
   name: string
@@ -37,6 +42,7 @@ export interface Student {
   attentionTags: Array<AttentionTag>
   // Academic Performance
   overallPercentage: number
+  subjectScores?: Array<SubjectScore>
   conduct: ConductGrade
   approvedMtl: string | null
   learningSupport: string | null
@@ -99,11 +105,12 @@ export interface ClassOption {
 
 export type FilterField =
   // General
-  | 'name'
   | 'class'
+  | 'cca'
   // Academic Performance
   | 'overallPercentage'
   | 'conduct'
+  | 'approvedMtl'
   | 'learningSupport'
   | 'postSecEligibility'
   // Behaviour and Discipline
@@ -122,6 +129,8 @@ export type FilterField =
   | 'housing'
   | 'housingType'
   | 'custody'
+  | 'commuterStatus'
+  | 'afterSchoolArrangement'
   | 'siblings'
   | 'externalAgencies'
 
@@ -132,6 +141,9 @@ export type FilterOperator =
   | 'lt'
   | 'lte'
   | 'eq'
+  | 'neq'
+  | 'between'
+  | 'not_between'
   // Text operators
   | 'contains'
   | 'not_contains'
@@ -140,11 +152,16 @@ export type FilterOperator =
   | 'is_empty'
   | 'is_not_empty'
 
+export interface FilterRangeValue {
+  min: number
+  max: number
+}
+
 export interface FilterCriterion {
   id: string
   field: FilterField
   operator: FilterOperator
-  value: string | number
+  value: string | number | FilterRangeValue
 }
 
 export type SortDirection = 'asc' | 'desc'

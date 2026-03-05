@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ChevronDown, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 
 import { ColumnHeaderMenu } from './column-header-menu'
 import type {
@@ -46,10 +46,30 @@ interface StudentTableProps {
   onAddQuickFilter: (field: FilterField) => void
   /** Handler for clearing a filter by field */
   onClearFilter: (field: FilterField) => void
+  /** Selected subjects for overall % computation (null = all subjects) */
+  selectedSubjects?: Array<string> | null
+  /** Opens the subject selector dialog */
+  onConfigureSubjects?: () => void
 }
 
 const tagVariantMap: Record<AttentionTag, 'default' | 'secondary' | 'outline'> =
   tagColors
+
+function computeOverallPct(
+  student: Student,
+  selectedSubjects: Array<string> | null | undefined,
+): number {
+  if (!selectedSubjects || !student.subjectScores) {
+    return student.overallPercentage
+  }
+  const relevant = student.subjectScores.filter((s) =>
+    selectedSubjects.includes(s.subject),
+  )
+  if (relevant.length === 0) return student.overallPercentage
+  return Math.round(
+    relevant.reduce((sum, s) => sum + s.percentage, 0) / relevant.length,
+  )
+}
 
 export function StudentTable({
   students,
@@ -64,11 +84,10 @@ export function StudentTable({
   onClearSort,
   onAddQuickFilter,
   onClearFilter,
+  selectedSubjects,
+  onConfigureSubjects,
 }: StudentTableProps) {
   const navigate = useNavigate()
-  const [isMatchedCollapsed, setIsMatchedCollapsed] = useState(false)
-  const [isUnmatchedCollapsed, setIsUnmatchedCollapsed] = useState(false)
-
   // Sticky header state
   const tableContainerRef = useRef<HTMLDivElement>(null)
   const stickyHeaderRef = useRef<HTMLDivElement>(null)
@@ -196,12 +215,6 @@ export function StudentTable({
     totalItems: students.length,
     pageSize,
   })
-
-  // Reset collapsed state when filters change
-  useEffect(() => {
-    setIsMatchedCollapsed(false)
-    setIsUnmatchedCollapsed(false)
-  }, [matchedIds, matchedCount])
 
   const paginatedStudents = useMemo(() => {
     return students.slice(startIndex, startIndex + pageSize)
@@ -424,6 +437,8 @@ export function StudentTable({
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
           className="min-w-[120px]"
+          onConfigureSubjects={onConfigureSubjects}
+          hasCustomSubjects={!!selectedSubjects}
         />
       )}
       {isVisible('approvedMtl') && (
@@ -582,93 +597,17 @@ export function StudentTable({
           </TableHeader>
           <TableBody>
             {paginatedStudents.map((student, index) => {
-              // startIndex from usePagination is already 0-based
-              const zeroBasedGlobalIndex = startIndex + index
-              const isInMatchedSection = zeroBasedGlobalIndex < matchedCount
-              const unmatchedCount = students.length - matchedCount
-              const visibleColumnCount = columns.filter((c) => c.visible).length
-
-              // Show matched header at the start when filters are active and there are matches
-              const showMatchedHeader =
-                matchedIds && matchedCount > 0 && zeroBasedGlobalIndex === 0
-
-              // Show unmatched header when:
-              // - Filters are active AND there are unmatched students
-              // - Either: transitioning from matched to unmatched (zeroBasedGlobalIndex === matchedCount)
-              // - Or: no matches exist and this is the first item (zeroBasedGlobalIndex === 0)
-              const showUnmatchedHeader =
-                matchedIds &&
-                unmatchedCount > 0 &&
-                ((matchedCount > 0 && zeroBasedGlobalIndex === matchedCount) ||
-                  (matchedCount === 0 && zeroBasedGlobalIndex === 0))
-
-              // Determine if this row should be hidden due to collapsed section
-              // When matchedCount is 0, all students are in the unmatched section
-              const isHidden =
-                matchedIds &&
-                ((matchedCount > 0 &&
-                  isInMatchedSection &&
-                  isMatchedCollapsed) ||
-                  (unmatchedCount > 0 &&
-                    !isInMatchedSection &&
-                    isUnmatchedCollapsed))
-
               return (
                 <React.Fragment key={student.id}>
-                  {showMatchedHeader && (
-                    <TableRow
-                      className="cursor-pointer hover:bg-muted/30"
-                      onClick={() => setIsMatchedCollapsed(!isMatchedCollapsed)}
-                    >
-                      <TableCell
-                        colSpan={visibleColumnCount}
-                        className="bg-muted/50 py-2 pl-4 text-sm font-medium text-muted-foreground"
-                      >
-                        <div className="flex items-center gap-2">
-                          <ChevronDown
-                            className={cn(
-                              'h-4 w-4 transition-transform',
-                              isMatchedCollapsed && '-rotate-90',
-                            )}
-                          />
-                          Matching filter criteria ({matchedCount})
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {showUnmatchedHeader && (
-                    <TableRow
-                      className="cursor-pointer hover:bg-muted/30"
-                      onClick={() =>
-                        setIsUnmatchedCollapsed(!isUnmatchedCollapsed)
-                      }
-                    >
-                      <TableCell
-                        colSpan={visibleColumnCount}
-                        className="bg-muted/50 py-2 pl-4 text-sm font-medium text-muted-foreground"
-                      >
-                        <div className="flex items-center gap-2">
-                          <ChevronDown
-                            className={cn(
-                              'h-4 w-4 transition-transform',
-                              isUnmatchedCollapsed && '-rotate-90',
-                            )}
-                          />
-                          Not matching filter criteria ({unmatchedCount})
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {!isHidden && (
-                    <TableRow
-                      className="group cursor-pointer hover:bg-muted/50"
-                      onClick={() =>
-                        navigate({
-                          to: '/students/$id',
-                          params: { id: student.id },
-                        })
-                      }
-                    >
+                  <TableRow
+                    className="group cursor-pointer hover:bg-muted/50"
+                    onClick={() =>
+                      navigate({
+                        to: '/students/$id',
+                        params: { id: student.id },
+                      })
+                    }
+                  >
                       {isVisible('index') && (
                         <TableCell className="sticky left-0 z-10 bg-white pl-6 text-muted-foreground transition-colors group-hover:bg-muted/50">
                           {displayStartIndex + index}
@@ -764,7 +703,9 @@ export function StudentTable({
                         </TableCell>
                       )}
                       {isVisible('overallPercentage') && (
-                        <TableCell>{student.overallPercentage}%</TableCell>
+                        <TableCell>
+                          {computeOverallPct(student, selectedSubjects)}%
+                        </TableCell>
                       )}
                       {isVisible('approvedMtl') && (
                         <TableCell>
@@ -820,14 +761,18 @@ export function StudentTable({
                       {isVisible('commuterStatus') && (
                         <TableCell>
                           {student.commuterStatus || (
-                            <span className="text-muted-foreground">Non-commuter</span>
+                            <span className="text-muted-foreground">
+                              Non-commuter
+                            </span>
                           )}
                         </TableCell>
                       )}
                       {isVisible('afterSchoolArrangement') && (
                         <TableCell>
                           {student.afterSchoolArrangement || (
-                            <span className="text-muted-foreground">No arrangement</span>
+                            <span className="text-muted-foreground">
+                              No arrangement
+                            </span>
                           )}
                         </TableCell>
                       )}
@@ -837,7 +782,6 @@ export function StudentTable({
                         </TableCell>
                       )}
                     </TableRow>
-                  )}
                 </React.Fragment>
               )
             })}

@@ -16,16 +16,62 @@ import { StudentFilters } from '@/components/students/student-filters'
 import { StudentTable } from '@/components/students/student-table'
 import { ClassSelector } from '@/components/students/class-selector'
 import { defaultColumns } from '@/components/students/column-visibility-popover'
+import { SubjectSelectorDialog } from '@/components/students/subject-selector-dialog'
 
 import { getMetrics, mockStudents } from '@/data/mock-students'
+
+const SUBJECT_SELECTION_KEY = 'overall-pct-subjects'
+
+function loadSelectedSubjects(): Array<string> | null {
+  try {
+    const raw = localStorage.getItem(SUBJECT_SELECTION_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function saveSelectedSubjects(subjects: Array<string> | null) {
+  if (subjects === null) {
+    localStorage.removeItem(SUBJECT_SELECTION_KEY)
+  } else {
+    localStorage.setItem(SUBJECT_SELECTION_KEY, JSON.stringify(subjects))
+  }
+}
+
+function computeStudentOverall(
+  student: Student,
+  selectedSubjects: Array<string> | null,
+): number {
+  if (!selectedSubjects || !student.subjectScores) {
+    return student.overallPercentage
+  }
+  const relevant = student.subjectScores.filter((s) =>
+    selectedSubjects.includes(s.subject),
+  )
+  if (relevant.length === 0) return student.overallPercentage
+  return Math.round(
+    relevant.reduce((sum, s) => sum + s.percentage, 0) / relevant.length,
+  )
+}
 
 export const Route = createFileRoute('/students/')({
   component: StudentsPage,
 })
 
 // Check if a student matches a filter condition
-function matchesCondition(student: Student, filter: FilterCriterion): boolean {
-  const value = student[filter.field as keyof Student]
+function matchesCondition(
+  student: Student,
+  filter: FilterCriterion,
+  selectedSubjects?: Array<string> | null,
+): boolean {
+  // For overallPercentage, use the computed value based on selected subjects
+  const value =
+    filter.field === 'overallPercentage'
+      ? computeStudentOverall(student, selectedSubjects ?? null)
+      : student[filter.field as keyof Student]
 
   switch (filter.operator) {
     // Numeric operators
@@ -39,6 +85,16 @@ function matchesCondition(student: Student, filter: FilterCriterion): boolean {
       return Number(value) <= Number(filter.value)
     case 'eq':
       return Number(value) === Number(filter.value)
+    case 'neq':
+      return Number(value) !== Number(filter.value)
+    case 'between': {
+      const range = filter.value as { min: number; max: number }
+      return Number(value) >= range.min && Number(value) <= range.max
+    }
+    case 'not_between': {
+      const range = filter.value as { min: number; max: number }
+      return Number(value) < range.min || Number(value) > range.max
+    }
     // Text operators
     case 'contains':
       return String(value ?? '')
@@ -69,6 +125,14 @@ function StudentsPage() {
   const [filters, setFilters] = useState<Array<FilterCriterion>>([])
   const [columns, setColumns] = useState<Array<ColumnConfig>>(defaultColumns)
   const [sort, setSort] = useState<SortConfig | null>(null)
+  const [selectedSubjects, setSelectedSubjects] =
+    useState<Array<string> | null>(() => loadSelectedSubjects())
+  const [subjectDialogOpen, setSubjectDialogOpen] = useState(false)
+
+  const handleSubjectsApply = useCallback((subjects: Array<string> | null) => {
+    setSelectedSubjects(subjects)
+    saveSelectedSubjects(subjects)
+  }, [])
 
   // Get students for the selected class/level (this determines the base list)
   const classStudents = useMemo(() => {
@@ -110,7 +174,9 @@ function StudentsPage() {
       // Check filter criteria
       const matchesFilters =
         !hasFilterCriteria ||
-        filters.every((filter) => matchesCondition(student, filter))
+        filters.every((filter) =>
+          matchesCondition(student, filter, selectedSubjects),
+        )
 
       if (matchesSearch && matchesFilters) {
         matched.add(student.id)
@@ -118,7 +184,7 @@ function StudentsPage() {
     }
 
     return { matchedIds: matched, hasActiveFilters: isFiltering }
-  }, [classStudents, searchQuery, filters])
+  }, [classStudents, searchQuery, filters, selectedSubjects])
 
   // Compute active filter fields for header indicators
   const activeFilterFields = useMemo(
@@ -161,8 +227,14 @@ function StudentsPage() {
     // Apply column sort first
     if (sort) {
       result.sort((a, b) => {
-        const aVal = a[sort.field as keyof Student]
-        const bVal = b[sort.field as keyof Student]
+        const aVal =
+          sort.field === 'overallPercentage'
+            ? computeStudentOverall(a, selectedSubjects)
+            : a[sort.field as keyof Student]
+        const bVal =
+          sort.field === 'overallPercentage'
+            ? computeStudentOverall(b, selectedSubjects)
+            : b[sort.field as keyof Student]
 
         // Handle null/undefined
         if (aVal == null && bVal == null) return 0
@@ -192,7 +264,7 @@ function StudentsPage() {
     }
 
     return result
-  }, [classStudents, sort, matchedIds, hasActiveFilters])
+  }, [classStudents, sort, matchedIds, hasActiveFilters, selectedSubjects])
 
   // For metrics, we only count the matched students
   const matchedStudents = useMemo(() => {
@@ -259,6 +331,8 @@ function StudentsPage() {
           onFiltersChange={setFilters}
           columns={columns}
           onColumnsChange={setColumns}
+          matchedCount={hasActiveFilters ? matchedIds.size : undefined}
+          totalCount={hasActiveFilters ? classStudents.length : undefined}
           className="px-6 pb-4"
         />
       </div>
@@ -276,6 +350,15 @@ function StudentsPage() {
         onClearSort={handleClearSort}
         onAddQuickFilter={handleAddQuickFilter}
         onClearFilter={handleClearFilter}
+        selectedSubjects={selectedSubjects}
+        onConfigureSubjects={() => setSubjectDialogOpen(true)}
+      />
+
+      <SubjectSelectorDialog
+        open={subjectDialogOpen}
+        onOpenChange={setSubjectDialogOpen}
+        selectedSubjects={selectedSubjects}
+        onApply={handleSubjectsApply}
       />
     </div>
   )

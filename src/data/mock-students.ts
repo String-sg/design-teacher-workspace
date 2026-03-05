@@ -80,6 +80,14 @@ export const mockStudents: Array<Student> = [
     totalSchoolDays: 47,
     teacherObservations: 'Shows improvement in class participation.',
     nextSteps: 'Continue monitoring attendance',
+    subjectScores: [
+      { subject: 'English', percentage: 58 },
+      { subject: 'Chinese', percentage: 55 },
+      { subject: 'Mathematics', percentage: 54 },
+      { subject: 'Science', percentage: 65 },
+      { subject: 'Geography', percentage: 68 },
+      { subject: 'Art', percentage: 72 },
+    ],
   },
   {
     id: '2',
@@ -132,6 +140,14 @@ export const mockStudents: Array<Student> = [
     totalSchoolDays: 47,
     teacherObservations: 'Good attitude, needs academic support.',
     nextSteps: 'Remedial classes recommended',
+    subjectScores: [
+      { subject: 'English', percentage: 52 },
+      { subject: 'Malay', percentage: 48 },
+      { subject: 'Mathematics', percentage: 55 },
+      { subject: 'Science', percentage: 58 },
+      { subject: 'Geography', percentage: 60 },
+      { subject: 'Music', percentage: 57 },
+    ],
   },
   {
     id: '3',
@@ -222,6 +238,14 @@ export const mockStudents: Array<Student> = [
     totalSchoolDays: 47,
     teacherObservations: 'Struggles with attendance. Needs intensive support.',
     nextSteps: 'Home visit required, daily check-in system',
+    subjectScores: [
+      { subject: 'English', percentage: 36 },
+      { subject: 'Basic Chinese', percentage: 30 },
+      { subject: 'Mathematics', percentage: 28 },
+      { subject: 'Science', percentage: 38 },
+      { subject: 'Social Studies', percentage: 35 },
+      { subject: 'Art', percentage: 37 },
+    ],
   },
   {
     id: '4',
@@ -279,6 +303,14 @@ export const mockStudents: Array<Student> = [
     totalSchoolDays: 47,
     teacherObservations: 'Academically strong but behavioral issues.',
     nextSteps: 'Discipline committee follow-up',
+    subjectScores: [
+      { subject: 'English', percentage: 88 },
+      { subject: 'Chinese', percentage: 85 },
+      { subject: 'Mathematics', percentage: 90 },
+      { subject: 'Science', percentage: 88 },
+      { subject: 'Geography', percentage: 84 },
+      { subject: 'Art', percentage: 87 },
+    ],
   },
   {
     id: '5',
@@ -331,6 +363,14 @@ export const mockStudents: Array<Student> = [
     totalSchoolDays: 47,
     teacherObservations: 'Making progress with learning support.',
     nextSteps: 'Continue LSM and LSP programs',
+    subjectScores: [
+      { subject: 'English', percentage: 32 },
+      { subject: 'Tamil', percentage: 30 },
+      { subject: 'Mathematics', percentage: 35 },
+      { subject: 'Science', percentage: 38 },
+      { subject: 'History', percentage: 38 },
+      { subject: 'Music', percentage: 37 },
+    ],
   },
   {
     id: '6',

@@ -1016,7 +1016,7 @@ function GradeDistChart({
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fontSize={9}
-                  fill="#687076"
+                  fill="#ffffff"
                   fontWeight={500}
                 >
                   View
@@ -1027,7 +1027,7 @@ function GradeDistChart({
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fontSize={9}
-                  fill="#687076"
+                  fill="#ffffff"
                   fontWeight={500}
                 >
                   students

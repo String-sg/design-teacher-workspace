@@ -69,16 +69,16 @@ export interface FilterFieldConfig {
 export const filterFieldConfigs: Array<FilterFieldConfig> = [
   // General
   {
-    field: 'name',
-    label: 'Name',
+    field: 'class',
+    label: 'Class',
     type: 'text',
     group: 'general',
     defaultOperator: 'contains',
     defaultValue: '',
   },
   {
-    field: 'class',
-    label: 'Class',
+    field: 'cca',
+    label: 'CCA',
     type: 'text',
     group: 'general',
     defaultOperator: 'contains',
@@ -87,7 +87,7 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   // Behaviour and Discipline
   {
     field: 'absences',
-    label: 'Non-valid Absenteeism',
+    label: 'Non-VR absences(%)',
     type: 'numeric',
     group: 'behaviour',
     defaultOperator: 'gte',
@@ -95,7 +95,7 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   },
   {
     field: 'lateComing',
-    label: 'Late-coming',
+    label: 'Late-coming(%)',
     type: 'numeric',
     group: 'behaviour',
     defaultOperator: 'gte',
@@ -111,7 +111,7 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   },
   {
     field: 'ccaMissed',
-    label: 'CCA Sessions Missed',
+    label: 'CCA attendance(%)',
     type: 'numeric',
     group: 'behaviour',
     defaultOperator: 'gte',
@@ -128,7 +128,7 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   },
   {
     field: 'conduct',
-    label: 'Conduct',
+    label: 'Conduct grade',
     type: 'enum',
     group: 'academic',
     defaultOperator: 'is',
@@ -136,8 +136,16 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
     enumValues: ['Excellent', 'Good', 'Fair', 'Poor'],
   },
   {
+    field: 'approvedMtl',
+    label: 'Approved MTL',
+    type: 'text',
+    group: 'academic',
+    defaultOperator: 'is_not_empty',
+    defaultValue: '',
+  },
+  {
     field: 'learningSupport',
-    label: 'Learning Support',
+    label: 'Learning support',
     type: 'text',
     group: 'academic',
     defaultOperator: 'is_not_empty',
@@ -154,7 +162,7 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   // Wellbeing
   {
     field: 'riskIndicators',
-    label: 'Risk Indicators (TCI)',
+    label: 'Risk indicators',
     type: 'numeric',
     group: 'wellbeing',
     defaultOperator: 'gte',
@@ -162,7 +170,7 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   },
   {
     field: 'lowMoodFlagged',
-    label: 'Low Mood',
+    label: 'Low mood flagged 2+ terms',
     type: 'boolean',
     group: 'wellbeing',
     defaultOperator: 'is',
@@ -171,7 +179,7 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   },
   {
     field: 'socialLinks',
-    label: 'Social Links',
+    label: 'Social links',
     type: 'numeric',
     group: 'wellbeing',
     defaultOperator: 'lte',
@@ -179,7 +187,7 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   },
   {
     field: 'counsellingSessions',
-    label: 'Counselling Sessions',
+    label: 'Counselling',
     type: 'numeric',
     group: 'wellbeing',
     defaultOperator: 'gte',
@@ -213,7 +221,7 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   },
   {
     field: 'housingType',
-    label: 'Ownership',
+    label: 'Housing ownership',
     type: 'enum',
     group: 'family',
     defaultOperator: 'is',
@@ -223,6 +231,22 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   {
     field: 'custody',
     label: 'Custody',
+    type: 'text',
+    group: 'family',
+    defaultOperator: 'is_not_empty',
+    defaultValue: '',
+  },
+  {
+    field: 'commuterStatus',
+    label: 'Commuter status',
+    type: 'text',
+    group: 'family',
+    defaultOperator: 'is_not_empty',
+    defaultValue: '',
+  },
+  {
+    field: 'afterSchoolArrangement',
+    label: 'After-school arrangement',
     type: 'text',
     group: 'family',
     defaultOperator: 'is_not_empty',

@@ -27,7 +27,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",
     "made-refine": "0.1.1-beta.1",
-    "nitro": "latest",
+    "nitro": "3.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-grab": "^0.1.13",
