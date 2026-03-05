@@ -11,20 +11,34 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudentsRouteImport } from './routes/students'
 import { Route as StudentAnalyticsRouteImport } from './routes/student-analytics'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as ParentsGatewayRouteImport } from './routes/parents-gateway'
 import { Route as InsightBuddyRouteImport } from './routes/insight-buddy'
+import { Route as FormsRouteImport } from './routes/forms'
 import { Route as FlagsRouteImport } from './routes/flags'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as GuestRouteImport } from './routes/_guest'
+import { Route as AllearsRouteImport } from './routes/_allears'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsIndexRouteImport } from './routes/students.index'
 import { Route as ReportsIndexRouteImport } from './routes/reports.index'
+import { Route as ParentsGatewayIndexRouteImport } from './routes/parents-gateway.index'
+import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
+import { Route as ParentsGatewayNewRouteImport } from './routes/parents-gateway.new'
+import { Route as ParentsGatewayIdRouteImport } from './routes/parents-gateway.$id'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
+import { Route as GuestPreviewMenuRouteImport } from './routes/_guest.preview-menu'
+import { Route as GuestLoginRouteImport } from './routes/_guest.login'
+import { Route as AllearsAllearsRouteImport } from './routes/_allears.allears'
+import { Route as AllearsAllearsIndexRouteImport } from './routes/_allears.allears.index'
 import { Route as GuestReportViewTokenRouteImport } from './routes/_guest.report-view.$token'
+import { Route as AllearsAllearsResponsesRouteImport } from './routes/_allears.allears.responses'
+import { Route as AllearsAllearsQuestionsRouteImport } from './routes/_allears.allears.questions'
 
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
@@ -36,14 +50,29 @@ const StudentAnalyticsRoute = StudentAnalyticsRouteImport.update({
   path: '/student-analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParentsGatewayRoute = ParentsGatewayRouteImport.update({
+  id: '/parents-gateway',
+  path: '/parents-gateway',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InsightBuddyRoute = InsightBuddyRouteImport.update({
   id: '/insight-buddy',
   path: '/insight-buddy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FormsRoute = FormsRouteImport.update({
+  id: '/forms',
+  path: '/forms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FlagsRoute = FlagsRouteImport.update({
@@ -58,6 +87,10 @@ const AnnouncementsRoute = AnnouncementsRouteImport.update({
 } as any)
 const GuestRoute = GuestRouteImport.update({
   id: '/_guest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AllearsRoute = AllearsRouteImport.update({
+  id: '/_allears',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SplatRoute = SplatRouteImport.update({
@@ -80,6 +113,16 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ReportsRoute,
 } as any)
+const ParentsGatewayIndexRoute = ParentsGatewayIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ParentsGatewayRoute,
+} as any)
+const FormsIndexRoute = FormsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FormsRoute,
+} as any)
 const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -95,15 +138,55 @@ const ReportsIdRoute = ReportsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ReportsRoute,
 } as any)
+const ParentsGatewayNewRoute = ParentsGatewayNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => ParentsGatewayRoute,
+} as any)
+const ParentsGatewayIdRoute = ParentsGatewayIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ParentsGatewayRoute,
+} as any)
 const AnnouncementsIdRoute = AnnouncementsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AnnouncementsRoute,
 } as any)
+const GuestPreviewMenuRoute = GuestPreviewMenuRouteImport.update({
+  id: '/preview-menu',
+  path: '/preview-menu',
+  getParentRoute: () => GuestRoute,
+} as any)
+const GuestLoginRoute = GuestLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => GuestRoute,
+} as any)
+const AllearsAllearsRoute = AllearsAllearsRouteImport.update({
+  id: '/allears',
+  path: '/allears',
+  getParentRoute: () => AllearsRoute,
+} as any)
+const AllearsAllearsIndexRoute = AllearsAllearsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AllearsAllearsRoute,
+} as any)
 const GuestReportViewTokenRoute = GuestReportViewTokenRouteImport.update({
   id: '/report-view/$token',
   path: '/report-view/$token',
   getParentRoute: () => GuestRoute,
+} as any)
+const AllearsAllearsResponsesRoute = AllearsAllearsResponsesRouteImport.update({
+  id: '/responses',
+  path: '/responses',
+  getParentRoute: () => AllearsAllearsRoute,
+} as any)
+const AllearsAllearsQuestionsRoute = AllearsAllearsQuestionsRouteImport.update({
+  id: '/questions',
+  path: '/questions',
+  getParentRoute: () => AllearsAllearsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -111,50 +194,87 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
+  '/forms': typeof FormsRouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
+  '/parents-gateway': typeof ParentsGatewayRouteWithChildren
   '/reports': typeof ReportsRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/student-analytics': typeof StudentAnalyticsRoute
   '/students': typeof StudentsRouteWithChildren
+  '/allears': typeof AllearsAllearsRouteWithChildren
+  '/login': typeof GuestLoginRoute
+  '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/parents-gateway/$id': typeof ParentsGatewayIdRoute
+  '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/forms/': typeof FormsIndexRoute
+  '/parents-gateway/': typeof ParentsGatewayIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
+  '/allears/questions': typeof AllearsAllearsQuestionsRoute
+  '/allears/responses': typeof AllearsAllearsResponsesRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
+  '/allears/': typeof AllearsAllearsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/flags': typeof FlagsRoute
   '/insight-buddy': typeof InsightBuddyRoute
+  '/settings': typeof SettingsRoute
   '/student-analytics': typeof StudentAnalyticsRoute
+  '/login': typeof GuestLoginRoute
+  '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/parents-gateway/$id': typeof ParentsGatewayIdRoute
+  '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
+  '/forms': typeof FormsIndexRoute
+  '/parents-gateway': typeof ParentsGatewayIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/students': typeof StudentsIndexRoute
+  '/allears/questions': typeof AllearsAllearsQuestionsRoute
+  '/allears/responses': typeof AllearsAllearsResponsesRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
+  '/allears': typeof AllearsAllearsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/_allears': typeof AllearsRouteWithChildren
   '/_guest': typeof GuestRouteWithChildren
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/flags': typeof FlagsRoute
+  '/forms': typeof FormsRouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
+  '/parents-gateway': typeof ParentsGatewayRouteWithChildren
   '/reports': typeof ReportsRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/student-analytics': typeof StudentAnalyticsRoute
   '/students': typeof StudentsRouteWithChildren
+  '/_allears/allears': typeof AllearsAllearsRouteWithChildren
+  '/_guest/login': typeof GuestLoginRoute
+  '/_guest/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/parents-gateway/$id': typeof ParentsGatewayIdRoute
+  '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/forms/': typeof FormsIndexRoute
+  '/parents-gateway/': typeof ParentsGatewayIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
+  '/_allears/allears/questions': typeof AllearsAllearsQuestionsRoute
+  '/_allears/allears/responses': typeof AllearsAllearsResponsesRoute
   '/_guest/report-view/$token': typeof GuestReportViewTokenRoute
+  '/_allears/allears/': typeof AllearsAllearsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -163,59 +283,100 @@ export interface FileRouteTypes {
     | '/$'
     | '/announcements'
     | '/flags'
+    | '/forms'
     | '/insight-buddy'
+    | '/parents-gateway'
     | '/reports'
+    | '/settings'
     | '/student-analytics'
     | '/students'
+    | '/allears'
+    | '/login'
+    | '/preview-menu'
     | '/announcements/$id'
+    | '/parents-gateway/$id'
+    | '/parents-gateway/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
+    | '/forms/'
+    | '/parents-gateway/'
     | '/reports/'
     | '/students/'
+    | '/allears/questions'
+    | '/allears/responses'
     | '/report-view/$token'
+    | '/allears/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$'
     | '/flags'
     | '/insight-buddy'
+    | '/settings'
     | '/student-analytics'
+    | '/login'
+    | '/preview-menu'
     | '/announcements/$id'
+    | '/parents-gateway/$id'
+    | '/parents-gateway/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements'
+    | '/forms'
+    | '/parents-gateway'
     | '/reports'
     | '/students'
+    | '/allears/questions'
+    | '/allears/responses'
     | '/report-view/$token'
+    | '/allears'
   id:
     | '__root__'
     | '/'
     | '/$'
+    | '/_allears'
     | '/_guest'
     | '/announcements'
     | '/flags'
+    | '/forms'
     | '/insight-buddy'
+    | '/parents-gateway'
     | '/reports'
+    | '/settings'
     | '/student-analytics'
     | '/students'
+    | '/_allears/allears'
+    | '/_guest/login'
+    | '/_guest/preview-menu'
     | '/announcements/$id'
+    | '/parents-gateway/$id'
+    | '/parents-gateway/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
+    | '/forms/'
+    | '/parents-gateway/'
     | '/reports/'
     | '/students/'
+    | '/_allears/allears/questions'
+    | '/_allears/allears/responses'
     | '/_guest/report-view/$token'
+    | '/_allears/allears/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  AllearsRoute: typeof AllearsRouteWithChildren
   GuestRoute: typeof GuestRouteWithChildren
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
+  FormsRoute: typeof FormsRouteWithChildren
   InsightBuddyRoute: typeof InsightBuddyRoute
+  ParentsGatewayRoute: typeof ParentsGatewayRouteWithChildren
   ReportsRoute: typeof ReportsRouteWithChildren
+  SettingsRoute: typeof SettingsRoute
   StudentAnalyticsRoute: typeof StudentAnalyticsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
 }
@@ -236,6 +397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentAnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reports': {
       id: '/reports'
       path: '/reports'
@@ -243,11 +411,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/parents-gateway': {
+      id: '/parents-gateway'
+      path: '/parents-gateway'
+      fullPath: '/parents-gateway'
+      preLoaderRoute: typeof ParentsGatewayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/insight-buddy': {
       id: '/insight-buddy'
       path: '/insight-buddy'
       fullPath: '/insight-buddy'
       preLoaderRoute: typeof InsightBuddyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forms': {
+      id: '/forms'
+      path: '/forms'
+      fullPath: '/forms'
+      preLoaderRoute: typeof FormsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/flags': {
@@ -269,6 +451,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof GuestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_allears': {
+      id: '/_allears'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AllearsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$': {
@@ -299,6 +488,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/parents-gateway/': {
+      id: '/parents-gateway/'
+      path: '/'
+      fullPath: '/parents-gateway/'
+      preLoaderRoute: typeof ParentsGatewayIndexRouteImport
+      parentRoute: typeof ParentsGatewayRoute
+    }
+    '/forms/': {
+      id: '/forms/'
+      path: '/'
+      fullPath: '/forms/'
+      preLoaderRoute: typeof FormsIndexRouteImport
+      parentRoute: typeof FormsRoute
+    }
     '/announcements/': {
       id: '/announcements/'
       path: '/'
@@ -320,12 +523,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsIdRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/parents-gateway/new': {
+      id: '/parents-gateway/new'
+      path: '/new'
+      fullPath: '/parents-gateway/new'
+      preLoaderRoute: typeof ParentsGatewayNewRouteImport
+      parentRoute: typeof ParentsGatewayRoute
+    }
+    '/parents-gateway/$id': {
+      id: '/parents-gateway/$id'
+      path: '/$id'
+      fullPath: '/parents-gateway/$id'
+      preLoaderRoute: typeof ParentsGatewayIdRouteImport
+      parentRoute: typeof ParentsGatewayRoute
+    }
     '/announcements/$id': {
       id: '/announcements/$id'
       path: '/$id'
       fullPath: '/announcements/$id'
       preLoaderRoute: typeof AnnouncementsIdRouteImport
       parentRoute: typeof AnnouncementsRoute
+    }
+    '/_guest/preview-menu': {
+      id: '/_guest/preview-menu'
+      path: '/preview-menu'
+      fullPath: '/preview-menu'
+      preLoaderRoute: typeof GuestPreviewMenuRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_guest/login': {
+      id: '/_guest/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof GuestLoginRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_allears/allears': {
+      id: '/_allears/allears'
+      path: '/allears'
+      fullPath: '/allears'
+      preLoaderRoute: typeof AllearsAllearsRouteImport
+      parentRoute: typeof AllearsRoute
+    }
+    '/_allears/allears/': {
+      id: '/_allears/allears/'
+      path: '/'
+      fullPath: '/allears/'
+      preLoaderRoute: typeof AllearsAllearsIndexRouteImport
+      parentRoute: typeof AllearsAllearsRoute
     }
     '/_guest/report-view/$token': {
       id: '/_guest/report-view/$token'
@@ -334,14 +579,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestReportViewTokenRouteImport
       parentRoute: typeof GuestRoute
     }
+    '/_allears/allears/responses': {
+      id: '/_allears/allears/responses'
+      path: '/responses'
+      fullPath: '/allears/responses'
+      preLoaderRoute: typeof AllearsAllearsResponsesRouteImport
+      parentRoute: typeof AllearsAllearsRoute
+    }
+    '/_allears/allears/questions': {
+      id: '/_allears/allears/questions'
+      path: '/questions'
+      fullPath: '/allears/questions'
+      preLoaderRoute: typeof AllearsAllearsQuestionsRouteImport
+      parentRoute: typeof AllearsAllearsRoute
+    }
   }
 }
 
+interface AllearsAllearsRouteChildren {
+  AllearsAllearsQuestionsRoute: typeof AllearsAllearsQuestionsRoute
+  AllearsAllearsResponsesRoute: typeof AllearsAllearsResponsesRoute
+  AllearsAllearsIndexRoute: typeof AllearsAllearsIndexRoute
+}
+
+const AllearsAllearsRouteChildren: AllearsAllearsRouteChildren = {
+  AllearsAllearsQuestionsRoute: AllearsAllearsQuestionsRoute,
+  AllearsAllearsResponsesRoute: AllearsAllearsResponsesRoute,
+  AllearsAllearsIndexRoute: AllearsAllearsIndexRoute,
+}
+
+const AllearsAllearsRouteWithChildren = AllearsAllearsRoute._addFileChildren(
+  AllearsAllearsRouteChildren,
+)
+
+interface AllearsRouteChildren {
+  AllearsAllearsRoute: typeof AllearsAllearsRouteWithChildren
+}
+
+const AllearsRouteChildren: AllearsRouteChildren = {
+  AllearsAllearsRoute: AllearsAllearsRouteWithChildren,
+}
+
+const AllearsRouteWithChildren =
+  AllearsRoute._addFileChildren(AllearsRouteChildren)
+
 interface GuestRouteChildren {
+  GuestLoginRoute: typeof GuestLoginRoute
+  GuestPreviewMenuRoute: typeof GuestPreviewMenuRoute
   GuestReportViewTokenRoute: typeof GuestReportViewTokenRoute
 }
 
 const GuestRouteChildren: GuestRouteChildren = {
+  GuestLoginRoute: GuestLoginRoute,
+  GuestPreviewMenuRoute: GuestPreviewMenuRoute,
   GuestReportViewTokenRoute: GuestReportViewTokenRoute,
 }
 
@@ -359,6 +649,32 @@ const AnnouncementsRouteChildren: AnnouncementsRouteChildren = {
 
 const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
   AnnouncementsRouteChildren,
+)
+
+interface FormsRouteChildren {
+  FormsIndexRoute: typeof FormsIndexRoute
+}
+
+const FormsRouteChildren: FormsRouteChildren = {
+  FormsIndexRoute: FormsIndexRoute,
+}
+
+const FormsRouteWithChildren = FormsRoute._addFileChildren(FormsRouteChildren)
+
+interface ParentsGatewayRouteChildren {
+  ParentsGatewayIdRoute: typeof ParentsGatewayIdRoute
+  ParentsGatewayNewRoute: typeof ParentsGatewayNewRoute
+  ParentsGatewayIndexRoute: typeof ParentsGatewayIndexRoute
+}
+
+const ParentsGatewayRouteChildren: ParentsGatewayRouteChildren = {
+  ParentsGatewayIdRoute: ParentsGatewayIdRoute,
+  ParentsGatewayNewRoute: ParentsGatewayNewRoute,
+  ParentsGatewayIndexRoute: ParentsGatewayIndexRoute,
+}
+
+const ParentsGatewayRouteWithChildren = ParentsGatewayRoute._addFileChildren(
+  ParentsGatewayRouteChildren,
 )
 
 interface ReportsRouteChildren {
@@ -391,11 +707,15 @@ const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  AllearsRoute: AllearsRouteWithChildren,
   GuestRoute: GuestRouteWithChildren,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
   FlagsRoute: FlagsRoute,
+  FormsRoute: FormsRouteWithChildren,
   InsightBuddyRoute: InsightBuddyRoute,
+  ParentsGatewayRoute: ParentsGatewayRouteWithChildren,
   ReportsRoute: ReportsRouteWithChildren,
+  SettingsRoute: SettingsRoute,
   StudentAnalyticsRoute: StudentAnalyticsRoute,
   StudentsRoute: StudentsRouteWithChildren,
 }

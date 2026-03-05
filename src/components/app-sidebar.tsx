@@ -64,11 +64,6 @@ const mainNavItems: Array<MenuItem> = [
     url: '/',
     icon: Home,
   },
-  {
-    title: 'Students',
-    url: '/students',
-    icon: Users,
-  },
 ]
 
 const studentInsightItems: Array<MenuItem> = [
@@ -77,12 +72,20 @@ const studentInsightItems: Array<MenuItem> = [
     url: '/student-analytics',
     icon: BarChart3,
     conceptTag: true,
+    featureFlag: 'student-analytics',
+  },
+  {
+    title: 'Profiles',
+    url: '/students',
+    icon: Users,
+    conceptTag: true,
   },
   {
     title: 'Insight Buddy',
     url: '/insight-buddy',
     icon: Bot,
     conceptTag: true,
+    featureFlag: 'student-analytics',
   },
 ]
 
@@ -163,6 +166,9 @@ export function AppSidebar() {
 
   const filteredMainItems = filterItems(mainNavItems)
   const filteredParentsItems = filterItems(parentsCommItems)
+  const filteredStudentItems = studentInsightItems.filter((item) =>
+    item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
+  )
 
   return (
     <Sidebar collapsible="icon">
@@ -185,6 +191,17 @@ export function AppSidebar() {
               currentPath={location.pathname}
             />
           </SidebarGroupContent>
+          <>
+            <SidebarGroupLabel className="mt-2">
+              Student Insights
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenuItems
+                items={filteredStudentItems}
+                currentPath={location.pathname}
+              />
+            </SidebarGroupContent>
+          </>
           {filteredParentsItems.length > 0 && (
             <>
               <SidebarGroupLabel className="mt-2">
@@ -193,19 +210,6 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenuItems
                   items={filteredParentsItems}
-                  currentPath={location.pathname}
-                />
-              </SidebarGroupContent>
-            </>
-          )}
-          {studentAnalyticsEnabled && (
-            <>
-              <SidebarGroupLabel className="mt-2">
-                Student Insights
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenuItems
-                  items={studentInsightItems}
                   currentPath={location.pathname}
                 />
               </SidebarGroupContent>
