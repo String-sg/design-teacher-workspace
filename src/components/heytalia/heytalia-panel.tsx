@@ -21,6 +21,7 @@ import {
 import { useHeyTalia } from './heytalia-context'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { mockStudents } from '@/data/mock-students'
 
 // ---------------------------------------------------------------------------
 // Colour constants
@@ -285,10 +286,120 @@ export const AGENTS: Array<AgentDef> = [
     color: '#9575CD',
     tag: 'Beta',
   },
+  {
+    id: 'lesson-planner',
+    name: 'Lesson Planner',
+    description: 'Plan lessons with student insights and MOE resources',
+    icon: '/logos/SLS.svg',
+    color: '#2E7D32',
+    tag: 'New',
+  },
 ]
 
+// ---------------------------------------------------------------------------
+// Lesson Planner helpers
+// ---------------------------------------------------------------------------
+interface AttentionStudent {
+  name: string
+  flags: Array<string>
+}
+
+function getSpecialAttentionStudents(className: string) {
+  const classStudents = mockStudents.filter((s) => s.class === className)
+  const attention: Array<AttentionStudent> = []
+
+  for (const s of classStudents) {
+    const flags: Array<string> = []
+    if (s.attentionTags.length > 0) flags.push(...s.attentionTags)
+    if (s.riskIndicators > 0) flags.push(`${s.riskIndicators} risk indicator(s)`)
+    if (s.sen) flags.push(`SEN: ${s.sen}`)
+    if (s.fas) flags.push(`FAS: ${s.fas}`)
+    if (s.learningSupport) flags.push(s.learningSupport)
+    if (s.lowMoodFlagged && s.lowMoodFlagged !== 'No') flags.push('Low mood flagged')
+    if (s.counsellingSessions > 0) flags.push(`${s.counsellingSessions} counselling session(s)`)
+    if (flags.length > 0) attention.push({ name: s.name, flags })
+  }
+
+  return { total: classStudents.length, attention }
+}
+
+function buildLessonPlanDraft(
+  className: string,
+  topic: string,
+  attention: Array<AttentionStudent>,
+): DraftBlock {
+  const t = topic.charAt(0).toUpperCase() + topic.slice(1)
+
+  const diffLines: Array<string> = []
+  // Group by flag type
+  const senStudents = attention.filter((s) => s.flags.some((f) => f.startsWith('SEN')))
+  const fasStudents = attention.filter((s) => s.flags.some((f) => f.startsWith('FAS') || f.includes('FAS')))
+  const lsStudents = attention.filter((s) => s.flags.some((f) => f === 'LSM' || f === 'LSP'))
+  const riskStudents = attention.filter((s) => s.flags.some((f) => f.includes('risk indicator')))
+  const moodStudents = attention.filter((s) => s.flags.some((f) => f.includes('Low mood')))
+
+  if (senStudents.length > 0) {
+    diffLines.push(`**SEN students:** ${senStudents.map((s) => s.name).join(', ')}`)
+    diffLines.push(`  - Provide modified worksheets and additional scaffolding`)
+  }
+  if (lsStudents.length > 0) {
+    diffLines.push(`**Learning Support (LSM/LSP):** ${lsStudents.map((s) => s.name).join(', ')}`)
+    diffLines.push(`  - Pair with stronger peers; use concrete manipulatives`)
+  }
+  if (fasStudents.length > 0) {
+    diffLines.push(`**FAS students:** ${fasStudents.map((s) => s.name).join(', ')}`)
+    diffLines.push(`  - Ensure access to materials; avoid assumptions about home resources`)
+  }
+  if (riskStudents.length > 0) {
+    diffLines.push(`**Students with risk indicators:** ${riskStudents.map((s) => s.name).join(', ')}`)
+    diffLines.push(`  - Check in at start of lesson; offer choice in activities`)
+  }
+  if (moodStudents.length > 0) {
+    diffLines.push(`**Low mood flagged:** ${moodStudents.map((s) => s.name).join(', ')}`)
+    diffLines.push(`  - Seat near supportive peers; provide positive reinforcement`)
+  }
+  if (diffLines.length === 0) {
+    diffLines.push(`No students requiring special attention identified.`)
+  }
+
+  return {
+    title: `Lesson Plan: ${t} (Class ${className})`,
+    body: [
+      `**Learning Objectives**`,
+      `1. [For input: Learning objective 1]`,
+      `2. [For input: Learning objective 2]`,
+      `3. [For input: Learning objective 3]`,
+      ``,
+      `**Prior Knowledge**`,
+      `Students should already know:`,
+      `- [For input: What students already know about ${t}]`,
+      ``,
+      `**Teaching Guide Alignment**`,
+      `- MOE Syllabus Reference: [For input: Syllabus code and topic]`,
+      `- Suggested Duration: [For input: Number of periods]`,
+      ``,
+      `**Differentiation Strategies (Class ${className})**`,
+      ...diffLines,
+      ``,
+      `**Resources**`,
+      `- 21st Century Competencies (21CC) Framework`,
+      `- Student Learning Space (SLS) — search "${t}"`,
+      `- MOE Teaching Guides for ${t}`,
+    ].join('\n'),
+    warning:
+      'This is a draft lesson plan template. Fill in the [For input] fields with your specific content. Review differentiation strategies against your latest student data.',
+  }
+}
+
+type LessonPlannerState =
+  | 'idle'
+  | 'awaiting-class'
+  | 'showing-summary'
+  | 'awaiting-topic'
+  | 'complete'
+
 export function HeyTaliaPanel() {
-  const { view, setView } = useHeyTalia()
+  const { view, setView, activeAgent, setActiveAgent } = useHeyTalia()
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<Array<Message>>([])
   const [isTyping, setIsTyping] = useState(false)
@@ -298,6 +409,10 @@ export function HeyTaliaPanel() {
   const [panelWidth, setPanelWidth] = useState(W_DEFAULT)
   const [isExpanded, setIsExpanded] = useState(false)
   const [agentDropdownOpen, setAgentDropdownOpen] = useState(false)
+
+  // Lesson planner state
+  const [lpState, setLpState] = useState<LessonPlannerState>('idle')
+  const [lpClass, setLpClass] = useState('')
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -311,6 +426,8 @@ export function HeyTaliaPanel() {
   const seed = SEED[ctx]
   const isMobile = useIsMobile()
 
+  const currentAgent = AGENTS.find((a) => a.id === activeAgent) ?? AGENTS[0]
+
   const isOpen = view === 'chat'
   const isPickerOpen = view === 'picker'
 
@@ -318,8 +435,10 @@ export function HeyTaliaPanel() {
   const effectiveWidth = isMobile ? '100vw' : panelWidth
 
   useEffect(() => {
-    setAwaitingTopic(false)
-    setMessages([{ role: 'assistant', text: seed.greeting, chips: seed.chips }])
+    if (activeAgent === 'heytalia') {
+      setAwaitingTopic(false)
+      setMessages([{ role: 'assistant', text: seed.greeting, chips: seed.chips }])
+    }
   }, [ctx])
 
   useEffect(() => {
@@ -377,6 +496,12 @@ export function HeyTaliaPanel() {
     setMessages((prev) => [...prev, { role: 'user', text }])
     setIsTyping(true)
 
+    // Lesson planner flow
+    if (activeAgent === 'lesson-planner') {
+      handleLessonPlannerMessage(text)
+      return
+    }
+
     if (awaitingTopic) {
       setAwaitingTopic(false)
       setTimeout(() => {
@@ -419,6 +544,135 @@ export function HeyTaliaPanel() {
     }, 900)
   }
 
+  function handleLessonPlannerMessage(text: string) {
+    // Handle "Show resource links"
+    if (text === 'Show resource links') {
+      setTimeout(() => {
+        setIsTyping(false)
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            text: [
+              '**MOE Resources for Lesson Planning:**',
+              '',
+              '**21st Century Competencies (21CC) Framework**',
+              'Guides holistic development across civic, global, and critical thinking literacies.',
+              '',
+              '**Student Learning Space (SLS)**',
+              'Digital platform with curriculum-aligned resources, lesson templates, and interactive activities.',
+              '',
+              '**MOE Teaching Guides**',
+              'Subject-specific pedagogy guides with suggested approaches, assessment strategies, and differentiation tips.',
+            ].join('\n'),
+          },
+        ])
+      }, 800)
+      return
+    }
+
+    // Handle class selection
+    if (lpState === 'awaiting-class' || lpState === 'idle') {
+      const classMatch = text.match(/(\d+[A-Za-z])/i)
+      if (classMatch) {
+        const cls = classMatch[1].toUpperCase()
+        setLpClass(cls)
+        const result = getSpecialAttentionStudents(cls)
+
+        if (result.total === 0) {
+          setTimeout(() => {
+            setIsTyping(false)
+            setLpState('awaiting-class')
+            setMessages((prev) => [
+              ...prev,
+              {
+                role: 'assistant',
+                text: `I couldn't find any students in class **${cls}**. Please try another class.`,
+                chips: ['Plan for class 3A', 'Plan for class 3B', 'Plan for class 3C'],
+              },
+            ])
+          }, 800)
+          return
+        }
+
+        const attentionLines = result.attention.map(
+          (s) => `- **${s.name}**: ${s.flags.join(', ')}`,
+        )
+        const summary = [
+          `**Class ${cls} Summary**`,
+          `Total students: **${result.total}**`,
+          `Students needing special attention: **${result.attention.length}**`,
+          '',
+          ...(result.attention.length > 0
+            ? attentionLines
+            : ['No students flagged for special attention.']),
+        ].join('\n')
+
+        setTimeout(() => {
+          setIsTyping(false)
+          setLpState('showing-summary')
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              text: summary,
+              chips: ['Generate lesson plan', 'Show resource links'],
+            },
+          ])
+        }, 900)
+        return
+      }
+    }
+
+    // Handle "Generate lesson plan" chip
+    if (text === 'Generate lesson plan' && (lpState === 'showing-summary' || lpClass)) {
+      setTimeout(() => {
+        setIsTyping(false)
+        setLpState('awaiting-topic')
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            text: 'What **subject and topic** would you like to plan for?\n\ne.g. *Mathematics: Fractions*, *English: Persuasive Writing*, *Science: Photosynthesis*',
+          },
+        ])
+      }, 700)
+      return
+    }
+
+    // Handle topic input for lesson plan generation
+    if (lpState === 'awaiting-topic') {
+      const result = getSpecialAttentionStudents(lpClass)
+      setTimeout(() => {
+        setIsTyping(false)
+        setLpState('complete')
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            text: "Here's your **Lesson Plan** draft:",
+            draft: buildLessonPlanDraft(lpClass, text, result.attention),
+          },
+        ])
+      }, 1100)
+      return
+    }
+
+    // Fallback
+    setTimeout(() => {
+      setIsTyping(false)
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: "I can help you plan lessons! Which class would you like to plan for?",
+          chips: ['Plan for class 3A', 'Plan for class 3B', 'Plan for class 3C'],
+        },
+      ])
+      setLpState('awaiting-class')
+    }, 700)
+  }
+
   function handleCopy(msgIdx: number, text: string) {
     void navigator.clipboard.writeText(text)
     setCopied(msgIdx)
@@ -432,8 +686,27 @@ export function HeyTaliaPanel() {
     }))
   }
 
-  function handleSelectAgent(_agentId: string) {
+  function handleSelectAgent(agentId: string) {
+    setActiveAgent(agentId)
     setView('chat')
+
+    if (agentId === 'lesson-planner') {
+      setAwaitingTopic(false)
+      setLpState('awaiting-class')
+      setLpClass('')
+      setMessages([
+        {
+          role: 'assistant',
+          text: "Hi! I'm the **Lesson Planner**. I can help you create personalised lesson plans with student insights and MOE resource references.\n\nWhich class would you like to plan for?",
+          chips: ['Plan for class 3A', 'Plan for class 3B', 'Plan for class 3C'],
+        },
+      ])
+    } else {
+      setLpState('idle')
+      setLpClass('')
+      setAwaitingTopic(false)
+      setMessages([{ role: 'assistant', text: seed.greeting, chips: seed.chips }])
+    }
   }
 
   return (
@@ -476,19 +749,21 @@ export function HeyTaliaPanel() {
           >
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
               <img
-                src="/logos/heytalia-icon.png"
-                alt="HeyTalia"
+                src={currentAgent.icon}
+                alt={currentAgent.name}
                 className="h-5 w-5"
               />
             </div>
             <div className="min-w-0 flex-1 text-left">
               <div className="flex items-center gap-1.5">
                 <span className="text-sm font-semibold text-foreground">
-                  HeyTalia
+                  {currentAgent.name}
                 </span>
-                <span className="rounded-full bg-twblue-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-twblue-9">
-                  Beta
-                </span>
+                {currentAgent.tag && (
+                  <span className="rounded-full bg-twblue-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-twblue-9">
+                    {currentAgent.tag}
+                  </span>
+                )}
               </div>
             </div>
             <ChevronDown
@@ -555,9 +830,11 @@ export function HeyTaliaPanel() {
               thumbed={thumbed[i]}
               onCopy={() => handleCopy(i, msg.draft?.body ?? msg.text)}
               onThumb={(dir) => handleThumb(i, dir)}
+              agentIcon={currentAgent.icon}
+              agentName={currentAgent.name}
             />
           ))}
-          {isTyping && <TypingIndicator />}
+          {isTyping && <TypingIndicator agentIcon={currentAgent.icon} agentName={currentAgent.name} />}
           <div ref={bottomRef} />
         </div>
 
@@ -575,7 +852,7 @@ export function HeyTaliaPanel() {
                   sendMessage(input)
                 }
               }}
-              placeholder="Ask HeyTalia…"
+              placeholder={activeAgent === 'lesson-planner' ? 'Ask Lesson Planner…' : 'Ask HeyTalia…'}
               className="h-9 w-full rounded-[var(--radius-input)] border border-input bg-white pr-10 pl-3 text-sm shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
             />
             <button
@@ -598,7 +875,7 @@ export function HeyTaliaPanel() {
             </button>
           </div>
           <p className="mt-1.5 text-center text-[10px] text-muted-foreground">
-            HeyTalia can make mistakes. Always verify before sending.
+            {currentAgent.name} can make mistakes. Always verify before sending.
           </p>
         </div>
       </div>
@@ -722,6 +999,8 @@ function MessageBubble({
   thumbed,
   onCopy,
   onThumb,
+  agentIcon,
+  agentName,
 }: {
   msg: Message
   msgIdx: number
@@ -730,6 +1009,8 @@ function MessageBubble({
   thumbed: 'up' | 'down' | undefined
   onCopy: () => void
   onThumb: (dir: 'up' | 'down') => void
+  agentIcon: string
+  agentName: string
 }) {
   const isAI = msg.role === 'assistant'
   const avatarUid = useId()
@@ -739,8 +1020,8 @@ function MessageBubble({
       {isAI && (
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twblue-3">
           <img
-            src="/logos/heytalia-icon.png"
-            alt="HeyTalia"
+            src={agentIcon}
+            alt={agentName}
             className="h-4 w-4"
           />
         </div>
@@ -985,13 +1266,13 @@ function DraftBody({ body }: { body: string }) {
 // ---------------------------------------------------------------------------
 // Typing indicator
 // ---------------------------------------------------------------------------
-function TypingIndicator() {
+function TypingIndicator({ agentIcon, agentName }: { agentIcon: string; agentName: string }) {
   return (
     <div className="flex items-center gap-2">
       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twblue-3">
         <img
-          src="/logos/heytalia-icon.png"
-          alt="HeyTalia"
+          src={agentIcon}
+          alt={agentName}
           className="h-4 w-4"
         />
       </div>

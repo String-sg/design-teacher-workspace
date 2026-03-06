@@ -5,13 +5,20 @@ type HeyTaliaView = 'closed' | 'picker' | 'chat'
 interface HeyTaliaContextValue {
   view: HeyTaliaView
   setView: (view: HeyTaliaView) => void
+  activeAgent: string
+  setActiveAgent: (id: string) => void
 }
 
 const HeyTaliaContext = createContext<HeyTaliaContextValue | null>(null)
 
 export function HeyTaliaProvider({ children }: { children: React.ReactNode }) {
   const [view, setView] = useState<HeyTaliaView>('closed')
-  return <HeyTaliaContext value={{ view, setView }}>{children}</HeyTaliaContext>
+  const [activeAgent, setActiveAgent] = useState('heytalia')
+  return (
+    <HeyTaliaContext value={{ view, setView, activeAgent, setActiveAgent }}>
+      {children}
+    </HeyTaliaContext>
+  )
 }
 
 export function useHeyTalia() {
