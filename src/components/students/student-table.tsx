@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/table'
 import { usePagination } from '@/hooks/use-pagination'
 import { tagColors } from '@/data/mock-students'
+import { useFeatureFlags } from '@/lib/feature-flags'
 
 interface StudentTableProps {
   students: Array<Student>
@@ -66,6 +67,7 @@ export function StudentTable({
   onClearFilter,
 }: StudentTableProps) {
   const navigate = useNavigate()
+  const { isEnabled } = useFeatureFlags()
   const [isMatchedCollapsed, setIsMatchedCollapsed] = useState(false)
   const [isUnmatchedCollapsed, setIsUnmatchedCollapsed] = useState(false)
 
@@ -702,7 +704,12 @@ export function StudentTable({
                         <TableCell>
                           {student.attentionTags.length > 0 ? (
                             <div className="flex gap-1">
-                              {student.attentionTags.map((tag) => (
+                              {student.attentionTags
+                                .filter(
+                                  (tag) =>
+                                    tag !== 'LTA' || isEnabled('lta-intervention'),
+                                )
+                                .map((tag) => (
                                 <Badge key={tag} variant={tagVariantMap[tag]}>
                                   {tag}
                                 </Badge>

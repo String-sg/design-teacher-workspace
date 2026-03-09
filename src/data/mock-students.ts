@@ -139,7 +139,7 @@ export const mockStudents: Array<Student> = [
     class: '3A',
     cca: 'Volleyball',
     schoolName: 'Bandung Secondary School',
-    attentionTags: ['FAS', 'GEP'],
+    attentionTags: ['FAS', 'GEP', 'LTA'],
     overallPercentage: 34,
     conduct: 'Excellent',
     approvedMtl: null,
@@ -382,7 +382,7 @@ export const mockStudents: Array<Student> = [
     class: '3A',
     cca: 'Drama',
     schoolName: 'Bandung Secondary School',
-    attentionTags: [],
+    attentionTags: ['LTA'],
     overallPercentage: 16,
     conduct: 'Fair',
     approvedMtl: null,
@@ -473,7 +473,7 @@ export const mockStudents: Array<Student> = [
     class: '3A',
     cca: 'Red Cross',
     schoolName: 'Bandung Secondary School',
-    attentionTags: ['SEN', 'FAS'],
+    attentionTags: ['SEN', 'FAS', 'LTA'],
     overallPercentage: 7,
     conduct: 'Good',
     approvedMtl: null,
@@ -5317,6 +5317,7 @@ export const tagColors: Record<
   LSM: 'secondary',
   LSP: 'secondary',
   SEN: 'outline',
+  LTA: 'outline',
 }
 
 export function getStudentById(id: string): Student | undefined {
