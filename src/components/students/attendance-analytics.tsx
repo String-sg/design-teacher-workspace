@@ -838,7 +838,7 @@ function AttendanceStudentsTable() {
               <button
                 type="button"
                 className={cn(
-                  'border-border flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors outline-none',
+                  'border-border flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
                   hasActiveFilters
                     ? 'border-blue-300 bg-blue-50 text-blue-700'
                     : 'bg-white hover:bg-muted',
@@ -1316,7 +1316,7 @@ export function AttendanceLevelAnalytics() {
               <button
                 onClick={() => setChartExpanded(true)}
                 className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                title="Expand chart"
+                aria-label="Expand chart"
               >
                 <Maximize2 className="h-4 w-4" />
               </button>
@@ -1338,8 +1338,20 @@ export function AttendanceLevelAnalytics() {
           <div
             className="fixed inset-0 z-40 bg-black/20"
             onClick={() => setChartExpanded(false)}
+            role="presentation"
           />
-          <div className="fixed inset-6 z-50 flex flex-col rounded-xl border bg-white p-6 shadow-2xl">
+          <div
+            className="fixed inset-6 z-50 flex flex-col rounded-xl border bg-white p-6 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Absences / Late-coming by Month"
+            tabIndex={-1}
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setChartExpanded(false)
+            }}
+          >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-foreground">
                 Absences / Late-coming by Month
@@ -1347,6 +1359,7 @@ export function AttendanceLevelAnalytics() {
               <button
                 onClick={() => setChartExpanded(false)}
                 className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label="Close chart"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1468,7 +1481,7 @@ export function AttendanceAnalytics() {
           <button
             onClick={() => setChartExpanded(true)}
             className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-            title="Expand chart"
+            aria-label="Expand chart"
           >
             <Maximize2 className="h-4 w-4" />
           </button>
@@ -1485,8 +1498,20 @@ export function AttendanceAnalytics() {
           <div
             className="fixed inset-0 z-40 bg-black/20"
             onClick={() => setChartExpanded(false)}
+            role="presentation"
           />
-          <div className="fixed inset-6 z-50 flex flex-col rounded-xl border bg-white p-6 shadow-2xl">
+          <div
+            className="fixed inset-6 z-50 flex flex-col rounded-xl border bg-white p-6 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Absences / Late-coming by Month"
+            tabIndex={-1}
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setChartExpanded(false)
+            }}
+          >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-foreground">
                 Absences / Late-coming by Month
@@ -1494,6 +1519,7 @@ export function AttendanceAnalytics() {
               <button
                 onClick={() => setChartExpanded(false)}
                 className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label="Close chart"
               >
                 <X className="h-4 w-4" />
               </button>

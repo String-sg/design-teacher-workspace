@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { ArrowUp, LineChart, Plus, Search, Sparkles } from 'lucide-react'
+import { ArrowRight, ArrowUp, LineChart, Search, Sparkles } from 'lucide-react'
 import {
   Bar,
   BarChart,
@@ -221,27 +221,32 @@ function ChatEmptyState({
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-12 text-center">
-      {/* Icon */}
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-        <Sparkles className="size-7 text-primary" />
+      {/* Animated icon */}
+      <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+        <Sparkles className="animate-sparkle-idle size-7 text-primary" />
+        {/* Subtle ring */}
+        <span className="absolute inset-0 animate-ping rounded-2xl bg-primary/5 [animation-duration:2.5s]" />
       </div>
 
       {/* Title + description */}
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Ask insight buddy</h2>
-        <p className="text-sm text-muted-foreground">AI analyst</p>
+        <h2 className="text-xl font-semibold">What would you like to explore?</h2>
+        <p className="text-sm text-muted-foreground">
+          Spot patterns, understand trends, or identify students who may need support.
+        </p>
       </div>
 
       {/* Suggestion chips */}
       <div className="flex w-full flex-col gap-2">
-        {SUGGESTIONS.map((s) => (
+        {SUGGESTIONS.map((s, i) => (
           <button
             key={s.label}
             onClick={() => onSuggestion(s.label, s.resultType)}
-            className="flex items-center gap-3 rounded-xl border bg-background px-4 py-3 text-left text-sm transition-colors hover:bg-muted/60 active:bg-muted"
+            className="group animate-fade-slide-up flex items-center gap-3 rounded-xl border bg-background px-4 py-3 text-left text-sm transition-all hover:-translate-y-px hover:border-primary/20 hover:bg-primary/5 hover:shadow-sm active:translate-y-0"
+            style={{ animationDelay: `${i * 60}ms` }}
           >
-            <Plus className="size-4 shrink-0 text-muted-foreground" />
-            <span className="text-foreground">{s.label}</span>
+            <span className="text-foreground flex-1">{s.label}</span>
+            <ArrowRight className="size-4 shrink-0 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-primary/60" />
           </button>
         ))}
       </div>
@@ -252,14 +257,35 @@ function ChatEmptyState({
 function ResultsEmptyState() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted opacity-50">
         <LineChart className="size-7 text-muted-foreground" />
       </div>
       <div className="space-y-1">
-        <p className="font-medium text-muted-foreground">No results yet</p>
-        <p className="text-sm text-muted-foreground/70">
-          Ask insight buddy a question to see analytics here
+        <p className="font-medium text-muted-foreground">Your canvas awaits</p>
+        <p className="text-sm text-muted-foreground/60">
+          Ask a question on the left — charts and tables will appear here
         </p>
+      </div>
+    </div>
+  )
+}
+
+function TypingIndicator() {
+  return (
+    <div className="animate-msg-in flex gap-3">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <Sparkles className="animate-sparkle-idle size-4" />
+      </div>
+      <div className="flex items-center gap-1.5 rounded-2xl bg-muted px-4 py-3">
+        {[0, 150, 300].map((delay) => (
+          <span
+            key={delay}
+            className="size-1.5 rounded-full bg-muted-foreground/50"
+            style={{
+              animation: `typing-dot 1.2s ease-in-out ${delay}ms infinite`,
+            }}
+          />
+        ))}
       </div>
     </div>
   )
@@ -465,36 +491,49 @@ function InsightBuddyPage() {
 
   const [messages, setMessages] = useState<Array<Message>>([])
   const [input, setInput] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
   const [activeResultType, setActiveResultType] = useState<ResultType | null>(
     null,
   )
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, isTyping])
 
   function handleSend(text?: string, resultType?: ResultType) {
     const query = (text ?? input).trim()
-    if (!query) return
+    if (!query || isTyping) return
 
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: query,
     }
-    const assistantContent =
-      resultType === 'performance-per-subject'
-        ? "Here's a comparison of weighted assessment scores per subject for this term versus last term."
-        : resultType === 'lta'
-          ? `I found ${LTA_STUDENTS.length} students with Latecoming/Truancy/Absenteeism (LTA) this term. The results are shown on the right.`
-          : `I'm analysing your query: "${query}". Results will appear on the right.`
 
-    const assistantMsg: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: assistantContent,
-      resultType,
-    }
-
-    setMessages((prev) => [...prev, userMsg, assistantMsg])
+    setMessages((prev) => [...prev, userMsg])
     setInput('')
-    setActiveResultType(resultType ?? 'generic')
+    setIsTyping(true)
+
+    setTimeout(() => {
+      const assistantContent =
+        resultType === 'performance-per-subject'
+          ? "Here's a comparison of weighted assessment scores per subject for this term versus last term."
+          : resultType === 'lta'
+            ? `I found ${LTA_STUDENTS.length} students with Latecoming/Truancy/Absenteeism (LTA) this term. The results are shown on the right.`
+            : `I'm analysing your query: "${query}". Results will appear on the right.`
+
+      const assistantMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: assistantContent,
+        resultType,
+      }
+
+      setIsTyping(false)
+      setMessages((prev) => [...prev, assistantMsg])
+      setActiveResultType(resultType ?? 'generic')
+    }, 900)
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -504,7 +543,7 @@ function InsightBuddyPage() {
     }
   }
 
-  const isEmpty = messages.length === 0
+  const isEmpty = messages.length === 0 && !isTyping
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -529,7 +568,7 @@ function InsightBuddyPage() {
                 <div
                   key={msg.id}
                   className={cn(
-                    'flex gap-3',
+                    'animate-msg-in flex gap-3',
                     msg.role === 'user' ? 'flex-row-reverse' : 'flex-row',
                   )}
                 >
@@ -561,6 +600,8 @@ function InsightBuddyPage() {
                   </div>
                 </div>
               ))}
+              {isTyping && <TypingIndicator />}
+              <div ref={messagesEndRef} />
             </div>
           </div>
         )}
@@ -579,8 +620,8 @@ function InsightBuddyPage() {
             <Button
               size="icon-sm"
               onClick={() => handleSend()}
-              disabled={!input.trim()}
-              className="shrink-0"
+              disabled={!input.trim() || isTyping}
+              className="shrink-0 transition-transform active:scale-90"
             >
               <ArrowUp className="size-4" />
             </Button>
@@ -597,15 +638,15 @@ function InsightBuddyPage() {
         </div>
 
         {activeResultType === 'lta' ? (
-          <div className="flex-1 overflow-auto p-6">
+          <div key="lta" className="animate-fade-slide-up flex-1 overflow-auto p-6">
             <LtaResultsTable />
           </div>
         ) : activeResultType === 'performance-per-subject' ? (
-          <div className="flex-1 overflow-auto p-6">
+          <div key="perf" className="animate-fade-slide-up flex-1 overflow-auto p-6">
             <PerformancePerSubjectChart />
           </div>
         ) : activeResultType === 'generic' ? (
-          <div className="flex-1 overflow-auto p-6">
+          <div key="generic" className="animate-fade-slide-up flex-1 overflow-auto p-6">
             <div className="rounded-xl border bg-background p-6 shadow-sm">
               <p className="text-sm text-muted-foreground">
                 Analytics results will appear here based on your query.
