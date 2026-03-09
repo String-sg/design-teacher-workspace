@@ -23,10 +23,10 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
 
   return (
     <>
-      <div className="rounded-lg border border-blue-400 bg-blue-200 px-5 py-4">
+      <div className="rounded-lg border border-blue-200 bg-blue-50/60 px-5 py-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-indigo-600">
+          <div className="flex items-center gap-1.5 text-blue-600">
             <Activity className="h-4 w-4" />
             <span className="text-sm font-semibold">Action required</span>
           </div>
@@ -34,7 +34,7 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="text-muted-foreground"
+              className="text-blue-400 hover:text-blue-600 hover:bg-blue-100"
               disabled
             >
               <ChevronLeft className="h-4 w-4" />
@@ -42,7 +42,7 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
             <Button
               variant="ghost"
               size="icon-sm"
-              className="text-muted-foreground"
+              className="text-blue-400 hover:text-blue-600 hover:bg-blue-100"
               disabled
             >
               <ChevronRight className="h-4 w-4" />
@@ -52,10 +52,10 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
 
         {/* Content */}
         <div className="mt-3">
-          <h3 className="text-sm font-semibold text-foreground">
+          <h3 className="text-sm font-semibold text-blue-900">
             LTA: long-term absenteeism
           </h3>
-          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+          <p className="mt-1 text-sm text-blue-700 leading-relaxed">
             {ltaPkg.why}
           </p>
         </div>
@@ -65,7 +65,7 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
           <Button
             variant="outline"
             size="sm"
-            className="rounded-full"
+            className="rounded-full border-blue-300 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
             onClick={() => setDialogOpen(true)}
           >
             Check
