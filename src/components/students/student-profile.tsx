@@ -32,6 +32,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { GenerateHdpWizard } from '@/components/reports/generate-hdp-wizard'
 import { InterventionBanner } from '@/components/students/intervention-banner'
+import { useFeatureFlags } from '@/lib/feature-flags'
 import {
   Sheet,
   SheetClose,
@@ -273,6 +274,7 @@ export function StudentProfile({
   const [wizardOpen, setWizardOpen] = useState(false)
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [academicAnalyticsOpen, setAcademicAnalyticsOpen] = useState(false)
+  const { isEnabled } = useFeatureFlags()
 
   const gradeCounts = getStudentGradeCounts(student)
   const studentReports = filterReports({ studentId: student.id })
@@ -309,7 +311,7 @@ export function StudentProfile({
         </div>
 
         {/* Intervention Banner — only surfaces for students with support needs */}
-        <InterventionBanner student={student} />
+        {isEnabled('lta-intervention') && <InterventionBanner student={student} />}
 
         {/* Overview Cards */}
         <StudentOverviewCards student={student} />
