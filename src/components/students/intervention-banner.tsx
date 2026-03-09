@@ -23,7 +23,7 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
 
   return (
     <>
-      <div className="rounded-lg border bg-slate-50 px-5 py-4">
+      <div className="rounded-lg border border-blue-400 bg-blue-200 px-5 py-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-indigo-600">
