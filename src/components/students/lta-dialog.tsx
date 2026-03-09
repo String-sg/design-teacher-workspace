@@ -22,31 +22,26 @@ type Tab = 'recommended' | 'deep-dive'
 const recommendedActions = [
   {
     icon: Search,
-    iconBg: 'bg-blue-100 text-blue-600',
     text: 'Confirm the pattern',
     link: { label: 'LTA guidelines', href: '#' },
   },
   {
     icon: MessageSquare,
-    iconBg: 'bg-violet-100 text-violet-600',
     text: 'Do a student check-in when reachable: explore barriers (sleep, anxiety, bullying, transport, caregiving) and agree on one small next step',
     link: { label: 'Check-in template', href: '#' },
   },
   {
     icon: ClipboardList,
-    iconBg: 'bg-amber-100 text-amber-600',
     text: 'Reach out to both caregivers within 24–48 hours through a call, SMS/WhatsApp, and email, and document your attempts.',
     link: { label: 'See parents contact', href: '#' },
   },
   {
     icon: Home,
-    iconBg: 'bg-orange-100 text-orange-600',
     text: 'If uncontactable or persistent: initiate home visit per guidelines',
     link: { label: 'Home visit checklist', href: '#' },
   },
   {
     icon: BookOpen,
-    iconBg: 'bg-teal-100 text-teal-600',
     text: 'Hold a brief case discussion.',
     link: { label: 'Open CaseSync', href: '#', external: true },
   },
@@ -143,12 +138,7 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
                         className="flex items-start gap-4 rounded-xl px-3 py-3.5 hover:bg-white/70 transition-colors cursor-default"
                       >
                         {/* Category icon */}
-                        <span
-                          className={cn(
-                            'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
-                            action.iconBg,
-                          )}
-                        >
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                           <Icon className="h-4 w-4" />
                         </span>
 
