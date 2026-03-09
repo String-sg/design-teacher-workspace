@@ -9,10 +9,12 @@ import {
   MessageSquare,
   Play,
   Search,
+  X,
 } from 'lucide-react'
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -59,10 +61,20 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl p-0 gap-0 overflow-hidden rounded-2xl">
+      <DialogContent className="sm:max-w-4xl p-0 gap-0 overflow-hidden rounded-2xl" showCloseButton={false}>
         <DialogTitle className="sr-only">
           How to support students with LTA
         </DialogTitle>
+
+        {/* Close button — fixed to top-right of the dialog, clear of both panels */}
+        <DialogClose
+          render={
+            <button className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-muted-foreground shadow-sm hover:bg-white hover:text-foreground transition-colors" />
+          }
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </DialogClose>
 
         <div className="flex min-h-[600px] max-h-[85vh]">
           {/* ── Left panel ── */}
@@ -137,7 +149,7 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
                     return (
                       <li
                         key={i}
-                        className="flex items-start gap-4 rounded-xl px-3 py-3.5 hover:bg-white/70 transition-colors cursor-default"
+                        className="flex items-start gap-4 rounded-xl px-3 py-3.5 hover:bg-slate-100 transition-colors cursor-default"
                       >
                         {/* Category icon */}
                         <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
@@ -168,7 +180,7 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
               ) : (
                 <ul className="-mx-3 space-y-1">
                   {/* Item 1 — Audio */}
-                  <li className="flex items-start gap-4 rounded-xl px-3 py-4 hover:bg-white/70 transition-colors cursor-default">
+                  <li className="flex items-start gap-4 rounded-xl px-3 py-4 hover:bg-slate-100 transition-colors cursor-default">
                     <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                       <Headphones className="h-4 w-4" />
                     </span>
@@ -192,7 +204,7 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
                   </li>
 
                   {/* Item 2 — Article */}
-                  <li className="flex items-start gap-4 rounded-xl px-3 py-4 hover:bg-white/70 transition-colors cursor-default">
+                  <li className="flex items-start gap-4 rounded-xl px-3 py-4 hover:bg-slate-100 transition-colors cursor-default">
                     <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                       <FileText className="h-4 w-4" />
                     </span>
