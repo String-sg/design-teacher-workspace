@@ -1,5 +1,13 @@
 import { useState } from 'react'
-import { ExternalLink, Play } from 'lucide-react'
+import {
+  BookOpen,
+  ClipboardList,
+  ExternalLink,
+  Home,
+  MessageSquare,
+  Play,
+  Search,
+} from 'lucide-react'
 
 import {
   Dialog,
@@ -7,27 +15,38 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 type Tab = 'recommended' | 'deep-dive'
 
 const recommendedActions = [
   {
+    icon: Search,
+    iconBg: 'bg-blue-100 text-blue-600',
     text: 'Confirm the pattern',
     link: { label: 'LTA guidelines', href: '#' },
   },
   {
+    icon: MessageSquare,
+    iconBg: 'bg-violet-100 text-violet-600',
     text: 'Do a student check-in when reachable: explore barriers (sleep, anxiety, bullying, transport, caregiving) and agree on one small next step',
     link: { label: 'Check-in template', href: '#' },
   },
   {
+    icon: ClipboardList,
+    iconBg: 'bg-amber-100 text-amber-600',
     text: 'Reach out to both caregivers within 24–48 hours through a call, SMS/WhatsApp, and email, and document your attempts.',
     link: { label: 'See parents contact', href: '#' },
   },
   {
+    icon: Home,
+    iconBg: 'bg-orange-100 text-orange-600',
     text: 'If uncontactable or persistent: initiate home visit per guidelines',
     link: { label: 'Home visit checklist', href: '#' },
   },
   {
+    icon: BookOpen,
+    iconBg: 'bg-teal-100 text-teal-600',
     text: 'Hold a brief case discussion.',
     link: { label: 'Open CaseSync', href: '#', external: true },
   },
@@ -86,24 +105,26 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
 
           {/* ── Right panel ── */}
           <div className="flex-1 bg-slate-50 flex flex-col overflow-y-auto p-10 pt-8">
-            {/* Segmented toggle */}
-            <div className="inline-flex self-start rounded-full bg-muted p-1 gap-0.5">
+            {/* Segmented toggle — full width */}
+            <div className="flex w-full rounded-full bg-muted p-1 gap-0.5">
               <button
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={cn(
+                  'flex-1 rounded-full py-1.5 text-sm font-medium transition-colors',
                   activeTab === 'recommended'
                     ? 'bg-white text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
                 onClick={() => setActiveTab('recommended')}
               >
                 Recommended actions
               </button>
               <button
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={cn(
+                  'flex-1 rounded-full py-1.5 text-sm font-medium transition-colors',
                   activeTab === 'deep-dive'
                     ? 'bg-white text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
                 onClick={() => setActiveTab('deep-dive')}
               >
                 Deep dive
@@ -111,52 +132,76 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
             </div>
 
             {/* Content */}
-            <div className="mt-8 space-y-7">
+            <div className="mt-6">
               {activeTab === 'recommended' ? (
-                recommendedActions.map((action, i) => (
-                  <div key={i}>
-                    <p className="text-sm text-foreground leading-relaxed">
-                      {action.text}
-                    </p>
-                    <a
-                      href={action.link.href}
-                      className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline underline-offset-2"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      {action.link.label}
-                      {'external' in action.link && action.link.external && (
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      )}
-                    </a>
-                  </div>
-                ))
+                <ul className="-mx-3">
+                  {recommendedActions.map((action, i) => {
+                    const Icon = action.icon
+                    return (
+                      <li
+                        key={i}
+                        className="flex items-start gap-4 rounded-xl px-3 py-3.5 hover:bg-white/70 transition-colors cursor-default"
+                      >
+                        {/* Category icon */}
+                        <span
+                          className={cn(
+                            'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
+                            action.iconBg,
+                          )}
+                        >
+                          <Icon className="h-4 w-4" />
+                        </span>
+
+                        {/* Text + link */}
+                        <div className="min-w-0">
+                          <p className="text-sm text-foreground leading-relaxed">
+                            {action.text}
+                          </p>
+                          <a
+                            href={action.link.href}
+                            className="mt-1.5 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline underline-offset-2"
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            {action.link.label}
+                            {'external' in action.link &&
+                              action.link.external && (
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              )}
+                          </a>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
               ) : (
-                <>
-                  {/* Deep dive item 1 — two buttons */}
-                  <div>
-                    <p className="text-sm text-foreground leading-relaxed">
+                <ul className="-mx-3 space-y-1">
+                  {/* Item 1 — Play video */}
+                  <li className="rounded-xl px-3 py-4 hover:bg-white/70 transition-colors cursor-default">
+                    <p className="text-sm font-medium text-foreground leading-snug">
                       Why students go missing: patterns behind absenteeism
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      By AST · 8 min watch
                     </p>
                     <div className="mt-3 flex items-center gap-2">
                       <Button size="sm" className="gap-1.5">
                         <Play className="h-3.5 w-3.5" />
                         Play
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => e.preventDefault()}
-                      >
+                      <Button variant="outline" size="sm">
                         Open Glow
                       </Button>
                     </div>
-                  </div>
+                  </li>
 
-                  {/* Deep dive item 2 — one button */}
-                  <div>
-                    <p className="text-sm text-foreground leading-relaxed">
+                  {/* Item 2 — Read article */}
+                  <li className="rounded-xl px-3 py-4 hover:bg-white/70 transition-colors cursor-default">
+                    <p className="text-sm font-medium text-foreground leading-snug">
                       Having difficult conversations with parents about
                       attendance
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      By AST · 5 min read
                     </p>
                     <div className="mt-3">
                       <Button
@@ -169,8 +214,8 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
                         <ExternalLink className="h-3.5 w-3.5" />
                       </Button>
                     </div>
-                  </div>
-                </>
+                  </li>
+                </ul>
               )}
             </div>
           </div>
