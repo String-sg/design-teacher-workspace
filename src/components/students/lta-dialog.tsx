@@ -3,6 +3,8 @@ import {
   BookOpen,
   ClipboardList,
   ExternalLink,
+  FileText,
+  Headphones,
   Home,
   MessageSquare,
   Play,
@@ -165,8 +167,12 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
                 </ul>
               ) : (
                 <ul className="-mx-3 space-y-1">
-                  {/* Item 1 — Play video */}
-                  <li className="rounded-xl px-3 py-4 hover:bg-white/70 transition-colors cursor-default">
+                  {/* Item 1 — Audio */}
+                  <li className="flex items-start gap-4 rounded-xl px-3 py-4 hover:bg-white/70 transition-colors cursor-default">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                      <Headphones className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground leading-snug">
                       Why students go missing: patterns behind absenteeism
                     </p>
@@ -182,10 +188,15 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
                         Open Glow
                       </Button>
                     </div>
+                    </div>
                   </li>
 
-                  {/* Item 2 — Read article */}
-                  <li className="rounded-xl px-3 py-4 hover:bg-white/70 transition-colors cursor-default">
+                  {/* Item 2 — Article */}
+                  <li className="flex items-start gap-4 rounded-xl px-3 py-4 hover:bg-white/70 transition-colors cursor-default">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                      <FileText className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground leading-snug">
                       Having difficult conversations with parents about
                       attendance
@@ -203,6 +214,7 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
                         Read more
                         <ExternalLink className="h-3.5 w-3.5" />
                       </Button>
+                    </div>
                     </div>
                   </li>
                 </ul>
