@@ -52,10 +52,10 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
 
         {/* Content */}
         <div className="mt-3">
-          <h3 className="text-sm font-semibold text-blue-900">
+          <h3 className="text-sm font-semibold text-foreground">
             LTA: long-term absenteeism
           </h3>
-          <p className="mt-1 text-sm text-blue-700 leading-relaxed">
+          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
             {ltaPkg.why}
           </p>
         </div>
