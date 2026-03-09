@@ -113,7 +113,7 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
           <div className="w-px bg-border shrink-0" />
 
           {/* ── Right panel ── */}
-          <div className="flex-1 bg-slate-50 flex flex-col overflow-y-auto p-10 pt-8">
+          <div className="flex-1 bg-slate-50 flex flex-col overflow-y-auto px-10 py-[60px]">
             {/* Segmented toggle — full width */}
             <div className="flex w-full rounded-full bg-muted p-1 gap-0.5">
               <button
