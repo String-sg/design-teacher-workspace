@@ -31,20 +31,10 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
             <span className="text-sm font-semibold">Action required</span>
           </div>
           <div className="flex items-center gap-0.5">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="text-blue-400 hover:text-blue-600 hover:bg-blue-100"
-              disabled
-            >
+            <Button variant="ghost" size="icon-sm" disabled>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="text-blue-400 hover:text-blue-600 hover:bg-blue-100"
-              disabled
-            >
+            <Button variant="ghost" size="icon-sm" disabled>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -65,7 +55,6 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
           <Button
             variant="outline"
             size="sm"
-            className="rounded-full border-blue-300 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
             onClick={() => setDialogOpen(true)}
           >
             Check
