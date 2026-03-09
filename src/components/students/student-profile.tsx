@@ -31,6 +31,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { GenerateHdpWizard } from '@/components/reports/generate-hdp-wizard'
+import { InterventionBanner } from '@/components/students/intervention-banner'
 import {
   Sheet,
   SheetClose,
@@ -306,6 +307,9 @@ export function StudentProfile({
             </p>
           </div>
         </div>
+
+        {/* Intervention Banner — only surfaces for students with support needs */}
+        <InterventionBanner student={student} />
 
         {/* Overview Cards */}
         <StudentOverviewCards student={student} />
