@@ -32,6 +32,7 @@ import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
 import { Route as ParentsGatewayNewRouteImport } from './routes/parents-gateway.new'
 import { Route as ParentsGatewayIdRouteImport } from './routes/parents-gateway.$id'
+import { Route as GlowStudentIdRouteImport } from './routes/glow.$studentId'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 import { Route as GuestPreviewMenuRouteImport } from './routes/_guest.preview-menu'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
@@ -154,6 +155,11 @@ const ParentsGatewayIdRoute = ParentsGatewayIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ParentsGatewayRoute,
 } as any)
+const GlowStudentIdRoute = GlowStudentIdRouteImport.update({
+  id: '/glow/$studentId',
+  path: '/glow/$studentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnnouncementsIdRoute = AnnouncementsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -212,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/glow/$studentId': typeof GlowStudentIdRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/glow/$studentId': typeof GlowStudentIdRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/glow/$studentId': typeof GlowStudentIdRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
+    | '/glow/$studentId'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
+    | '/glow/$studentId'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/_guest/login'
     | '/_guest/preview-menu'
     | '/announcements/$id'
+    | '/glow/$studentId'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
@@ -392,6 +404,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StudentAnalyticsRoute: typeof StudentAnalyticsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
+  GlowStudentIdRoute: typeof GlowStudentIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -556,6 +569,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/parents-gateway/$id'
       preLoaderRoute: typeof ParentsGatewayIdRouteImport
       parentRoute: typeof ParentsGatewayRoute
+    }
+    '/glow/$studentId': {
+      id: '/glow/$studentId'
+      path: '/glow/$studentId'
+      fullPath: '/glow/$studentId'
+      preLoaderRoute: typeof GlowStudentIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/announcements/$id': {
       id: '/announcements/$id'
@@ -739,6 +759,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StudentAnalyticsRoute: StudentAnalyticsRoute,
   StudentsRoute: StudentsRouteWithChildren,
+  GlowStudentIdRoute: GlowStudentIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

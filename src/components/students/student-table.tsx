@@ -707,13 +707,14 @@ export function StudentTable({
                               {student.attentionTags
                                 .filter(
                                   (tag) =>
-                                    tag !== 'LTA' || isEnabled('lta-intervention'),
+                                    tag !== 'LTA' ||
+                                    isEnabled('lta-intervention'),
                                 )
                                 .map((tag) => (
-                                <Badge key={tag} variant={tagVariantMap[tag]}>
-                                  {tag}
-                                </Badge>
-                              ))}
+                                  <Badge key={tag} variant={tagVariantMap[tag]}>
+                                    {tag}
+                                  </Badge>
+                                ))}
                             </div>
                           ) : (
                             <span className="text-muted-foreground">-</span>

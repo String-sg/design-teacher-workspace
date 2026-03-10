@@ -145,10 +145,13 @@ export const mockStudents: Array<Student> = [
     approvedMtl: null,
     learningSupport: null,
     postSecEligibility: '404 ITE, 105 Poly',
-    offences: 0,
+    offences: 1,
+    offenceDetails: [
+      { type: 'Bullying (verbal)', count: 1, latestDate: '3 Mar 2026' },
+    ],
     absences: 15,
     lateComing: 5,
-    ccaMissed: 8,
+    ccaMissed: 3,
     riskIndicators: 4,
     riskIndicatorHistory: [
       {
