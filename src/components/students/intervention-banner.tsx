@@ -73,7 +73,7 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
         </div>
       </div>
 
-      <LtaDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <LtaDialog open={dialogOpen} onOpenChange={setDialogOpen} student={student} />
     </>
   )
 }
