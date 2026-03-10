@@ -43,7 +43,7 @@ function StudentAnalyticsPage() {
 
   return (
     <div className="flex flex-col p-6">
-      <div className="w-full max-w-[860px]">
+      <div className="w-full max-w-[1200px]">
         {/* Page header */}
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-semibold">Analytics</h1>

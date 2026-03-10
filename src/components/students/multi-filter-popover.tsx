@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  Check,
   ChevronDown,
   ChevronUp,
   Filter,
@@ -16,7 +17,7 @@ import type {
   FilterRangeValue,
 } from '@/types/student'
 import type { FilterFieldOption } from '@/data/filter-config'
-import { filterFieldConfigs } from '@/data/filter-config'
+import { filterFieldConfigs, isFilterComplete } from '@/data/filter-config'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -51,6 +52,10 @@ const booleanOperatorOptions = [
   { value: 'is_not' as FilterOperator, label: 'is not' },
 ]
 
+const multiselectOperatorOptions = [
+  { value: 'is' as FilterOperator, label: 'is' },
+]
+
 const textOperatorOptions = [
   { value: 'contains' as FilterOperator, label: 'contains' },
   { value: 'not_contains' as FilterOperator, label: 'does not contain' },
@@ -70,9 +75,11 @@ const filterFieldOptions: Array<FilterFieldOption2> = filterFieldConfigs.map(
     operators:
       config.type === 'numeric'
         ? numericOperatorOptions
-        : config.type === 'boolean' || config.type === 'enum'
-          ? booleanOperatorOptions
-          : textOperatorOptions,
+        : config.type === 'multiselect'
+          ? multiselectOperatorOptions
+          : config.type === 'boolean' || config.type === 'enum'
+            ? booleanOperatorOptions
+            : textOperatorOptions,
   }),
 )
 
@@ -106,6 +113,13 @@ export function MultiFilterPopover({
   const [fieldSelectorQuery, setFieldSelectorQuery] = useState('')
   const fieldSelectorSearchRef = useRef<HTMLInputElement>(null)
 
+  // Per-row multiselect value dropdown state
+  const [openMultiselectIndex, setOpenMultiselectIndex] = useState<
+    number | null
+  >(null)
+  const [multiselectQuery, setMultiselectQuery] = useState('')
+  const multiselectSearchRef = useRef<HTMLInputElement>(null)
+
   // Auto-open selector when popover opens (only if no filters yet)
   useEffect(() => {
     if (open) {
@@ -115,6 +129,8 @@ export function MultiFilterPopover({
       setSearchQuery('')
       setOpenFieldSelectorIndex(null)
       setFieldSelectorQuery('')
+      setOpenMultiselectIndex(null)
+      setMultiselectQuery('')
     }
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -133,6 +149,14 @@ export function MultiFilterPopover({
       return () => clearTimeout(t)
     }
   }, [openFieldSelectorIndex])
+
+  // Focus search when multiselect dropdown opens
+  useEffect(() => {
+    if (openMultiselectIndex !== null) {
+      const t = setTimeout(() => multiselectSearchRef.current?.focus(), 30)
+      return () => clearTimeout(t)
+    }
+  }, [openMultiselectIndex])
 
   const activeFields = useMemo(
     () => new Set(filters.map((f) => f.field)),
@@ -156,11 +180,13 @@ export function MultiFilterPopover({
   const handleAddFilter = (field: FilterField) => {
     const fieldOption = filterFieldOptions.find((opt) => opt.field === field)
     if (!fieldOption) return
-    const operator =
+    const operator = fieldOption.defaultOperator
+    const value =
       fieldOption.type === 'numeric'
-        ? fieldOption.operators[0].value
-        : fieldOption.defaultOperator
-    const value = fieldOption.type === 'numeric' ? '' : fieldOption.defaultValue
+        ? ''
+        : fieldOption.type === 'multiselect'
+          ? []
+          : fieldOption.defaultValue
     onFiltersChange([
       ...filters,
       {
@@ -181,11 +207,13 @@ export function MultiFilterPopover({
   const handleFieldChange = (index: number, field: FilterField) => {
     const fieldOption = filterFieldOptions.find((opt) => opt.field === field)
     if (!fieldOption) return
-    const operator =
+    const operator = fieldOption.defaultOperator
+    const value =
       fieldOption.type === 'numeric'
-        ? fieldOption.operators[0].value
-        : fieldOption.defaultOperator
-    const value = fieldOption.type === 'numeric' ? '' : fieldOption.defaultValue
+        ? ''
+        : fieldOption.type === 'multiselect'
+          ? []
+          : fieldOption.defaultValue
     const newFilters = [...filters]
     newFilters[index] = {
       ...newFilters[index],
@@ -206,7 +234,8 @@ export function MultiFilterPopover({
       value = { min: num, max: num }
     } else if (prev.operator === 'between' || prev.operator === 'not_between') {
       // switching away from range — use min as the single value
-      value = typeof value === 'object' ? (value).min : ''
+      value =
+        typeof value === 'object' && !Array.isArray(value) ? value.min : ''
     } else if (operator === 'is_empty' || operator === 'is_not_empty') {
       value = ''
     }
@@ -239,7 +268,9 @@ export function MultiFilterPopover({
     operator === 'between' || operator === 'not_between'
 
   const showCount =
-    filters.length > 0 && matchedCount !== undefined && totalCount !== undefined
+    filters.filter(isFilterComplete).length > 0 &&
+    matchedCount !== undefined &&
+    totalCount !== undefined
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -255,9 +286,9 @@ export function MultiFilterPopover({
       >
         <Filter className="h-4 w-4" />
         Filter
-        {filters.length > 0 && (
+        {filters.filter(isFilterComplete).length > 0 && (
           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-            {filters.length}
+            {filters.filter(isFilterComplete).length}
           </span>
         )}
       </PopoverTrigger>
@@ -313,7 +344,7 @@ export function MultiFilterPopover({
                           render={
                             <button
                               type="button"
-                              className="border-input flex h-9 w-[152px] shrink-0 items-center justify-between gap-1.5 rounded-[var(--radius-input)] border bg-white px-3 text-sm outline-none"
+                              className="border-input flex h-9 w-[152px] shrink-0 items-center justify-between gap-1.5 rounded-[14px] border bg-white px-3 text-sm outline-none"
                             />
                           }
                         >
@@ -331,7 +362,7 @@ export function MultiFilterPopover({
                             <input
                               ref={fieldSelectorSearchRef}
                               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                              placeholder="Search filters"
+                              placeholder="Search options"
                               value={fieldSelectorQuery}
                               onChange={(e) =>
                                 setFieldSelectorQuery(e.target.value)
@@ -385,7 +416,11 @@ export function MultiFilterPopover({
                         }
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="min-w-max" align="start" alignItemWithTrigger={false}>
+                    <SelectContent
+                      className="min-w-max"
+                      align="start"
+                      alignItemWithTrigger={false}
+                    >
                       {fieldOption?.operators.map((op) => (
                         <SelectItem key={op.value} value={op.value}>
                           {op.label}
@@ -398,21 +433,188 @@ export function MultiFilterPopover({
                   <div className="w-[240px] shrink-0">
                     {needsValueInput(filter.operator) && (
                       <>
-                        {fieldOption?.type === 'numeric' ? (
+                        {fieldOption?.type === 'multiselect' ? (
+                          // Multi-select dropdown
+                          (() => {
+                            const isOpen = openMultiselectIndex === index
+                            const selectedValues = Array.isArray(filter.value)
+                              ? filter.value
+                              : []
+                            const q = multiselectQuery.trim().toLowerCase()
+                            const sortedEnumValues = [
+                              ...((fieldOption.enumValues ?? []).includes('-')
+                                ? ['-']
+                                : []),
+                              ...(fieldOption.enumValues ?? []).filter(
+                                (v) => v !== '-',
+                              ),
+                            ]
+                            const visibleOptions = q
+                              ? sortedEnumValues.filter((v) =>
+                                  v.toLowerCase().includes(q),
+                                )
+                              : sortedEnumValues
+                            const allSelected =
+                              visibleOptions.length > 0 &&
+                              visibleOptions.every((v) =>
+                                selectedValues.includes(v),
+                              )
+                            const toggleValue = (v: string) => {
+                              const next = selectedValues.includes(v)
+                                ? selectedValues.filter((s) => s !== v)
+                                : [...selectedValues, v]
+                              handleValueChange(index, next)
+                            }
+                            const toggleAll = () => {
+                              if (allSelected) {
+                                handleValueChange(
+                                  index,
+                                  selectedValues.filter(
+                                    (v) => !visibleOptions.includes(v),
+                                  ),
+                                )
+                              } else {
+                                const next = [
+                                  ...new Set([
+                                    ...selectedValues,
+                                    ...visibleOptions,
+                                  ]),
+                                ]
+                                handleValueChange(index, next)
+                              }
+                            }
+                            return (
+                              <Popover
+                                open={isOpen}
+                                onOpenChange={(v) => {
+                                  setOpenMultiselectIndex(v ? index : null)
+                                  if (!v) setMultiselectQuery('')
+                                }}
+                              >
+                                <PopoverTrigger
+                                  render={
+                                    <button
+                                      type="button"
+                                      className={cn(
+                                        'border-input flex h-9 w-full items-center justify-between gap-1.5 rounded-[14px] border bg-white px-3 text-sm outline-none',
+                                        selectedValues.length === 0 &&
+                                          'text-muted-foreground',
+                                      )}
+                                    />
+                                  }
+                                >
+                                  <span className="flex-1 truncate text-left">
+                                    {selectedValues.length === 0
+                                      ? 'Select option'
+                                      : selectedValues.length === 1
+                                        ? selectedValues[0]
+                                        : `${selectedValues.length} selected`}
+                                  </span>
+                                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="w-[260px] gap-0 p-0"
+                                  align="start"
+                                >
+                                  {/* Header */}
+                                  <div className="flex items-center justify-between border-b px-3 py-2.5">
+                                    <span className="text-sm font-semibold">
+                                      {fieldOption.label}
+                                    </span>
+                                    {visibleOptions.length > 0 && (
+                                      <button
+                                        type="button"
+                                        onClick={toggleAll}
+                                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                                      >
+                                        <div
+                                          className={cn(
+                                            'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border',
+                                            allSelected
+                                              ? 'border-primary bg-primary text-primary-foreground'
+                                              : 'border-input',
+                                          )}
+                                        >
+                                          {allSelected && (
+                                            <Check className="h-2.5 w-2.5" />
+                                          )}
+                                        </div>
+                                        Select all
+                                      </button>
+                                    )}
+                                  </div>
+                                  {/* Search */}
+                                  <div className="flex items-center gap-2 border-b px-3 py-2">
+                                    <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                    <input
+                                      ref={multiselectSearchRef}
+                                      className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                                      placeholder="Search options"
+                                      value={multiselectQuery}
+                                      onChange={(e) =>
+                                        setMultiselectQuery(e.target.value)
+                                      }
+                                    />
+                                  </div>
+                                  <ScrollArea className="max-h-[220px]">
+                                    <div className="py-1">
+                                      {visibleOptions.map((v) => {
+                                        const checked =
+                                          selectedValues.includes(v)
+                                        return (
+                                          <button
+                                            key={v}
+                                            type="button"
+                                            onClick={() => toggleValue(v)}
+                                            className={cn(
+                                              'flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-accent',
+                                              checked && 'bg-accent/50',
+                                            )}
+                                          >
+                                            <div
+                                              className={cn(
+                                                'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
+                                                checked
+                                                  ? 'border-primary bg-primary text-primary-foreground'
+                                                  : 'border-input',
+                                              )}
+                                            >
+                                              {checked && (
+                                                <Check className="h-3 w-3" />
+                                              )}
+                                            </div>
+                                            {v}
+                                          </button>
+                                        )
+                                      })}
+                                      {visibleOptions.length === 0 && (
+                                        <div className="px-3 py-4 text-center text-sm text-muted-foreground">
+                                          No options found
+                                        </div>
+                                      )}
+                                    </div>
+                                  </ScrollArea>
+                                </PopoverContent>
+                              </Popover>
+                            )
+                          })()
+                        ) : fieldOption?.type === 'numeric' ? (
                           isRangeOperator(filter.operator) ? (
                             // Numerical - range
                             <div className="flex items-center gap-1.5">
                               <Input
                                 type="number"
                                 value={
-                                  typeof filter.value === 'object'
-                                    ? (filter.value).min
+                                  typeof filter.value === 'object' &&
+                                  !Array.isArray(filter.value)
+                                    ? filter.value.min
                                     : 0
                                 }
                                 onChange={(e) =>
                                   handleValueChange(index, {
-                                    ...(typeof filter.value === 'object'
-                                      ? (filter.value)
+                                    ...(typeof filter.value === 'object' &&
+                                    !Array.isArray(filter.value)
+                                      ? filter.value
                                       : { min: 0, max: 0 }),
                                     min: Number(e.target.value),
                                   })
@@ -426,14 +628,16 @@ export function MultiFilterPopover({
                               <Input
                                 type="number"
                                 value={
-                                  typeof filter.value === 'object'
-                                    ? (filter.value).max
+                                  typeof filter.value === 'object' &&
+                                  !Array.isArray(filter.value)
+                                    ? filter.value.max
                                     : 0
                                 }
                                 onChange={(e) =>
                                   handleValueChange(index, {
-                                    ...(typeof filter.value === 'object'
-                                      ? (filter.value)
+                                    ...(typeof filter.value === 'object' &&
+                                    !Array.isArray(filter.value)
+                                      ? filter.value
                                       : { min: 0, max: 0 }),
                                     max: Number(e.target.value),
                                   })
@@ -515,9 +719,7 @@ export function MultiFilterPopover({
 
         {/* Select filter row – shown when no filters or when adding */}
         {(filters.length === 0 || selectorOpen) && (
-          <div
-            className={cn('px-5 pb-3', filters.length > 0 && 'pt-1')}
-          >
+          <div className={cn('px-5 pb-3', filters.length > 0 && 'pt-1')}>
             <div className="flex items-center gap-2">
               <span className="w-12 shrink-0 text-sm text-muted-foreground">
                 {filters.length === 0 ? 'Where' : 'and'}
@@ -552,7 +754,7 @@ export function MultiFilterPopover({
                       <input
                         ref={searchRef}
                         className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                        placeholder="Search filters"
+                        placeholder="Search options"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />

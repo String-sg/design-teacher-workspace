@@ -161,7 +161,7 @@ export interface FilterCriterion {
   id: string
   field: FilterField
   operator: FilterOperator
-  value: string | number | FilterRangeValue
+  value: string | number | FilterRangeValue | Array<string>
 }
 
 export type SortDirection = 'asc' | 'desc'

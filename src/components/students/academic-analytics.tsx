@@ -17,6 +17,7 @@ import {
   ChevronRight,
   FileText,
   Maximize2,
+  RotateCcw,
   Search,
   SlidersHorizontal,
   X,
@@ -1738,28 +1739,19 @@ export function MonitoringAcademicAnalytics() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 w-full text-xs text-muted-foreground"
+                      className="h-7 w-full gap-1.5 text-xs font-medium text-[var(--slate-12)]"
                       onClick={() => {
                         clearTableFilters()
                         setFilterOpen(false)
                       }}
                     >
-                      <X className="mr-1 h-3 w-3" />
-                      Clear all filters
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      Reset
                     </Button>
                   )}
                 </div>
               </PopoverContent>
             </Popover>
-
-            {hasActiveTableFilters && (
-              <button
-                onClick={clearTableFilters}
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                Clear
-              </button>
-            )}
           </div>
 
           {/* Table */}
@@ -1767,6 +1759,9 @@ export function MonitoringAcademicAnalytics() {
             <table className="w-full table-fixed text-sm">
               <thead>
                 <tr className="border-b bg-muted/40">
+                  <th className="w-[15%] px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    View profile
+                  </th>
                   <th className="w-2/5 px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     Name
                   </th>
@@ -1779,9 +1774,6 @@ export function MonitoringAcademicAnalytics() {
                   <th className="w-[15%] px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     Grade
                   </th>
-                  <th className="w-[15%] px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    View profile
-                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -1790,18 +1782,6 @@ export function MonitoringAcademicAnalytics() {
                     key={c.id}
                     className="bg-white transition-colors hover:bg-muted/30"
                   >
-                    <td className="w-2/5 px-4 py-2.5 font-medium text-foreground">
-                      {c.name}
-                    </td>
-                    <td className="w-[15%] px-4 py-2.5 text-muted-foreground">
-                      {c.class}
-                    </td>
-                    <td className="w-[15%] px-4 py-2.5 text-right tabular-nums">
-                      {c.score}
-                    </td>
-                    <td className="w-[15%] px-4 py-2.5 text-right text-muted-foreground">
-                      {c.grade}
-                    </td>
                     <td className="w-[15%] px-4 py-2.5">
                       {(() => {
                         const realId = studentIdByName.get(c.name)
@@ -1831,6 +1811,18 @@ export function MonitoringAcademicAnalytics() {
                         )
                       })()}
                     </td>
+                    <td className="w-2/5 px-4 py-2.5 font-medium text-foreground">
+                      {c.name}
+                    </td>
+                    <td className="w-[15%] px-4 py-2.5 text-muted-foreground">
+                      {c.class}
+                    </td>
+                    <td className="w-[15%] px-4 py-2.5 text-right tabular-nums">
+                      {c.score}
+                    </td>
+                    <td className="w-[15%] px-4 py-2.5 text-right text-muted-foreground">
+                      {c.grade}
+                    </td>
                   </tr>
                 ))}
                 {pagedCandidates.length === 0 && (
@@ -1851,8 +1843,9 @@ export function MonitoringAcademicAnalytics() {
           {totalPages > 1 && (
             <div className="mt-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground text-xs">
-                {filteredCandidates.length} students · Page {page} of{' '}
-                {totalPages}
+                {(page - 1) * PAGE_SIZE + 1}–
+                {Math.min(page * PAGE_SIZE, filteredCandidates.length)} of{' '}
+                {filteredCandidates.length} records
               </span>
               <div className="flex items-center gap-1">
                 <Button

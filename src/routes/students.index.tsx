@@ -10,7 +10,7 @@ import type {
 } from '@/types/student'
 import type { ColumnConfig } from '@/components/students/column-visibility-popover'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { filterFieldConfigs } from '@/data/filter-config'
+import { filterFieldConfigs, isFilterComplete } from '@/data/filter-config'
 import { DataCard } from '@/components/data-card'
 import { StudentFilters } from '@/components/students/student-filters'
 import { StudentTable } from '@/components/students/student-table'
@@ -105,6 +105,9 @@ function matchesCondition(
         .toLowerCase()
         .includes(String(filter.value).toLowerCase())
     case 'is':
+      if (Array.isArray(filter.value)) {
+        return filter.value.includes(String(value ?? ''))
+      }
       return String(value ?? '') === String(filter.value)
     case 'is_not':
       return String(value ?? '') !== String(filter.value)
@@ -155,7 +158,8 @@ function StudentsPage() {
   // Determine which students match the current filters (search + filter criteria)
   const { matchedIds, hasActiveFilters } = useMemo(() => {
     const hasSearch = !!searchQuery
-    const hasFilterCriteria = filters.length > 0
+    const completeFilters = filters.filter(isFilterComplete)
+    const hasFilterCriteria = completeFilters.length > 0
     const isFiltering = hasSearch || hasFilterCriteria
 
     if (!isFiltering) {
@@ -174,7 +178,7 @@ function StudentsPage() {
       // Check filter criteria
       const matchesFilters =
         !hasFilterCriteria ||
-        filters.every((filter) =>
+        completeFilters.every((filter) =>
           matchesCondition(student, filter, selectedSubjects),
         )
 
@@ -186,9 +190,9 @@ function StudentsPage() {
     return { matchedIds: matched, hasActiveFilters: isFiltering }
   }, [classStudents, searchQuery, filters, selectedSubjects])
 
-  // Compute active filter fields for header indicators
+  // Compute active filter fields for header indicators (only complete filters)
   const activeFilterFields = useMemo(
-    () => new Set(filters.map((f) => f.field)),
+    () => new Set(filters.filter(isFilterComplete).map((f) => f.field)),
     [filters],
   )
 

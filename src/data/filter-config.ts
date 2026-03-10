@@ -1,7 +1,21 @@
 import type { ReactNode } from 'react'
-import type { FilterField, FilterOperator } from '@/types/student'
+import type {
+  FilterCriterion,
+  FilterField,
+  FilterOperator,
+} from '@/types/student'
 
-export type FieldType = 'numeric' | 'text' | 'boolean' | 'enum'
+/** A filter is "complete" (should be applied) when its value is filled in */
+export function isFilterComplete(filter: FilterCriterion): boolean {
+  const { operator, value } = filter
+  if (operator === 'is_empty' || operator === 'is_not_empty') return true
+  if (Array.isArray(value)) return value.length > 0
+  if (typeof value === 'object' && value !== null) return true // range
+  if (typeof value === 'number') return true
+  return typeof value === 'string' && value.trim() !== ''
+}
+
+export type FieldType = 'numeric' | 'text' | 'boolean' | 'enum' | 'multiselect'
 
 export type FieldGroup =
   | 'general'
@@ -79,10 +93,33 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   {
     field: 'cca',
     label: 'CCA',
-    type: 'text',
+    type: 'multiselect',
     group: 'general',
-    defaultOperator: 'contains',
+    defaultOperator: 'is',
     defaultValue: '',
+    enumValues: [
+      'No CCA',
+      'AVA',
+      'Robotics',
+      'Flying club',
+      'Badminton',
+      'Basketball',
+      'Bowling',
+      'Football',
+      'Netball',
+      'Tchoukball',
+      "Boys' brigade",
+      "Girls' brigade",
+      'National cadet corps (Land)',
+      'National civil defence cadet corps',
+      'National police cadet corps',
+      'Choir',
+      'Concert band',
+      'English drama',
+      'Guitar ensemble',
+      'Modern dance',
+      'Visual arts',
+    ],
   },
   // Behaviour and Discipline
   {
@@ -129,11 +166,11 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   {
     field: 'conduct',
     label: 'Conduct grade',
-    type: 'enum',
+    type: 'multiselect',
     group: 'academic',
     defaultOperator: 'is',
-    defaultValue: 'Poor',
-    enumValues: ['Excellent', 'Good', 'Fair', 'Poor'],
+    defaultValue: '',
+    enumValues: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
   },
   {
     field: 'approvedMtl',
@@ -146,10 +183,11 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   {
     field: 'learningSupport',
     label: 'Learning support',
-    type: 'text',
+    type: 'multiselect',
     group: 'academic',
-    defaultOperator: 'is_not_empty',
+    defaultOperator: 'is',
     defaultValue: '',
+    enumValues: ['LSP', 'LSM'],
   },
   {
     field: 'postSecEligibility',
@@ -171,10 +209,10 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   {
     field: 'lowMoodFlagged',
     label: 'Low mood flagged 2+ terms',
-    type: 'boolean',
+    type: 'multiselect',
     group: 'wellbeing',
     defaultOperator: 'is',
-    defaultValue: 'Yes',
+    defaultValue: '',
     enumValues: ['Yes', 'No'],
   },
   {
@@ -188,53 +226,76 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
   {
     field: 'counsellingSessions',
     label: 'Counselling',
-    type: 'numeric',
+    type: 'multiselect',
     group: 'wellbeing',
-    defaultOperator: 'gte',
-    defaultValue: 1,
+    defaultOperator: 'is',
+    defaultValue: '',
+    enumValues: ['Complex cases', 'Less complex cases', '-'],
   },
   {
     field: 'sen',
     label: 'SEN',
-    type: 'text',
+    type: 'multiselect',
     group: 'wellbeing',
-    defaultOperator: 'is_not_empty',
+    defaultOperator: 'is',
     defaultValue: '',
+    enumValues: [
+      '-',
+      'Intellectual disability',
+      'Attention Deficit Hyperactivity Disorder',
+      'Depression',
+      'Developmental Language Disorder',
+      'Dyslexia',
+    ],
   },
   {
     field: 'fas',
     label: 'FAS',
-    type: 'boolean',
+    type: 'multiselect',
     group: 'wellbeing',
     defaultOperator: 'is',
-    defaultValue: 'Yes',
-    enumValues: ['Yes', 'No'],
+    defaultValue: '',
+    enumValues: ['MOE FAS', 'School based FAS', '-'],
   },
   // Family, Housing, Finance
   {
     field: 'housing',
     label: 'Housing',
-    type: 'text',
+    type: 'multiselect',
     group: 'family',
-    defaultOperator: 'is_not_empty',
+    defaultOperator: 'is',
     defaultValue: '',
+    enumValues: [
+      'Others',
+      'HDB 1-room flat',
+      'HDB 2-room flat',
+      'HDB 3-room flat',
+      'HDB 4-room flat',
+      'HDB 5-room flat',
+      'HDB executive/multi-generation flat',
+      'HUDC flat',
+      'Private flat/apartment',
+      'Semi-detached house',
+      'Terrace',
+    ],
   },
   {
     field: 'housingType',
     label: 'Housing ownership',
-    type: 'enum',
+    type: 'multiselect',
     group: 'family',
     defaultOperator: 'is',
-    defaultValue: 'Rented',
-    enumValues: ['Owned', 'Rented'],
+    defaultValue: '',
+    enumValues: ['Owner occupied', 'Rented'],
   },
   {
     field: 'custody',
     label: 'Custody',
-    type: 'text',
+    type: 'multiselect',
     group: 'family',
-    defaultOperator: 'is_not_empty',
+    defaultOperator: 'is',
     defaultValue: '',
+    enumValues: ['Father', 'Mother', 'Joint custody', 'Others'],
   },
   {
     field: 'commuterStatus',

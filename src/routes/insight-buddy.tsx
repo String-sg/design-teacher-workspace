@@ -230,9 +230,12 @@ function ChatEmptyState({
 
       {/* Title + description */}
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">What would you like to explore?</h2>
+        <h2 className="text-xl font-semibold">
+          What would you like to explore?
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Spot patterns, understand trends, or identify students who may need support.
+          Spot patterns, understand trends, or identify students who may need
+          support.
         </p>
       </div>
 
@@ -638,15 +641,24 @@ function InsightBuddyPage() {
         </div>
 
         {activeResultType === 'lta' ? (
-          <div key="lta" className="animate-fade-slide-up flex-1 overflow-auto p-6">
+          <div
+            key="lta"
+            className="animate-fade-slide-up flex-1 overflow-auto p-6"
+          >
             <LtaResultsTable />
           </div>
         ) : activeResultType === 'performance-per-subject' ? (
-          <div key="perf" className="animate-fade-slide-up flex-1 overflow-auto p-6">
+          <div
+            key="perf"
+            className="animate-fade-slide-up flex-1 overflow-auto p-6"
+          >
             <PerformancePerSubjectChart />
           </div>
         ) : activeResultType === 'generic' ? (
-          <div key="generic" className="animate-fade-slide-up flex-1 overflow-auto p-6">
+          <div
+            key="generic"
+            className="animate-fade-slide-up flex-1 overflow-auto p-6"
+          >
             <div className="rounded-xl border bg-background p-6 shadow-sm">
               <p className="text-sm text-muted-foreground">
                 Analytics results will appear here based on your query.

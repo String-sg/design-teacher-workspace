@@ -608,180 +608,180 @@ export function StudentTable({
                       })
                     }
                   >
-                      {isVisible('index') && (
-                        <TableCell className="sticky left-0 z-10 bg-white pl-6 text-muted-foreground transition-colors group-hover:bg-muted/50">
-                          {displayStartIndex + index}
-                        </TableCell>
-                      )}
-                      {isVisible('name') && (
-                        <TableCell
-                          className={cn(
-                            'sticky z-10 bg-white font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors group-hover:bg-muted/50',
-                            isVisible('index') ? 'left-12' : 'left-0',
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            {student.name}
-                            <Link
-                              to="/students/$id"
-                              params={{ id: student.id }}
-                              className="text-muted-foreground hover:text-foreground"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <FileText className="size-4" />
-                            </Link>
+                    {isVisible('index') && (
+                      <TableCell className="sticky left-0 z-10 bg-white pl-6 text-muted-foreground transition-colors group-hover:bg-muted/50">
+                        {displayStartIndex + index}
+                      </TableCell>
+                    )}
+                    {isVisible('name') && (
+                      <TableCell
+                        className={cn(
+                          'sticky z-10 bg-white font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors group-hover:bg-muted/50',
+                          isVisible('index') ? 'left-12' : 'left-0',
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          {student.name}
+                          <Link
+                            to="/students/$id"
+                            params={{ id: student.id }}
+                            className="text-muted-foreground hover:text-foreground"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <FileText className="size-4" />
+                          </Link>
+                        </div>
+                      </TableCell>
+                    )}
+                    {isVisible('class') && (
+                      <TableCell>{student.class}</TableCell>
+                    )}
+                    {isVisible('cca') && <TableCell>{student.cca}</TableCell>}
+                    {isVisible('attentionTags') && (
+                      <TableCell>
+                        {student.attentionTags.length > 0 ? (
+                          <div className="flex gap-1">
+                            {student.attentionTags.map((tag) => (
+                              <Badge
+                                key={tag}
+                                className="bg-blue-600 text-white"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
                           </div>
-                        </TableCell>
-                      )}
-                      {isVisible('class') && (
-                        <TableCell>{student.class}</TableCell>
-                      )}
-                      {isVisible('cca') && <TableCell>{student.cca}</TableCell>}
-                      {isVisible('attentionTags') && (
-                        <TableCell>
-                          {student.attentionTags.length > 0 ? (
-                            <div className="flex gap-1">
-                              {student.attentionTags.map((tag) => (
-                                <Badge key={tag} variant={tagVariantMap[tag]}>
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('attendance') && (
-                        <TableCell>
-                          {student.totalSchoolDays > 0
-                            ? Math.round(
-                                (student.daysPresent /
-                                  student.totalSchoolDays) *
-                                  100,
-                              )
-                            : 0}
-                          %
-                        </TableCell>
-                      )}
-                      {isVisible('lateComing') && (
-                        <TableCell>{student.lateComing}</TableCell>
-                      )}
-                      {isVisible('absences') && (
-                        <TableCell>{student.absences}</TableCell>
-                      )}
-                      {isVisible('ccaMissed') && (
-                        <TableCell>{student.ccaMissed}</TableCell>
-                      )}
-                      {isVisible('offences') && (
-                        <TableCell>{student.offences}</TableCell>
-                      )}
-                      {isVisible('conduct') && (
-                        <TableCell>{student.conduct}</TableCell>
-                      )}
-                      {isVisible('counsellingSessions') && (
-                        <TableCell>{student.counsellingSessions}</TableCell>
-                      )}
-                      {isVisible('sen') && (
-                        <TableCell>
-                          {student.sen || (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('socialLinks') && (
-                        <TableCell>{student.socialLinks}</TableCell>
-                      )}
-                      {isVisible('riskIndicators') && (
-                        <TableCell>{student.riskIndicators}</TableCell>
-                      )}
-                      {isVisible('lowMoodFlagged') && (
-                        <TableCell>
-                          {student.lowMoodFlagged || (
-                            <span className="text-muted-foreground">No</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('overallPercentage') && (
-                        <TableCell>
-                          {computeOverallPct(student, selectedSubjects)}%
-                        </TableCell>
-                      )}
-                      {isVisible('approvedMtl') && (
-                        <TableCell>
-                          {student.approvedMtl || (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('learningSupport') && (
-                        <TableCell>
-                          {student.learningSupport || (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('postSecEligibility') && (
-                        <TableCell className="max-w-[150px] truncate">
-                          {student.postSecEligibility}
-                        </TableCell>
-                      )}
-                      {isVisible('fas') && (
-                        <TableCell>
-                          {student.fas || (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('housing') && (
-                        <TableCell>
-                          {student.housing || (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('housingType') && (
-                        <TableCell>
-                          {student.housingType === 'Rented' ? (
-                            'Rental'
-                          ) : student.housingType === 'Owned' ? (
-                            'Owner occupied'
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('custody') && (
-                        <TableCell>
-                          {student.custody || (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('commuterStatus') && (
-                        <TableCell>
-                          {student.commuterStatus || (
-                            <span className="text-muted-foreground">
-                              Non-commuter
-                            </span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('afterSchoolArrangement') && (
-                        <TableCell>
-                          {student.afterSchoolArrangement || (
-                            <span className="text-muted-foreground">
-                              No arrangement
-                            </span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('siblings') && (
-                        <TableCell className="pr-6">
-                          {student.siblings}
-                        </TableCell>
-                      )}
-                    </TableRow>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('attendance') && (
+                      <TableCell>
+                        {student.totalSchoolDays > 0
+                          ? Math.round(
+                              (student.daysPresent / student.totalSchoolDays) *
+                                100,
+                            )
+                          : 0}
+                        %
+                      </TableCell>
+                    )}
+                    {isVisible('lateComing') && (
+                      <TableCell>{student.lateComing}</TableCell>
+                    )}
+                    {isVisible('absences') && (
+                      <TableCell>{student.absences}</TableCell>
+                    )}
+                    {isVisible('ccaMissed') && (
+                      <TableCell>{student.ccaMissed}</TableCell>
+                    )}
+                    {isVisible('offences') && (
+                      <TableCell>{student.offences}</TableCell>
+                    )}
+                    {isVisible('conduct') && (
+                      <TableCell>{student.conduct}</TableCell>
+                    )}
+                    {isVisible('counsellingSessions') && (
+                      <TableCell>{student.counsellingSessions}</TableCell>
+                    )}
+                    {isVisible('sen') && (
+                      <TableCell>
+                        {student.sen || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('socialLinks') && (
+                      <TableCell>{student.socialLinks}</TableCell>
+                    )}
+                    {isVisible('riskIndicators') && (
+                      <TableCell>{student.riskIndicators}</TableCell>
+                    )}
+                    {isVisible('lowMoodFlagged') && (
+                      <TableCell>
+                        {student.lowMoodFlagged || (
+                          <span className="text-muted-foreground">No</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('overallPercentage') && (
+                      <TableCell>
+                        {computeOverallPct(student, selectedSubjects)}%
+                      </TableCell>
+                    )}
+                    {isVisible('approvedMtl') && (
+                      <TableCell>
+                        {student.approvedMtl || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('learningSupport') && (
+                      <TableCell>
+                        {student.learningSupport || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('postSecEligibility') && (
+                      <TableCell className="max-w-[150px] truncate">
+                        {student.postSecEligibility}
+                      </TableCell>
+                    )}
+                    {isVisible('fas') && (
+                      <TableCell>
+                        {student.fas || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('housing') && (
+                      <TableCell>
+                        {student.housing || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('housingType') && (
+                      <TableCell>
+                        {student.housingType === 'Rented' ? (
+                          'Rental'
+                        ) : student.housingType === 'Owned' ? (
+                          'Owner occupied'
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('custody') && (
+                      <TableCell>
+                        {student.custody || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('commuterStatus') && (
+                      <TableCell>
+                        {student.commuterStatus || (
+                          <span className="text-muted-foreground">
+                            Non-commuter
+                          </span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('afterSchoolArrangement') && (
+                      <TableCell>
+                        {student.afterSchoolArrangement || (
+                          <span className="text-muted-foreground">
+                            No arrangement
+                          </span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('siblings') && (
+                      <TableCell className="pr-6">{student.siblings}</TableCell>
+                    )}
+                  </TableRow>
                 </React.Fragment>
               )
             })}
@@ -791,6 +791,8 @@ export function StudentTable({
         {/* Record count and Pagination */}
         <div className="flex shrink-0 items-center justify-between px-6 py-4">
           <div className="text-sm text-muted-foreground">
+            {displayStartIndex}–
+            {Math.min(startIndex + pageSize, students.length)} of{' '}
             {students.length} records
           </div>
           {totalPages > 1 && (

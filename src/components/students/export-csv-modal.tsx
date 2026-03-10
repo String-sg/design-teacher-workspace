@@ -62,8 +62,8 @@ export function ExportCsvModal({
   onOpenChange,
   onExport,
 }: ExportCsvModalProps) {
-  const [senFormat, setSenFormat] = useState<SenFormat>('sen-norm')
-  const [dataRange, setDataRange] = useState<DataRange>('all')
+  const [senFormat, setSenFormat] = useState<SenFormat>('sen-high')
+  const [dataRange, setDataRange] = useState<DataRange>('current')
 
   function handleExport() {
     onExport({ senFormat, dataRange })
@@ -78,6 +78,25 @@ export function ExportCsvModal({
         </DialogHeader>
 
         <div className="flex flex-col gap-5">
+          {/* Columns to export */}
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium">Columns to export</p>
+            <div className="flex flex-col gap-2">
+              <RadioCard
+                label="Current view"
+                description="Export columns shown in the table"
+                selected={dataRange === 'current'}
+                onClick={() => setDataRange('current')}
+              />
+              <RadioCard
+                label="All columns"
+                description="Export all columns in the table"
+                selected={dataRange === 'all'}
+                onClick={() => setDataRange('all')}
+              />
+            </div>
+          </div>
+
           {/* Sensitivity format */}
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium">Sensitivity</p>
@@ -93,25 +112,6 @@ export function ExportCsvModal({
                 description="Masks Sensitive-High data, converting to Sensitive Normal"
                 selected={senFormat === 'sen-norm'}
                 onClick={() => setSenFormat('sen-norm')}
-              />
-            </div>
-          </div>
-
-          {/* Data range */}
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">Data range</p>
-            <div className="flex flex-col gap-2">
-              <RadioCard
-                label="All available data"
-                description="Export all student data across all terms"
-                selected={dataRange === 'all'}
-                onClick={() => setDataRange('all')}
-              />
-              <RadioCard
-                label="Current view"
-                description="Export only what is currently displayed on screen"
-                selected={dataRange === 'current'}
-                onClick={() => setDataRange('current')}
               />
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
   Bar,
@@ -13,10 +13,15 @@ import {
   YAxis,
 } from 'recharts'
 import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   FileText,
   Maximize2,
+  RotateCcw,
   Search,
   SlidersHorizontal,
   X,
@@ -221,24 +226,20 @@ const ABSENCE_DETAILS = [
 ]
 
 const BAR_CATEGORIES = [
-  { key: 'latecoming', label: 'Latecoming', color: '#228be6' }, // blue
-  {
-    key: 'absentNoValid',
-    label: 'Absent without valid reason',
-    color: '#a7aab5', // gray
-  },
+  { key: 'latecoming', label: 'Late', color: '#228be6' }, // blue
+  { key: 'absentNoValid', label: 'Non-VR absences', color: '#a7aab5' }, // gray
+  { key: 'pendingReason', label: 'Pending reason', color: '#6366f1' }, // indigo
+  { key: 'absentMC', label: 'MC', color: '#0891b2' }, // cyan
   {
     key: 'absentValidPrivate',
-    label: 'Absent with valid reason (Private)',
-    color: '#7c3aed', // violet
-  },
+    label: 'Valid reason (private)',
+    color: '#7c3aed',
+  }, // violet
   {
     key: 'absentValidOfficial',
-    label: 'Absent with valid reason (Official)',
-    color: '#12b886', // teal
-  },
-  { key: 'absentMC', label: 'Absent with MC', color: '#0891b2' }, // cyan
-  { key: 'pendingReason', label: 'Absence pending reason', color: '#6366f1' }, // indigo
+    label: 'Valid reason (official)',
+    color: '#12b886',
+  }, // teal
 ]
 
 const CHART_COMMON_PROPS = {
@@ -250,9 +251,11 @@ const CHART_COMMON_PROPS = {
 function AbsenceBarChart({
   barSize,
   data = MONTHLY_DATA,
+  onSegmentClick,
 }: {
   barSize?: number
   data?: Array<MonthlyEntry>
+  onSegmentClick?: (month: string, categoryKey: string, count: number) => void
 }) {
   const reversedCategories = [...BAR_CATEGORIES].reverse()
   return (
@@ -271,18 +274,26 @@ function AbsenceBarChart({
         allowDecimals={false}
       />
       <Tooltip
-        formatter={(value: number, name: string) => {
-          const cat = BAR_CATEGORIES.find((c) => c.key === name)
-          return [value, cat?.label ?? name]
-        }}
-        contentStyle={{
-          fontSize: 12,
-          borderRadius: 6,
-          border: '1px solid #dee2e6',
-        }}
+        content={<CustomBarTooltip clickable={!!onSegmentClick} />}
+        cursor={{ fill: 'rgba(0,0,0,0.04)' }}
       />
       {reversedCategories.map((cat, i) => (
-        <Bar key={cat.key} dataKey={cat.key} fill={cat.color} stackId="a">
+        <Bar
+          key={cat.key}
+          dataKey={cat.key}
+          fill={cat.color}
+          stackId="a"
+          cursor={onSegmentClick ? 'pointer' : undefined}
+          onClick={
+            onSegmentClick
+              ? (((entry: Record<string, unknown>) => {
+                  const count = Number(entry[cat.key]) || 0
+                  if (count > 0)
+                    onSegmentClick(entry.month as string, cat.key, count)
+                }) as any)
+              : undefined
+          }
+        >
           <LabelList
             dataKey={cat.key}
             content={({
@@ -376,6 +387,63 @@ function AbsenceLegend() {
   )
 }
 
+function CustomBarTooltip({
+  active,
+  payload,
+  label,
+  clickable,
+}: {
+  active?: boolean
+  payload?: Array<{ name: string; value: number; color?: string }>
+  label?: string
+  clickable?: boolean
+}) {
+  if (!active || !payload || payload.length === 0) return null
+  const itemsWithValue = [...payload].reverse().filter((p) => p.value > 0)
+  const total = itemsWithValue.reduce((sum, p) => sum + p.value, 0)
+  if (total === 0) return null
+  return (
+    <div className="w-[220px] rounded-lg border border-border/60 bg-white px-3 py-2.5 shadow-lg text-xs">
+      <p className="mb-2 text-[11px] font-semibold text-foreground">{label}</p>
+      <div className="space-y-1.5">
+        {itemsWithValue.map((item) => {
+          const cat = BAR_CATEGORIES.find((c) => c.key === item.name)
+          return (
+            <div
+              key={item.name}
+              className="flex items-center justify-between gap-3"
+            >
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: cat?.color ?? item.color }}
+                />
+                <span className="truncate text-muted-foreground">
+                  {cat?.label ?? item.name}
+                </span>
+              </div>
+              <span className="font-semibold tabular-nums text-foreground">
+                {item.value}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+      {itemsWithValue.length > 1 && (
+        <div className="mt-2 flex justify-between border-t pt-2 font-semibold text-foreground">
+          <span>Total</span>
+          <span className="tabular-nums">{total}</span>
+        </div>
+      )}
+      {clickable && (
+        <p className="mt-2 border-t pt-2 text-[10px] text-muted-foreground/70">
+          Click a segment to view students
+        </p>
+      )}
+    </div>
+  )
+}
+
 // ─── Level-based attendance mock data ────────────────────────────────────────
 
 interface LevelAttendance {
@@ -456,369 +524,465 @@ interface AttendanceStudent {
   id: string
   name: string
   class: string
-  absent: number
   late: number
   mc: number
   absentPendingReason: number
   nonVRAbsences: number
+  absentValidPrivate: number
+  absentValidOfficial: number
 }
 
-// Pre-sorted by (absent + late) descending
-const ATTENDANCE_STUDENTS: Array<AttendanceStudent> = [
-  {
-    id: '1',
-    name: 'Chen Teo Jun Kai',
-    class: '4A',
-    absent: 15,
-    late: 8,
-    mc: 3,
-    absentPendingReason: 4,
-    nonVRAbsences: 8,
+// Derive attendance table rows from mockStudents so the count matches
+const ATTENDANCE_STUDENTS: Array<AttendanceStudent> = mockStudents.map(
+  (s, i) => {
+    // Spread values deterministically from existing student data
+    const seed = i + 1
+    const late = s.lateComing
+    const mc = Math.max(0, (seed * 3) % 6)
+    const absentPendingReason = Math.max(0, (seed * 2) % 5)
+    const nonVRAbsences = s.absences
+    const absentValidPrivate = Math.max(0, (seed * 4) % 4)
+    const absentValidOfficial = Math.max(0, (seed * 6) % 3)
+    return {
+      id: s.id,
+      name: s.name,
+      class: s.class,
+      late,
+      mc,
+      absentPendingReason,
+      nonVRAbsences,
+      absentValidPrivate,
+      absentValidOfficial,
+    }
   },
-  {
-    id: '2',
-    name: 'Xiao Lam Wei Jie',
-    class: '4B',
-    absent: 12,
-    late: 10,
-    mc: 2,
-    absentPendingReason: 3,
-    nonVRAbsences: 7,
-  },
-  {
-    id: '3',
-    name: 'Darren Ong Wei Sheng',
-    class: '4C',
-    absent: 14,
-    late: 6,
-    mc: 4,
-    absentPendingReason: 3,
-    nonVRAbsences: 7,
-  },
-  {
-    id: '4',
-    name: 'Aisha Binte Yusof',
-    class: '4B',
-    absent: 13,
-    late: 5,
-    mc: 2,
-    absentPendingReason: 4,
-    nonVRAbsences: 7,
-  },
-  {
-    id: '5',
-    name: 'Muhammad Rizwan',
-    class: '4D',
-    absent: 10,
-    late: 7,
-    mc: 1,
-    absentPendingReason: 3,
-    nonVRAbsences: 6,
-  },
-  {
-    id: '6',
-    name: 'Tariq Bin Anwar',
-    class: '4C',
-    absent: 11,
-    late: 5,
-    mc: 3,
-    absentPendingReason: 2,
-    nonVRAbsences: 6,
-  },
-  {
-    id: '7',
-    name: 'Priya Sharma',
-    class: '4C',
-    absent: 9,
-    late: 6,
-    mc: 2,
-    absentPendingReason: 2,
-    nonVRAbsences: 5,
-  },
-  {
-    id: '8',
-    name: 'Farhan Bin Osman',
-    class: '4C',
-    absent: 10,
-    late: 4,
-    mc: 2,
-    absentPendingReason: 3,
-    nonVRAbsences: 5,
-  },
-  {
-    id: '9',
-    name: 'Ahmad Bin Hassan',
-    class: '4A',
-    absent: 8,
-    late: 6,
-    mc: 1,
-    absentPendingReason: 2,
-    nonVRAbsences: 5,
-  },
-  {
-    id: '10',
-    name: 'Nur Ain Binte Azhar',
-    class: '4C',
-    absent: 9,
-    late: 4,
-    mc: 2,
-    absentPendingReason: 2,
-    nonVRAbsences: 5,
-  },
-  {
-    id: '11',
-    name: 'Azlan Bin Mustafa',
-    class: '4D',
-    absent: 8,
-    late: 5,
-    mc: 2,
-    absentPendingReason: 1,
-    nonVRAbsences: 5,
-  },
-  {
-    id: '12',
-    name: 'Farrukh Bin Rashid',
-    class: '4A',
-    absent: 7,
-    late: 5,
-    mc: 1,
-    absentPendingReason: 2,
-    nonVRAbsences: 4,
-  },
-  {
-    id: '13',
-    name: 'Rizky Bin Ahmad',
-    class: '4B',
-    absent: 8,
-    late: 4,
-    mc: 2,
-    absentPendingReason: 1,
-    nonVRAbsences: 5,
-  },
-  {
-    id: '14',
-    name: 'Humaira Binte Salleh',
-    class: '4D',
-    absent: 7,
-    late: 4,
-    mc: 1,
-    absentPendingReason: 2,
-    nonVRAbsences: 4,
-  },
-  {
-    id: '15',
-    name: 'Ryan Seah Kok Wee',
-    class: '4A',
-    absent: 6,
-    late: 5,
-    mc: 1,
-    absentPendingReason: 1,
-    nonVRAbsences: 4,
-  },
-  {
-    id: '16',
-    name: 'Marcus Loh Jian Hao',
-    class: '4D',
-    absent: 7,
-    late: 3,
-    mc: 2,
-    absentPendingReason: 1,
-    nonVRAbsences: 4,
-  },
-  {
-    id: '17',
-    name: 'Kevin Ng Wei Ming',
-    class: '4B',
-    absent: 6,
-    late: 4,
-    mc: 1,
-    absentPendingReason: 2,
-    nonVRAbsences: 3,
-  },
-  {
-    id: '18',
-    name: 'Malcolm Lee Zheng Yi',
-    class: '4D',
-    absent: 6,
-    late: 3,
-    mc: 1,
-    absentPendingReason: 1,
-    nonVRAbsences: 4,
-  },
-  {
-    id: '19',
-    name: 'Samantha Quek Hui Ping',
-    class: '4A',
-    absent: 5,
-    late: 3,
-    mc: 1,
-    absentPendingReason: 1,
-    nonVRAbsences: 3,
-  },
-  {
-    id: '20',
-    name: 'Timothy Goh Kai Hong',
-    class: '4C',
-    absent: 5,
-    late: 2,
-    mc: 1,
-    absentPendingReason: 1,
-    nonVRAbsences: 3,
-  },
-  {
-    id: '21',
-    name: 'Rachel Wong Mei Ling',
-    class: '4D',
-    absent: 4,
-    late: 2,
-    mc: 1,
-    absentPendingReason: 1,
-    nonVRAbsences: 2,
-  },
-  {
-    id: '22',
-    name: 'Sarah Chan Jun Kai',
-    class: '4A',
-    absent: 3,
-    late: 2,
-    mc: 1,
-    absentPendingReason: 0,
-    nonVRAbsences: 2,
-  },
-  {
-    id: '23',
-    name: 'Lena Chua Shu Min',
-    class: '4A',
-    absent: 3,
-    late: 1,
-    mc: 1,
-    absentPendingReason: 0,
-    nonVRAbsences: 2,
-  },
-  {
-    id: '24',
-    name: 'Vincent Koh Xin Yi',
-    class: '4A',
-    absent: 2,
-    late: 2,
-    mc: 0,
-    absentPendingReason: 1,
-    nonVRAbsences: 1,
-  },
-  {
-    id: '25',
-    name: 'Natasha Sim Jing Yi',
-    class: '4A',
-    absent: 2,
-    late: 1,
-    mc: 1,
-    absentPendingReason: 0,
-    nonVRAbsences: 1,
-  },
-]
+)
 
-function AttendanceStudentsTable() {
+// ─── Filter / sort helpers for the attendance table ──────────────────────────
+
+type FilterOp = 'gt' | 'gte' | 'lt' | 'lte' | 'eq'
+type AttSortField =
+  | 'name'
+  | 'class'
+  | 'late'
+  | 'mc'
+  | 'absentPendingReason'
+  | 'nonVRAbsences'
+  | 'absentValidPrivate'
+  | 'absentValidOfficial'
+  | 'total'
+type AttSortDir = 'asc' | 'desc'
+
+interface NumericFilter {
+  op: FilterOp
+  value: string
+}
+
+const OP_LABELS: Record<FilterOp, string> = {
+  gt: 'greater than',
+  gte: 'greater than or equal to',
+  lt: 'less than',
+  lte: 'less than or equal to',
+  eq: 'equals',
+}
+
+const AVAILABLE_MONTHS = MONTHLY_DATA.map((m) => m.month)
+// Reverse-chronological for the dropdown (most recent first)
+const MONTH_OPTIONS = [...AVAILABLE_MONTHS].reverse()
+// Current month abbreviation (Mar for 2026-03-10)
+const CURRENT_MONTH_ABBR = new Date().toLocaleString('en-US', {
+  month: 'short',
+})
+const DEFAULT_MONTH = AVAILABLE_MONTHS.includes(CURRENT_MONTH_ABBR)
+  ? CURRENT_MONTH_ABBR
+  : 'all'
+const DEFAULT_FILTER: NumericFilter = { op: 'gt', value: '' }
+
+function matchesNumericFilter(value: number, filter: NumericFilter): boolean {
+  if (filter.value === '') return true
+  const n = Number(filter.value)
+  if (isNaN(n)) return true
+  switch (filter.op) {
+    case 'gt':
+      return value > n
+    case 'gte':
+      return value >= n
+    case 'lt':
+      return value < n
+    case 'lte':
+      return value <= n
+    case 'eq':
+      return value === n
+  }
+}
+
+// Deterministically assign months to students based on their counts
+const STUDENT_MONTHS: Array<Array<string>> = ATTENDANCE_STUDENTS.map((s, i) => {
+  const total =
+    s.nonVRAbsences +
+    s.late +
+    s.mc +
+    s.absentPendingReason +
+    s.absentValidPrivate +
+    s.absentValidOfficial
+  const count = Math.min(
+    Math.max(Math.round(total / 4), 1),
+    AVAILABLE_MONTHS.length,
+  )
+  const offset = (i * 3) % AVAILABLE_MONTHS.length
+  return Array.from(
+    { length: count },
+    (_, j) => AVAILABLE_MONTHS[(offset + j) % AVAILABLE_MONTHS.length],
+  )
+})
+
+function AttSortableHeader({
+  label,
+  field,
+  sortField,
+  sortDir,
+  onSort,
+  onClearSort,
+  className,
+  align = 'left',
+  truncate = false,
+}: {
+  label: string
+  field: AttSortField
+  sortField: AttSortField | null
+  sortDir: AttSortDir
+  onSort: (f: AttSortField, dir: AttSortDir) => void
+  onClearSort: () => void
+  className?: string
+  align?: 'left' | 'right'
+  /** Truncate label with ellipsis when column is narrow */
+  truncate?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const active = sortField === field
+  const dir = active ? sortDir : null
+
+  return (
+    <th
+      className={cn(
+        'overflow-hidden px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground',
+        align === 'right' ? 'text-right' : 'text-left',
+        className,
+      )}
+      title={label}
+    >
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              className={cn(
+                'flex w-full items-center gap-1 overflow-hidden rounded-md px-2 py-1 -ml-2 transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer text-xs font-medium uppercase tracking-wide',
+                !truncate && 'whitespace-nowrap',
+                align === 'right' && 'justify-end',
+                active && 'text-primary',
+              )}
+            />
+          }
+        >
+          <span className={cn('min-w-0', truncate ? 'truncate' : 'shrink-0')}>
+            {label}
+          </span>
+          <span className="shrink-0">
+            {dir === 'asc' ? (
+              <ArrowUp className="h-3 w-3" />
+            ) : dir === 'desc' ? (
+              <ArrowDown className="h-3 w-3" />
+            ) : (
+              <ChevronDown className="h-3 w-3 opacity-40" />
+            )}
+          </span>
+        </PopoverTrigger>
+        <PopoverContent
+          align={align === 'right' ? 'end' : 'start'}
+          className="w-48 gap-1 p-3"
+        >
+          <button
+            type="button"
+            onClick={() => {
+              onSort(field, 'asc')
+              setOpen(false)
+            }}
+            className={cn(
+              'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]',
+              dir === 'asc' && 'bg-[var(--slate-5)]',
+            )}
+          >
+            <ArrowUp className="h-4 w-4 text-[var(--slate-11)]" />
+            Sort ascending
+            {dir === 'asc' && (
+              <Check className="ml-auto h-4 w-4 text-[var(--slate-11)]" />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onSort(field, 'desc')
+              setOpen(false)
+            }}
+            className={cn(
+              'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]',
+              dir === 'desc' && 'bg-[var(--slate-5)]',
+            )}
+          >
+            <ArrowDown className="h-4 w-4 text-[var(--slate-11)]" />
+            Sort descending
+            {dir === 'desc' && (
+              <Check className="ml-auto h-4 w-4 text-[var(--slate-11)]" />
+            )}
+          </button>
+          {active && (
+            <button
+              type="button"
+              onClick={() => {
+                onClearSort()
+                setOpen(false)
+              }}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]"
+            >
+              <X className="h-4 w-4 text-[var(--slate-11)]" />
+              Clear sort
+            </button>
+          )}
+        </PopoverContent>
+      </Popover>
+    </th>
+  )
+}
+
+function NumericFilterRow({
+  label,
+  filter,
+  onChange,
+}: {
+  label: string
+  filter: NumericFilter
+  onChange: (f: NumericFilter) => void
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-medium text-muted-foreground">
+        {label}
+      </label>
+      <div className="flex items-center gap-2">
+        <Select
+          value={filter.op}
+          onValueChange={(v) => onChange({ ...filter, op: v as FilterOp })}
+        >
+          <SelectTrigger className="h-9 w-[180px] shrink-0 rounded-[14px] bg-white text-sm">
+            <SelectValue>{OP_LABELS[filter.op]}</SelectValue>
+          </SelectTrigger>
+          <SelectContent
+            className="min-w-max"
+            align="start"
+            alignItemWithTrigger={false}
+          >
+            {(Object.entries(OP_LABELS) as Array<[FilterOp, string]>).map(
+              ([op, lbl]) => (
+                <SelectItem key={op} value={op}>
+                  {lbl}
+                </SelectItem>
+              ),
+            )}
+          </SelectContent>
+        </Select>
+        <Input
+          placeholder="Enter number"
+          value={filter.value}
+          onChange={(e) => onChange({ ...filter, value: e.target.value })}
+          className="h-8 text-sm"
+          type="number"
+          min={0}
+        />
+      </div>
+    </div>
+  )
+}
+
+function AttendanceStudentsTable({
+  segment,
+  onClearSegment,
+}: {
+  segment?: SegmentSelection | null
+  onClearSegment?: () => void
+}) {
+  const tableRef = useRef<HTMLDivElement>(null)
   const [search, setSearch] = useState('')
   const [filterClass, setFilterClass] = useState('all')
-  const [filterAbsentMin, setFilterAbsentMin] = useState('')
-  const [filterAbsentMax, setFilterAbsentMax] = useState('')
-  const [filterLateMin, setFilterLateMin] = useState('')
-  const [filterLateMax, setFilterLateMax] = useState('')
-  const [filterMcMin, setFilterMcMin] = useState('')
-  const [filterMcMax, setFilterMcMax] = useState('')
-  const [filterPendMin, setFilterPendMin] = useState('')
-  const [filterPendMax, setFilterPendMax] = useState('')
-  const [filterNonVRMin, setFilterNonVRMin] = useState('')
-  const [filterNonVRMax, setFilterNonVRMax] = useState('')
+  const [filterMonth, setFilterMonth] = useState(DEFAULT_MONTH)
+  const [filterLate, setFilterLate] = useState<NumericFilter>(DEFAULT_FILTER)
+  const [filterMc, setFilterMc] = useState<NumericFilter>(DEFAULT_FILTER)
+  const [filterPend, setFilterPend] = useState<NumericFilter>(DEFAULT_FILTER)
+  const [filterNonVR, setFilterNonVR] = useState<NumericFilter>(DEFAULT_FILTER)
+  const [filterValidPrivate, setFilterValidPrivate] =
+    useState<NumericFilter>(DEFAULT_FILTER)
+  const [filterValidOfficial, setFilterValidOfficial] =
+    useState<NumericFilter>(DEFAULT_FILTER)
   const [filterOpen, setFilterOpen] = useState(false)
   const [page, setPage] = useState(1)
+  const [sortField, setSortField] = useState<AttSortField | null>('total')
+  const [sortDir, setSortDir] = useState<AttSortDir>('desc')
 
-  const hasActiveFilters =
+  // Apply segment filter when chart segment is clicked
+  useEffect(() => {
+    if (!segment) return
+    const { month, categoryKey } = segment
+    // Reset all numeric filters first, then apply the relevant one
+    setFilterMonth(month)
+    setFilterLate(DEFAULT_FILTER)
+    setFilterMc(DEFAULT_FILTER)
+    setFilterPend(DEFAULT_FILTER)
+    setFilterNonVR(DEFAULT_FILTER)
+    setFilterValidPrivate(DEFAULT_FILTER)
+    setFilterValidOfficial(DEFAULT_FILTER)
+    const active: NumericFilter = { op: 'gte', value: '1' }
+    if (categoryKey === 'latecoming') setFilterLate(active)
+    else if (categoryKey === 'absentNoValid') setFilterNonVR(active)
+    else if (categoryKey === 'absentMC') setFilterMc(active)
+    else if (categoryKey === 'pendingReason') setFilterPend(active)
+    else if (categoryKey === 'absentValidPrivate') setFilterValidPrivate(active)
+    else if (categoryKey === 'absentValidOfficial')
+      setFilterValidOfficial(active)
+    setPage(1)
+    // Scroll table into view
+    setTimeout(() => {
+      tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }, [segment])
+
+  const hasPopoverFilters =
     filterClass !== 'all' ||
-    filterAbsentMin !== '' ||
-    filterAbsentMax !== '' ||
-    filterLateMin !== '' ||
-    filterLateMax !== '' ||
-    filterMcMin !== '' ||
-    filterMcMax !== '' ||
-    filterPendMin !== '' ||
-    filterPendMax !== '' ||
-    filterNonVRMin !== '' ||
-    filterNonVRMax !== ''
+    filterLate.value !== '' ||
+    filterMc.value !== '' ||
+    filterPend.value !== '' ||
+    filterNonVR.value !== '' ||
+    filterValidPrivate.value !== '' ||
+    filterValidOfficial.value !== ''
 
   const activeFilterCount = [
     filterClass !== 'all',
-    filterAbsentMin !== '' || filterAbsentMax !== '',
-    filterLateMin !== '' || filterLateMax !== '',
-    filterMcMin !== '' || filterMcMax !== '',
-    filterPendMin !== '' || filterPendMax !== '',
-    filterNonVRMin !== '' || filterNonVRMax !== '',
+    filterLate.value !== '',
+    filterMc.value !== '',
+    filterPend.value !== '',
+    filterNonVR.value !== '',
+    filterValidPrivate.value !== '',
+    filterValidOfficial.value !== '',
   ].filter(Boolean).length
 
   const clearFilters = () => {
     setFilterClass('all')
-    setFilterAbsentMin('')
-    setFilterAbsentMax('')
-    setFilterLateMin('')
-    setFilterLateMax('')
-    setFilterMcMin('')
-    setFilterMcMax('')
-    setFilterPendMin('')
-    setFilterPendMax('')
-    setFilterNonVRMin('')
-    setFilterNonVRMax('')
+    setFilterLate(DEFAULT_FILTER)
+    setFilterMc(DEFAULT_FILTER)
+    setFilterPend(DEFAULT_FILTER)
+    setFilterNonVR(DEFAULT_FILTER)
+    setFilterValidPrivate(DEFAULT_FILTER)
+    setFilterValidOfficial(DEFAULT_FILTER)
+    setPage(1)
+  }
+
+  const handleSort = (field: AttSortField, dir: AttSortDir) => {
+    setSortField(field)
+    setSortDir(dir)
+    setPage(1)
+  }
+
+  const clearSort = () => {
+    setSortField(null)
     setPage(1)
   }
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
-    return ATTENDANCE_STUDENTS.filter((s) => {
+    return ATTENDANCE_STUDENTS.filter((s, i) => {
       if (q && !s.name.toLowerCase().includes(q)) return false
       if (filterClass !== 'all' && s.class !== filterClass) return false
-      if (filterAbsentMin !== '' && s.absent < Number(filterAbsentMin))
+      if (filterMonth !== 'all' && !STUDENT_MONTHS[i]?.includes(filterMonth))
         return false
-      if (filterAbsentMax !== '' && s.absent > Number(filterAbsentMax))
+      if (!matchesNumericFilter(s.late, filterLate)) return false
+      if (!matchesNumericFilter(s.mc, filterMc)) return false
+      if (!matchesNumericFilter(s.absentPendingReason, filterPend)) return false
+      if (!matchesNumericFilter(s.nonVRAbsences, filterNonVR)) return false
+      if (!matchesNumericFilter(s.absentValidPrivate, filterValidPrivate))
         return false
-      if (filterLateMin !== '' && s.late < Number(filterLateMin)) return false
-      if (filterLateMax !== '' && s.late > Number(filterLateMax)) return false
-      if (filterMcMin !== '' && s.mc < Number(filterMcMin)) return false
-      if (filterMcMax !== '' && s.mc > Number(filterMcMax)) return false
-      if (filterPendMin !== '' && s.absentPendingReason < Number(filterPendMin))
-        return false
-      if (filterPendMax !== '' && s.absentPendingReason > Number(filterPendMax))
-        return false
-      if (filterNonVRMin !== '' && s.nonVRAbsences < Number(filterNonVRMin))
-        return false
-      if (filterNonVRMax !== '' && s.nonVRAbsences > Number(filterNonVRMax))
+      if (!matchesNumericFilter(s.absentValidOfficial, filterValidOfficial))
         return false
       return true
     })
   }, [
     search,
     filterClass,
-    filterAbsentMin,
-    filterAbsentMax,
-    filterLateMin,
-    filterLateMax,
-    filterMcMin,
-    filterMcMax,
-    filterPendMin,
-    filterPendMax,
-    filterNonVRMin,
-    filterNonVRMax,
+    filterMonth,
+    filterLate,
+    filterMc,
+    filterPend,
+    filterNonVR,
+    filterValidPrivate,
+    filterValidOfficial,
   ])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / ATT_PAGE_SIZE))
-  const paged = filtered.slice((page - 1) * ATT_PAGE_SIZE, page * ATT_PAGE_SIZE)
+  const sorted = useMemo(() => {
+    if (!sortField) return filtered
+    return [...filtered].sort((a, b) => {
+      let cmp = 0
+      if (sortField === 'name') cmp = a.name.localeCompare(b.name)
+      else if (sortField === 'class') cmp = a.class.localeCompare(b.class)
+      else if (sortField === 'total')
+        cmp =
+          a.late +
+          a.nonVRAbsences +
+          a.absentPendingReason +
+          a.mc +
+          a.absentValidPrivate +
+          a.absentValidOfficial -
+          (b.late +
+            b.nonVRAbsences +
+            b.absentPendingReason +
+            b.mc +
+            b.absentValidPrivate +
+            b.absentValidOfficial)
+      else cmp = a[sortField] - b[sortField]
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+  }, [filtered, sortField, sortDir])
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / ATT_PAGE_SIZE))
+  const paged = sorted.slice((page - 1) * ATT_PAGE_SIZE, page * ATT_PAGE_SIZE)
+
+  const segmentCat = segment
+    ? BAR_CATEGORIES.find((c) => c.key === segment.categoryKey)
+    : null
 
   return (
-    <div className="rounded-lg border bg-white p-4">
-      <p className="mb-3 text-sm font-semibold text-foreground">
-        Students sorted by absences / late-coming
-      </p>
-
-      {/* Search + filter bar */}
+    <div ref={tableRef} className="scroll-mt-8 rounded-lg border bg-white p-4">
       <div className="mb-3 flex items-center gap-2">
+        <p className="text-sm font-semibold text-foreground">
+          Students sorted by absences / late-coming
+        </p>
+        {segment && segmentCat && (
+          <span className="flex items-center gap-1.5 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+            <span
+              className="inline-block h-2 w-2 shrink-0 rounded-sm"
+              style={{ backgroundColor: segmentCat.color }}
+            />
+            {segment.month} · {segmentCat.label}
+            <button
+              type="button"
+              onClick={onClearSegment}
+              className="ml-0.5 rounded-full hover:text-blue-900"
+              aria-label="Clear segment filter"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        )}
+      </div>
+
+      {/* Search + month selector + filter button */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <div className="relative max-w-xs flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -832,6 +996,38 @@ function AttendanceStudentsTable() {
           />
         </div>
 
+        {/* Month selector — always visible, visually prominent */}
+        <Select
+          value={filterMonth}
+          onValueChange={(v) => {
+            setFilterMonth(v)
+            setPage(1)
+          }}
+        >
+          <SelectTrigger
+            size="sm"
+            className={cn(
+              'h-8 w-auto gap-1.5 rounded-full border px-3 text-sm',
+              filterMonth !== 'all'
+                ? 'border-blue-300 bg-blue-50 text-blue-700'
+                : 'border-border bg-white hover:bg-muted',
+            )}
+          >
+            <SelectValue>
+              {filterMonth === 'all' ? 'All' : filterMonth}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            {MONTH_OPTIONS.map((m) => (
+              <SelectItem key={m} value={m}>
+                {m}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Advanced filters */}
         <Popover open={filterOpen} onOpenChange={setFilterOpen}>
           <PopoverTrigger
             render={
@@ -839,7 +1035,7 @@ function AttendanceStudentsTable() {
                 type="button"
                 className={cn(
                   'border-border flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
-                  hasActiveFilters
+                  hasPopoverFilters
                     ? 'border-blue-300 bg-blue-50 text-blue-700'
                     : 'bg-white hover:bg-muted',
                 )}
@@ -848,13 +1044,13 @@ function AttendanceStudentsTable() {
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
             Filter
-            {hasActiveFilters && (
+            {hasPopoverFilters && (
               <span className="ml-0.5 rounded-full bg-blue-600 px-1.5 py-0.5 text-[10px] font-medium leading-none text-white">
                 {activeFilterCount}
               </span>
             )}
           </PopoverTrigger>
-          <PopoverContent className="w-72 p-4" align="end">
+          <PopoverContent className="w-80 p-4" align="end">
             <div className="space-y-4">
               <p className="text-sm font-semibold">Filter students</p>
 
@@ -886,222 +1082,166 @@ function AttendanceStudentsTable() {
                 </Select>
               </div>
 
-              {/* Absent range */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Absent
-                </label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Min"
-                    value={filterAbsentMin}
-                    onChange={(e) => {
-                      setFilterAbsentMin(e.target.value)
-                      setPage(1)
-                    }}
-                    className="h-8 text-sm"
-                    type="number"
-                    min={0}
-                  />
-                  <span className="text-xs text-muted-foreground">–</span>
-                  <Input
-                    placeholder="Max"
-                    value={filterAbsentMax}
-                    onChange={(e) => {
-                      setFilterAbsentMax(e.target.value)
-                      setPage(1)
-                    }}
-                    className="h-8 text-sm"
-                    type="number"
-                    min={0}
-                  />
-                </div>
-              </div>
+              <NumericFilterRow
+                label="Late"
+                filter={filterLate}
+                onChange={(f) => {
+                  setFilterLate(f)
+                  setPage(1)
+                }}
+              />
+              <NumericFilterRow
+                label="Non-VR absences"
+                filter={filterNonVR}
+                onChange={(f) => {
+                  setFilterNonVR(f)
+                  setPage(1)
+                }}
+              />
+              <NumericFilterRow
+                label="Pending reason"
+                filter={filterPend}
+                onChange={(f) => {
+                  setFilterPend(f)
+                  setPage(1)
+                }}
+              />
+              <NumericFilterRow
+                label="MC"
+                filter={filterMc}
+                onChange={(f) => {
+                  setFilterMc(f)
+                  setPage(1)
+                }}
+              />
+              <NumericFilterRow
+                label="Valid reason (private)"
+                filter={filterValidPrivate}
+                onChange={(f) => {
+                  setFilterValidPrivate(f)
+                  setPage(1)
+                }}
+              />
+              <NumericFilterRow
+                label="Valid reason (official)"
+                filter={filterValidOfficial}
+                onChange={(f) => {
+                  setFilterValidOfficial(f)
+                  setPage(1)
+                }}
+              />
 
-              {/* Late range */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Late
-                </label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Min"
-                    value={filterLateMin}
-                    onChange={(e) => {
-                      setFilterLateMin(e.target.value)
-                      setPage(1)
-                    }}
-                    className="h-8 text-sm"
-                    type="number"
-                    min={0}
-                  />
-                  <span className="text-xs text-muted-foreground">–</span>
-                  <Input
-                    placeholder="Max"
-                    value={filterLateMax}
-                    onChange={(e) => {
-                      setFilterLateMax(e.target.value)
-                      setPage(1)
-                    }}
-                    className="h-8 text-sm"
-                    type="number"
-                    min={0}
-                  />
-                </div>
-              </div>
-
-              {/* MC range */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  MC
-                </label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Min"
-                    value={filterMcMin}
-                    onChange={(e) => {
-                      setFilterMcMin(e.target.value)
-                      setPage(1)
-                    }}
-                    className="h-8 text-sm"
-                    type="number"
-                    min={0}
-                  />
-                  <span className="text-xs text-muted-foreground">–</span>
-                  <Input
-                    placeholder="Max"
-                    value={filterMcMax}
-                    onChange={(e) => {
-                      setFilterMcMax(e.target.value)
-                      setPage(1)
-                    }}
-                    className="h-8 text-sm"
-                    type="number"
-                    min={0}
-                  />
-                </div>
-              </div>
-
-              {/* Absent pending reason range */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Absent pending reason
-                </label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Min"
-                    value={filterPendMin}
-                    onChange={(e) => {
-                      setFilterPendMin(e.target.value)
-                      setPage(1)
-                    }}
-                    className="h-8 text-sm"
-                    type="number"
-                    min={0}
-                  />
-                  <span className="text-xs text-muted-foreground">–</span>
-                  <Input
-                    placeholder="Max"
-                    value={filterPendMax}
-                    onChange={(e) => {
-                      setFilterPendMax(e.target.value)
-                      setPage(1)
-                    }}
-                    className="h-8 text-sm"
-                    type="number"
-                    min={0}
-                  />
-                </div>
-              </div>
-
-              {/* Non-VR absences range */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Non-VR absences
-                </label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Min"
-                    value={filterNonVRMin}
-                    onChange={(e) => {
-                      setFilterNonVRMin(e.target.value)
-                      setPage(1)
-                    }}
-                    className="h-8 text-sm"
-                    type="number"
-                    min={0}
-                  />
-                  <span className="text-xs text-muted-foreground">–</span>
-                  <Input
-                    placeholder="Max"
-                    value={filterNonVRMax}
-                    onChange={(e) => {
-                      setFilterNonVRMax(e.target.value)
-                      setPage(1)
-                    }}
-                    className="h-8 text-sm"
-                    type="number"
-                    min={0}
-                  />
-                </div>
-              </div>
-
-              {hasActiveFilters && (
+              {hasPopoverFilters && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-full text-xs text-muted-foreground"
+                  className="h-7 w-full gap-1.5 text-xs font-medium text-[var(--slate-12)]"
                   onClick={() => {
                     clearFilters()
                     setFilterOpen(false)
                   }}
                 >
-                  <X className="mr-1 h-3 w-3" />
-                  Clear all filters
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset
                 </Button>
               )}
             </div>
           </PopoverContent>
         </Popover>
-
-        {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="text-xs text-muted-foreground hover:text-foreground"
-          >
-            Clear
-          </button>
-        )}
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-lg border">
-        <table className="w-full table-fixed text-sm">
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="min-w-full table-fixed text-sm">
           <thead>
             <tr className="border-b bg-muted/40">
-              <th className="w-[24%] px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Name
-              </th>
-              <th className="w-[9%] px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Class
-              </th>
-              <th className="w-[9%] px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Absent
-              </th>
-              <th className="w-[9%] px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Late
-              </th>
-              <th className="w-[7%] px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                MC
-              </th>
-              <th className="w-[20%] px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Absent pending reason
-              </th>
-              <th className="w-[12%] px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Non-VR absences
-              </th>
-              <th className="w-[10%] px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                View profile
+              <AttSortableHeader
+                label="Name"
+                field="name"
+                sortField={sortField}
+                sortDir={sortDir}
+                onSort={handleSort}
+                onClearSort={clearSort}
+                className="w-[220px]"
+              />
+              <AttSortableHeader
+                label="Class"
+                field="class"
+                sortField={sortField}
+                sortDir={sortDir}
+                onSort={handleSort}
+                onClearSort={clearSort}
+                className="w-[96px]"
+              />
+              <AttSortableHeader
+                label="Total"
+                field="total"
+                sortField={sortField}
+                sortDir={sortDir}
+                onSort={handleSort}
+                onClearSort={clearSort}
+                className="w-[96px]"
+              />
+              <AttSortableHeader
+                label="Late"
+                field="late"
+                sortField={sortField}
+                sortDir={sortDir}
+                onSort={handleSort}
+                onClearSort={clearSort}
+                className="w-[96px]"
+              />
+              <AttSortableHeader
+                label="Non-VR absences"
+                field="nonVRAbsences"
+                sortField={sortField}
+                sortDir={sortDir}
+                onSort={handleSort}
+                onClearSort={clearSort}
+                className="w-[96px]"
+                truncate
+              />
+              <AttSortableHeader
+                label="Pending reason"
+                field="absentPendingReason"
+                sortField={sortField}
+                sortDir={sortDir}
+                onSort={handleSort}
+                onClearSort={clearSort}
+                className="w-[96px]"
+                truncate
+              />
+              <AttSortableHeader
+                label="MC"
+                field="mc"
+                sortField={sortField}
+                sortDir={sortDir}
+                onSort={handleSort}
+                onClearSort={clearSort}
+                className="w-[96px]"
+              />
+              <AttSortableHeader
+                label="Valid reason (private)"
+                field="absentValidPrivate"
+                sortField={sortField}
+                sortDir={sortDir}
+                onSort={handleSort}
+                onClearSort={clearSort}
+                className="w-[96px]"
+                truncate
+              />
+              <AttSortableHeader
+                label="Valid reason (official)"
+                field="absentValidOfficial"
+                sortField={sortField}
+                sortDir={sortDir}
+                onSort={handleSort}
+                onClearSort={clearSort}
+                className="w-[96px]"
+                truncate
+              />
+              <th className="w-[60px] overflow-hidden px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Profile
               </th>
             </tr>
           </thead>
@@ -1111,28 +1251,7 @@ function AttendanceStudentsTable() {
                 key={s.id}
                 className="bg-white transition-colors hover:bg-muted/30"
               >
-                <td className="w-[24%] px-4 py-2.5 font-medium text-foreground">
-                  {s.name}
-                </td>
-                <td className="w-[9%] px-4 py-2.5 text-muted-foreground">
-                  {s.class}
-                </td>
-                <td className="w-[9%] px-4 py-2.5 text-right tabular-nums">
-                  {s.absent}
-                </td>
-                <td className="w-[9%] px-4 py-2.5 text-right tabular-nums">
-                  {s.late}
-                </td>
-                <td className="w-[7%] px-4 py-2.5 text-right tabular-nums">
-                  {s.mc}
-                </td>
-                <td className="w-[20%] px-4 py-2.5 text-right tabular-nums">
-                  {s.absentPendingReason}
-                </td>
-                <td className="w-[12%] px-4 py-2.5 text-right tabular-nums">
-                  {s.nonVRAbsences}
-                </td>
-                <td className="w-[10%] px-4 py-2.5">
+                <td className="w-[60px] px-4 py-2.5">
                   {(() => {
                     const realId = studentIdByName.get(s.name)
                     return (
@@ -1161,12 +1280,44 @@ function AttendanceStudentsTable() {
                     )
                   })()}
                 </td>
+                <td className="w-[220px] px-4 py-2.5 font-medium text-foreground">
+                  {s.name}
+                </td>
+                <td className="min-w-[96px] px-4 py-2.5 text-muted-foreground">
+                  {s.class}
+                </td>
+                <td className="min-w-[96px] px-4 py-2.5 tabular-nums font-medium">
+                  {s.late +
+                    s.nonVRAbsences +
+                    s.absentPendingReason +
+                    s.mc +
+                    s.absentValidPrivate +
+                    s.absentValidOfficial}
+                </td>
+                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                  {s.late}
+                </td>
+                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                  {s.nonVRAbsences}
+                </td>
+                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                  {s.absentPendingReason}
+                </td>
+                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                  {s.mc}
+                </td>
+                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                  {s.absentValidPrivate}
+                </td>
+                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                  {s.absentValidOfficial}
+                </td>
               </tr>
             ))}
             {paged.length === 0 && (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={10}
                   className="px-4 py-8 text-center text-sm text-muted-foreground"
                 >
                   No students match your filters.
@@ -1178,71 +1329,94 @@ function AttendanceStudentsTable() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-3 flex items-center justify-between text-sm">
-          <span className="text-xs text-muted-foreground">
-            {filtered.length} students · Page {page} of {totalPages}
-          </span>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 w-7"
-              disabled={page === 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-            </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter(
-                (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1,
-              )
-              .reduce<Array<number | '…'>>((acc, p, i, arr) => {
-                if (i > 0 && p - arr[i - 1] > 1) acc.push('…')
-                acc.push(p)
-                return acc
-              }, [])
-              .map((p, i) =>
-                p === '…' ? (
-                  <span
-                    key={`ellipsis-${i}`}
-                    className="px-1 text-muted-foreground"
-                  >
-                    …
-                  </span>
-                ) : (
-                  <Button
-                    key={p}
-                    variant={p === page ? 'default' : 'outline'}
-                    size="icon"
-                    className="h-7 w-7 text-xs"
-                    onClick={() => setPage(p)}
-                  >
-                    {p}
-                  </Button>
-                ),
-              )}
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 w-7"
-              disabled={page === totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              <ChevronRight className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+      <div className="mt-3 flex items-center justify-between text-sm">
+        <span className="text-xs text-muted-foreground">
+          {(page - 1) * ATT_PAGE_SIZE + 1}–
+          {Math.min(page * ATT_PAGE_SIZE, sorted.length)} of {sorted.length}{' '}
+          records
+        </span>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-7 w-7"
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </Button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter(
+              (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1,
+            )
+            .reduce<Array<number | '…'>>((acc, p, i, arr) => {
+              if (i > 0 && p - arr[i - 1] > 1) acc.push('…')
+              acc.push(p)
+              return acc
+            }, [])
+            .map((p, i) =>
+              p === '…' ? (
+                <span
+                  key={`ellipsis-${i}`}
+                  className="px-1 text-muted-foreground"
+                >
+                  …
+                </span>
+              ) : (
+                <Button
+                  key={p}
+                  variant={p === page ? 'default' : 'outline'}
+                  size="icon"
+                  className="h-7 w-7 text-xs"
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </Button>
+              ),
+            )}
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-7 w-7"
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Button>
         </div>
-      )}
+      </div>
     </div>
   )
 }
 
 // ─── Level Attendance Analytics (for Student Analytics page) ─────────────────
 
+interface SegmentSelection {
+  month: string
+  categoryKey: string
+  count: number
+}
+
+function getStudentsForSegment(
+  categoryKey: string,
+  count: number,
+): typeof mockStudents {
+  // Deterministically pick students based on category key
+  const offset = BAR_CATEGORIES.findIndex((c) => c.key === categoryKey)
+  const pool = [...mockStudents]
+  // rotate the pool by offset to get different students per category
+  const rotated = [
+    ...pool.slice(offset % pool.length),
+    ...pool.slice(0, offset % pool.length),
+  ]
+  return rotated.slice(0, Math.min(count, rotated.length))
+}
+
 export function AttendanceLevelAnalytics() {
   const [level, setLevel] = useState('Secondary 4')
   const [chartExpanded, setChartExpanded] = useState(false)
+  const [selectedSegment, setSelectedSegment] =
+    useState<SegmentSelection | null>(null)
 
   const attendance = LEVEL_ATTENDANCE_DATA[level] ?? {
     present: 100,
@@ -1322,7 +1496,12 @@ export function AttendanceLevelAnalytics() {
               </button>
             </div>
             <ResponsiveContainer width="100%" height={260}>
-              <AbsenceBarChart data={monthlyData} />
+              <AbsenceBarChart
+                data={monthlyData}
+                onSegmentClick={(month, categoryKey, count) =>
+                  setSelectedSegment({ month, categoryKey, count })
+                }
+              />
             </ResponsiveContainer>
             <AbsenceLegend />
           </div>
@@ -1330,7 +1509,10 @@ export function AttendanceLevelAnalytics() {
       </div>
 
       {/* Students sorted by absences / late-coming */}
-      <AttendanceStudentsTable />
+      <AttendanceStudentsTable
+        segment={selectedSegment}
+        onClearSegment={() => setSelectedSegment(null)}
+      />
 
       {/* Expanded overlay */}
       {chartExpanded && (
@@ -1366,7 +1548,14 @@ export function AttendanceLevelAnalytics() {
             </div>
             <div className="min-h-0 flex-1">
               <ResponsiveContainer width="100%" height="100%">
-                <AbsenceBarChart data={monthlyData} barSize={16} />
+                <AbsenceBarChart
+                  data={monthlyData}
+                  barSize={16}
+                  onSegmentClick={(month, categoryKey, count) => {
+                    setChartExpanded(false)
+                    setSelectedSegment({ month, categoryKey, count })
+                  }}
+                />
               </ResponsiveContainer>
             </div>
             <AbsenceLegend />
