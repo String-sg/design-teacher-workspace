@@ -1,33 +1,36 @@
 import { useState } from 'react'
 import {
-  BookOpen,
+  AlertTriangle,
+  CheckCircle2,
   ExternalLink,
   FileText,
-  Headphones,
-  Home,
   MessageSquare,
-  Phone,
   Send,
+  SquareIcon,
   User,
-  Users,
   X,
 } from 'lucide-react'
 
+import type { Student } from '@/types/student'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { Student } from '@/types/student'
 
 type ResourceTab = 'resources' | 'learn-more'
 
 interface GuidanceAction {
-  icon: typeof Phone
+  icon: typeof AlertTriangle
   iconColor: string
+  iconBg: string
   title: string
   description: string
-  urgency: { label: string; dotColor: string; textColor: string }
-  source: string
-  contacts: string[]
-  resources: { label: string; href: string; external?: boolean }[]
+  urgency: {
+    label: string
+    dotColor: string
+    textColor: string
+    badgeBg: string
+  }
+  contacts: Array<string>
+  resources: Array<{ label: string; href: string; external?: boolean }>
 }
 
 function getStudentInitials(name: string): string {
@@ -40,299 +43,290 @@ function getStudentInitials(name: string): string {
     .toUpperCase()
 }
 
-function getSeverityInfo(absences: number) {
-  if (absences >= 40)
-    return {
-      label: 'Severe LTA (40+ days)',
-      level: 'Tier 3 — severe concern',
-      badgeClass: 'bg-red-100 text-red-700',
-    }
-  if (absences >= 20)
-    return {
-      label: 'LTA (20–39 days)',
-      level: 'Tier 2 — emerging concern',
-      badgeClass: 'bg-orange-100 text-orange-700',
-    }
-  return {
-    label: 'At-risk attendance (10–19 days)',
-    level: 'Tier 1 — watch',
-    badgeClass: 'bg-amber-100 text-amber-700',
-  }
-}
-
-const guidanceActions: GuidanceAction[] = [
+const guidanceActions: Array<GuidanceAction> = [
   {
-    icon: Phone,
-    iconColor: 'bg-red-100 text-red-600',
-    title: 'Attempt contact within 24–48 hours',
+    icon: AlertTriangle,
+    iconColor: 'text-red-600',
+    iconBg: 'bg-red-50',
+    title: 'Do a 1-on-1 check-in within 48 hours',
     description:
-      'Call both caregivers, SMS/WhatsApp, and email. Log all attempts — even failed ones count for compliance and show pattern.',
+      "Low mood is the most time-sensitive signal here — it could point to something deeper. Validate feelings first; don't address the bullying incident in the same conversation.",
     urgency: {
       label: 'Urgent',
       dotColor: 'bg-red-500',
-      textColor: 'text-red-600',
+      textColor: 'text-red-700',
+      badgeBg: 'bg-red-50 border border-red-200',
     },
-    source: 'Student Management Guide (MOE)',
-    contacts: ['Form Teacher'],
-    resources: [{ label: 'Contact log template', href: '#' }],
+    contacts: ['School Counsellor', 'SEN Officer'],
+    resources: [
+      { label: 'Check-in guide (SwAN-adapted)', href: '#' },
+      { label: 'Low mood red flags', href: '#' },
+    ],
+  },
+  {
+    icon: SquareIcon,
+    iconColor: 'text-orange-600',
+    iconBg: 'bg-orange-50',
+    title: 'Consult SEN Officer before setting expectations',
+    description:
+      'Before re-engaging CCA or setting behavioural targets, understand his specific profile. Generic interventions may not apply — adjust communication style, consequences, and support.',
+    urgency: {
+      label: 'This week',
+      dotColor: 'bg-orange-500',
+      textColor: 'text-orange-700',
+      badgeBg: 'bg-orange-50 border border-orange-200',
+    },
+    contacts: ['SEN Officer'],
+    resources: [{ label: 'SwAN differentiation guide', href: '#' }],
   },
   {
     icon: MessageSquare,
-    iconColor: 'bg-orange-100 text-orange-600',
-    title: 'Do a student check-in when reachable',
+    iconColor: 'text-orange-600',
+    iconBg: 'bg-orange-50',
+    title: 'Convene a 15-min SDT/CMT case discussion',
     description:
-      "Explore barriers (sleep, anxiety, bullying, transport, caregiving) and agree on one small next step. Listen first — don't jump to solutions.",
+      'Pull RIOT data (attendance, discipline, teacher observations — past 4 weeks). Assign a single Case Manager to coordinate across all three concerns: YH, SC, and SEN Officer all looped in.',
     urgency: {
       label: 'This week',
       dotColor: 'bg-orange-500',
-      textColor: 'text-orange-600',
+      textColor: 'text-orange-700',
+      badgeBg: 'bg-orange-50 border border-orange-200',
     },
-    source: 'Well-being Guide (MOE)',
-    contacts: ['School Counsellor'],
-    resources: [{ label: 'Check-in template', href: '#' }],
+    contacts: ['Year Head', 'School Counsellor', 'SEN Officer'],
+    resources: [
+      { label: 'Case Management Guide', href: '#' },
+      { label: 'Open CaseSync', href: '#', external: true },
+    ],
   },
   {
-    icon: Users,
-    iconColor: 'bg-orange-100 text-orange-600',
-    title: 'Loop in the School Counsellor',
+    icon: CheckCircle2,
+    iconColor: 'text-green-600',
+    iconBg: 'bg-green-50',
+    title: 'Re-engage CCA with a phased plan',
     description:
-      'Before considering an FSC referral, assess the situation with the School Counsellor. Share your observations and get a read on whether formal support is needed.',
-    urgency: {
-      label: 'This week',
-      dotColor: 'bg-orange-500',
-      textColor: 'text-orange-600',
-    },
-    source: 'SwAN Support Framework (MOE)',
-    contacts: ['School Counsellor', 'Year Head'],
-    resources: [{ label: 'SC referral form', href: '#' }],
-  },
-  {
-    icon: Home,
-    iconColor: 'bg-green-100 text-green-600',
-    title: 'Initiate home visit if uncontactable',
-    description:
-      'If uncontactable or persistent: initiate home visit per guidelines. Go with a colleague; verify address before visiting.',
+      'Once low mood and safety are stabilised, meet CCA TIC + student to agree on a 4-week plan — buddy system, reduced role, clear expectations. CCA can be protective if the environment is right.',
     urgency: {
       label: 'Monitor',
       dotColor: 'bg-green-500',
-      textColor: 'text-green-600',
+      textColor: 'text-green-700',
+      badgeBg: 'bg-green-50 border border-green-200',
     },
-    source: 'Student Management Guide (MOE)',
-    contacts: ['Year Head', 'Form Teacher'],
-    resources: [{ label: 'Home visit checklist', href: '#' }],
+    contacts: ['CCA Teacher-in-Charge', 'Form Teacher'],
+    resources: [{ label: 'CCA re-engagement guide', href: '#' }],
   },
 ]
 
 const caseResources = [
-  { label: 'Contact log template', href: '#' },
-  { label: 'Check-in template (LTA-adapted)', href: '#' },
-  { label: 'Home visit checklist', href: '#' },
-  { label: 'LTA guidelines', href: '#' },
-  { label: 'Attendance monitoring protocol', href: '#' },
+  { label: 'Check-in guide (SwAN-adapted)', href: '#' },
+  { label: 'Low mood red flags', href: '#' },
+  { label: 'Bullying response protocol', href: '#' },
+  { label: 'Incident report template', href: '#' },
+  { label: 'SwAN differentiation guide', href: '#' },
   { label: 'Case Management Guide', href: '#' },
+  { label: 'CCA re-engagement guide', href: '#' },
   { label: 'Open CaseSync', href: '#', external: true },
 ]
 
 const learnMoreItems = [
   {
-    type: 'audio' as const,
-    title: 'Why students go missing: patterns behind absenteeism',
-    author: 'AST',
-    duration: '8 min watch',
+    label: 'Understanding SwAN Profiles',
+    meta: 'MOE Well-being Guide · 8 min read',
   },
   {
-    type: 'article' as const,
-    title: 'Having difficult conversations with parents about attendance',
-    author: 'AST',
-    duration: '5 min read',
+    label: 'Tier 2 Intervention Playbook',
+    meta: 'Case Management Guide · 12 min read',
+  },
+  {
+    label: 'Conducting Safe Check-ins',
+    meta: 'School Counselling Handbook · 6 min read',
   },
 ]
 
-interface LtaDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+interface GlowStudentSupportPageProps {
   student: Student
+  onClose: () => void
 }
 
-export function LtaDialog({ open, onOpenChange, student }: LtaDialogProps) {
+export function GlowStudentSupportPage({
+  student,
+  onClose,
+}: GlowStudentSupportPageProps) {
   const [activeTab, setActiveTab] = useState<ResourceTab>('resources')
 
-  if (!open) return null
-
-  const severity = getSeverityInfo(student.absences)
   const initials = getStudentInitials(student.name)
   const firstName = student.name.split(' ')[0]
 
   const suggestedQuestions = [
-    'What should I do if parents are uncontactable?',
-    `How do I adjust my approach for ${firstName}'s situation?`,
-    'When should I escalate to Year Head?',
+    'Which issue should I tackle first?',
+    `How do I adjust my approach for his SwAN profile?`,
+    'When should I loop in the School Counsellor?',
   ]
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white">
+    // Fills the full viewport — no fixed/z-index needed since this IS the page
+    <div className="flex h-screen flex-col bg-[var(--background)]">
       {/* ── Top bar ── */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b px-6">
+      <header className="flex h-14 shrink-0 items-center justify-between px-4">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-xs font-bold text-white">
+          <span className="flex h-7 w-7 items-center justify-center rounded-[var(--radius)] bg-[var(--twblue-9)] text-xs font-bold text-white">
             G
           </span>
-          <span className="text-sm font-medium">Glow · Student Support</span>
+          <span className="text-sm font-semibold text-[var(--foreground)]">
+            Glow
+          </span>
+          <span className="text-sm text-[var(--muted-foreground)]">·</span>
+          <span className="text-sm text-[var(--muted-foreground)]">
+            Student Support
+          </span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => onOpenChange(false)}
-        >
+        <Button variant="ghost" size="icon-sm" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
       </header>
 
-      {/* ── 3-column layout ── */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* ── 3-column layout — gap creates the NotebookLM-style visible separation ── */}
+      <div className="flex flex-1 gap-4 overflow-hidden p-3">
         {/* ── Left panel: Student context ── */}
-        <aside className="w-[280px] shrink-0 overflow-y-auto border-r p-6">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-            Student Profile · Attendance
-          </p>
+        <aside className="flex w-[420px] shrink-0 flex-col overflow-hidden rounded-[var(--radius)] border bg-[var(--card)] shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
+          {/* Panel header */}
+          <div className="shrink-0 border-b border-[var(--border)] px-5 py-3.5">
+            <h2 className="text-sm font-medium text-[var(--foreground)]">
+              Student context
+            </h2>
+          </div>
 
-          {/* Student identity */}
-          <div className="mt-4 flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-              {initials}
-            </span>
-            <div>
-              <p className="text-sm font-semibold">{student.name}</p>
-              <p className="text-xs text-muted-foreground">
-                Class {student.class} · {student.cca}
-              </p>
+          <div className="overflow-y-auto p-5">
+            {/* Section label */}
+            <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+              Student Profile · Wellbeing
+            </p>
+
+            {/* Student identity */}
+            <div className="mt-4 flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--twblue-9)] text-xs font-bold text-white">
+                {initials}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{student.name}</p>
+                <p className="truncate text-xs text-[var(--muted-foreground)]">
+                  Class {student.class} · {student.cca}
+                </p>
+              </div>
             </div>
-          </div>
 
-          {/* Severity badge */}
-          <div className="mt-3">
-            <span
-              className={cn(
-                'inline-flex rounded-full px-2.5 py-1 text-xs font-medium',
-                severity.badgeClass,
-              )}
-            >
-              {severity.label}
-            </span>
-          </div>
+            {/* SwAN badge */}
+            <div className="mt-3">
+              <span className="inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                SwAN — SEN Profile
+              </span>
+            </div>
 
-          {/* Context */}
-          <h2 className="mt-6 text-base font-bold leading-snug">
-            How to support a student with long-term absenteeism?
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Persistent absence often signals barriers the student hasn't voiced
-            — anxiety, caregiving, peer issues, or disengagement.
-          </p>
+            {/* Context question */}
+            <h2 className="mt-5 text-sm font-semibold leading-snug text-[var(--foreground)]">
+              How to support a SwAN student with multiple concerns?
+            </h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">
+              Co-occurring behavioural, social-emotional, and engagement
+              challenges require a sequenced, differentiated approach.
+            </p>
 
-          {/* Active triggers */}
-          <div className="mt-6">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            {/* Divider */}
+            <div className="my-5 border-t border-[var(--border)]" />
+
+            {/* Active triggers */}
+            <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
               Active Triggers
             </p>
-            <div className="mt-2.5 space-y-2">
-              <div className="flex items-center gap-2 rounded-lg bg-orange-50 px-3 py-2">
-                <span className="h-2 w-2 shrink-0 rounded-full bg-orange-500" />
-                <span className="text-sm font-medium text-orange-800">
-                  {student.absences} non-VR absences
-                </span>
+            <div className="mt-2.5 space-y-1.5">
+              <div className="flex items-center gap-2 rounded-[var(--radius)] bg-red-50 px-3 py-2 text-sm font-medium text-red-800">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                Bullying offence
               </div>
-              {student.attentionTags.includes('SEN') && (
-                <div className="flex items-center gap-2 rounded-lg bg-purple-50 px-3 py-2">
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-purple-500" />
-                  <span className="text-sm font-medium text-purple-800">
-                    SEN profile
-                  </span>
-                </div>
-              )}
-              {student.attentionTags.includes('FAS') && (
-                <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2">
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
-                  <span className="text-sm font-medium text-amber-800">
-                    FAS recipient
-                  </span>
-                </div>
-              )}
-              {student.lowMoodFlagged && (
-                <div className="flex items-center gap-2 rounded-lg bg-rose-50 px-3 py-2">
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-rose-500" />
-                  <span className="text-sm font-medium text-rose-800">
-                    Low mood flagged
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-2 rounded-[var(--radius)] bg-orange-50 px-3 py-2 text-sm font-medium text-orange-800">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
+                {student.ccaMissed} missed CCA sessions
+              </div>
+              <div className="flex items-center gap-2 rounded-[var(--radius)] bg-orange-50 px-3 py-2 text-sm font-medium text-orange-800">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
+                Low mood in class
+              </div>
             </div>
-          </div>
 
-          {/* Metadata */}
-          <div className="mt-6 space-y-4">
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                Risk Level
-              </p>
-              <p className="mt-1 text-sm">{severity.level}</p>
-            </div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                Case Manager
-              </p>
-              <p className="mt-1 text-sm">Not yet assigned</p>
-            </div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                Last SDT Review
-              </p>
-              <p className="mt-1 text-sm">&mdash;</p>
+            <div className="my-5 border-t border-[var(--border)]" />
+
+            {/* Metadata */}
+            <div className="space-y-4">
+              <MetaField
+                label="SwAN Need Area"
+                value="Social-emotional / behavioural"
+              />
+              <MetaField label="Risk Level" value="Tier 2 — emerging concern" />
+              <MetaField label="Case Manager" value="Not yet assigned" />
+              <MetaField label="Last SDT Review" value="—" />
             </div>
           </div>
         </aside>
 
         {/* ── Middle panel: AI Chat ── */}
-        <main className="flex flex-1 flex-col overflow-hidden">
-          {/* Scrollable messages */}
-          <div className="flex-1 overflow-y-auto px-10 py-8">
+        <main className="flex flex-1 flex-col overflow-hidden rounded-[var(--radius)] border bg-[var(--card)] shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
+          {/* Panel header */}
+          <div className="shrink-0 border-b border-[var(--border)] px-8 py-3.5">
+            <h2 className="text-sm font-medium text-[var(--foreground)]">
+              Chat
+            </h2>
+          </div>
+
+          {/* Scrollable messages area */}
+          <div className="flex-1 overflow-y-auto px-8 py-7">
             {/* AI response */}
             <div className="flex gap-3">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-white">
+              {/* Glow avatar */}
+              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--twblue-9)] text-xs font-bold text-white">
                 G
               </span>
+
               <div className="min-w-0 flex-1">
-                <p className="text-sm leading-relaxed">
-                  {student.name} is flagged at{' '}
-                  <strong>{severity.label}</strong> because they have
-                  accumulated {student.absences} non-VR absences this term.
-                  Here's a sequenced approach, prioritised by urgency:
+                <p className="text-sm leading-relaxed text-[var(--foreground)]">
+                  {firstName} is flagged at <strong>Tier 2 risk</strong> because
+                  three concerns are presenting at the same time — a bullying
+                  offence, disengagement from CCA, and observed low mood. Each
+                  alone may be manageable; together, they suggest an emerging
+                  pattern that warrants coordinated support before it escalates
+                  to Tier 3. Here's a sequenced approach, prioritised by
+                  urgency:
                 </p>
 
                 {/* Action cards */}
-                <div className="mt-6 space-y-2">
+                <div className="mt-5 space-y-2.5">
                   {guidanceActions.map((action, i) => {
                     const Icon = action.icon
                     return (
-                      <div key={i} className="rounded-lg border p-4">
+                      <div
+                        key={i}
+                        className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-4 transition-colors hover:bg-[var(--muted)]"
+                      >
                         <div className="flex items-start gap-3">
+                          {/* Icon */}
                           <span
                             className={cn(
-                              'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
-                              action.iconColor,
+                              'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius)]',
+                              action.iconBg,
                             )}
                           >
-                            <Icon className="h-4 w-4" />
+                            <Icon className={cn('h-4 w-4', action.iconColor)} />
                           </span>
+
                           <div className="min-w-0 flex-1">
-                            {/* Title + urgency */}
-                            <div className="flex items-center justify-between gap-2">
-                              <h4 className="text-sm font-semibold">
+                            {/* Title + urgency badge */}
+                            <div className="flex items-start justify-between gap-3">
+                              <h4 className="text-sm font-semibold leading-snug">
                                 {action.title}
                               </h4>
                               <span
                                 className={cn(
-                                  'flex shrink-0 items-center gap-1.5 text-xs font-medium',
+                                  'flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium',
+                                  action.urgency.badgeBg,
                                   action.urgency.textColor,
                                 )}
                               >
@@ -346,48 +340,38 @@ export function LtaDialog({ open, onOpenChange, student }: LtaDialogProps) {
                               </span>
                             </div>
 
-                            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                            <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">
                               {action.description}
                             </p>
 
-                            {/* Source + Contact */}
-                            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1.5">
-                                <span className="font-medium uppercase tracking-wide">
-                                  Source
-                                </span>
-                                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5">
-                                  <BookOpen className="h-3 w-3" />
-                                  {action.source}
-                                </span>
-                              </span>
-                              <span className="text-border">|</span>
-                              <span className="flex items-center gap-1.5">
-                                <span className="font-medium uppercase tracking-wide">
+                            {/* Contact chips */}
+                            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
                                   Contact
                                 </span>
                                 {action.contacts.map((c) => (
                                   <span
                                     key={c}
-                                    className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5"
+                                    className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--foreground)]"
                                   >
-                                    <User className="h-3 w-3" />
+                                    <User className="h-3 w-3 shrink-0 text-[var(--muted-foreground)]" />
                                     {c}
                                   </span>
                                 ))}
-                              </span>
+                              </div>
                             </div>
 
                             {/* Resources */}
-                            <div className="mt-1.5 flex flex-wrap items-center gap-x-2 text-xs">
-                              <span className="font-medium uppercase tracking-wide text-muted-foreground">
+                            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                              <span className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
                                 Resources
                               </span>
                               {action.resources.map((r) => (
                                 <a
                                   key={r.label}
                                   href={r.href}
-                                  className="text-blue-600 underline-offset-2 hover:underline"
+                                  className="inline-flex items-center gap-0.5 text-xs text-[var(--twblue-11)] underline-offset-2 hover:underline"
                                   onClick={(e) => e.preventDefault()}
                                 >
                                   {r.label}
@@ -405,24 +389,24 @@ export function LtaDialog({ open, onOpenChange, student }: LtaDialogProps) {
                 </div>
 
                 {/* Sharpen prompt */}
-                <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-                  <strong className="text-foreground">
+                <p className="mt-6 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                  <strong className="text-[var(--foreground)]">
                     To sharpen this plan:
                   </strong>{' '}
-                  it would help to know whether the absences are continuous (3+
-                  days in a row) or intermittent, and whether there's been any
-                  recent contact with the family. Share what you know in the chat
-                  below.
+                  it would help to know how long the low mood has been observed,
+                  whether the bullying was physical/verbal/cyber and if the
+                  victim is safe, and what {firstName}'s specific SwAN diagnosis
+                  or support needs are. Share what you know in the chat below.
                 </p>
               </div>
             </div>
 
-            {/* Suggested questions */}
+            {/* Suggested follow-up questions */}
             <div className="mt-6 flex flex-wrap gap-2 pl-10">
               {suggestedQuestions.map((q) => (
                 <button
                   key={q}
-                  className="rounded-full border px-3.5 py-2 text-sm transition-colors hover:bg-muted"
+                  className="rounded-[var(--radius-input)] border border-[var(--border)] bg-[var(--background)] px-3.5 py-2 text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--muted)]"
                   onClick={(e) => e.preventDefault()}
                 >
                   {q}
@@ -431,19 +415,19 @@ export function LtaDialog({ open, onOpenChange, student }: LtaDialogProps) {
             </div>
           </div>
 
-          {/* Chat input */}
-          <div className="shrink-0 border-t px-10 py-4">
-            <div className="flex items-center gap-2 rounded-full border px-4 py-2.5">
+          {/* Chat input — pinned to bottom */}
+          <div className="shrink-0 border-t border-[var(--border)] px-8 py-4">
+            <div className="flex items-center gap-2 rounded-[var(--radius-input)] border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 transition-colors focus-within:border-[var(--ring)] focus-within:ring-2 focus-within:ring-[var(--ring)]/20">
               <input
                 type="text"
-                placeholder={`Ask a follow-up about ${firstName}...`}
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                placeholder={`Ask a follow-up about ${firstName}…`}
+                className="flex-1 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted-foreground)]"
                 readOnly
               />
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="text-muted-foreground"
+                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -452,52 +436,51 @@ export function LtaDialog({ open, onOpenChange, student }: LtaDialogProps) {
         </main>
 
         {/* ── Right panel: Resources ── */}
-        <aside className="w-[280px] shrink-0 overflow-y-auto border-l">
-          {/* Tab bar */}
-          <div className="flex border-b">
-            <button
-              className={cn(
-                'flex-1 px-4 py-3 text-sm font-medium transition-colors',
-                activeTab === 'resources'
-                  ? 'border-b-2 border-foreground text-foreground'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
-              onClick={() => setActiveTab('resources')}
-            >
-              Resources
-            </button>
-            <button
-              className={cn(
-                'flex-1 px-4 py-3 text-sm font-medium transition-colors',
-                activeTab === 'learn-more'
-                  ? 'border-b-2 border-foreground text-foreground'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
-              onClick={() => setActiveTab('learn-more')}
-            >
-              Learn More
-            </button>
+        <aside className="flex w-[400px] shrink-0 flex-col overflow-hidden rounded-[var(--radius)] border bg-[var(--card)] shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
+          {/* Panel header */}
+          <div className="shrink-0 border-b border-[var(--border)] px-4 py-3.5">
+            <h2 className="text-sm font-medium text-[var(--foreground)]">
+              Learn more
+            </h2>
           </div>
 
-          <div className="p-5">
+          {/* Segmented tab control */}
+          <div className="shrink-0 px-4 py-3">
+            <div className="flex rounded-full bg-muted p-1 gap-1">
+              <TabButton
+                active={activeTab === 'resources'}
+                onClick={() => setActiveTab('resources')}
+              >
+                Resources
+              </TabButton>
+              <TabButton
+                active={activeTab === 'learn-more'}
+                onClick={() => setActiveTab('learn-more')}
+              >
+                Learn More
+              </TabButton>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4">
             {activeTab === 'resources' ? (
               <>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                <p className="mb-3 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
                   Relevant to this case
                 </p>
-                <ul className="mt-3 space-y-0.5">
+                <ul className="space-y-0.5">
                   {caseResources.map((r) => (
                     <li key={r.label}>
                       <a
                         href={r.href}
-                        className="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm transition-colors hover:bg-muted"
+                        className="group flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--muted)]"
                         onClick={(e) => e.preventDefault()}
                       >
-                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                        <span className="flex-1">{r.label}</span>
-                        {r.external && (
-                          <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                        )}
+                        <FileText className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)] group-hover:text-[var(--twblue-9)]" />
+                        <span className="flex-1 leading-snug">{r.label}</span>
+                        {r.external ? (
+                          <ExternalLink className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)]" />
+                        ) : null}
                       </a>
                     </li>
                   ))}
@@ -505,32 +488,24 @@ export function LtaDialog({ open, onOpenChange, student }: LtaDialogProps) {
               </>
             ) : (
               <>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                  Further learning
+                <p className="mb-3 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+                  Professional learning
                 </p>
-                <ul className="mt-3 space-y-3">
+                <ul className="space-y-1.5">
                   {learnMoreItems.map((item) => (
-                    <li
-                      key={item.title}
-                      className="cursor-default rounded-lg border p-3 transition-colors hover:bg-muted"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                          {item.type === 'audio' ? (
-                            <Headphones className="h-4 w-4" />
-                          ) : (
-                            <FileText className="h-4 w-4" />
-                          )}
+                    <li key={item.label}>
+                      <a
+                        href="#"
+                        className="group flex flex-col gap-0.5 rounded-[var(--radius)] px-2.5 py-2 transition-colors hover:bg-[var(--muted)]"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <span className="text-sm font-medium text-[var(--foreground)] group-hover:text-[var(--twblue-9)]">
+                          {item.label}
                         </span>
-                        <div>
-                          <p className="text-sm font-medium leading-snug">
-                            {item.title}
-                          </p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            By {item.author} · {item.duration}
-                          </p>
-                        </div>
-                      </div>
+                        <span className="text-xs text-[var(--muted-foreground)]">
+                          {item.meta}
+                        </span>
+                      </a>
                     </li>
                   ))}
                 </ul>
@@ -540,5 +515,42 @@ export function LtaDialog({ open, onOpenChange, student }: LtaDialogProps) {
         </aside>
       </div>
     </div>
+  )
+}
+
+// ── Sub-components ──────────────────────────────────────────
+
+function MetaField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted-foreground)]">
+        {label}
+      </p>
+      <p className="mt-1 text-sm text-[var(--foreground)]">{value}</p>
+    </div>
+  )
+}
+
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      className={cn(
+        'flex-1 rounded-full py-1.5 text-sm font-medium transition-all',
+        active
+          ? 'bg-background text-foreground shadow-sm'
+          : 'text-muted-foreground hover:text-foreground',
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </button>
   )
 }

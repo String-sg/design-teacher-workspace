@@ -314,7 +314,9 @@ export function StudentProfile({
         </div>
 
         {/* Intervention Banner — only surfaces for students with support needs */}
-        {isEnabled('lta-intervention') && <InterventionBanner student={student} />}
+        {isEnabled('lta-intervention') && (
+          <InterventionBanner student={student} />
+        )}
 
         {/* Overview Cards */}
         <StudentOverviewCards student={student} />

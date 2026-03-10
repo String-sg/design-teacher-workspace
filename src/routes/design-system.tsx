@@ -85,7 +85,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
 import {
   Popover,
@@ -225,18 +229,14 @@ function ColorScale({
 }: {
   name: string
   prefix: string
-  steps: number[]
+  steps: Array<number>
 }) {
   return (
     <div className="space-y-2">
       <h4 className="text-sm font-medium capitalize">{name}</h4>
       <div className="flex flex-wrap gap-2">
         {steps.map((step) => (
-          <Swatch
-            key={step}
-            name={`${step}`}
-            cssVar={`--${prefix}-${step}`}
-          />
+          <Swatch key={step} name={`${step}`} cssVar={`--${prefix}-${step}`} />
         ))}
       </div>
     </div>
@@ -350,7 +350,7 @@ function DesignSystemPage() {
 
 type ColorEntry = { name: string; cssVar: string }
 
-const SEMANTIC_COLORS: ColorEntry[] = [
+const SEMANTIC_COLORS: Array<ColorEntry> = [
   { name: 'background', cssVar: '--background' },
   { name: 'foreground', cssVar: '--foreground' },
   { name: 'primary', cssVar: '--primary' },
@@ -366,12 +366,12 @@ const SEMANTIC_COLORS: ColorEntry[] = [
   { name: 'popover', cssVar: '--popover' },
 ]
 
-const CHART_COLORS: ColorEntry[] = [1, 2, 3, 4, 5].map((n) => ({
+const CHART_COLORS: Array<ColorEntry> = [1, 2, 3, 4, 5].map((n) => ({
   name: `chart-${n}`,
   cssVar: `--chart-${n}`,
 }))
 
-const SIDEBAR_COLORS: ColorEntry[] = [
+const SIDEBAR_COLORS: Array<ColorEntry> = [
   { name: 'sidebar', cssVar: '--sidebar' },
   { name: 'sidebar-fg', cssVar: '--sidebar-foreground' },
   { name: 'sidebar-primary', cssVar: '--sidebar-primary' },
@@ -389,7 +389,7 @@ const COLOR_SCALES = [
   { name: 'Amber', prefix: 'amber' },
 ]
 
-function ColorSwatchList({ colors }: { colors: ColorEntry[] }) {
+function ColorSwatchList({ colors }: { colors: Array<ColorEntry> }) {
   return (
     <div className="flex flex-wrap gap-2">
       {colors.map((c) => (
@@ -399,7 +399,7 @@ function ColorSwatchList({ colors }: { colors: ColorEntry[] }) {
   )
 }
 
-function ColorTableList({ colors }: { colors: ColorEntry[] }) {
+function ColorTableList({ colors }: { colors: Array<ColorEntry> }) {
   return (
     <div className="border border-border rounded-xl overflow-hidden">
       <Table>
@@ -438,7 +438,7 @@ function ColorScaleTable({
 }: {
   name: string
   prefix: string
-  steps: number[]
+  steps: Array<number>
 }) {
   return (
     <div className="space-y-2">
@@ -785,12 +785,7 @@ function ButtonSection() {
 }
 
 function BadgeSection() {
-  const variants = [
-    'default',
-    'secondary',
-    'destructive',
-    'outline',
-  ] as const
+  const variants = ['default', 'secondary', 'destructive', 'outline'] as const
 
   return (
     <Section id="badge" title="Badge">
@@ -1150,17 +1145,13 @@ function TooltipSection() {
             <TooltipTrigger render={<Button variant="outline" />}>
               Hover me (bottom)
             </TooltipTrigger>
-            <TooltipContent side="bottom">
-              Tooltip on bottom
-            </TooltipContent>
+            <TooltipContent side="bottom">Tooltip on bottom</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger render={<Button variant="outline" />}>
               Hover me (right)
             </TooltipTrigger>
-            <TooltipContent side="right">
-              Tooltip on right
-            </TooltipContent>
+            <TooltipContent side="right">Tooltip on right</TooltipContent>
           </Tooltip>
         </div>
       </TooltipProvider>

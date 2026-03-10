@@ -20,8 +20,8 @@ export interface InterventionPackage {
   badge: string
   title: string
   why: string
-  actions: InterventionAction[]
-  resources: InterventionResource[]
+  actions: Array<InterventionAction>
+  resources: Array<InterventionResource>
 }
 
 interface InterventionRule {
@@ -29,11 +29,10 @@ interface InterventionRule {
   buildPackage: (student: Student) => InterventionPackage
 }
 
-export const interventionRules: InterventionRule[] = [
+export const interventionRules: Array<InterventionRule> = [
   // SEN / SwAN
   {
-    trigger: (s) =>
-      s.sen !== null || s.attentionTags.includes('SEN'),
+    trigger: (s) => s.sen !== null || s.attentionTags.includes('SEN'),
     buildPackage: (s) => ({
       id: 'sen',
       color: 'purple',
@@ -204,7 +203,8 @@ export const interventionRules: InterventionRule[] = [
           },
           {
             type: 'article',
-            title: 'Having difficult conversations with parents about attendance',
+            title:
+              'Having difficult conversations with parents about attendance',
             duration: '5 min read',
             href: '#',
           },
@@ -294,7 +294,7 @@ export const interventionRules: InterventionRule[] = [
   },
 ]
 
-export function getInterventions(student: Student): InterventionPackage[] {
+export function getInterventions(student: Student): Array<InterventionPackage> {
   return interventionRules
     .filter((rule) => rule.trigger(student))
     .map((rule) => rule.buildPackage(student))

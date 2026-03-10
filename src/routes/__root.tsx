@@ -73,8 +73,11 @@ function RootComponent() {
   const isGuestRoute = matches.some(
     (m) => m.routeId === '/_guest' || m.routeId === '/_allears',
   )
+  const isGlowRoute = matches.some((m) =>
+    (m as { pathname: string }).pathname?.startsWith('/glow/'),
+  )
 
-  if (isGuestRoute) {
+  if (isGuestRoute || isGlowRoute) {
     return (
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
