@@ -1,15 +1,5 @@
-import { useState } from 'react'
-import {
-  AlertTriangle,
-  CheckCircle2,
-  ExternalLink,
-  FileText,
-  MessageSquare,
-  Send,
-  SquareIcon,
-  User,
-  X,
-} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { ExternalLink, FileText, Send, User, X } from 'lucide-react'
 
 import type { Student } from '@/types/student'
 import { Button } from '@/components/ui/button'
@@ -18,19 +8,160 @@ import { cn } from '@/lib/utils'
 type ResourceTab = 'resources' | 'learn-more'
 
 interface GuidanceAction {
-  icon: typeof AlertTriangle
-  iconColor: string
-  iconBg: string
   title: string
   description: string
   urgency: {
     label: string
-    dotColor: string
+    icon: React.ReactNode
     textColor: string
     badgeBg: string
   }
   contacts: Array<string>
   resources: Array<{ label: string; href: string; external?: boolean }>
+}
+
+
+// ── Linear-style priority icons ──────────────────────────────
+
+function PriorityUrgentIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect width="16" height="16" rx="3" />
+      <rect x="7" y="3" width="2" height="6" rx="1" fill="white" />
+      <rect x="7" y="11" width="2" height="2" rx="1" fill="white" />
+    </svg>
+  )
+}
+
+function PriorityMediumIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="1" y="9" width="3" height="5" rx="1" />
+      <rect x="6.5" y="5" width="3" height="9" rx="1" />
+      <rect x="12" y="1" width="3" height="13" rx="1" opacity="0.35" />
+    </svg>
+  )
+}
+
+function PriorityLowIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <rect x="1" y="9" width="3" height="5" rx="1" />
+      <rect x="6.5" y="5" width="3" height="9" rx="1" opacity="0.35" />
+      <rect x="12" y="1" width="3" height="13" rx="1" opacity="0.35" />
+    </svg>
+  )
+}
+
+// ── Glow bot avatar (Perplexity-style monitor face with animated eyes) ──
+
+function GlowBotIcon({ size = 28 }: { size?: number }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const [eyeOffset, setEyeOffset] = useState(0)
+  const [blinkScale, setBlinkScale] = useState(1)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    if (!isHovered) {
+      setEyeOffset(0)
+      setBlinkScale(1)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      return
+    }
+
+    // Eye look sequence: center → left → right → center → blink
+    const sequence = [
+      { delay: 0, offset: 0, blink: 1 },
+      { delay: 200, offset: -1.4, blink: 1 },
+      { delay: 500, offset: 1.4, blink: 1 },
+      { delay: 800, offset: 0, blink: 1 },
+      { delay: 1100, offset: 0, blink: 0.1 },
+      { delay: 1250, offset: 0, blink: 1 },
+    ]
+
+    const timers: ReturnType<typeof setTimeout>[] = []
+
+    function runSequence() {
+      for (const step of sequence) {
+        const t = setTimeout(() => {
+          setEyeOffset(step.offset)
+          setBlinkScale(step.blink)
+        }, step.delay)
+        timers.push(t)
+      }
+    }
+
+    runSequence()
+    intervalRef.current = setInterval(runSequence, 2000)
+
+    return () => {
+      timers.forEach(clearTimeout)
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [isHovered])
+
+  return (
+    <span
+      className="flex shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--twblue-9)]"
+      style={{ width: size, height: size }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <svg
+        width={size * 0.64}
+        height={size * 0.64}
+        viewBox="0 0 18 18"
+        fill="none"
+        aria-hidden="true"
+      >
+        {/* Monitor body */}
+        <rect
+          x="2"
+          y="2"
+          width="14"
+          height="10"
+          rx="2.5"
+          stroke="white"
+          strokeWidth="1.5"
+          fill="none"
+        />
+        {/* Left eye */}
+        <rect
+          x={6 + eyeOffset}
+          y="5.5"
+          width="2"
+          height="2"
+          rx="0.5"
+          fill="white"
+          style={{
+            transform: `scaleY(${blinkScale})`,
+            transformOrigin: '7px 6.5px',
+            transition: 'x 150ms ease, transform 80ms ease',
+          }}
+        />
+        {/* Right eye */}
+        <rect
+          x={10 + eyeOffset}
+          y="5.5"
+          width="2"
+          height="2"
+          rx="0.5"
+          fill="white"
+          style={{
+            transform: `scaleY(${blinkScale})`,
+            transformOrigin: '11px 6.5px',
+            transition: 'x 150ms ease, transform 80ms ease',
+          }}
+        />
+        {/* Stand base */}
+        <line x1="7" y1="14" x2="11" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+        {/* Stand neck */}
+        <line x1="9" y1="12" x2="9" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    </span>
+  )
 }
 
 function getStudentInitials(name: string): string {
@@ -45,15 +176,12 @@ function getStudentInitials(name: string): string {
 
 const guidanceActions: Array<GuidanceAction> = [
   {
-    icon: AlertTriangle,
-    iconColor: 'text-red-600',
-    iconBg: 'bg-red-50',
     title: 'Do a 1-on-1 check-in within 48 hours',
     description:
       "Low mood is the most time-sensitive signal here — it could point to something deeper. Validate feelings first; don't address the bullying incident in the same conversation.",
     urgency: {
       label: 'Urgent',
-      dotColor: 'bg-red-500',
+      icon: <PriorityUrgentIcon />,
       textColor: 'text-red-700',
       badgeBg: 'bg-red-50 border border-red-200',
     },
@@ -64,15 +192,12 @@ const guidanceActions: Array<GuidanceAction> = [
     ],
   },
   {
-    icon: SquareIcon,
-    iconColor: 'text-orange-600',
-    iconBg: 'bg-orange-50',
     title: 'Consult SEN Officer before setting expectations',
     description:
       'Before re-engaging CCA or setting behavioural targets, understand his specific profile. Generic interventions may not apply — adjust communication style, consequences, and support.',
     urgency: {
       label: 'This week',
-      dotColor: 'bg-orange-500',
+      icon: <PriorityMediumIcon />,
       textColor: 'text-orange-700',
       badgeBg: 'bg-orange-50 border border-orange-200',
     },
@@ -80,15 +205,12 @@ const guidanceActions: Array<GuidanceAction> = [
     resources: [{ label: 'SwAN differentiation guide', href: '#' }],
   },
   {
-    icon: MessageSquare,
-    iconColor: 'text-orange-600',
-    iconBg: 'bg-orange-50',
     title: 'Convene a 15-min SDT/CMT case discussion',
     description:
       'Pull RIOT data (attendance, discipline, teacher observations — past 4 weeks). Assign a single Case Manager to coordinate across all three concerns: YH, SC, and SEN Officer all looped in.',
     urgency: {
       label: 'This week',
-      dotColor: 'bg-orange-500',
+      icon: <PriorityMediumIcon />,
       textColor: 'text-orange-700',
       badgeBg: 'bg-orange-50 border border-orange-200',
     },
@@ -99,15 +221,12 @@ const guidanceActions: Array<GuidanceAction> = [
     ],
   },
   {
-    icon: CheckCircle2,
-    iconColor: 'text-green-600',
-    iconBg: 'bg-green-50',
     title: 'Re-engage CCA with a phased plan',
     description:
       'Once low mood and safety are stabilised, meet CCA TIC + student to agree on a 4-week plan — buddy system, reduced role, clear expectations. CCA can be protective if the environment is right.',
     urgency: {
       label: 'Monitor',
-      dotColor: 'bg-green-500',
+      icon: <PriorityLowIcon />,
       textColor: 'text-green-700',
       badgeBg: 'bg-green-50 border border-green-200',
     },
@@ -129,16 +248,31 @@ const caseResources = [
 
 const learnMoreItems = [
   {
-    label: 'Understanding SwAN Profiles',
-    meta: 'MOE Well-being Guide · 8 min read',
+    title: 'Understanding SwAN Profiles',
+    author: 'SEND',
+    duration: '22 min',
+    type: 'podcast' as const,
+    cover: '/learn-cover-1.png',
+    description:
+      'A comprehensive overview of Students with Additional Needs — how to identify profiles, adapt communication, and plan differentiated support.',
   },
   {
-    label: 'Tier 2 Intervention Playbook',
-    meta: 'Case Management Guide · 12 min read',
+    title: 'Tier 2 Intervention Playbook',
+    author: 'SDCD',
+    duration: '12 min',
+    type: 'article' as const,
+    cover: '/learn-cover-2.png',
+    description:
+      'Step-by-step protocols for emerging concerns: when to escalate, who to loop in, and how to coordinate across Year Heads, Counsellors, and SEN Officers.',
   },
   {
-    label: 'Conducting Safe Check-ins',
-    meta: 'School Counselling Handbook · 6 min read',
+    title: 'Conducting Safe Check-ins',
+    author: 'SWB',
+    duration: '18 min',
+    type: 'podcast' as const,
+    cover: '/learn-cover-3.png',
+    description:
+      'Practical techniques for 1-on-1 conversations with students showing low mood — building trust, asking the right questions, and knowing when to refer.',
   },
 ]
 
@@ -168,9 +302,7 @@ export function GlowStudentSupportPage({
       {/* ── Top bar ── */}
       <header className="flex h-14 shrink-0 items-center justify-between px-4">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-[var(--radius)] bg-[var(--twblue-9)] text-xs font-bold text-white">
-            G
-          </span>
+          <GlowBotIcon size={28} />
           <span className="text-sm font-semibold text-[var(--foreground)]">
             Glow
           </span>
@@ -196,14 +328,10 @@ export function GlowStudentSupportPage({
           </div>
 
           <div className="overflow-y-auto p-5">
-            {/* Section label */}
-            <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
-              Student Profile · Wellbeing
-            </p>
 
             {/* Student identity */}
             <div className="mt-4 flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--twblue-9)] text-xs font-bold text-white">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-xs font-bold text-white">
                 {initials}
               </span>
               <div className="min-w-0">
@@ -216,8 +344,8 @@ export function GlowStudentSupportPage({
 
             {/* SwAN badge */}
             <div className="mt-3">
-              <span className="inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+              <span className="inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
                 SwAN — SEN Profile
               </span>
             </div>
@@ -235,7 +363,7 @@ export function GlowStudentSupportPage({
             <div className="my-5 border-t border-[var(--border)]" />
 
             {/* Active triggers */}
-            <p className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+            <p className="text-xs font-medium text-[var(--muted-foreground)]">
               Active Triggers
             </p>
             <div className="mt-2.5 space-y-1.5">
@@ -253,18 +381,6 @@ export function GlowStudentSupportPage({
               </div>
             </div>
 
-            <div className="my-5 border-t border-[var(--border)]" />
-
-            {/* Metadata */}
-            <div className="space-y-4">
-              <MetaField
-                label="SwAN Need Area"
-                value="Social-emotional / behavioural"
-              />
-              <MetaField label="Risk Level" value="Tier 2 — emerging concern" />
-              <MetaField label="Case Manager" value="Not yet assigned" />
-              <MetaField label="Last SDT Review" value="—" />
-            </div>
           </div>
         </aside>
 
@@ -282,9 +398,9 @@ export function GlowStudentSupportPage({
             {/* AI response */}
             <div className="flex gap-3">
               {/* Glow avatar */}
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--twblue-9)] text-xs font-bold text-white">
-                G
-              </span>
+              <div className="mt-0.5">
+                <GlowBotIcon size={28} />
+              </div>
 
               <div className="min-w-0 flex-1">
                 <p className="text-sm leading-relaxed text-[var(--foreground)]">
@@ -300,44 +416,27 @@ export function GlowStudentSupportPage({
                 {/* Action cards */}
                 <div className="mt-5 space-y-2.5">
                   {guidanceActions.map((action, i) => {
-                    const Icon = action.icon
                     return (
                       <div
                         key={i}
                         className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-4 transition-colors hover:bg-[var(--muted)]"
                       >
-                        <div className="flex items-start gap-3">
-                          {/* Icon */}
-                          <span
-                            className={cn(
-                              'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius)]',
-                              action.iconBg,
-                            )}
-                          >
-                            <Icon className={cn('h-4 w-4', action.iconColor)} />
-                          </span>
-
                           <div className="min-w-0 flex-1">
-                            {/* Title + urgency badge */}
-                            <div className="flex items-start justify-between gap-3">
-                              <h4 className="text-sm font-semibold leading-snug">
-                                {action.title}
-                              </h4>
+                            {/* Urgency badge then title */}
+                            <div className="flex flex-col gap-1.5">
                               <span
                                 className={cn(
-                                  'flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium',
+                                  'inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
                                   action.urgency.badgeBg,
                                   action.urgency.textColor,
                                 )}
                               >
-                                <span
-                                  className={cn(
-                                    'h-1.5 w-1.5 rounded-full',
-                                    action.urgency.dotColor,
-                                  )}
-                                />
+                                {action.urgency.icon}
                                 {action.urgency.label}
                               </span>
+                              <h4 className="text-sm font-semibold leading-snug">
+                                {action.title}
+                              </h4>
                             </div>
 
                             <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">
@@ -347,31 +446,32 @@ export function GlowStudentSupportPage({
                             {/* Contact chips */}
                             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+                                <span className="text-xs font-medium text-[var(--muted-foreground)]">
                                   Contact
                                 </span>
                                 {action.contacts.map((c) => (
-                                  <span
+                                  <button
                                     key={c}
-                                    className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--foreground)]"
+                                    className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--foreground)] underline-offset-2 hover:underline"
+                                    onClick={(e) => e.preventDefault()}
                                   >
                                     <User className="h-3 w-3 shrink-0 text-[var(--muted-foreground)]" />
                                     {c}
-                                  </span>
+                                  </button>
                                 ))}
                               </div>
                             </div>
 
                             {/* Resources */}
                             <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-                              <span className="text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+                              <span className="text-xs font-medium text-[var(--muted-foreground)]">
                                 Resources
                               </span>
                               {action.resources.map((r) => (
                                 <a
                                   key={r.label}
                                   href={r.href}
-                                  className="inline-flex items-center gap-0.5 text-xs text-[var(--twblue-11)] underline-offset-2 hover:underline"
+                                  className="inline-flex items-center gap-0.5 text-xs text-[var(--foreground)] underline-offset-2 hover:underline"
                                   onClick={(e) => e.preventDefault()}
                                 >
                                   {r.label}
@@ -382,7 +482,6 @@ export function GlowStudentSupportPage({
                               ))}
                             </div>
                           </div>
-                        </div>
                       </div>
                     )
                   })}
@@ -457,7 +556,7 @@ export function GlowStudentSupportPage({
                 active={activeTab === 'learn-more'}
                 onClick={() => setActiveTab('learn-more')}
               >
-                Learn More
+                Learn
               </TabButton>
             </div>
           </div>
@@ -465,9 +564,7 @@ export function GlowStudentSupportPage({
           <div className="flex-1 overflow-y-auto p-4">
             {activeTab === 'resources' ? (
               <>
-                <p className="mb-3 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
-                  Relevant to this case
-                </p>
+
                 <ul className="space-y-0.5">
                   {caseResources.map((r) => (
                     <li key={r.label}>
@@ -476,7 +573,7 @@ export function GlowStudentSupportPage({
                         className="group flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--muted)]"
                         onClick={(e) => e.preventDefault()}
                       >
-                        <FileText className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)] group-hover:text-[var(--twblue-9)]" />
+                        <FileText className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)]" />
                         <span className="flex-1 leading-snug">{r.label}</span>
                         {r.external ? (
                           <ExternalLink className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)]" />
@@ -487,29 +584,45 @@ export function GlowStudentSupportPage({
                 </ul>
               </>
             ) : (
-              <>
-                <p className="mb-3 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
-                  Professional learning
-                </p>
-                <ul className="space-y-1.5">
-                  {learnMoreItems.map((item) => (
-                    <li key={item.label}>
-                      <a
-                        href="#"
-                        className="group flex flex-col gap-0.5 rounded-[var(--radius)] px-2.5 py-2 transition-colors hover:bg-[var(--muted)]"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <span className="text-sm font-medium text-[var(--foreground)] group-hover:text-[var(--twblue-9)]">
-                          {item.label}
-                        </span>
-                        <span className="text-xs text-[var(--muted-foreground)]">
-                          {item.meta}
-                        </span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </>
+              <ul className="space-y-3">
+                {learnMoreItems.map((item) => (
+                  <li key={item.title}>
+                    <a
+                      href="#"
+                      className="group flex items-stretch gap-3 rounded-[var(--radius)] p-2 transition-colors hover:bg-[var(--muted)]"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      {/* Cover image — stretches to match text height */}
+                      <div className="w-24 shrink-0 self-stretch">
+                        <img
+                          src={item.cover}
+                          alt=""
+                          className="h-full w-full rounded-[var(--radius)] object-contain"
+                        />
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        {/* Title */}
+                        <p className="text-sm font-medium leading-snug text-[var(--foreground)]">
+                          {item.title}
+                        </p>
+
+                        {/* Author + duration — no icon */}
+                        <div className="mt-1 flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]">
+                          <span>{item.author}</span>
+                          <span>·</span>
+                          <span>{item.duration}</span>
+                        </div>
+
+                        {/* Description — 2 lines, visible on hover */}
+                        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100">
+                          {item.description}
+                        </p>
+                      </div>
+                    </a>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </aside>
@@ -523,7 +636,7 @@ export function GlowStudentSupportPage({
 function MetaField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted-foreground)]">
+      <p className="text-[10px] font-semibold text-[var(--muted-foreground)]">
         {label}
       </p>
       <p className="mt-1 text-sm text-[var(--foreground)]">{value}</p>
