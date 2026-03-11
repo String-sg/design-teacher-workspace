@@ -73,7 +73,6 @@ function RootComponent() {
   const isGuestRoute = matches.some(
     (m) => m.routeId === '/_guest' || m.routeId === '/_allears',
   )
-
   if (isGuestRoute) {
     return (
       <ErrorBoundary>

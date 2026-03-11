@@ -1,7 +1,12 @@
+@import '@flow/design-tokens/css';
+@import '@flow/design-tokens/tailwind/reset';
+@import '@flow/design-tokens/tailwind';
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource-variable/inter';
+@import '@fontsource/inter';
+@import '@fontsource/atkinson-hyperlegible';
+@import '@flow/core/tailwind.no-reset.css';
 @import '@radix-ui/colors/slate.css';
 @import '@radix-ui/colors/slate-dark.css';
 @import '@radix-ui/colors/crimson.css';
@@ -79,6 +84,140 @@
   --sidebar-accent-foreground: var(--slate-12);
   --sidebar-border: var(--slate-6);
   --sidebar-ring: var(--twblue-8);
+
+  /* Teacher Workspace Theme: Override Flow DS color scales at :root */
+  /* Brand → twblue */
+  --color-brand-1: var(--twblue-1);
+  --color-brand-2: var(--twblue-2);
+  --color-brand-3: var(--twblue-3);
+  --color-brand-4: var(--twblue-4);
+  --color-brand-5: var(--twblue-5);
+  --color-brand-6: var(--twblue-6);
+  --color-brand-7: var(--twblue-7);
+  --color-brand-8: var(--twblue-8);
+  --color-brand-9: var(--twblue-9);
+  --color-brand-10: var(--twblue-10);
+  --color-brand-11: var(--twblue-11);
+  --color-brand-12: var(--twblue-12);
+  /* Brand alpha → twblue alpha */
+  --color-brand-alpha-1: var(--twblue-a1);
+  --color-brand-alpha-2: var(--twblue-a2);
+  --color-brand-alpha-3: var(--twblue-a3);
+  --color-brand-alpha-4: var(--twblue-a4);
+  --color-brand-alpha-5: var(--twblue-a5);
+  --color-brand-alpha-6: var(--twblue-a6);
+  --color-brand-alpha-7: var(--twblue-a7);
+  --color-brand-alpha-8: var(--twblue-a8);
+  --color-brand-alpha-9: var(--twblue-a9);
+  --color-brand-alpha-10: var(--twblue-a10);
+  --color-brand-alpha-11: var(--twblue-a11);
+  --color-brand-alpha-12: var(--twblue-a12);
+  /* Neutral → slate */
+  --color-neutral-1: var(--slate-1);
+  --color-neutral-2: var(--slate-2);
+  --color-neutral-3: var(--slate-3);
+  --color-neutral-4: var(--slate-4);
+  --color-neutral-5: var(--slate-5);
+  --color-neutral-6: var(--slate-6);
+  --color-neutral-7: var(--slate-7);
+  --color-neutral-8: var(--slate-8);
+  --color-neutral-9: var(--slate-9);
+  --color-neutral-10: var(--slate-10);
+  --color-neutral-11: var(--slate-11);
+  --color-neutral-12: var(--slate-12);
+  /* Critical → crimson */
+  --color-critical-1: var(--crimson-1);
+  --color-critical-2: var(--crimson-2);
+  --color-critical-3: var(--crimson-3);
+  --color-critical-4: var(--crimson-4);
+  --color-critical-5: var(--crimson-5);
+  --color-critical-6: var(--crimson-6);
+  --color-critical-7: var(--crimson-7);
+  --color-critical-8: var(--crimson-8);
+  --color-critical-9: var(--crimson-9);
+  --color-critical-10: var(--crimson-10);
+  --color-critical-11: var(--crimson-11);
+  --color-critical-12: var(--crimson-12);
+  /* Success → lime */
+  --color-success-1: var(--lime-1);
+  --color-success-2: var(--lime-2);
+  --color-success-3: var(--lime-3);
+  --color-success-4: var(--lime-4);
+  --color-success-5: var(--lime-5);
+  --color-success-6: var(--lime-6);
+  --color-success-7: var(--lime-7);
+  --color-success-8: var(--lime-8);
+  --color-success-9: var(--lime-9);
+  --color-success-10: var(--lime-10);
+  --color-success-11: var(--lime-11);
+  --color-success-12: var(--lime-12);
+  /* Caution → orange */
+  --color-caution-1: var(--orange-1);
+  --color-caution-2: var(--orange-2);
+  --color-caution-3: var(--orange-3);
+  --color-caution-4: var(--orange-4);
+  --color-caution-5: var(--orange-5);
+  --color-caution-6: var(--orange-6);
+  --color-caution-7: var(--orange-7);
+  --color-caution-8: var(--orange-8);
+  --color-caution-9: var(--orange-9);
+  --color-caution-10: var(--orange-10);
+  --color-caution-11: var(--orange-11);
+  --color-caution-12: var(--orange-12);
+  /* Info → amber */
+  --color-info-1: var(--amber-1);
+  --color-info-2: var(--amber-2);
+  --color-info-3: var(--amber-3);
+  --color-info-4: var(--amber-4);
+  --color-info-5: var(--amber-5);
+  --color-info-6: var(--amber-6);
+  --color-info-7: var(--amber-7);
+  --color-info-8: var(--amber-8);
+  --color-info-9: var(--amber-9);
+  --color-info-10: var(--amber-10);
+  --color-info-11: var(--amber-11);
+  --color-info-12: var(--amber-12);
+  /* Accent → amber */
+  --color-accent-1: var(--amber-1);
+  --color-accent-2: var(--amber-2);
+  --color-accent-3: var(--amber-3);
+  --color-accent-4: var(--amber-4);
+  --color-accent-5: var(--amber-5);
+  --color-accent-6: var(--amber-6);
+  --color-accent-7: var(--amber-7);
+  --color-accent-8: var(--amber-8);
+  --color-accent-9: var(--amber-9);
+  --color-accent-10: var(--amber-10);
+  --color-accent-11: var(--amber-11);
+  --color-accent-12: var(--amber-12);
+
+  /* Blue → twblue (Flow DS base blue scale) */
+  --color-blue-1: var(--twblue-1);
+  --color-blue-2: var(--twblue-2);
+  --color-blue-3: var(--twblue-3);
+  --color-blue-4: var(--twblue-4);
+  --color-blue-5: var(--twblue-5);
+  --color-blue-6: var(--twblue-6);
+  --color-blue-7: var(--twblue-7);
+  --color-blue-8: var(--twblue-8);
+  --color-blue-9: var(--twblue-9);
+  --color-blue-10: var(--twblue-10);
+  --color-blue-11: var(--twblue-11);
+  --color-blue-12: var(--twblue-12);
+
+  /* Flow DS semantic overrides */
+  --color-background-page: var(--background);
+  --color-background-section: var(--card);
+  --color-background-popover: var(--popover);
+  --color-foreground-default: var(--foreground);
+  --color-foreground-section: var(--card-foreground);
+  --color-border-default: var(--border);
+  --color-border-focus: var(--ring);
+  --color-fill-critical: var(--destructive);
+  --color-lightest: white;
+  /* Fix info→amber side effects: links and focus should stay blue (brand) */
+  --color-foreground-link: var(--color-brand-11);
+  --color-foreground-link-hover: var(--color-brand-12);
 }
 
 .dark {
@@ -198,10 +337,144 @@
   --sidebar-accent-foreground: var(--slate-12);
   --sidebar-border: var(--slate-6);
   --sidebar-ring: var(--twblue-8);
+
+  /* Flow DS scales for dark mode (reference already-dark-swapped Radix values) */
+  /* Brand → twblue */
+  --color-brand-1: var(--twblue-1);
+  --color-brand-2: var(--twblue-2);
+  --color-brand-3: var(--twblue-3);
+  --color-brand-4: var(--twblue-4);
+  --color-brand-5: var(--twblue-5);
+  --color-brand-6: var(--twblue-6);
+  --color-brand-7: var(--twblue-7);
+  --color-brand-8: var(--twblue-8);
+  --color-brand-9: var(--twblue-9);
+  --color-brand-10: var(--twblue-10);
+  --color-brand-11: var(--twblue-11);
+  --color-brand-12: var(--twblue-12);
+  /* Brand alpha → twblue alpha */
+  --color-brand-alpha-1: var(--twblue-a1);
+  --color-brand-alpha-2: var(--twblue-a2);
+  --color-brand-alpha-3: var(--twblue-a3);
+  --color-brand-alpha-4: var(--twblue-a4);
+  --color-brand-alpha-5: var(--twblue-a5);
+  --color-brand-alpha-6: var(--twblue-a6);
+  --color-brand-alpha-7: var(--twblue-a7);
+  --color-brand-alpha-8: var(--twblue-a8);
+  --color-brand-alpha-9: var(--twblue-a9);
+  --color-brand-alpha-10: var(--twblue-a10);
+  --color-brand-alpha-11: var(--twblue-a11);
+  --color-brand-alpha-12: var(--twblue-a12);
+  /* Neutral → slate */
+  --color-neutral-1: var(--slate-1);
+  --color-neutral-2: var(--slate-2);
+  --color-neutral-3: var(--slate-3);
+  --color-neutral-4: var(--slate-4);
+  --color-neutral-5: var(--slate-5);
+  --color-neutral-6: var(--slate-6);
+  --color-neutral-7: var(--slate-7);
+  --color-neutral-8: var(--slate-8);
+  --color-neutral-9: var(--slate-9);
+  --color-neutral-10: var(--slate-10);
+  --color-neutral-11: var(--slate-11);
+  --color-neutral-12: var(--slate-12);
+  /* Critical → crimson */
+  --color-critical-1: var(--crimson-1);
+  --color-critical-2: var(--crimson-2);
+  --color-critical-3: var(--crimson-3);
+  --color-critical-4: var(--crimson-4);
+  --color-critical-5: var(--crimson-5);
+  --color-critical-6: var(--crimson-6);
+  --color-critical-7: var(--crimson-7);
+  --color-critical-8: var(--crimson-8);
+  --color-critical-9: var(--crimson-9);
+  --color-critical-10: var(--crimson-10);
+  --color-critical-11: var(--crimson-11);
+  --color-critical-12: var(--crimson-12);
+  /* Success → lime */
+  --color-success-1: var(--lime-1);
+  --color-success-2: var(--lime-2);
+  --color-success-3: var(--lime-3);
+  --color-success-4: var(--lime-4);
+  --color-success-5: var(--lime-5);
+  --color-success-6: var(--lime-6);
+  --color-success-7: var(--lime-7);
+  --color-success-8: var(--lime-8);
+  --color-success-9: var(--lime-9);
+  --color-success-10: var(--lime-10);
+  --color-success-11: var(--lime-11);
+  --color-success-12: var(--lime-12);
+  /* Caution → orange */
+  --color-caution-1: var(--orange-1);
+  --color-caution-2: var(--orange-2);
+  --color-caution-3: var(--orange-3);
+  --color-caution-4: var(--orange-4);
+  --color-caution-5: var(--orange-5);
+  --color-caution-6: var(--orange-6);
+  --color-caution-7: var(--orange-7);
+  --color-caution-8: var(--orange-8);
+  --color-caution-9: var(--orange-9);
+  --color-caution-10: var(--orange-10);
+  --color-caution-11: var(--orange-11);
+  --color-caution-12: var(--orange-12);
+  /* Info → amber */
+  --color-info-1: var(--amber-1);
+  --color-info-2: var(--amber-2);
+  --color-info-3: var(--amber-3);
+  --color-info-4: var(--amber-4);
+  --color-info-5: var(--amber-5);
+  --color-info-6: var(--amber-6);
+  --color-info-7: var(--amber-7);
+  --color-info-8: var(--amber-8);
+  --color-info-9: var(--amber-9);
+  --color-info-10: var(--amber-10);
+  --color-info-11: var(--amber-11);
+  --color-info-12: var(--amber-12);
+  /* Accent → amber */
+  --color-accent-1: var(--amber-1);
+  --color-accent-2: var(--amber-2);
+  --color-accent-3: var(--amber-3);
+  --color-accent-4: var(--amber-4);
+  --color-accent-5: var(--amber-5);
+  --color-accent-6: var(--amber-6);
+  --color-accent-7: var(--amber-7);
+  --color-accent-8: var(--amber-8);
+  --color-accent-9: var(--amber-9);
+  --color-accent-10: var(--amber-10);
+  --color-accent-11: var(--amber-11);
+  --color-accent-12: var(--amber-12);
+
+  /* Blue → twblue */
+  --color-blue-1: var(--twblue-1);
+  --color-blue-2: var(--twblue-2);
+  --color-blue-3: var(--twblue-3);
+  --color-blue-4: var(--twblue-4);
+  --color-blue-5: var(--twblue-5);
+  --color-blue-6: var(--twblue-6);
+  --color-blue-7: var(--twblue-7);
+  --color-blue-8: var(--twblue-8);
+  --color-blue-9: var(--twblue-9);
+  --color-blue-10: var(--twblue-10);
+  --color-blue-11: var(--twblue-11);
+  --color-blue-12: var(--twblue-12);
+
+  /* Flow DS semantic dark overrides */
+  --color-background-page: var(--background);
+  --color-background-section: var(--card);
+  --color-background-popover: var(--popover);
+  --color-foreground-default: var(--foreground);
+  --color-foreground-section: var(--card-foreground);
+  --color-border-default: var(--border);
+  --color-border-focus: var(--ring);
+  --color-fill-critical: var(--destructive);
+  --color-lightest: var(--slate-1);
+  /* Fix info→amber side effects: links and focus should stay blue (brand) */
+  --color-foreground-link: var(--color-brand-11);
+  --color-foreground-link-hover: var(--color-brand-12);
 }
 
 @theme inline {
-  --font-sans: 'Inter Variable', sans-serif;
+  --font-sans: 'Inter', sans-serif;
   --color-slate-1: var(--slate-1);
   --color-slate-2: var(--slate-2);
   --color-twblue-1: var(--twblue-1);

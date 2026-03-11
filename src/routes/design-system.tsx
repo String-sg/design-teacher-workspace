@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import {
   BoldIcon,
   ChevronDownIcon,
@@ -270,6 +270,11 @@ function DesignSystemPage() {
       {/* Left Nav */}
       <nav className="w-52 shrink-0 border-r border-border sticky top-0 h-[calc(100vh-3.5rem)] overflow-y-auto">
         <div className="p-4 space-y-6">
+          <div className="pb-4 border-b border-border">
+            <Button variant="outline" size="sm" asChild className="w-full">
+              <Link to="/design-system-flow">Flow DS</Link>
+            </Button>
+          </div>
           {NAV_SECTIONS.map((section) => (
             <div key={section.title}>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
@@ -884,7 +889,7 @@ function SelectSection() {
           <Label>Default Select</Label>
           <Select>
             <SelectTrigger>
-              <SelectValue placeholder="Select an option" />
+              <SelectValue placeholder="Select">Select</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="opt1">Option 1</SelectItem>

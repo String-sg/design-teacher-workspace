@@ -17,6 +17,7 @@ import { Route as ParentsGatewayRouteImport } from './routes/parents-gateway'
 import { Route as InsightBuddyRouteImport } from './routes/insight-buddy'
 import { Route as FormsRouteImport } from './routes/forms'
 import { Route as FlagsRouteImport } from './routes/flags'
+import { Route as DesignSystemFlowRouteImport } from './routes/design-system-flow'
 import { Route as DesignSystemRouteImport } from './routes/design-system'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as GuestRouteImport } from './routes/_guest'
@@ -79,6 +80,11 @@ const FormsRoute = FormsRouteImport.update({
 const FlagsRoute = FlagsRouteImport.update({
   id: '/flags',
   path: '/flags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesignSystemFlowRoute = DesignSystemFlowRouteImport.update({
+  id: '/design-system-flow',
+  path: '/design-system-flow',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DesignSystemRoute = DesignSystemRouteImport.update({
@@ -200,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/design-system': typeof DesignSystemRoute
+  '/design-system-flow': typeof DesignSystemFlowRoute
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/design-system': typeof DesignSystemRoute
+  '/design-system-flow': typeof DesignSystemFlowRoute
   '/flags': typeof FlagsRoute
   '/insight-buddy': typeof InsightBuddyRoute
   '/settings': typeof SettingsRoute
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   '/_guest': typeof GuestRouteWithChildren
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/design-system': typeof DesignSystemRoute
+  '/design-system-flow': typeof DesignSystemFlowRoute
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/announcements'
     | '/design-system'
+    | '/design-system-flow'
     | '/flags'
     | '/forms'
     | '/insight-buddy'
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/design-system'
+    | '/design-system-flow'
     | '/flags'
     | '/insight-buddy'
     | '/settings'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/_guest'
     | '/announcements'
     | '/design-system'
+    | '/design-system-flow'
     | '/flags'
     | '/forms'
     | '/insight-buddy'
@@ -384,6 +396,7 @@ export interface RootRouteChildren {
   GuestRoute: typeof GuestRouteWithChildren
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   DesignSystemRoute: typeof DesignSystemRoute
+  DesignSystemFlowRoute: typeof DesignSystemFlowRoute
   FlagsRoute: typeof FlagsRoute
   FormsRoute: typeof FormsRouteWithChildren
   InsightBuddyRoute: typeof InsightBuddyRoute
@@ -450,6 +463,13 @@ declare module '@tanstack/react-router' {
       path: '/flags'
       fullPath: '/flags'
       preLoaderRoute: typeof FlagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/design-system-flow': {
+      id: '/design-system-flow'
+      path: '/design-system-flow'
+      fullPath: '/design-system-flow'
+      preLoaderRoute: typeof DesignSystemFlowRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/design-system': {
@@ -731,6 +751,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuestRoute: GuestRouteWithChildren,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
   DesignSystemRoute: DesignSystemRoute,
+  DesignSystemFlowRoute: DesignSystemFlowRoute,
   FlagsRoute: FlagsRoute,
   FormsRoute: FormsRouteWithChildren,
   InsightBuddyRoute: InsightBuddyRoute,
