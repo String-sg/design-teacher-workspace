@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { Palette, Layers } from 'lucide-react'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { Layers, Palette } from 'lucide-react'
 
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 

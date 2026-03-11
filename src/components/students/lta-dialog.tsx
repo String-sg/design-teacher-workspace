@@ -61,7 +61,10 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl p-0 gap-0 overflow-hidden rounded-2xl" showCloseButton={false}>
+      <DialogContent
+        className="sm:max-w-4xl p-0 gap-0 overflow-hidden rounded-2xl"
+        showCloseButton={false}
+      >
         <DialogTitle className="sr-only">
           How to support students with LTA
         </DialogTitle>
@@ -101,8 +104,8 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
                 <ul className="mt-2 space-y-1.5 text-sm text-foreground list-disc pl-4">
                   <li>Continuously absent for more than 3 days, or</li>
                   <li>
-                    Persistently absent for over 10 days in a term without
-                    valid reasons.
+                    Persistently absent for over 10 days in a term without valid
+                    reasons.
                   </li>
                 </ul>
               </div>
@@ -185,21 +188,21 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
                       <Headphones className="h-4 w-4" />
                     </span>
                     <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground leading-snug">
-                      Why students go missing: patterns behind absenteeism
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      By AST · 8 min watch
-                    </p>
-                    <div className="mt-3 flex items-center gap-2">
-                      <Button size="sm" className="gap-1.5">
-                        <Play className="h-3.5 w-3.5" />
-                        Play
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Open Glow
-                      </Button>
-                    </div>
+                      <p className="text-sm font-medium text-foreground leading-snug">
+                        Why students go missing: patterns behind absenteeism
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        By AST · 8 min watch
+                      </p>
+                      <div className="mt-3 flex items-center gap-2">
+                        <Button size="sm" className="gap-1.5">
+                          <Play className="h-3.5 w-3.5" />
+                          Play
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          Open Glow
+                        </Button>
+                      </div>
                     </div>
                   </li>
 
@@ -209,24 +212,24 @@ export function LtaDialog({ open, onOpenChange }: LtaDialogProps) {
                       <FileText className="h-4 w-4" />
                     </span>
                     <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground leading-snug">
-                      Having difficult conversations with parents about
-                      attendance
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      By AST · 5 min read
-                    </p>
-                    <div className="mt-3">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="gap-1.5 px-0 text-blue-600 hover:text-blue-700 hover:bg-transparent"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        Read more
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
+                      <p className="text-sm font-medium text-foreground leading-snug">
+                        Having difficult conversations with parents about
+                        attendance
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        By AST · 5 min read
+                      </p>
+                      <div className="mt-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1.5 px-0 text-blue-600 hover:text-blue-700 hover:bg-transparent"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          Read more
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </div>
                   </li>
                 </ul>

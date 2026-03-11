@@ -69,13 +69,8 @@
   --chart-3: var(--twblue-8);
   --chart-4: var(--twblue-9);
   --chart-5: var(--twblue-11);
-  --radius: 0.625rem;
   --radius-input: 14px;
-  --shadow-xs-x: 0px;
-  --shadow-xs-y: 1px;
-  --shadow-xs-blur: 2px;
-  --shadow-xs-spread: 0px;
-  --color-shadow-xs: rgb(0 0 0 / 0.05);
+  --overlay: rgba(0, 0, 0, 0.8);
   --sidebar: var(--slate-2);
   --sidebar-foreground: var(--slate-12);
   --sidebar-primary: var(--twblue-9);
@@ -221,6 +216,7 @@
 }
 
 .dark {
+  --overlay: rgba(0, 0, 0, 0.8);
   --slate-1: var(--slate-dark-1);
   --slate-2: var(--slate-dark-2);
   --slate-3: var(--slate-dark-3);
@@ -580,14 +576,15 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-4xl: 32px;
   --radius-input: var(--radius-input);
+  --color-overlay: var(--overlay);
 }
 
 @layer base {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import {
   BoldIcon,
   ChevronDownIcon,
@@ -85,7 +85,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
 import {
   Popover,
@@ -226,18 +230,14 @@ function ColorScale({
 }: {
   name: string
   prefix: string
-  steps: number[]
+  steps: Array<number>
 }) {
   return (
     <div className="space-y-2">
       <h4 className="text-sm font-medium capitalize">{name}</h4>
       <div className="flex flex-wrap gap-2">
         {steps.map((step) => (
-          <Swatch
-            key={step}
-            name={`${step}`}
-            cssVar={`--${prefix}-${step}`}
-          />
+          <Swatch key={step} name={`${step}`} cssVar={`--${prefix}-${step}`} />
         ))}
       </div>
     </div>
@@ -274,33 +274,33 @@ function DesignSystemPage() {
       {/* Left Nav */}
       <nav className="w-52 shrink-0 border-r border-border sticky top-0 h-[calc(100vh-3.5rem)]">
         <ScrollArea className="h-full">
-        <div className="p-4 space-y-6">
-          {NAV_SECTIONS.map((section) => (
-            <div key={section.title}>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                {section.title}
-              </p>
-              <ul className="space-y-0.5">
-                {section.items.map((item) => (
-                  <li key={item.id}>
-                    <a
-                      href={`#${item.id}`}
-                      onClick={() => setActiveSection(item.id)}
-                      className={cn(
-                        'block px-2 py-1.5 text-sm rounded-md transition-colors',
-                        activeSection === item.id
-                          ? 'bg-muted text-foreground font-medium'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-                      )}
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+          <div className="p-4 space-y-6">
+            {NAV_SECTIONS.map((section) => (
+              <div key={section.title}>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  {section.title}
+                </p>
+                <ul className="space-y-0.5">
+                  {section.items.map((item) => (
+                    <li key={item.id}>
+                      <a
+                        href={`#${item.id}`}
+                        onClick={() => setActiveSection(item.id)}
+                        className={cn(
+                          'block px-2 py-1.5 text-sm rounded-md transition-colors',
+                          activeSection === item.id
+                            ? 'bg-muted text-foreground font-medium'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                        )}
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </ScrollArea>
       </nav>
 
@@ -357,7 +357,7 @@ function DesignSystemPage() {
 
 type ColorEntry = { name: string; cssVar: string }
 
-const SEMANTIC_COLORS: ColorEntry[] = [
+const SEMANTIC_COLORS: Array<ColorEntry> = [
   { name: 'background', cssVar: '--background' },
   { name: 'foreground', cssVar: '--foreground' },
   { name: 'primary', cssVar: '--primary' },
@@ -373,12 +373,12 @@ const SEMANTIC_COLORS: ColorEntry[] = [
   { name: 'popover', cssVar: '--popover' },
 ]
 
-const CHART_COLORS: ColorEntry[] = [1, 2, 3, 4, 5].map((n) => ({
+const CHART_COLORS: Array<ColorEntry> = [1, 2, 3, 4, 5].map((n) => ({
   name: `chart-${n}`,
   cssVar: `--chart-${n}`,
 }))
 
-const SIDEBAR_COLORS: ColorEntry[] = [
+const SIDEBAR_COLORS: Array<ColorEntry> = [
   { name: 'sidebar', cssVar: '--sidebar' },
   { name: 'sidebar-fg', cssVar: '--sidebar-foreground' },
   { name: 'sidebar-primary', cssVar: '--sidebar-primary' },
@@ -396,7 +396,7 @@ const COLOR_SCALES = [
   { name: 'Amber', prefix: 'amber' },
 ]
 
-function ColorSwatchList({ colors }: { colors: ColorEntry[] }) {
+function ColorSwatchList({ colors }: { colors: Array<ColorEntry> }) {
   return (
     <div className="flex flex-wrap gap-2">
       {colors.map((c) => (
@@ -406,7 +406,7 @@ function ColorSwatchList({ colors }: { colors: ColorEntry[] }) {
   )
 }
 
-function ColorTableList({ colors }: { colors: ColorEntry[] }) {
+function ColorTableList({ colors }: { colors: Array<ColorEntry> }) {
   return (
     <div className="border border-border rounded-xl overflow-hidden">
       <Table>
@@ -445,7 +445,7 @@ function ColorScaleTable({
 }: {
   name: string
   prefix: string
-  steps: number[]
+  steps: Array<number>
 }) {
   return (
     <div className="space-y-2">
@@ -567,22 +567,82 @@ type MappingRow = {
   flowDsToken?: string
 }
 
-const SEMANTIC_MAPPING: MappingRow[] = [
-  { twToken: '--background', value: 'var(--slate-1)', flowDsToken: '--color-background-page' },
-  { twToken: '--foreground', value: 'var(--slate-12)', flowDsToken: '--color-foreground-default' },
-  { twToken: '--card', value: 'white', flowDsToken: '--color-background-section' },
-  { twToken: '--card-foreground', value: 'var(--slate-12)', flowDsToken: '--color-foreground-section' },
-  { twToken: '--popover', value: 'white', flowDsToken: '--color-background-popover' },
-  { twToken: '--primary', value: 'var(--twblue-9)', flowDsToken: '--color-fill-contrast' },
-  { twToken: '--primary-foreground', value: 'white', flowDsToken: '--color-foreground-contrast' },
-  { twToken: '--secondary', value: 'var(--slate-3)', flowDsToken: '--color-background-skeleton' },
-  { twToken: '--muted', value: 'var(--slate-3)', flowDsToken: '--color-background-overlay' },
-  { twToken: '--muted-foreground', value: 'var(--slate-11)', flowDsToken: '--color-foreground-subtle' },
-  { twToken: '--accent', value: 'var(--slate-3)', flowDsToken: '--btn-color-fill-hover' },
-  { twToken: '--destructive', value: 'var(--crimson-9)', flowDsToken: '--color-fill-critical' },
-  { twToken: '--border', value: 'var(--slate-6)', flowDsToken: '--color-border-default' },
-  { twToken: '--input', value: 'var(--slate-6)', flowDsToken: '--color-border-default' },
-  { twToken: '--ring', value: 'var(--twblue-8)', flowDsToken: '--color-border-focus' },
+const SEMANTIC_MAPPING: Array<MappingRow> = [
+  {
+    twToken: '--background',
+    value: 'var(--slate-1)',
+    flowDsToken: '--color-background-page',
+  },
+  {
+    twToken: '--foreground',
+    value: 'var(--slate-12)',
+    flowDsToken: '--color-foreground-default',
+  },
+  {
+    twToken: '--card',
+    value: 'white',
+    flowDsToken: '--color-background-section',
+  },
+  {
+    twToken: '--card-foreground',
+    value: 'var(--slate-12)',
+    flowDsToken: '--color-foreground-section',
+  },
+  {
+    twToken: '--popover',
+    value: 'white',
+    flowDsToken: '--color-background-popover',
+  },
+  {
+    twToken: '--primary',
+    value: 'var(--twblue-9)',
+    flowDsToken: '--color-fill-contrast',
+  },
+  {
+    twToken: '--primary-foreground',
+    value: 'white',
+    flowDsToken: '--color-foreground-contrast',
+  },
+  {
+    twToken: '--secondary',
+    value: 'var(--slate-3)',
+    flowDsToken: '--color-background-skeleton',
+  },
+  {
+    twToken: '--muted',
+    value: 'var(--slate-3)',
+    flowDsToken: '--color-background-overlay',
+  },
+  {
+    twToken: '--muted-foreground',
+    value: 'var(--slate-11)',
+    flowDsToken: '--color-foreground-subtle',
+  },
+  {
+    twToken: '--accent',
+    value: 'var(--slate-3)',
+    flowDsToken: '--btn-color-fill-hover',
+  },
+  {
+    twToken: '--destructive',
+    value: 'var(--crimson-9)',
+    flowDsToken: '--color-fill-critical',
+  },
+  {
+    twToken: '--border',
+    value: 'var(--slate-6)',
+    flowDsToken: '--color-border-default',
+  },
+  {
+    twToken: '--input',
+    value: 'var(--slate-6)',
+    flowDsToken: '--color-border-default',
+  },
+  {
+    twToken: '--ring',
+    value: 'var(--twblue-8)',
+    flowDsToken: '--color-border-focus',
+  },
 ]
 
 type ScaleMappingRow = {
@@ -591,10 +651,14 @@ type ScaleMappingRow = {
   role: string
 }
 
-const SCALE_MAPPING: ScaleMappingRow[] = [
+const SCALE_MAPPING: Array<ScaleMappingRow> = [
   { flowDsScale: 'color-brand', radixScale: 'twblue', role: 'Brand / Primary' },
   { flowDsScale: 'color-neutral', radixScale: 'slate', role: 'Neutral / Gray' },
-  { flowDsScale: 'color-critical', radixScale: 'crimson', role: 'Error / Destructive' },
+  {
+    flowDsScale: 'color-critical',
+    radixScale: 'crimson',
+    role: 'Error / Destructive',
+  },
   { flowDsScale: 'color-success', radixScale: 'lime', role: 'Success' },
   { flowDsScale: 'color-caution', radixScale: 'orange', role: 'Warning' },
   { flowDsScale: 'color-info', radixScale: 'amber', role: 'Info' },
@@ -607,14 +671,16 @@ function TokenMappingSection() {
     <Section id="token-mapping" title="Token Mapping">
       <div className="space-y-8">
         <p className="text-sm text-muted-foreground">
-          Shows how Tailwind theme tokens resolve to underlying color scales, and how Flow DS tokens map back to the same values.
+          Shows how Tailwind theme tokens resolve to underlying color scales,
+          and how Flow DS tokens map back to the same values.
         </p>
 
         {/* Semantic token mapping */}
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Semantic Tokens</h4>
           <p className="text-xs text-muted-foreground">
-            TW theme tokens and their resolved values. Where a Flow DS semantic token points back to the same value, it is shown.
+            TW theme tokens and their resolved values. Where a Flow DS semantic
+            token points back to the same value, it is shown.
           </p>
           <div className="border border-border rounded-xl overflow-hidden">
             <Table>
@@ -648,7 +714,9 @@ function TokenMappingSection() {
                           {row.flowDsToken}
                         </span>
                       ) : (
-                        <span className="text-muted-foreground/40">&mdash;</span>
+                        <span className="text-muted-foreground/40">
+                          &mdash;
+                        </span>
                       )}
                     </TableCell>
                   </TableRow>
@@ -662,7 +730,8 @@ function TokenMappingSection() {
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Color Scale Mapping</h4>
           <p className="text-xs text-muted-foreground">
-            Each Flow DS color scale (1-12) is overridden to point at a Radix UI / custom color scale.
+            Each Flow DS color scale (1-12) is overridden to point at a Radix UI
+            / custom color scale.
           </p>
           <div className="border border-border rounded-xl overflow-x-auto">
             <Table>
@@ -711,7 +780,8 @@ function TokenMappingSection() {
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Additional Flow DS Overrides</h4>
           <p className="text-xs text-muted-foreground">
-            Flow DS semantic tokens that are wired back to TW theme values for consistency.
+            Flow DS semantic tokens that are wired back to TW theme values for
+            consistency.
           </p>
           <div className="border border-border rounded-xl overflow-hidden">
             <Table>
@@ -724,8 +794,14 @@ function TokenMappingSection() {
               <TableBody>
                 {[
                   { flow: '--color-lightest', tw: 'white' },
-                  { flow: '--color-foreground-link', tw: 'var(--color-brand-11)' },
-                  { flow: '--color-foreground-link-hover', tw: 'var(--color-brand-12)' },
+                  {
+                    flow: '--color-foreground-link',
+                    tw: 'var(--color-brand-11)',
+                  },
+                  {
+                    flow: '--color-foreground-link-hover',
+                    tw: 'var(--color-brand-12)',
+                  },
                 ].map((row) => (
                   <TableRow key={row.flow}>
                     <TableCell className="font-mono text-xs">
@@ -978,12 +1054,7 @@ function ButtonSection() {
 }
 
 function BadgeSection() {
-  const variants = [
-    'default',
-    'secondary',
-    'destructive',
-    'outline',
-  ] as const
+  const variants = ['default', 'secondary', 'destructive', 'outline'] as const
 
   return (
     <Section id="badge" title="Badge">
@@ -1243,7 +1314,9 @@ function DropdownMenuSection() {
           <ChevronDownIcon data-icon="inline-end" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>
@@ -1343,17 +1416,13 @@ function TooltipSection() {
             <TooltipTrigger render={<Button variant="outline" />}>
               Hover me (bottom)
             </TooltipTrigger>
-            <TooltipContent side="bottom">
-              Tooltip on bottom
-            </TooltipContent>
+            <TooltipContent side="bottom">Tooltip on bottom</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger render={<Button variant="outline" />}>
               Hover me (right)
             </TooltipTrigger>
-            <TooltipContent side="right">
-              Tooltip on right
-            </TooltipContent>
+            <TooltipContent side="right">Tooltip on right</TooltipContent>
           </Tooltip>
         </div>
       </TooltipProvider>

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Activity, ChevronLeft, ChevronRight } from 'lucide-react'
 
-import { interventionRules } from '@/data/intervention-config'
 import type { Student } from '@/types/student'
+import { interventionRules } from '@/data/intervention-config'
 import { Button } from '@/components/ui/button'
 import { LtaDialog } from '@/components/students/lta-dialog'
 

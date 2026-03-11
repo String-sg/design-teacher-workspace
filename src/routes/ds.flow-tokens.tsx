@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -114,7 +114,7 @@ function ColorScale({
 }: {
   name: string
   prefix: string
-  steps?: number[]
+  steps?: Array<number>
 }) {
   return (
     <div className="space-y-2">
@@ -177,33 +177,33 @@ function FlowDesignSystemPage() {
       {/* Left Nav */}
       <nav className="w-52 shrink-0 border-r border-border sticky top-0 h-[calc(100vh-3.5rem)]">
         <ScrollArea className="h-full">
-        <div className="p-4 space-y-6">
-          {NAV_SECTIONS.map((section) => (
-            <div key={section.title}>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                {section.title}
-              </p>
-              <ul className="space-y-0.5">
-                {section.items.map((item) => (
-                  <li key={item.id}>
-                    <a
-                      href={`#${item.id}`}
-                      onClick={() => setActiveSection(item.id)}
-                      className={cn(
-                        'block px-2 py-1.5 text-sm rounded-md transition-colors',
-                        activeSection === item.id
-                          ? 'bg-muted text-foreground font-medium'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-                      )}
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+          <div className="p-4 space-y-6">
+            {NAV_SECTIONS.map((section) => (
+              <div key={section.title}>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  {section.title}
+                </p>
+                <ul className="space-y-0.5">
+                  {section.items.map((item) => (
+                    <li key={item.id}>
+                      <a
+                        href={`#${item.id}`}
+                        onClick={() => setActiveSection(item.id)}
+                        className={cn(
+                          'block px-2 py-1.5 text-sm rounded-md transition-colors',
+                          activeSection === item.id
+                            ? 'bg-muted text-foreground font-medium'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                        )}
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </ScrollArea>
       </nav>
 
@@ -396,9 +396,24 @@ function FlowDesignSystemPage() {
             id="text-display"
             title="Display"
             styles={[
-              { name: 'display-sm', size: '2.875rem', lineHeight: '56px', weight: 'bold' },
-              { name: 'display-md', size: '3.25rem', lineHeight: '64px', weight: 'bold' },
-              { name: 'display-lg', size: '4.125rem', lineHeight: '80px', weight: 'bold' },
+              {
+                name: 'display-sm',
+                size: '2.875rem',
+                lineHeight: '56px',
+                weight: 'bold',
+              },
+              {
+                name: 'display-md',
+                size: '3.25rem',
+                lineHeight: '64px',
+                weight: 'bold',
+              },
+              {
+                name: 'display-lg',
+                size: '4.125rem',
+                lineHeight: '80px',
+                weight: 'bold',
+              },
             ]}
           />
 
@@ -406,12 +421,42 @@ function FlowDesignSystemPage() {
             id="text-headline"
             title="Headline"
             styles={[
-              { name: 'headline-sm', size: '2rem', lineHeight: '40px', weight: 'semibold' },
-              { name: 'headline-sm-strong', size: '2rem', lineHeight: '40px', weight: 'bold' },
-              { name: 'headline-md', size: '2.25rem', lineHeight: '44px', weight: 'semibold' },
-              { name: 'headline-md-strong', size: '2.25rem', lineHeight: '44px', weight: 'bold' },
-              { name: 'headline-lg', size: '2.5625rem', lineHeight: '48px', weight: 'semibold' },
-              { name: 'headline-lg-strong', size: '2.5625rem', lineHeight: '48px', weight: 'bold' },
+              {
+                name: 'headline-sm',
+                size: '2rem',
+                lineHeight: '40px',
+                weight: 'semibold',
+              },
+              {
+                name: 'headline-sm-strong',
+                size: '2rem',
+                lineHeight: '40px',
+                weight: 'bold',
+              },
+              {
+                name: 'headline-md',
+                size: '2.25rem',
+                lineHeight: '44px',
+                weight: 'semibold',
+              },
+              {
+                name: 'headline-md-strong',
+                size: '2.25rem',
+                lineHeight: '44px',
+                weight: 'bold',
+              },
+              {
+                name: 'headline-lg',
+                size: '2.5625rem',
+                lineHeight: '48px',
+                weight: 'semibold',
+              },
+              {
+                name: 'headline-lg-strong',
+                size: '2.5625rem',
+                lineHeight: '48px',
+                weight: 'bold',
+              },
             ]}
           />
 
@@ -419,12 +464,42 @@ function FlowDesignSystemPage() {
             id="text-title"
             title="Title"
             styles={[
-              { name: 'title-sm', size: '1.25rem', lineHeight: '24px', weight: 'semibold' },
-              { name: 'title-sm-strong', size: '1.25rem', lineHeight: '24px', weight: 'bold' },
-              { name: 'title-md', size: '1.4375rem', lineHeight: '28px', weight: 'semibold' },
-              { name: 'title-md-strong', size: '1.4375rem', lineHeight: '28px', weight: 'bold' },
-              { name: 'title-lg', size: '1.625rem', lineHeight: '32px', weight: 'semibold' },
-              { name: 'title-lg-strong', size: '1.625rem', lineHeight: '32px', weight: 'bold' },
+              {
+                name: 'title-sm',
+                size: '1.25rem',
+                lineHeight: '24px',
+                weight: 'semibold',
+              },
+              {
+                name: 'title-sm-strong',
+                size: '1.25rem',
+                lineHeight: '24px',
+                weight: 'bold',
+              },
+              {
+                name: 'title-md',
+                size: '1.4375rem',
+                lineHeight: '28px',
+                weight: 'semibold',
+              },
+              {
+                name: 'title-md-strong',
+                size: '1.4375rem',
+                lineHeight: '28px',
+                weight: 'bold',
+              },
+              {
+                name: 'title-lg',
+                size: '1.625rem',
+                lineHeight: '32px',
+                weight: 'semibold',
+              },
+              {
+                name: 'title-lg-strong',
+                size: '1.625rem',
+                lineHeight: '32px',
+                weight: 'bold',
+              },
             ]}
           />
 
@@ -432,16 +507,66 @@ function FlowDesignSystemPage() {
             id="text-body"
             title="Body"
             styles={[
-              { name: 'body-sm', size: '0.875rem', lineHeight: '20px', weight: 'regular' },
-              { name: 'body-sm-strong', size: '0.875rem', lineHeight: '20px', weight: 'semibold' },
-              { name: 'body-md', size: '1rem', lineHeight: '24px', weight: 'regular' },
-              { name: 'body-md-strong', size: '1rem', lineHeight: '24px', weight: 'semibold' },
-              { name: 'body-lg', size: '1.125rem', lineHeight: '28px', weight: 'regular' },
-              { name: 'body-lg-strong', size: '1.125rem', lineHeight: '28px', weight: 'semibold' },
-              { name: 'body-xl', size: '1.25rem', lineHeight: '32px', weight: 'regular' },
-              { name: 'body-xl-strong', size: '1.25rem', lineHeight: '32px', weight: 'semibold' },
-              { name: 'body-2xl', size: '1.625rem', lineHeight: '40px', weight: 'regular' },
-              { name: 'body-2xl-strong', size: '1.625rem', lineHeight: '40px', weight: 'semibold' },
+              {
+                name: 'body-sm',
+                size: '0.875rem',
+                lineHeight: '20px',
+                weight: 'regular',
+              },
+              {
+                name: 'body-sm-strong',
+                size: '0.875rem',
+                lineHeight: '20px',
+                weight: 'semibold',
+              },
+              {
+                name: 'body-md',
+                size: '1rem',
+                lineHeight: '24px',
+                weight: 'regular',
+              },
+              {
+                name: 'body-md-strong',
+                size: '1rem',
+                lineHeight: '24px',
+                weight: 'semibold',
+              },
+              {
+                name: 'body-lg',
+                size: '1.125rem',
+                lineHeight: '28px',
+                weight: 'regular',
+              },
+              {
+                name: 'body-lg-strong',
+                size: '1.125rem',
+                lineHeight: '28px',
+                weight: 'semibold',
+              },
+              {
+                name: 'body-xl',
+                size: '1.25rem',
+                lineHeight: '32px',
+                weight: 'regular',
+              },
+              {
+                name: 'body-xl-strong',
+                size: '1.25rem',
+                lineHeight: '32px',
+                weight: 'semibold',
+              },
+              {
+                name: 'body-2xl',
+                size: '1.625rem',
+                lineHeight: '40px',
+                weight: 'regular',
+              },
+              {
+                name: 'body-2xl-strong',
+                size: '1.625rem',
+                lineHeight: '40px',
+                weight: 'semibold',
+              },
             ]}
           />
 
@@ -449,13 +574,48 @@ function FlowDesignSystemPage() {
             id="text-label"
             title="Label"
             styles={[
-              { name: 'label-xs', size: '0.6875rem', lineHeight: '11px', weight: 'regular' },
-              { name: 'label-sm', size: '0.875rem', lineHeight: '14px', weight: 'regular' },
-              { name: 'label-sm-strong', size: '0.875rem', lineHeight: '14px', weight: 'semibold' },
-              { name: 'label-md', size: '1rem', lineHeight: '16px', weight: 'regular' },
-              { name: 'label-md-strong', size: '1rem', lineHeight: '16px', weight: 'semibold' },
-              { name: 'label-lg', size: '1.125rem', lineHeight: '18px', weight: 'regular' },
-              { name: 'label-lg-strong', size: '1.125rem', lineHeight: '18px', weight: 'semibold' },
+              {
+                name: 'label-xs',
+                size: '0.6875rem',
+                lineHeight: '11px',
+                weight: 'regular',
+              },
+              {
+                name: 'label-sm',
+                size: '0.875rem',
+                lineHeight: '14px',
+                weight: 'regular',
+              },
+              {
+                name: 'label-sm-strong',
+                size: '0.875rem',
+                lineHeight: '14px',
+                weight: 'semibold',
+              },
+              {
+                name: 'label-md',
+                size: '1rem',
+                lineHeight: '16px',
+                weight: 'regular',
+              },
+              {
+                name: 'label-md-strong',
+                size: '1rem',
+                lineHeight: '16px',
+                weight: 'semibold',
+              },
+              {
+                name: 'label-lg',
+                size: '1.125rem',
+                lineHeight: '18px',
+                weight: 'regular',
+              },
+              {
+                name: 'label-lg-strong',
+                size: '1.125rem',
+                lineHeight: '18px',
+                weight: 'semibold',
+              },
             ]}
           />
 
@@ -536,19 +696,35 @@ function FontSection() {
   ]
 
   return (
-    <Section id="font" title="Font" description="Font families, sizes, weights, and line heights">
+    <Section
+      id="font"
+      title="Font"
+      description="Font families, sizes, weights, and line heights"
+    >
       <div className="space-y-8">
         {/* Families */}
         <div>
           <h4 className="text-sm font-medium mb-3">Families</h4>
           <div className="space-y-2">
             <div className="flex items-baseline gap-3">
-              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">--font-family-inter</code>
-              <span style={{ fontFamily: 'var(--font-family-inter)' }}>Inter</span>
+              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                --font-family-inter
+              </code>
+              <span style={{ fontFamily: 'var(--font-family-inter)' }}>
+                Inter
+              </span>
             </div>
             <div className="flex items-baseline gap-3">
-              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">--font-family-atkinson-hyperlegible</code>
-              <span style={{ fontFamily: 'var(--font-family-atkinson-hyperlegible)' }}>Atkinson Hyperlegible</span>
+              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                --font-family-atkinson-hyperlegible
+              </code>
+              <span
+                style={{
+                  fontFamily: 'var(--font-family-atkinson-hyperlegible)',
+                }}
+              >
+                Atkinson Hyperlegible
+              </span>
             </div>
           </div>
         </div>
@@ -558,8 +734,16 @@ function FontSection() {
           <h4 className="text-sm font-medium mb-3">Weights</h4>
           <div className="flex flex-wrap gap-6">
             {[
-              { token: '--font-weight-regular', value: '400', label: 'Regular' },
-              { token: '--font-weight-semibold', value: '600', label: 'Semibold' },
+              {
+                token: '--font-weight-regular',
+                value: '400',
+                label: 'Regular',
+              },
+              {
+                token: '--font-weight-semibold',
+                value: '600',
+                label: 'Semibold',
+              },
               { token: '--font-weight-bold', value: '700', label: 'Bold' },
             ].map((w) => (
               <div key={w.token} className="space-y-1">
@@ -586,7 +770,10 @@ function FontSection() {
               { token: '--font-lineheight-md', value: '1.2' },
               { token: '--font-lineheight-lg', value: '1.5' },
             ].map((lh) => (
-              <code key={lh.token} className="text-xs bg-muted px-1.5 py-0.5 rounded">
+              <code
+                key={lh.token}
+                className="text-xs bg-muted px-1.5 py-0.5 rounded"
+              >
                 {lh.token}: {lh.value}
               </code>
             ))}
