@@ -261,20 +261,19 @@ function ShowcaseRow({
 // --- Page ---
 
 function DesignSystemPage() {
-  useSetBreadcrumbs([{ label: 'Design System', href: '/ds/tw-theme' }])
+  useSetBreadcrumbs([
+    { label: 'Design System', href: '/ds' },
+    { label: 'TW Theme', href: '/ds/tw-theme' },
+  ])
 
   const [activeSection, setActiveSection] = useState('colors')
 
   return (
     <div className="flex h-full">
       {/* Left Nav */}
-      <nav className="w-52 shrink-0 border-r border-border sticky top-0 h-[calc(100vh-3.5rem)] overflow-y-auto">
+      <nav className="w-52 shrink-0 border-r border-border sticky top-0 h-[calc(100vh-3.5rem)]">
+        <ScrollArea className="h-full">
         <div className="p-4 space-y-6">
-          <div className="pb-4 border-b border-border">
-            <Button variant="outline" size="sm" asChild className="w-full">
-              <Link to="/ds/flow-tokens">Flow DS</Link>
-            </Button>
-          </div>
           {NAV_SECTIONS.map((section) => (
             <div key={section.title}>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
@@ -301,6 +300,7 @@ function DesignSystemPage() {
             </div>
           ))}
         </div>
+        </ScrollArea>
       </nav>
 
       {/* Main Content */}
