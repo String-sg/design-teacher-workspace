@@ -130,7 +130,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-export const Route = createFileRoute('/design-system')({
+export const Route = createFileRoute('/ds/tw-theme')({
   component: DesignSystemPage,
 })
 
@@ -261,7 +261,7 @@ function ShowcaseRow({
 // --- Page ---
 
 function DesignSystemPage() {
-  useSetBreadcrumbs([{ label: 'Design System', href: '/design-system' }])
+  useSetBreadcrumbs([{ label: 'Design System', href: '/ds/tw-theme' }])
 
   const [activeSection, setActiveSection] = useState('colors')
 
@@ -272,7 +272,7 @@ function DesignSystemPage() {
         <div className="p-4 space-y-6">
           <div className="pb-4 border-b border-border">
             <Button variant="outline" size="sm" asChild className="w-full">
-              <Link to="/design-system-flow">Flow DS</Link>
+              <Link to="/ds/flow-tokens">Flow DS</Link>
             </Button>
           </div>
           {NAV_SECTIONS.map((section) => (
@@ -307,7 +307,7 @@ function DesignSystemPage() {
       <ScrollArea className="flex-1">
         <div className="max-w-4xl mx-auto p-8 space-y-16">
           <div>
-            <h1 className="text-2xl font-bold">Design System</h1>
+            <h1 className="text-2xl font-bold">TW Theme</h1>
             <p className="text-muted-foreground mt-1">
               Tokens and component reference for the MOE Teacher Workspace.
             </p>

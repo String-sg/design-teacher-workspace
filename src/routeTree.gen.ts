@@ -17,8 +17,7 @@ import { Route as ParentsGatewayRouteImport } from './routes/parents-gateway'
 import { Route as InsightBuddyRouteImport } from './routes/insight-buddy'
 import { Route as FormsRouteImport } from './routes/forms'
 import { Route as FlagsRouteImport } from './routes/flags'
-import { Route as DesignSystemFlowRouteImport } from './routes/design-system-flow'
-import { Route as DesignSystemRouteImport } from './routes/design-system'
+import { Route as DsRouteImport } from './routes/ds'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as GuestRouteImport } from './routes/_guest'
 import { Route as AllearsRouteImport } from './routes/_allears'
@@ -28,11 +27,14 @@ import { Route as StudentsIndexRouteImport } from './routes/students.index'
 import { Route as ReportsIndexRouteImport } from './routes/reports.index'
 import { Route as ParentsGatewayIndexRouteImport } from './routes/parents-gateway.index'
 import { Route as FormsIndexRouteImport } from './routes/forms.index'
+import { Route as DsIndexRouteImport } from './routes/ds.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
 import { Route as ParentsGatewayNewRouteImport } from './routes/parents-gateway.new'
 import { Route as ParentsGatewayIdRouteImport } from './routes/parents-gateway.$id'
+import { Route as DsTwThemeRouteImport } from './routes/ds.tw-theme'
+import { Route as DsFlowTokensRouteImport } from './routes/ds.flow-tokens'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 import { Route as GuestPreviewMenuRouteImport } from './routes/_guest.preview-menu'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
@@ -82,14 +84,9 @@ const FlagsRoute = FlagsRouteImport.update({
   path: '/flags',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DesignSystemFlowRoute = DesignSystemFlowRouteImport.update({
-  id: '/design-system-flow',
-  path: '/design-system-flow',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DesignSystemRoute = DesignSystemRouteImport.update({
-  id: '/design-system',
-  path: '/design-system',
+const DsRoute = DsRouteImport.update({
+  id: '/ds',
+  path: '/ds',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnnouncementsRoute = AnnouncementsRouteImport.update({
@@ -135,6 +132,11 @@ const FormsIndexRoute = FormsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => FormsRoute,
 } as any)
+const DsIndexRoute = DsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DsRoute,
+} as any)
 const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -159,6 +161,16 @@ const ParentsGatewayIdRoute = ParentsGatewayIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ParentsGatewayRoute,
+} as any)
+const DsTwThemeRoute = DsTwThemeRouteImport.update({
+  id: '/tw-theme',
+  path: '/tw-theme',
+  getParentRoute: () => DsRoute,
+} as any)
+const DsFlowTokensRoute = DsFlowTokensRouteImport.update({
+  id: '/flow-tokens',
+  path: '/flow-tokens',
+  getParentRoute: () => DsRoute,
 } as any)
 const AnnouncementsIdRoute = AnnouncementsIdRouteImport.update({
   id: '/$id',
@@ -205,8 +217,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
-  '/design-system': typeof DesignSystemRoute
-  '/design-system-flow': typeof DesignSystemFlowRoute
+  '/ds': typeof DsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
@@ -219,11 +230,14 @@ export interface FileRoutesByFullPath {
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/ds/flow-tokens': typeof DsFlowTokensRoute
+  '/ds/tw-theme': typeof DsTwThemeRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/ds/': typeof DsIndexRoute
   '/forms/': typeof FormsIndexRoute
   '/parents-gateway/': typeof ParentsGatewayIndexRoute
   '/reports/': typeof ReportsIndexRoute
@@ -236,8 +250,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
-  '/design-system': typeof DesignSystemRoute
-  '/design-system-flow': typeof DesignSystemFlowRoute
   '/flags': typeof FlagsRoute
   '/insight-buddy': typeof InsightBuddyRoute
   '/settings': typeof SettingsRoute
@@ -245,11 +257,14 @@ export interface FileRoutesByTo {
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/ds/flow-tokens': typeof DsFlowTokensRoute
+  '/ds/tw-theme': typeof DsTwThemeRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
+  '/ds': typeof DsIndexRoute
   '/forms': typeof FormsIndexRoute
   '/parents-gateway': typeof ParentsGatewayIndexRoute
   '/reports': typeof ReportsIndexRoute
@@ -266,8 +281,7 @@ export interface FileRoutesById {
   '/_allears': typeof AllearsRouteWithChildren
   '/_guest': typeof GuestRouteWithChildren
   '/announcements': typeof AnnouncementsRouteWithChildren
-  '/design-system': typeof DesignSystemRoute
-  '/design-system-flow': typeof DesignSystemFlowRoute
+  '/ds': typeof DsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
@@ -280,11 +294,14 @@ export interface FileRoutesById {
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/ds/flow-tokens': typeof DsFlowTokensRoute
+  '/ds/tw-theme': typeof DsTwThemeRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/ds/': typeof DsIndexRoute
   '/forms/': typeof FormsIndexRoute
   '/parents-gateway/': typeof ParentsGatewayIndexRoute
   '/reports/': typeof ReportsIndexRoute
@@ -300,8 +317,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/announcements'
-    | '/design-system'
-    | '/design-system-flow'
+    | '/ds'
     | '/flags'
     | '/forms'
     | '/insight-buddy'
@@ -314,11 +330,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
+    | '/ds/flow-tokens'
+    | '/ds/tw-theme'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
+    | '/ds/'
     | '/forms/'
     | '/parents-gateway/'
     | '/reports/'
@@ -331,8 +350,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$'
-    | '/design-system'
-    | '/design-system-flow'
     | '/flags'
     | '/insight-buddy'
     | '/settings'
@@ -340,11 +357,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
+    | '/ds/flow-tokens'
+    | '/ds/tw-theme'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements'
+    | '/ds'
     | '/forms'
     | '/parents-gateway'
     | '/reports'
@@ -360,8 +380,7 @@ export interface FileRouteTypes {
     | '/_allears'
     | '/_guest'
     | '/announcements'
-    | '/design-system'
-    | '/design-system-flow'
+    | '/ds'
     | '/flags'
     | '/forms'
     | '/insight-buddy'
@@ -374,11 +393,14 @@ export interface FileRouteTypes {
     | '/_guest/login'
     | '/_guest/preview-menu'
     | '/announcements/$id'
+    | '/ds/flow-tokens'
+    | '/ds/tw-theme'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
+    | '/ds/'
     | '/forms/'
     | '/parents-gateway/'
     | '/reports/'
@@ -395,8 +417,7 @@ export interface RootRouteChildren {
   AllearsRoute: typeof AllearsRouteWithChildren
   GuestRoute: typeof GuestRouteWithChildren
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
-  DesignSystemRoute: typeof DesignSystemRoute
-  DesignSystemFlowRoute: typeof DesignSystemFlowRoute
+  DsRoute: typeof DsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
   FormsRoute: typeof FormsRouteWithChildren
   InsightBuddyRoute: typeof InsightBuddyRoute
@@ -465,18 +486,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FlagsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/design-system-flow': {
-      id: '/design-system-flow'
-      path: '/design-system-flow'
-      fullPath: '/design-system-flow'
-      preLoaderRoute: typeof DesignSystemFlowRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/design-system': {
-      id: '/design-system'
-      path: '/design-system'
-      fullPath: '/design-system'
-      preLoaderRoute: typeof DesignSystemRouteImport
+    '/ds': {
+      id: '/ds'
+      path: '/ds'
+      fullPath: '/ds'
+      preLoaderRoute: typeof DsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/announcements': {
@@ -542,6 +556,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FormsIndexRouteImport
       parentRoute: typeof FormsRoute
     }
+    '/ds/': {
+      id: '/ds/'
+      path: '/'
+      fullPath: '/ds/'
+      preLoaderRoute: typeof DsIndexRouteImport
+      parentRoute: typeof DsRoute
+    }
     '/announcements/': {
       id: '/announcements/'
       path: '/'
@@ -576,6 +597,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/parents-gateway/$id'
       preLoaderRoute: typeof ParentsGatewayIdRouteImport
       parentRoute: typeof ParentsGatewayRoute
+    }
+    '/ds/tw-theme': {
+      id: '/ds/tw-theme'
+      path: '/tw-theme'
+      fullPath: '/ds/tw-theme'
+      preLoaderRoute: typeof DsTwThemeRouteImport
+      parentRoute: typeof DsRoute
+    }
+    '/ds/flow-tokens': {
+      id: '/ds/flow-tokens'
+      path: '/flow-tokens'
+      fullPath: '/ds/flow-tokens'
+      preLoaderRoute: typeof DsFlowTokensRouteImport
+      parentRoute: typeof DsRoute
     }
     '/announcements/$id': {
       id: '/announcements/$id'
@@ -691,6 +726,20 @@ const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
   AnnouncementsRouteChildren,
 )
 
+interface DsRouteChildren {
+  DsFlowTokensRoute: typeof DsFlowTokensRoute
+  DsTwThemeRoute: typeof DsTwThemeRoute
+  DsIndexRoute: typeof DsIndexRoute
+}
+
+const DsRouteChildren: DsRouteChildren = {
+  DsFlowTokensRoute: DsFlowTokensRoute,
+  DsTwThemeRoute: DsTwThemeRoute,
+  DsIndexRoute: DsIndexRoute,
+}
+
+const DsRouteWithChildren = DsRoute._addFileChildren(DsRouteChildren)
+
 interface FormsRouteChildren {
   FormsIndexRoute: typeof FormsIndexRoute
 }
@@ -750,8 +799,7 @@ const rootRouteChildren: RootRouteChildren = {
   AllearsRoute: AllearsRouteWithChildren,
   GuestRoute: GuestRouteWithChildren,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
-  DesignSystemRoute: DesignSystemRoute,
-  DesignSystemFlowRoute: DesignSystemFlowRoute,
+  DsRoute: DsRouteWithChildren,
   FlagsRoute: FlagsRoute,
   FormsRoute: FormsRouteWithChildren,
   InsightBuddyRoute: InsightBuddyRoute,

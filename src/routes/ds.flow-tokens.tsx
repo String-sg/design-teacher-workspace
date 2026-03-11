@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
-export const Route = createFileRoute('/design-system-flow')({
+export const Route = createFileRoute('/ds/flow-tokens')({
   component: FlowDesignSystemPage,
 })
 
@@ -166,8 +166,8 @@ const STEPS_12 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
 function FlowDesignSystemPage() {
   useSetBreadcrumbs([
-    { label: 'Design System', href: '/design-system' },
-    { label: 'Flow DS', href: '/design-system-flow' },
+    { label: 'Design System', href: '/ds/tw-theme' },
+    { label: 'Flow DS', href: '/ds/flow-tokens' },
   ])
 
   const [activeSection, setActiveSection] = useState('font')
@@ -179,7 +179,7 @@ function FlowDesignSystemPage() {
         <div className="p-4 space-y-6">
           <div className="pb-4 border-b border-border">
             <Button variant="outline" size="sm" asChild className="w-full">
-              <Link to="/design-system">TW Theme</Link>
+              <Link to="/ds/tw-theme">TW Theme</Link>
             </Button>
           </div>
           {NAV_SECTIONS.map((section) => (
@@ -214,7 +214,7 @@ function FlowDesignSystemPage() {
       <ScrollArea className="flex-1">
         <div className="max-w-4xl mx-auto p-8 space-y-16">
           <div>
-            <h1 className="text-2xl font-bold">Flow Design System Tokens</h1>
+            <h1 className="text-2xl font-bold">Flow DS Tokens</h1>
             <p className="text-muted-foreground mt-1">
               All CSS custom properties from{' '}
               <code className="text-xs bg-muted px-1 py-0.5 rounded">
