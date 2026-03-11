@@ -141,6 +141,7 @@ const NAV_SECTIONS = [
     title: 'Tokens',
     items: [
       { id: 'colors', label: 'Colors' },
+      { id: 'token-mapping', label: 'Token Mapping' },
       { id: 'typography', label: 'Typography' },
       { id: 'spacing', label: 'Spacing' },
       { id: 'radius', label: 'Border Radius' },
@@ -316,6 +317,7 @@ function DesignSystemPage() {
           {/* ===== TOKENS ===== */}
 
           <ColorsSection />
+          <TokenMappingSection />
           <TypographySection />
           <SpacingSection />
           <RadiusSection />
@@ -552,6 +554,192 @@ function ColorsSection() {
             />
           ),
         )}
+      </div>
+    </Section>
+  )
+}
+
+// --- Token Mapping types & data ---
+
+type MappingRow = {
+  twToken: string
+  value: string
+  flowDsToken?: string
+}
+
+const SEMANTIC_MAPPING: MappingRow[] = [
+  { twToken: '--background', value: 'var(--slate-1)', flowDsToken: '--color-background-page' },
+  { twToken: '--foreground', value: 'var(--slate-12)', flowDsToken: '--color-foreground-default' },
+  { twToken: '--card', value: 'white', flowDsToken: '--color-background-section' },
+  { twToken: '--card-foreground', value: 'var(--slate-12)', flowDsToken: '--color-foreground-section' },
+  { twToken: '--popover', value: 'white', flowDsToken: '--color-background-popover' },
+  { twToken: '--primary', value: 'var(--twblue-9)' },
+  { twToken: '--primary-foreground', value: 'white' },
+  { twToken: '--secondary', value: 'var(--slate-3)' },
+  { twToken: '--muted', value: 'var(--slate-3)' },
+  { twToken: '--muted-foreground', value: 'var(--slate-11)' },
+  { twToken: '--accent', value: 'var(--slate-3)' },
+  { twToken: '--destructive', value: 'var(--crimson-9)', flowDsToken: '--color-fill-critical' },
+  { twToken: '--border', value: 'var(--slate-6)', flowDsToken: '--color-border-default' },
+  { twToken: '--input', value: 'var(--slate-6)' },
+  { twToken: '--ring', value: 'var(--twblue-8)', flowDsToken: '--color-border-focus' },
+]
+
+type ScaleMappingRow = {
+  flowDsScale: string
+  radixScale: string
+  role: string
+}
+
+const SCALE_MAPPING: ScaleMappingRow[] = [
+  { flowDsScale: 'color-brand', radixScale: 'twblue', role: 'Brand / Primary' },
+  { flowDsScale: 'color-neutral', radixScale: 'slate', role: 'Neutral / Gray' },
+  { flowDsScale: 'color-critical', radixScale: 'crimson', role: 'Error / Destructive' },
+  { flowDsScale: 'color-success', radixScale: 'lime', role: 'Success' },
+  { flowDsScale: 'color-caution', radixScale: 'orange', role: 'Warning' },
+  { flowDsScale: 'color-info', radixScale: 'amber', role: 'Info' },
+  { flowDsScale: 'color-accent', radixScale: 'amber', role: 'Accent' },
+  { flowDsScale: 'color-blue', radixScale: 'twblue', role: 'Blue' },
+]
+
+function TokenMappingSection() {
+  return (
+    <Section id="token-mapping" title="Token Mapping">
+      <div className="space-y-8">
+        <p className="text-sm text-muted-foreground">
+          Shows how Tailwind theme tokens resolve to underlying color scales, and how Flow DS tokens map back to the same values.
+        </p>
+
+        {/* Semantic token mapping */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">Semantic Tokens</h4>
+          <p className="text-xs text-muted-foreground">
+            TW theme tokens and their resolved values. Where a Flow DS semantic token points back to the same value, it is shown.
+          </p>
+          <div className="border border-border rounded-xl overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10" />
+                  <TableHead>TW Token</TableHead>
+                  <TableHead>Value</TableHead>
+                  <TableHead>Flow DS Token</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {SEMANTIC_MAPPING.map((row) => (
+                  <TableRow key={row.twToken}>
+                    <TableCell>
+                      <div
+                        className="size-6 rounded border border-border"
+                        style={{ backgroundColor: `var(${row.twToken})` }}
+                      />
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {row.twToken}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {row.value}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {row.flowDsToken ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="size-1.5 rounded-full bg-primary shrink-0" />
+                          {row.flowDsToken}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground/40">&mdash;</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {/* Scale mapping */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">Color Scale Mapping</h4>
+          <p className="text-xs text-muted-foreground">
+            Each Flow DS color scale (1-12) is overridden to point at a Radix UI / custom color scale.
+          </p>
+          <div className="border border-border rounded-xl overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Flow DS Scale</TableHead>
+                  <TableHead>Radix / Custom Scale</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead className="w-[312px]">Preview (1-12)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {SCALE_MAPPING.map((row) => (
+                  <TableRow key={row.flowDsScale}>
+                    <TableCell className="font-mono text-xs">
+                      --{row.flowDsScale}-*
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      --{row.radixScale}-*
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {row.role}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-0.5">
+                        {SCALE_STEPS.map((step) => (
+                          <div
+                            key={step}
+                            className="size-5 rounded-sm border border-border/50"
+                            style={{
+                              backgroundColor: `var(--${row.radixScale}-${step})`,
+                            }}
+                            title={`--${row.flowDsScale}-${step} → --${row.radixScale}-${step}`}
+                          />
+                        ))}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {/* Additional Flow DS semantic overrides */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">Additional Flow DS Overrides</h4>
+          <p className="text-xs text-muted-foreground">
+            Flow DS semantic tokens that are wired back to TW theme values for consistency.
+          </p>
+          <div className="border border-border rounded-xl overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Flow DS Token</TableHead>
+                  <TableHead>Points To</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[
+                  { flow: '--color-lightest', tw: 'white' },
+                  { flow: '--color-foreground-link', tw: 'var(--color-brand-11)' },
+                  { flow: '--color-foreground-link-hover', tw: 'var(--color-brand-12)' },
+                ].map((row) => (
+                  <TableRow key={row.flow}>
+                    <TableCell className="font-mono text-xs">
+                      {row.flow}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {row.tw}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
     </Section>
   )
