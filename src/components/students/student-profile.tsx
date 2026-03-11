@@ -485,7 +485,7 @@ export function StudentProfile({
                       <ul className="space-y-1 text-sm">
                         <li className="flex items-center gap-2">
                           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                          {student.socialLinks} peer connection(s)
+                          {student.socialLinks}
                         </li>
                       </ul>
                     </div>

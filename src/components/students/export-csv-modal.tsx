@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Download } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -74,42 +73,40 @@ export function ExportCsvModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Export to CSV</DialogTitle>
+          <DialogTitle>Export view</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-5">
-          {/* Columns to export */}
+          {/* What to export */}
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">Columns to export</p>
+            <p className="text-sm font-medium">What to export</p>
             <div className="flex flex-col gap-2">
               <RadioCard
-                label="Current view"
-                description="Export columns shown in the table"
+                label="Visible columns"
                 selected={dataRange === 'current'}
                 onClick={() => setDataRange('current')}
               />
               <RadioCard
                 label="All columns"
-                description="Export all columns in the table"
                 selected={dataRange === 'all'}
                 onClick={() => setDataRange('all')}
               />
             </div>
           </div>
 
-          {/* Sensitivity format */}
+          {/* Export format */}
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">Sensitivity</p>
+            <p className="text-sm font-medium">Export format</p>
             <div className="flex flex-col gap-2">
               <RadioCard
-                label="Current view"
-                description="Includes Sensitive-High data (e.g. Counselling, SEN, Offences)"
+                label="As shown"
+                description="Export data as shown in the table"
                 selected={senFormat === 'sen-high'}
                 onClick={() => setSenFormat('sen-high')}
               />
               <RadioCard
-                label="Redacted view"
-                description="Masks Sensitive-High data, converting to Sensitive Normal"
+                label="Redacted"
+                description="Export with sensitive-high data masked"
                 selected={senFormat === 'sen-norm'}
                 onClick={() => setSenFormat('sen-norm')}
               />
@@ -119,8 +116,7 @@ export function ExportCsvModal({
 
         <DialogFooter>
           <Button onClick={handleExport}>
-            <Download className="mr-1.5 size-4" />
-            Export CSV
+            Export view
           </Button>
         </DialogFooter>
       </DialogContent>

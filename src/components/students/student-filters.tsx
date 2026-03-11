@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Clock, MoreHorizontal, Search, X } from 'lucide-react'
+import { Clock, Download, MoreHorizontal, Search, Upload, X } from 'lucide-react'
 
 import { MultiFilterPopover } from './multi-filter-popover'
 import { ColumnVisibilityPopover } from './column-visibility-popover'
@@ -86,10 +86,12 @@ export function StudentFilters({
             />
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setExportModalOpen(true)}>
-                Export to CSV
+                <Download className="mr-2 size-4" />
+                Export view
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setImportDialogOpen(true)}>
-                Import fields
+                <Upload className="mr-2 size-4" />
+                Import data
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -100,7 +102,7 @@ export function StudentFilters({
         <div className="fixed inset-0 z-50 flex flex-col bg-background">
           {/* Header */}
           <div className="flex shrink-0 items-center justify-between border-b px-6 py-4">
-            <h1 className="text-base font-semibold">Import fields</h1>
+            <h1 className="text-base font-semibold">Import data</h1>
             <Button
               variant="ghost"
               size="icon-sm"
