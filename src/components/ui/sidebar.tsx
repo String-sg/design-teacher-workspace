@@ -95,6 +95,17 @@ function SidebarProvider({
     return isMobile ? setOpenMobile((prev) => !prev) : setOpen((prev) => !prev)
   }, [isMobile, setOpen, setOpenMobile])
 
+  // Sync sidebar state from localStorage after hydration (SSR returns defaultOpen,
+  // and React hydration skips re-running useState initializers).
+  // useLayoutEffect runs synchronously before paint, avoiding a visible flash.
+  React.useLayoutEffect(() => {
+    if (openProp !== undefined) return
+    const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY)
+    if (stored !== null) {
+      _setOpen(stored === 'true')
+    }
+  }, [openProp])
+
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

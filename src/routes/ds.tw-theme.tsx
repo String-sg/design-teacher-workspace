@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import {
   BoldIcon,
   ChevronDownIcon,
@@ -134,7 +134,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-export const Route = createFileRoute('/design-system')({
+export const Route = createFileRoute('/ds/tw-theme')({
   component: DesignSystemPage,
 })
 
@@ -145,6 +145,7 @@ const NAV_SECTIONS = [
     title: 'Tokens',
     items: [
       { id: 'colors', label: 'Colors' },
+      { id: 'token-mapping', label: 'Token Mapping' },
       { id: 'typography', label: 'Typography' },
       { id: 'spacing', label: 'Spacing' },
       { id: 'radius', label: 'Border Radius' },
@@ -261,48 +262,53 @@ function ShowcaseRow({
 // --- Page ---
 
 function DesignSystemPage() {
-  useSetBreadcrumbs([{ label: 'Design System', href: '/design-system' }])
+  useSetBreadcrumbs([
+    { label: 'Design System', href: '/ds' },
+    { label: 'TW Theme', href: '/ds/tw-theme' },
+  ])
 
   const [activeSection, setActiveSection] = useState('colors')
 
   return (
     <div className="flex h-full">
       {/* Left Nav */}
-      <nav className="w-52 shrink-0 border-r border-border sticky top-0 h-[calc(100vh-3.5rem)] overflow-y-auto">
-        <div className="p-4 space-y-6">
-          {NAV_SECTIONS.map((section) => (
-            <div key={section.title}>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                {section.title}
-              </p>
-              <ul className="space-y-0.5">
-                {section.items.map((item) => (
-                  <li key={item.id}>
-                    <a
-                      href={`#${item.id}`}
-                      onClick={() => setActiveSection(item.id)}
-                      className={cn(
-                        'block px-2 py-1.5 text-sm rounded-md transition-colors',
-                        activeSection === item.id
-                          ? 'bg-muted text-foreground font-medium'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-                      )}
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+      <nav className="w-52 shrink-0 border-r border-border sticky top-0 h-[calc(100vh-3.5rem)]">
+        <ScrollArea className="h-full">
+          <div className="p-4 space-y-6">
+            {NAV_SECTIONS.map((section) => (
+              <div key={section.title}>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  {section.title}
+                </p>
+                <ul className="space-y-0.5">
+                  {section.items.map((item) => (
+                    <li key={item.id}>
+                      <a
+                        href={`#${item.id}`}
+                        onClick={() => setActiveSection(item.id)}
+                        className={cn(
+                          'block px-2 py-1.5 text-sm rounded-md transition-colors',
+                          activeSection === item.id
+                            ? 'bg-muted text-foreground font-medium'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                        )}
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       </nav>
 
       {/* Main Content */}
       <ScrollArea className="flex-1">
         <div className="max-w-4xl mx-auto p-8 space-y-16">
           <div>
-            <h1 className="text-2xl font-bold">Design System</h1>
+            <h1 className="text-2xl font-bold">TW Theme</h1>
             <p className="text-muted-foreground mt-1">
               Tokens and component reference for the MOE Teacher Workspace.
             </p>
@@ -311,6 +317,7 @@ function DesignSystemPage() {
           {/* ===== TOKENS ===== */}
 
           <ColorsSection />
+          <TokenMappingSection />
           <TypographySection />
           <SpacingSection />
           <RadiusSection />
@@ -547,6 +554,268 @@ function ColorsSection() {
             />
           ),
         )}
+      </div>
+    </Section>
+  )
+}
+
+// --- Token Mapping types & data ---
+
+type MappingRow = {
+  twToken: string
+  value: string
+  flowDsToken?: string
+}
+
+const SEMANTIC_MAPPING: Array<MappingRow> = [
+  {
+    twToken: '--background',
+    value: 'var(--slate-1)',
+    flowDsToken: '--color-background-page',
+  },
+  {
+    twToken: '--foreground',
+    value: 'var(--slate-12)',
+    flowDsToken: '--color-foreground-default',
+  },
+  {
+    twToken: '--card',
+    value: 'white',
+    flowDsToken: '--color-background-section',
+  },
+  {
+    twToken: '--card-foreground',
+    value: 'var(--slate-12)',
+    flowDsToken: '--color-foreground-section',
+  },
+  {
+    twToken: '--popover',
+    value: 'white',
+    flowDsToken: '--color-background-popover',
+  },
+  {
+    twToken: '--primary',
+    value: 'var(--twblue-9)',
+    flowDsToken: '--color-fill-contrast',
+  },
+  {
+    twToken: '--primary-foreground',
+    value: 'white',
+    flowDsToken: '--color-foreground-contrast',
+  },
+  {
+    twToken: '--secondary',
+    value: 'var(--slate-3)',
+    flowDsToken: '--color-background-skeleton',
+  },
+  {
+    twToken: '--muted',
+    value: 'var(--slate-3)',
+    flowDsToken: '--color-background-overlay',
+  },
+  {
+    twToken: '--muted-foreground',
+    value: 'var(--slate-11)',
+    flowDsToken: '--color-foreground-subtle',
+  },
+  {
+    twToken: '--accent',
+    value: 'var(--slate-3)',
+    flowDsToken: '--btn-color-fill-hover',
+  },
+  {
+    twToken: '--destructive',
+    value: 'var(--crimson-9)',
+    flowDsToken: '--color-fill-critical',
+  },
+  {
+    twToken: '--border',
+    value: 'var(--slate-6)',
+    flowDsToken: '--color-border-default',
+  },
+  {
+    twToken: '--input',
+    value: 'var(--slate-6)',
+    flowDsToken: '--color-border-default',
+  },
+  {
+    twToken: '--ring',
+    value: 'var(--twblue-8)',
+    flowDsToken: '--color-border-focus',
+  },
+]
+
+type ScaleMappingRow = {
+  flowDsScale: string
+  radixScale: string
+  role: string
+}
+
+const SCALE_MAPPING: Array<ScaleMappingRow> = [
+  { flowDsScale: 'color-brand', radixScale: 'twblue', role: 'Brand / Primary' },
+  { flowDsScale: 'color-neutral', radixScale: 'slate', role: 'Neutral / Gray' },
+  {
+    flowDsScale: 'color-critical',
+    radixScale: 'crimson',
+    role: 'Error / Destructive',
+  },
+  { flowDsScale: 'color-success', radixScale: 'lime', role: 'Success' },
+  { flowDsScale: 'color-caution', radixScale: 'orange', role: 'Warning' },
+  { flowDsScale: 'color-info', radixScale: 'amber', role: 'Info' },
+  { flowDsScale: 'color-accent', radixScale: 'amber', role: 'Accent' },
+  { flowDsScale: 'color-blue', radixScale: 'twblue', role: 'Blue' },
+]
+
+function TokenMappingSection() {
+  return (
+    <Section id="token-mapping" title="Token Mapping">
+      <div className="space-y-8">
+        <p className="text-sm text-muted-foreground">
+          Shows how Tailwind theme tokens resolve to underlying color scales,
+          and how Flow DS tokens map back to the same values.
+        </p>
+
+        {/* Semantic token mapping */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">Semantic Tokens</h4>
+          <p className="text-xs text-muted-foreground">
+            TW theme tokens and their resolved values. Where a Flow DS semantic
+            token points back to the same value, it is shown.
+          </p>
+          <div className="border border-border rounded-xl overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10" />
+                  <TableHead>TW Token</TableHead>
+                  <TableHead>Value</TableHead>
+                  <TableHead>Flow DS Token</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {SEMANTIC_MAPPING.map((row) => (
+                  <TableRow key={row.twToken}>
+                    <TableCell>
+                      <div
+                        className="size-6 rounded border border-border"
+                        style={{ backgroundColor: `var(${row.twToken})` }}
+                      />
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {row.twToken}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {row.value}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {row.flowDsToken ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="size-1.5 rounded-full bg-primary shrink-0" />
+                          {row.flowDsToken}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground/40">
+                          &mdash;
+                        </span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {/* Scale mapping */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">Color Scale Mapping</h4>
+          <p className="text-xs text-muted-foreground">
+            Each Flow DS color scale (1-12) is overridden to point at a Radix UI
+            / custom color scale.
+          </p>
+          <div className="border border-border rounded-xl overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Flow DS Scale</TableHead>
+                  <TableHead>Radix / Custom Scale</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead className="w-[312px]">Preview (1-12)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {SCALE_MAPPING.map((row) => (
+                  <TableRow key={row.flowDsScale}>
+                    <TableCell className="font-mono text-xs">
+                      --{row.flowDsScale}-*
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      --{row.radixScale}-*
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {row.role}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-0.5">
+                        {SCALE_STEPS.map((step) => (
+                          <div
+                            key={step}
+                            className="size-5 rounded-sm border border-border/50"
+                            style={{
+                              backgroundColor: `var(--${row.radixScale}-${step})`,
+                            }}
+                            title={`--${row.flowDsScale}-${step} → --${row.radixScale}-${step}`}
+                          />
+                        ))}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {/* Additional Flow DS semantic overrides */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">Additional Flow DS Overrides</h4>
+          <p className="text-xs text-muted-foreground">
+            Flow DS semantic tokens that are wired back to TW theme values for
+            consistency.
+          </p>
+          <div className="border border-border rounded-xl overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Flow DS Token</TableHead>
+                  <TableHead>Points To</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[
+                  { flow: '--color-lightest', tw: 'white' },
+                  {
+                    flow: '--color-foreground-link',
+                    tw: 'var(--color-brand-11)',
+                  },
+                  {
+                    flow: '--color-foreground-link-hover',
+                    tw: 'var(--color-brand-12)',
+                  },
+                ].map((row) => (
+                  <TableRow key={row.flow}>
+                    <TableCell className="font-mono text-xs">
+                      {row.flow}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {row.tw}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
     </Section>
   )
@@ -879,7 +1148,7 @@ function SelectSection() {
           <Label>Default Select</Label>
           <Select>
             <SelectTrigger>
-              <SelectValue placeholder="Select an option" />
+              <SelectValue placeholder="Select">Select</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="opt1">Option 1</SelectItem>
@@ -1045,7 +1314,9 @@ function DropdownMenuSection() {
           <ChevronDownIcon data-icon="inline-end" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>
