@@ -35,6 +35,7 @@ import { Route as ParentsGatewayNewRouteImport } from './routes/parents-gateway.
 import { Route as ParentsGatewayIdRouteImport } from './routes/parents-gateway.$id'
 import { Route as DsTwThemeRouteImport } from './routes/ds.tw-theme'
 import { Route as DsFlowTokensRouteImport } from './routes/ds.flow-tokens'
+import { Route as DsFlowComponentsRouteImport } from './routes/ds.flow-components'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 import { Route as GuestPreviewMenuRouteImport } from './routes/_guest.preview-menu'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
@@ -172,6 +173,11 @@ const DsFlowTokensRoute = DsFlowTokensRouteImport.update({
   path: '/flow-tokens',
   getParentRoute: () => DsRoute,
 } as any)
+const DsFlowComponentsRoute = DsFlowComponentsRouteImport.update({
+  id: '/flow-components',
+  path: '/flow-components',
+  getParentRoute: () => DsRoute,
+} as any)
 const AnnouncementsIdRoute = AnnouncementsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -230,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/ds/flow-components': typeof DsFlowComponentsRoute
   '/ds/flow-tokens': typeof DsFlowTokensRoute
   '/ds/tw-theme': typeof DsTwThemeRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
@@ -257,6 +264,7 @@ export interface FileRoutesByTo {
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/ds/flow-components': typeof DsFlowComponentsRoute
   '/ds/flow-tokens': typeof DsFlowTokensRoute
   '/ds/tw-theme': typeof DsTwThemeRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
@@ -294,6 +302,7 @@ export interface FileRoutesById {
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/ds/flow-components': typeof DsFlowComponentsRoute
   '/ds/flow-tokens': typeof DsFlowTokensRoute
   '/ds/tw-theme': typeof DsTwThemeRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
@@ -330,6 +339,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
+    | '/ds/flow-components'
     | '/ds/flow-tokens'
     | '/ds/tw-theme'
     | '/parents-gateway/$id'
@@ -357,6 +367,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
+    | '/ds/flow-components'
     | '/ds/flow-tokens'
     | '/ds/tw-theme'
     | '/parents-gateway/$id'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/_guest/login'
     | '/_guest/preview-menu'
     | '/announcements/$id'
+    | '/ds/flow-components'
     | '/ds/flow-tokens'
     | '/ds/tw-theme'
     | '/parents-gateway/$id'
@@ -612,6 +624,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DsFlowTokensRouteImport
       parentRoute: typeof DsRoute
     }
+    '/ds/flow-components': {
+      id: '/ds/flow-components'
+      path: '/flow-components'
+      fullPath: '/ds/flow-components'
+      preLoaderRoute: typeof DsFlowComponentsRouteImport
+      parentRoute: typeof DsRoute
+    }
     '/announcements/$id': {
       id: '/announcements/$id'
       path: '/$id'
@@ -727,12 +746,14 @@ const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
 )
 
 interface DsRouteChildren {
+  DsFlowComponentsRoute: typeof DsFlowComponentsRoute
   DsFlowTokensRoute: typeof DsFlowTokensRoute
   DsTwThemeRoute: typeof DsTwThemeRoute
   DsIndexRoute: typeof DsIndexRoute
 }
 
 const DsRouteChildren: DsRouteChildren = {
+  DsFlowComponentsRoute: DsFlowComponentsRoute,
   DsFlowTokensRoute: DsFlowTokensRoute,
   DsTwThemeRoute: DsTwThemeRoute,
   DsIndexRoute: DsIndexRoute,

@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { Layers, Palette } from 'lucide-react'
+import { Component, Layers, Palette } from 'lucide-react'
 
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
@@ -14,6 +14,13 @@ const DS_PAGES = [
     description:
       'Teacher Workspace design tokens, color palette, and Shadcn component reference.',
     icon: Palette,
+  },
+  {
+    to: '/ds/flow-components' as const,
+    title: 'Flow Components',
+    description:
+      'Interactive showcase of @flow/core components with TW/Flow theme switching.',
+    icon: Component,
   },
   {
     to: '/ds/flow-tokens' as const,
