@@ -97,15 +97,15 @@ const parentsCommItems: Array<MenuItem> = [
     featureFlag: 'parents-gateway',
   },
   {
-    title: 'Forms',
-    url: '/forms',
-    icon: ClipboardList,
-  },
-  {
     title: 'Reports',
     url: '/reports',
     icon: FileText,
     featureFlag: 'holistic-reports',
+  },
+  {
+    title: 'Forms',
+    url: '/forms',
+    icon: ClipboardList,
   },
 ]
 
