@@ -33,6 +33,7 @@ import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
 import { Route as ParentsGatewayNewRouteImport } from './routes/parents-gateway.new'
 import { Route as ParentsGatewayIdRouteImport } from './routes/parents-gateway.$id'
+import { Route as GlowStudentIdRouteImport } from './routes/glow.$studentId'
 import { Route as DsTwThemeRouteImport } from './routes/ds.tw-theme'
 import { Route as DsFlowTokensRouteImport } from './routes/ds.flow-tokens'
 import { Route as DsFlowComponentsRouteImport } from './routes/ds.flow-components'
@@ -163,6 +164,11 @@ const ParentsGatewayIdRoute = ParentsGatewayIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ParentsGatewayRoute,
 } as any)
+const GlowStudentIdRoute = GlowStudentIdRouteImport.update({
+  id: '/glow/$studentId',
+  path: '/glow/$studentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DsTwThemeRoute = DsTwThemeRouteImport.update({
   id: '/tw-theme',
   path: '/tw-theme',
@@ -239,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/ds/flow-components': typeof DsFlowComponentsRoute
   '/ds/flow-tokens': typeof DsFlowTokensRoute
   '/ds/tw-theme': typeof DsTwThemeRoute
+  '/glow/$studentId': typeof GlowStudentIdRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByTo {
   '/ds/flow-components': typeof DsFlowComponentsRoute
   '/ds/flow-tokens': typeof DsFlowTokensRoute
   '/ds/tw-theme': typeof DsTwThemeRoute
+  '/glow/$studentId': typeof GlowStudentIdRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -305,6 +313,7 @@ export interface FileRoutesById {
   '/ds/flow-components': typeof DsFlowComponentsRoute
   '/ds/flow-tokens': typeof DsFlowTokensRoute
   '/ds/tw-theme': typeof DsTwThemeRoute
+  '/glow/$studentId': typeof GlowStudentIdRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -342,6 +351,7 @@ export interface FileRouteTypes {
     | '/ds/flow-components'
     | '/ds/flow-tokens'
     | '/ds/tw-theme'
+    | '/glow/$studentId'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/ds/flow-components'
     | '/ds/flow-tokens'
     | '/ds/tw-theme'
+    | '/glow/$studentId'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
@@ -407,6 +418,7 @@ export interface FileRouteTypes {
     | '/ds/flow-components'
     | '/ds/flow-tokens'
     | '/ds/tw-theme'
+    | '/glow/$studentId'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
@@ -438,6 +450,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StudentAnalyticsRoute: typeof StudentAnalyticsRoute
   StudentsRoute: typeof StudentsRouteWithChildren
+  GlowStudentIdRoute: typeof GlowStudentIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -609,6 +622,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/parents-gateway/$id'
       preLoaderRoute: typeof ParentsGatewayIdRouteImport
       parentRoute: typeof ParentsGatewayRoute
+    }
+    '/glow/$studentId': {
+      id: '/glow/$studentId'
+      path: '/glow/$studentId'
+      fullPath: '/glow/$studentId'
+      preLoaderRoute: typeof GlowStudentIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/ds/tw-theme': {
       id: '/ds/tw-theme'
@@ -829,6 +849,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StudentAnalyticsRoute: StudentAnalyticsRoute,
   StudentsRoute: StudentsRouteWithChildren,
+  GlowStudentIdRoute: GlowStudentIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
