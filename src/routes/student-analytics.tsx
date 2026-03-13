@@ -54,7 +54,7 @@ function StudentAnalyticsPage() {
 
   return (
     <div className="flex flex-col p-6">
-      <div className="w-full max-w-[860px]">
+      <div className="w-full max-w-[1200px]">
         {/* Page header */}
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-semibold">Analytics</h1>
@@ -100,6 +100,7 @@ function StudentAnalyticsPage() {
             <div className="mt-4 flex w-fit rounded-full bg-muted p-1">
               <button
                 onClick={() => setAcademicView('monitoring')}
+                aria-pressed={academicView === 'monitoring'}
                 className={cn(
                   'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
                   academicView === 'monitoring'
@@ -111,6 +112,7 @@ function StudentAnalyticsPage() {
               </button>
               <button
                 onClick={() => setAcademicView('benchmark')}
+                aria-pressed={academicView === 'benchmark'}
                 className={cn(
                   'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
                   academicView === 'benchmark'

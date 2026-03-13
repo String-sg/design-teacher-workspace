@@ -279,6 +279,7 @@ export function StudentProfile({
 
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
 
+
   const gradeCounts = getStudentGradeCounts(student)
   const studentReports = filterReports({ studentId: student.id })
   const existingTerms = new Set(studentReports.map((r) => r.term))
@@ -317,6 +318,7 @@ export function StudentProfile({
         {isEnabled('lta-intervention') && (
           <InterventionBanner student={student} />
         )}
+
 
         {/* Overview Cards */}
         <StudentOverviewCards student={student} />

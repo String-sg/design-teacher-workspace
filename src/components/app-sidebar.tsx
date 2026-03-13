@@ -49,6 +49,7 @@ interface MenuItem {
   badge?: number
   featureFlag?: FeatureFlagKey
   conceptTag?: boolean
+  transparent?: boolean
 }
 
 const mainNavItems: Array<MenuItem> = [
@@ -100,7 +101,7 @@ const parentsCommItems: Array<MenuItem> = [
     title: 'Reports',
     url: '/reports',
     icon: FileText,
-    featureFlag: 'holistic-reports',
+    transparent: true,
   },
   {
     title: 'Forms',
@@ -118,7 +119,10 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
   return (
     <SidebarMenu>
       {items.map((item) => (
-        <SidebarMenuItem key={item.title}>
+        <SidebarMenuItem
+          key={item.title}
+          className={item.transparent ? 'opacity-0 pointer-events-none' : ''}
+        >
           <SidebarMenuButton
             render={<Link to={item.url} />}
             isActive={
@@ -149,7 +153,6 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
 export function AppSidebar() {
   const location = useLocation()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
-
   const announcementsEnabled = useFeatureFlag('announcements')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
   const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
@@ -174,7 +177,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-0">
         <div className="flex h-14 items-center justify-center gap-2 px-4 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0">
-          <span className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0">
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0 select-none cursor-default">
             Teacher Workspace
             <span className="ml-1.5 rounded-full bg-twblue-3 px-1.5 py-0.5 text-xs font-medium text-twblue-9">
               Beta
@@ -184,7 +187,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="pb-0">
           <SidebarGroupContent>
             <SidebarMenuItems
               items={filteredMainItems}

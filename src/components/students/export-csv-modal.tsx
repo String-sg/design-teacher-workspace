@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Download } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -12,45 +12,41 @@ import {
 import { cn } from '@/lib/utils'
 
 type SenFormat = 'sen-high' | 'sen-norm'
-type DataRange = 'all' | 'current'
 
 interface ExportCsvModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onExport: (options: { senFormat: SenFormat; dataRange: DataRange }) => void
+  onExport: (options: { senFormats: SenFormat[] }) => void
 }
 
-interface RadioCardProps {
+interface CheckboxCardProps {
   label: string
   description?: string
-  selected: boolean
-  onClick: () => void
+  checked: boolean
+  onChange: () => void
 }
 
-function RadioCard({ label, description, selected, onClick }: RadioCardProps) {
+function CheckboxCard({ label, description, checked, onChange }: CheckboxCardProps) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={onChange}
       className={cn(
-        'flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors',
-        selected
-          ? 'border-primary bg-primary/5 ring-1 ring-primary'
-          : 'border-border hover:bg-muted/50',
+        'flex w-full items-start gap-2 rounded-[14px] border p-4 text-left transition-colors',
+        checked
+          ? 'border-[#98c1ff] bg-[#f5f9ff]'
+          : 'border-border bg-background hover:bg-muted/50',
       )}
     >
-      <span
-        className={cn(
-          'mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2',
-          selected ? 'border-primary' : 'border-muted-foreground/40',
-        )}
-      >
-        {selected && <span className="h-2 w-2 rounded-full bg-primary" />}
-      </span>
-      <span className="flex flex-col gap-0.5">
-        <span className="text-sm font-medium">{label}</span>
+      <Checkbox
+        checked={checked}
+        tabIndex={-1}
+        className="pointer-events-none mt-0.5 shrink-0"
+      />
+      <span className="flex flex-col gap-1">
+        <span className="text-base leading-none text-[#1c2024]">{label}</span>
         {description && (
-          <span className="text-xs text-muted-foreground">{description}</span>
+          <span className="text-sm leading-none text-[#60646c]">{description}</span>
         )}
       </span>
     </button>
@@ -62,11 +58,22 @@ export function ExportCsvModal({
   onOpenChange,
   onExport,
 }: ExportCsvModalProps) {
-  const [senFormat, setSenFormat] = useState<SenFormat>('sen-norm')
-  const [dataRange, setDataRange] = useState<DataRange>('all')
+  const [senFormats, setSenFormats] = useState<Set<SenFormat>>(new Set(['sen-high']))
+
+  function toggleFormat(format: SenFormat) {
+    setSenFormats(prev => {
+      const next = new Set(prev)
+      if (next.has(format)) {
+        next.delete(format)
+      } else {
+        next.add(format)
+      }
+      return next
+    })
+  }
 
   function handleExport() {
-    onExport({ senFormat, dataRange })
+    onExport({ senFormats: Array.from(senFormats) })
     onOpenChange(false)
   }
 
@@ -74,53 +81,27 @@ export function ExportCsvModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Export to CSV</DialogTitle>
+          <DialogTitle>Export view</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-5">
-          {/* Sensitivity format */}
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">Sensitivity</p>
-            <div className="flex flex-col gap-2">
-              <RadioCard
-                label="Current view"
-                description="Includes Sensitive-High data (e.g. Counselling, SEN, Offences)"
-                selected={senFormat === 'sen-high'}
-                onClick={() => setSenFormat('sen-high')}
-              />
-              <RadioCard
-                label="Redacted view"
-                description="Masks Sensitive-High data, converting to Sensitive Normal"
-                selected={senFormat === 'sen-norm'}
-                onClick={() => setSenFormat('sen-norm')}
-              />
-            </div>
-          </div>
-
-          {/* Data range */}
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">Data range</p>
-            <div className="flex flex-col gap-2">
-              <RadioCard
-                label="All available data"
-                description="Export all student data across all terms"
-                selected={dataRange === 'all'}
-                onClick={() => setDataRange('all')}
-              />
-              <RadioCard
-                label="Current view"
-                description="Export only what is currently displayed on screen"
-                selected={dataRange === 'current'}
-                onClick={() => setDataRange('current')}
-              />
-            </div>
-          </div>
+        <div className="flex flex-col gap-2">
+          <CheckboxCard
+            label="As shown"
+            description="Export data as shown in the table"
+            checked={senFormats.has('sen-high')}
+            onChange={() => toggleFormat('sen-high')}
+          />
+          <CheckboxCard
+            label="Redacted"
+            description="Export with sensitive-high data masked"
+            checked={senFormats.has('sen-norm')}
+            onChange={() => toggleFormat('sen-norm')}
+          />
         </div>
 
         <DialogFooter>
-          <Button onClick={handleExport}>
-            <Download className="mr-1.5 size-4" />
-            Export CSV
+          <Button onClick={handleExport} disabled={senFormats.size === 0}>
+            Export
           </Button>
         </DialogFooter>
       </DialogContent>

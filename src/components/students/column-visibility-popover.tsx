@@ -24,6 +24,8 @@ export interface ColumnConfig {
   sortable?: boolean
   filterable?: boolean
   filterField?: FilterField
+  source?: string
+  lastUpdated?: string
 }
 
 export const defaultColumns: Array<ColumnConfig> = [
@@ -41,6 +43,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'name',
+    source: 'School Cockpit, RE_SDT_041',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'class',
@@ -49,6 +53,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'class',
+    source: 'School Cockpit, RE_SDT_041',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'cca',
@@ -56,6 +62,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     visible: true,
     sortable: true,
     filterable: false,
+    source: 'School Cockpit, RE_SDT_041',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'attentionTags',
@@ -78,6 +86,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'lateComing',
+    source: 'School Cockpit, RE_AT_002',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'absences',
@@ -86,6 +96,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'absences',
+    source: 'School Cockpit, RE_AT_002',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'ccaMissed',
@@ -94,6 +106,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'ccaMissed',
+    source: 'School Cockpit, RE_AT_002',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'offences',
@@ -102,6 +116,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'offences',
+    source: 'School Cockpit, RE_DI_003',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'conduct',
@@ -110,6 +126,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'conduct',
+    source: 'School Cockpit, RE_DI_003',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'counsellingSessions',
@@ -118,6 +136,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'counsellingSessions',
+    source: 'School Cockpit, RE_WB_004',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'sen',
@@ -126,6 +146,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'sen',
+    source: 'School Cockpit, RE_WB_004',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'socialLinks',
@@ -134,6 +156,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'socialLinks',
+    source: 'School Cockpit, RE_WB_004',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'riskIndicators',
@@ -142,6 +166,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'riskIndicators',
+    source: 'School Cockpit, RE_WB_004',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'lowMoodFlagged',
@@ -150,6 +176,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'lowMoodFlagged',
+    source: 'School Cockpit, RE_WB_004',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'overallPercentage',
@@ -158,6 +186,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'overallPercentage',
+    source: 'School Cockpit, RE_AC_005',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'approvedMtl',
@@ -165,6 +195,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     visible: true,
     sortable: true,
     filterable: false,
+    source: 'School Cockpit, RE_AC_005',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'learningSupport',
@@ -173,6 +205,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'learningSupport',
+    source: 'School Cockpit, RE_AC_005',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'postSecEligibility',
@@ -181,6 +215,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'postSecEligibility',
+    source: 'School Cockpit, RE_AC_005',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'fas',
@@ -189,6 +225,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'fas',
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'housing',
@@ -197,6 +235,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'housing',
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'housingType',
@@ -205,6 +245,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'housingType',
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'custody',
@@ -213,6 +255,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'custody',
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'commuterStatus',
@@ -220,6 +264,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     visible: true,
     sortable: true,
     filterable: false,
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'afterSchoolArrangement',
@@ -227,6 +273,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     visible: true,
     sortable: true,
     filterable: false,
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
   {
     id: 'siblings',
@@ -235,6 +283,8 @@ export const defaultColumns: Array<ColumnConfig> = [
     sortable: true,
     filterable: true,
     filterField: 'siblings',
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
 ]
 

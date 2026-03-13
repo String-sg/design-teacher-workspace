@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUp, Plus, Sparkles, X } from 'lucide-react'
+import { ArrowRight, ArrowUp, Sparkles, X } from 'lucide-react'
 
 import type { Student } from '@/types/student'
 import { cn } from '@/lib/utils'
@@ -255,6 +255,31 @@ function MessageContent({ content }: { content: string }) {
 }
 
 // ---------------------------------------------------------------------------
+// Typing indicator
+// ---------------------------------------------------------------------------
+
+function TypingIndicator() {
+  return (
+    <div className="animate-msg-in flex gap-2 justify-start">
+      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100">
+        <Sparkles className="animate-sparkle-idle h-3 w-3 text-blue-600" />
+      </div>
+      <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-muted/70 px-3 py-2">
+        {[0, 150, 300].map((delay) => (
+          <span
+            key={delay}
+            className="size-1.5 rounded-full bg-muted-foreground/50"
+            style={{
+              animation: `typing-dot 1.2s ease-in-out ${delay}ms infinite`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Shared chat panel content
 // ---------------------------------------------------------------------------
 
@@ -266,6 +291,7 @@ interface PanelContentProps {
   sendMessage: (text: string) => void
   onClose?: () => void
   messagesEndRef: React.RefObject<HTMLDivElement | null>
+  isTyping: boolean
 }
 
 function PanelContent({
@@ -276,8 +302,9 @@ function PanelContent({
   sendMessage,
   onClose,
   messagesEndRef,
+  isTyping,
 }: PanelContentProps) {
-  const isEmpty = messages.length === 0
+  const isEmpty = messages.length === 0 && !isTyping
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -315,19 +342,18 @@ function PanelContent({
       {/* Messages / empty state */}
       <div className="flex-1 overflow-y-auto px-3 py-4">
         {isEmpty ? (
-          <div className="flex flex-col gap-3">
-            <p className="text-[11px] text-muted-foreground">
-              Ask me anything about your data, or try:
-            </p>
-            {examplePrompts.map((prompt) => (
+          <div className="flex flex-col gap-2">
+            <p className="text-[11px] text-muted-foreground">Try asking:</p>
+            {examplePrompts.map((prompt, i) => (
               <button
                 key={prompt}
                 type="button"
                 onClick={() => sendMessage(prompt)}
-                className="flex items-center gap-3 rounded-xl border bg-background px-4 py-3 text-left text-sm transition-colors hover:bg-muted/60 active:bg-muted"
+                className="animate-fade-slide-up group flex items-center gap-2 rounded-xl border bg-background px-3 py-2.5 text-left text-xs transition-all hover:-translate-y-px hover:border-blue-200 hover:bg-blue-50/50 active:translate-y-0"
+                style={{ animationDelay: `${i * 60}ms` }}
               >
-                <Plus className="size-4 shrink-0 text-muted-foreground" />
-                <span className="text-foreground">{prompt}</span>
+                <span className="flex-1 text-foreground">{prompt}</span>
+                <ArrowRight className="size-3.5 shrink-0 text-muted-foreground/30 transition-all group-hover:translate-x-0.5 group-hover:text-blue-500/70" />
               </button>
             ))}
             {examplePrompts.length === 0 && (
@@ -344,7 +370,7 @@ function PanelContent({
               <div
                 key={msg.id}
                 className={cn(
-                  'flex gap-2',
+                  'animate-msg-in flex gap-2',
                   msg.role === 'user' ? 'justify-end' : 'justify-start',
                 )}
               >
@@ -365,6 +391,7 @@ function PanelContent({
                 </div>
               </div>
             ))}
+            {isTyping && <TypingIndicator />}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -385,8 +412,8 @@ function PanelContent({
             type="button"
             size="icon-sm"
             onClick={() => sendMessage(input.trim())}
-            disabled={!input.trim()}
-            className="shrink-0"
+            disabled={!input.trim() || isTyping}
+            className="shrink-0 transition-transform active:scale-90"
           >
             <ArrowUp className="size-4" />
           </Button>
@@ -408,14 +435,15 @@ export function InsightBuddy({
   const [messages, setMessages] = useState<Array<Message>>([])
   const [input, setInput] = useState('')
   const [isOpen, setIsOpen] = useState(false) // only used in floating mode
+  const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, isTyping])
 
   function sendMessage(text: string) {
-    if (!text.trim()) return
+    if (!text.trim() || isTyping) return
 
     const userMsg: Message = {
       id: `${Date.now()}-u`,
@@ -423,15 +451,20 @@ export function InsightBuddy({
       content: text,
     }
 
-    const botResponse = getBotResponse(text, messages, student)
-    const assistantMsg: Message = {
-      id: `${Date.now()}-a`,
-      role: 'assistant',
-      content: botResponse,
-    }
-
-    setMessages((prev) => [...prev, userMsg, assistantMsg])
+    setMessages((prev) => [...prev, userMsg])
     setInput('')
+    setIsTyping(true)
+
+    setTimeout(() => {
+      const botResponse = getBotResponse(text, messages, student)
+      const assistantMsg: Message = {
+        id: `${Date.now()}-a`,
+        role: 'assistant',
+        content: botResponse,
+      }
+      setIsTyping(false)
+      setMessages((prev) => [...prev, assistantMsg])
+    }, 900)
   }
 
   const panelProps: PanelContentProps = {
@@ -441,6 +474,7 @@ export function InsightBuddy({
     setInput,
     sendMessage,
     messagesEndRef,
+    isTyping,
   }
 
   // ── Floating mode: FAB + fixed overlay ─────────────────────────────────────
@@ -452,7 +486,7 @@ export function InsightBuddy({
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           className={cn(
-            'fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all',
+            'fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95',
             isOpen
               ? 'bg-gray-700 text-white hover:bg-gray-800'
               : 'bg-blue-600 text-white hover:bg-blue-700',
@@ -460,15 +494,15 @@ export function InsightBuddy({
           title={isOpen ? 'Close Insight Buddy' : 'Open Insight Buddy'}
         >
           {isOpen ? (
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5 transition-transform" />
           ) : (
-            <Sparkles className="h-5 w-5" />
+            <Sparkles className="animate-sparkle-idle h-5 w-5" />
           )}
         </button>
 
         {/* Overlay panel */}
         {isOpen && (
-          <div className="fixed bottom-[72px] right-6 z-40 flex h-[min(560px,calc(100vh-6rem))] w-80 flex-col overflow-hidden rounded-2xl border bg-white shadow-2xl">
+          <div className="animate-panel-up fixed bottom-[72px] right-6 z-40 flex h-[min(560px,calc(100vh-6rem))] w-80 flex-col overflow-hidden rounded-2xl border bg-white shadow-2xl">
             <PanelContent {...panelProps} onClose={() => setIsOpen(false)} />
           </div>
         )}
