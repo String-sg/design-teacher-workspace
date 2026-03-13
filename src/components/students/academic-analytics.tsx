@@ -318,7 +318,7 @@ function computeBreakdownData(
 }
 
 const MOCK_CANDIDATES = [
-  { id: '1', name: 'Chen Teo Jun Kai', class: '4A', score: 92, grade: 'A1' },
+  { id: '1', name: 'Chen Jun Kai', class: '4A', score: 92, grade: 'A1' },
   { id: '2', name: 'Vincent Koh Xin Yi', class: '4A', score: 91, grade: 'A1' },
   { id: '3', name: 'Mei Lin Huang', class: '4B', score: 90, grade: 'A1' },
   {
@@ -358,7 +358,7 @@ const MOCK_CANDIDATES = [
   { id: '14', name: 'Preet Kaur Sandhu', class: '4D', score: 79, grade: 'A1' },
   { id: '15', name: 'Zachary Ng Jun Hao', class: '4B', score: 78, grade: 'A1' },
   { id: '16', name: 'Sarah Chan Jun Kai', class: '4A', score: 77, grade: 'A2' },
-  { id: '17', name: 'Xiao Lam Wei Jie', class: '4B', score: 76, grade: 'A2' },
+  { id: '17', name: 'Lam Wei Jie', class: '4B', score: 76, grade: 'A2' },
   {
     id: '18',
     name: 'Jessica Foo Mei Ling',
@@ -386,12 +386,12 @@ const MOCK_CANDIDATES = [
     score: 67,
     grade: 'A2',
   },
-  { id: '27', name: 'Yusuf Koh Xin Yi', class: '4C', score: 66, grade: 'B3' },
-  { id: '28', name: 'Liang Lim Wei Jie', class: '4B', score: 65, grade: 'B3' },
+  { id: '27', name: 'Kenneth Koh Xin Yi', class: '4C', score: 66, grade: 'B3' },
+  { id: '28', name: 'Liang Wei Jie', class: '4B', score: 65, grade: 'B3' },
   { id: '29', name: 'Sarah Tan Jun Kai', class: '4A', score: 64, grade: 'B3' },
   {
     id: '30',
-    name: 'Harish Cheng Xin Yi',
+    name: 'Wayne Cheng Xin Yi',
     class: '4D',
     score: 63,
     grade: 'B3',
@@ -446,7 +446,7 @@ const MOCK_CANDIDATES = [
     score: 55,
     grade: 'B3',
   },
-  { id: '39', name: 'Tan Lam Wei Jie', class: '4B', score: 54, grade: 'B4' },
+  { id: '39', name: 'Tan Wei Jie', class: '4B', score: 54, grade: 'B4' },
   { id: '40', name: 'Jason Chua Jun Kai', class: '4C', score: 53, grade: 'B4' },
   { id: '41', name: 'Ahmad Bin Hassan', class: '4A', score: 52, grade: 'B4' },
   {
@@ -1755,34 +1755,32 @@ export function MonitoringAcademicAnalytics() {
           </div>
 
           {/* Table */}
-          <div className="overflow-hidden rounded-lg border">
+          <div className="overflow-x-auto rounded-lg border">
             <table className="w-full table-fixed text-sm">
               <thead>
                 <tr className="border-b bg-muted/40">
-                  <th className="w-[15%] px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    View profile
-                  </th>
-                  <th className="w-2/5 px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Name
-                  </th>
-                  <th className="w-[15%] px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Class
-                  </th>
-                  <th className="w-[15%] px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Score
-                  </th>
-                  <th className="w-[15%] px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Grade
-                  </th>
+                  {(['Profile', 'Name', 'Class', 'Score', 'Grade'] as const).map((label, i) => (
+                    <th
+                      key={label}
+                      className={cn(
+                        'h-12 px-4 text-left align-middle font-medium text-muted-foreground',
+                        i === 0 && 'w-[96px]',
+                        i === 1 && 'w-[300px]',
+                        (i === 2 || i === 3 || i === 4) && 'w-[140px]',
+                      )}
+                    >
+                      {label}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {pagedCandidates.map((c) => (
                   <tr
                     key={c.id}
-                    className="bg-white transition-colors hover:bg-muted/30"
+                    className="transition-colors hover:bg-muted/50"
                   >
-                    <td className="w-[15%] px-4 py-2.5">
+                    <td className="w-[96px] p-4 align-middle">
                       {(() => {
                         const realId = studentIdByName.get(c.name)
                         return (
@@ -1811,16 +1809,16 @@ export function MonitoringAcademicAnalytics() {
                         )
                       })()}
                     </td>
-                    <td className="w-2/5 px-4 py-2.5 font-medium text-foreground">
+                    <td className="w-[300px] p-4 align-middle font-medium">
                       {c.name}
                     </td>
-                    <td className="w-[15%] px-4 py-2.5 text-muted-foreground">
+                    <td className="w-[140px] p-4 align-middle">
                       {c.class}
                     </td>
-                    <td className="w-[15%] px-4 py-2.5 text-right tabular-nums">
+                    <td className="w-[140px] p-4 align-middle tabular-nums">
                       {c.score}
                     </td>
-                    <td className="w-[15%] px-4 py-2.5 text-right text-muted-foreground">
+                    <td className="w-[140px] p-4 align-middle">
                       {c.grade}
                     </td>
                   </tr>

@@ -4,7 +4,7 @@ import type { AttentionTag, ClassOption, Student } from '@/types/student'
 export const mockStudents: Array<Student> = [
   {
     id: '1',
-    name: 'Chen Teo Jun Kai',
+    name: 'Chen Jun Kai',
     class: '3A',
     cca: 'Basketball',
     schoolName: 'Bandung Secondary School',
@@ -64,8 +64,8 @@ export const mockStudents: Array<Student> = [
     afterSchoolArrangement: null,
     siblings: 2,
     siblingDetails: [
-      { name: 'Chen Teo Jun Hao', class: '1A' },
-      { name: 'Chen Teo Mei Ling', class: '5B' },
+      { name: 'Chen Jun Hao', class: '1A' },
+      { name: 'Chen Mei Ling', class: '5B' },
     ],
     externalAgencies: null,
     birthday: '4 Jan 2010',
@@ -151,7 +151,7 @@ export const mockStudents: Array<Student> = [
   },
   {
     id: '3',
-    name: 'Xiao Lam Wei Jie',
+    name: 'Lam Wei Jie',
     class: '3A',
     cca: 'Volleyball',
     schoolName: 'Bandung Secondary School',
@@ -314,7 +314,7 @@ export const mockStudents: Array<Student> = [
   },
   {
     id: '5',
-    name: 'Yusuf Koh Xin Yi',
+    name: 'Kenneth Koh Xin Yi',
     class: '3A',
     cca: 'Choir',
     schoolName: 'Bandung Secondary School',
@@ -331,7 +331,7 @@ export const mockStudents: Array<Student> = [
     riskIndicators: 2,
     lowMoodFlagged: null,
     socialLinks: 3,
-    selectedBy: [{ name: 'Chen Teo Jun Kai', class: '3A', closenessRating: 2 }],
+    selectedBy: [{ name: 'Chen Jun Kai', class: '3A', closenessRating: 2 }],
     selectedFriends: [
       { name: 'Sarah Chan Jun Kai', class: '3A', closenessRating: null },
       { name: 'Wei Xiang', class: '3B', closenessRating: 1 },
@@ -374,7 +374,7 @@ export const mockStudents: Array<Student> = [
   },
   {
     id: '6',
-    name: 'Liang Lim Wei Jie',
+    name: 'Liang Wei Jie',
     class: '3A',
     cca: 'Concert Band',
     schoolName: 'Bandung Secondary School',
@@ -461,7 +461,7 @@ export const mockStudents: Array<Student> = [
   },
   {
     id: '8',
-    name: 'Harish Cheng Xin Yi',
+    name: 'Wayne Cheng Xin Yi',
     class: '3A',
     cca: 'Scouts',
     schoolName: 'Bandung Secondary School',
@@ -509,7 +509,7 @@ export const mockStudents: Array<Student> = [
   },
   {
     id: '9',
-    name: 'Tan Lam Wei Jie',
+    name: 'Tan Wei Jie',
     class: '3A',
     cca: 'Red Cross',
     schoolName: 'Bandung Secondary School',

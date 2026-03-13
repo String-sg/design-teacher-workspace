@@ -133,9 +133,9 @@ export function StudentFilters({
       <ExportCsvModal
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
-        onExport={({ senFormat, dataRange }) => {
+        onExport={({ senFormats }) => {
           // TODO: implement actual CSV export
-          console.log('Exporting CSV', { senFormat, dataRange })
+          console.log('Exporting CSV', { senFormats })
         }}
       />
     </>

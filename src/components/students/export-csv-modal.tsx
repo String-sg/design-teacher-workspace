@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -11,45 +12,41 @@ import {
 import { cn } from '@/lib/utils'
 
 type SenFormat = 'sen-high' | 'sen-norm'
-type DataRange = 'all' | 'current'
 
 interface ExportCsvModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onExport: (options: { senFormat: SenFormat; dataRange: DataRange }) => void
+  onExport: (options: { senFormats: SenFormat[] }) => void
 }
 
-interface RadioCardProps {
+interface CheckboxCardProps {
   label: string
   description?: string
-  selected: boolean
-  onClick: () => void
+  checked: boolean
+  onChange: () => void
 }
 
-function RadioCard({ label, description, selected, onClick }: RadioCardProps) {
+function CheckboxCard({ label, description, checked, onChange }: CheckboxCardProps) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={onChange}
       className={cn(
-        'flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors',
-        selected
-          ? 'border-primary bg-primary/5 ring-1 ring-primary'
-          : 'border-border hover:bg-muted/50',
+        'flex w-full items-start gap-2 rounded-[14px] border p-4 text-left transition-colors',
+        checked
+          ? 'border-[#98c1ff] bg-[#f5f9ff]'
+          : 'border-border bg-background hover:bg-muted/50',
       )}
     >
-      <span
-        className={cn(
-          'mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2',
-          selected ? 'border-primary' : 'border-muted-foreground/40',
-        )}
-      >
-        {selected && <span className="h-2 w-2 rounded-full bg-primary" />}
-      </span>
-      <span className="flex flex-col gap-0.5">
-        <span className="text-sm font-medium">{label}</span>
+      <Checkbox
+        checked={checked}
+        tabIndex={-1}
+        className="pointer-events-none mt-0.5 shrink-0"
+      />
+      <span className="flex flex-col gap-1">
+        <span className="text-base leading-none text-[#1c2024]">{label}</span>
         {description && (
-          <span className="text-xs text-muted-foreground">{description}</span>
+          <span className="text-sm leading-none text-[#60646c]">{description}</span>
         )}
       </span>
     </button>
@@ -61,11 +58,22 @@ export function ExportCsvModal({
   onOpenChange,
   onExport,
 }: ExportCsvModalProps) {
-  const [senFormat, setSenFormat] = useState<SenFormat>('sen-high')
-  const [dataRange, setDataRange] = useState<DataRange>('current')
+  const [senFormats, setSenFormats] = useState<Set<SenFormat>>(new Set(['sen-high']))
+
+  function toggleFormat(format: SenFormat) {
+    setSenFormats(prev => {
+      const next = new Set(prev)
+      if (next.has(format)) {
+        next.delete(format)
+      } else {
+        next.add(format)
+      }
+      return next
+    })
+  }
 
   function handleExport() {
-    onExport({ senFormat, dataRange })
+    onExport({ senFormats: Array.from(senFormats) })
     onOpenChange(false)
   }
 
@@ -76,47 +84,24 @@ export function ExportCsvModal({
           <DialogTitle>Export view</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-5">
-          {/* What to export */}
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">What to export</p>
-            <div className="flex flex-col gap-2">
-              <RadioCard
-                label="Visible columns"
-                selected={dataRange === 'current'}
-                onClick={() => setDataRange('current')}
-              />
-              <RadioCard
-                label="All columns"
-                selected={dataRange === 'all'}
-                onClick={() => setDataRange('all')}
-              />
-            </div>
-          </div>
-
-          {/* Export format */}
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">Export format</p>
-            <div className="flex flex-col gap-2">
-              <RadioCard
-                label="As shown"
-                description="Export data as shown in the table"
-                selected={senFormat === 'sen-high'}
-                onClick={() => setSenFormat('sen-high')}
-              />
-              <RadioCard
-                label="Redacted"
-                description="Export with sensitive-high data masked"
-                selected={senFormat === 'sen-norm'}
-                onClick={() => setSenFormat('sen-norm')}
-              />
-            </div>
-          </div>
+        <div className="flex flex-col gap-2">
+          <CheckboxCard
+            label="As shown"
+            description="Export data as shown in the table"
+            checked={senFormats.has('sen-high')}
+            onChange={() => toggleFormat('sen-high')}
+          />
+          <CheckboxCard
+            label="Redacted"
+            description="Export with sensitive-high data masked"
+            checked={senFormats.has('sen-norm')}
+            onChange={() => toggleFormat('sen-norm')}
+          />
         </div>
 
         <DialogFooter>
-          <Button onClick={handleExport}>
-            Export view
+          <Button onClick={handleExport} disabled={senFormats.size === 0}>
+            Export
           </Button>
         </DialogFooter>
       </DialogContent>

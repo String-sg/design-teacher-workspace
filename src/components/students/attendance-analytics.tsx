@@ -589,12 +589,7 @@ const AVAILABLE_MONTHS = MONTHLY_DATA.map((m) => m.month)
 // Reverse-chronological for the dropdown (most recent first)
 const MONTH_OPTIONS = [...AVAILABLE_MONTHS].reverse()
 // Current month abbreviation (Mar for 2026-03-10)
-const CURRENT_MONTH_ABBR = new Date().toLocaleString('en-US', {
-  month: 'short',
-})
-const DEFAULT_MONTH = AVAILABLE_MONTHS.includes(CURRENT_MONTH_ABBR)
-  ? CURRENT_MONTH_ABBR
-  : 'all'
+const DEFAULT_MONTH = AVAILABLE_MONTHS[AVAILABLE_MONTHS.length - 1] ?? 'all'
 const DEFAULT_FILTER: NumericFilter = { op: 'gt', value: '' }
 
 function matchesNumericFilter(value: number, filter: NumericFilter): boolean {
@@ -661,42 +656,53 @@ function AttSortableHeader({
   const active = sortField === field
   const dir = active ? sortDir : null
 
+  const triggerButton = (
+    <PopoverTrigger
+      render={
+        <button
+          type="button"
+          className={cn(
+            'inline-flex w-full items-center gap-1 overflow-hidden rounded-md px-2 py-1 -ml-2 transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer',
+            align === 'right' && 'justify-end',
+            active && 'text-primary',
+          )}
+        />
+      }
+    >
+      <span className={cn('min-w-0', truncate ? 'truncate' : 'shrink-0')}>
+        {label}
+      </span>
+      <span className="shrink-0">
+        {dir === 'asc' ? (
+          <ArrowUp className="h-3 w-3" />
+        ) : dir === 'desc' ? (
+          <ArrowDown className="h-3 w-3" />
+        ) : (
+          <ChevronDown className="h-3 w-3 opacity-40" />
+        )}
+      </span>
+    </PopoverTrigger>
+  )
+
   return (
     <th
       className={cn(
-        'overflow-hidden px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground',
+        'h-12 px-4 align-middle font-medium text-muted-foreground overflow-hidden',
         align === 'right' ? 'text-right' : 'text-left',
         className,
       )}
-      title={label}
     >
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger
-          render={
-            <button
-              type="button"
-              className={cn(
-                'flex w-full items-center gap-1 overflow-hidden rounded-md px-2 py-1 -ml-2 transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer text-xs font-medium uppercase tracking-wide',
-                !truncate && 'whitespace-nowrap',
-                align === 'right' && 'justify-end',
-                active && 'text-primary',
-              )}
-            />
-          }
-        >
-          <span className={cn('min-w-0', truncate ? 'truncate' : 'shrink-0')}>
-            {label}
-          </span>
-          <span className="shrink-0">
-            {dir === 'asc' ? (
-              <ArrowUp className="h-3 w-3" />
-            ) : dir === 'desc' ? (
-              <ArrowDown className="h-3 w-3" />
-            ) : (
-              <ChevronDown className="h-3 w-3 opacity-40" />
-            )}
-          </span>
-        </PopoverTrigger>
+        {truncate ? (
+          <TooltipUI>
+            <TooltipTrigger render={<span style={{ display: 'inline-flex', width: '100%' }} />}>
+              {triggerButton}
+            </TooltipTrigger>
+            <TooltipContent side="top">{label}</TooltipContent>
+          </TooltipUI>
+        ) : (
+          triggerButton
+        )}
         <PopoverContent
           align={align === 'right' ? 'end' : 'start'}
           className="w-48 gap-1 p-3"
@@ -1006,12 +1012,7 @@ function AttendanceStudentsTable({
         >
           <SelectTrigger
             size="sm"
-            className={cn(
-              'h-8 w-auto gap-1.5 rounded-full border px-3 text-sm',
-              filterMonth !== 'all'
-                ? 'border-blue-300 bg-blue-50 text-blue-700'
-                : 'border-border bg-white hover:bg-muted',
-            )}
+            className="h-8 w-auto gap-1.5 rounded-[14px] border border-border bg-white px-3 text-sm hover:bg-muted"
           >
             <SelectValue>
               {filterMonth === 'all' ? 'All' : filterMonth}
@@ -1152,9 +1153,12 @@ function AttendanceStudentsTable({
 
       {/* Table */}
       <div className="overflow-x-auto rounded-lg border">
-        <table className="min-w-full table-fixed text-sm">
+        <table className="w-full table-fixed text-sm">
           <thead>
             <tr className="border-b bg-muted/40">
+              <th className="w-[96px] h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                Profile
+              </th>
               <AttSortableHeader
                 label="Name"
                 field="name"
@@ -1162,7 +1166,7 @@ function AttendanceStudentsTable({
                 sortDir={sortDir}
                 onSort={handleSort}
                 onClearSort={clearSort}
-                className="w-[220px]"
+                className="w-[192px]"
               />
               <AttSortableHeader
                 label="Class"
@@ -1171,7 +1175,7 @@ function AttendanceStudentsTable({
                 sortDir={sortDir}
                 onSort={handleSort}
                 onClearSort={clearSort}
-                className="w-[96px]"
+                className="w-[140px]"
               />
               <AttSortableHeader
                 label="Total"
@@ -1180,7 +1184,7 @@ function AttendanceStudentsTable({
                 sortDir={sortDir}
                 onSort={handleSort}
                 onClearSort={clearSort}
-                className="w-[96px]"
+                className="w-[140px]"
               />
               <AttSortableHeader
                 label="Late"
@@ -1189,7 +1193,7 @@ function AttendanceStudentsTable({
                 sortDir={sortDir}
                 onSort={handleSort}
                 onClearSort={clearSort}
-                className="w-[96px]"
+                className="w-[140px]"
               />
               <AttSortableHeader
                 label="Non-VR absences"
@@ -1198,7 +1202,7 @@ function AttendanceStudentsTable({
                 sortDir={sortDir}
                 onSort={handleSort}
                 onClearSort={clearSort}
-                className="w-[96px]"
+                className="w-[140px]"
                 truncate
               />
               <AttSortableHeader
@@ -1208,7 +1212,7 @@ function AttendanceStudentsTable({
                 sortDir={sortDir}
                 onSort={handleSort}
                 onClearSort={clearSort}
-                className="w-[96px]"
+                className="w-[140px]"
                 truncate
               />
               <AttSortableHeader
@@ -1218,7 +1222,7 @@ function AttendanceStudentsTable({
                 sortDir={sortDir}
                 onSort={handleSort}
                 onClearSort={clearSort}
-                className="w-[96px]"
+                className="w-[140px]"
               />
               <AttSortableHeader
                 label="Valid reason (private)"
@@ -1227,7 +1231,7 @@ function AttendanceStudentsTable({
                 sortDir={sortDir}
                 onSort={handleSort}
                 onClearSort={clearSort}
-                className="w-[96px]"
+                className="w-[140px]"
                 truncate
               />
               <AttSortableHeader
@@ -1237,21 +1241,18 @@ function AttendanceStudentsTable({
                 sortDir={sortDir}
                 onSort={handleSort}
                 onClearSort={clearSort}
-                className="w-[96px]"
+                className="w-[140px]"
                 truncate
               />
-              <th className="w-[60px] overflow-hidden px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Profile
-              </th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {paged.map((s) => (
               <tr
                 key={s.id}
-                className="bg-white transition-colors hover:bg-muted/30"
+                className="transition-colors hover:bg-muted/50"
               >
-                <td className="w-[60px] px-4 py-2.5">
+                <td className="w-[96px] p-4 align-middle">
                   {(() => {
                     const realId = studentIdByName.get(s.name)
                     return (
@@ -1280,13 +1281,13 @@ function AttendanceStudentsTable({
                     )
                   })()}
                 </td>
-                <td className="w-[220px] px-4 py-2.5 font-medium text-foreground">
+                <td className="w-[192px] p-4 align-middle font-medium">
                   {s.name}
                 </td>
-                <td className="min-w-[96px] px-4 py-2.5 text-muted-foreground">
+                <td className="min-w-[140px] p-4 align-middle">
                   {s.class}
                 </td>
-                <td className="min-w-[96px] px-4 py-2.5 tabular-nums font-medium">
+                <td className="min-w-[140px] p-4 align-middle tabular-nums">
                   {s.late +
                     s.nonVRAbsences +
                     s.absentPendingReason +
@@ -1294,22 +1295,22 @@ function AttendanceStudentsTable({
                     s.absentValidPrivate +
                     s.absentValidOfficial}
                 </td>
-                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                <td className="min-w-[140px] p-4 align-middle tabular-nums">
                   {s.late}
                 </td>
-                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                <td className="min-w-[140px] p-4 align-middle tabular-nums">
                   {s.nonVRAbsences}
                 </td>
-                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                <td className="min-w-[140px] p-4 align-middle tabular-nums">
                   {s.absentPendingReason}
                 </td>
-                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                <td className="min-w-[140px] p-4 align-middle tabular-nums">
                   {s.mc}
                 </td>
-                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                <td className="min-w-[140px] p-4 align-middle tabular-nums">
                   {s.absentValidPrivate}
                 </td>
-                <td className="min-w-[96px] px-4 py-2.5 tabular-nums">
+                <td className="min-w-[140px] p-4 align-middle tabular-nums">
                   {s.absentValidOfficial}
                 </td>
               </tr>
