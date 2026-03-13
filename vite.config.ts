@@ -10,6 +10,9 @@ import { madeRefine } from 'made-refine/vite'
 const require = createRequire(import.meta.url)
 
 const config = defineConfig({
+  server: {
+    host: '127.0.0.1',
+  },
   plugins: [
     // devtools disabled to avoid port conflict with other worktree
     // devtools({ port: 42070 }),

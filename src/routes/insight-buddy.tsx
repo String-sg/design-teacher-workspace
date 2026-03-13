@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { ArrowRight, ArrowUp, LineChart, Search, Sparkles } from 'lucide-react'
 import {
   Bar,
@@ -12,6 +12,10 @@ import {
   YAxis,
 } from 'recharts'
 import type { KeyboardEvent } from 'react'
+import {
+  DEFAULT_FEATURE_FLAGS,
+  FEATURE_FLAGS_STORAGE_KEY,
+} from '@/lib/feature-flags'
 
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { Button } from '@/components/ui/button'
@@ -35,6 +39,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/insight-buddy')({
+  beforeLoad: () => {
+    const stored = localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY)
+    const flags = stored
+      ? { ...DEFAULT_FEATURE_FLAGS, ...JSON.parse(stored) }
+      : DEFAULT_FEATURE_FLAGS
+    if (!flags['student-analytics']) throw redirect({ to: '/' })
+  },
   component: InsightBuddyPage,
 })
 

@@ -1,7 +1,12 @@
+@import '@flow/design-tokens/css';
+@import '@flow/design-tokens/tailwind/reset';
+@import '@flow/design-tokens/tailwind';
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource-variable/inter';
+@import '@fontsource/inter';
+@import '@fontsource/atkinson-hyperlegible';
+@import '@flow/core/tailwind.no-reset.css';
 @import '@radix-ui/colors/slate.css';
 @import '@radix-ui/colors/slate-dark.css';
 @import '@radix-ui/colors/crimson.css';
@@ -64,8 +69,34 @@
   --chart-3: var(--twblue-8);
   --chart-4: var(--twblue-9);
   --chart-5: var(--twblue-11);
-  --radius: 0.625rem;
-  --radius-input: 0.5rem;
+  --radius-input: 14px;
+
+  /*
+   * Overridable radius/spacing/typography primitives (Tier 1).
+   * TW theme values by default; .flow-theme reverts to Flow DS defaults.
+   * Prefixed with _ to distinguish from Flow's own token layer.
+   */
+  /* Radius */
+  --_radius-sm: 6px;
+  --_radius-md: 8px;
+  --_radius-lg: 10px;
+  --_radius-xl: 14px;
+  --_radius-2xl: 24px; /* Flow: 16px → TW: 24px (cards) */
+  --_radius-3xl: 24px;
+  --_radius-4xl: 32px;
+  /* Spacing */
+  --_spacing-xs: 0.375rem; /* Flow: 0.5rem → TW: 0.375rem */
+  --_spacing-md: 0.75rem; /* Flow: 1rem → TW: 0.75rem */
+  --_spacing-2xl: 2.25rem; /* Flow: 2.5rem → TW: 2.25rem */
+  /* Typography */
+  --_text-body-md: 0.875rem; /* Flow: 1rem → TW: 0.875rem */
+  --_text-body-md-strong: 0.875rem;
+  --_text-label-sm: 0.75rem; /* Flow: 0.875rem → TW: 0.75rem */
+  --_text-label-sm-strong: 0.75rem;
+  --_weight-body-md-strong: 500; /* Flow: 600 → TW: 500 */
+  --_weight-label-sm-strong: 500;
+
+  --overlay: rgba(0, 0, 0, 0.8);
   --sidebar: var(--slate-2);
   --sidebar-foreground: var(--slate-12);
   --sidebar-primary: var(--twblue-9);
@@ -74,9 +105,130 @@
   --sidebar-accent-foreground: var(--slate-12);
   --sidebar-border: var(--slate-6);
   --sidebar-ring: var(--twblue-8);
+
+  /* Teacher Workspace Theme: Override Flow DS color scales at :root */
+  /* Brand → twblue */
+  --color-brand-1: var(--twblue-1);
+  --color-brand-2: var(--twblue-2);
+  --color-brand-3: var(--twblue-3);
+  --color-brand-4: var(--twblue-4);
+  --color-brand-5: var(--twblue-5);
+  --color-brand-6: var(--twblue-6);
+  --color-brand-7: var(--twblue-7);
+  --color-brand-8: var(--twblue-8);
+  --color-brand-9: var(--twblue-9);
+  --color-brand-10: var(--twblue-10);
+  --color-brand-11: var(--twblue-11);
+  --color-brand-12: var(--twblue-12);
+  /* Brand alpha → twblue alpha */
+  --color-brand-alpha-1: var(--twblue-a1);
+  --color-brand-alpha-2: var(--twblue-a2);
+  --color-brand-alpha-3: var(--twblue-a3);
+  --color-brand-alpha-4: var(--twblue-a4);
+  --color-brand-alpha-5: var(--twblue-a5);
+  --color-brand-alpha-6: var(--twblue-a6);
+  --color-brand-alpha-7: var(--twblue-a7);
+  --color-brand-alpha-8: var(--twblue-a8);
+  --color-brand-alpha-9: var(--twblue-a9);
+  --color-brand-alpha-10: var(--twblue-a10);
+  --color-brand-alpha-11: var(--twblue-a11);
+  --color-brand-alpha-12: var(--twblue-a12);
+  /* Neutral → slate */
+  --color-neutral-1: var(--slate-1);
+  --color-neutral-2: var(--slate-2);
+  --color-neutral-3: var(--slate-3);
+  --color-neutral-4: var(--slate-4);
+  --color-neutral-5: var(--slate-5);
+  --color-neutral-6: var(--slate-6);
+  --color-neutral-7: var(--slate-7);
+  --color-neutral-8: var(--slate-8);
+  --color-neutral-9: var(--slate-9);
+  --color-neutral-10: var(--slate-10);
+  --color-neutral-11: var(--slate-11);
+  --color-neutral-12: var(--slate-12);
+  /* Critical → crimson */
+  --color-critical-1: var(--crimson-1);
+  --color-critical-2: var(--crimson-2);
+  --color-critical-3: var(--crimson-3);
+  --color-critical-4: var(--crimson-4);
+  --color-critical-5: var(--crimson-5);
+  --color-critical-6: var(--crimson-6);
+  --color-critical-7: var(--crimson-7);
+  --color-critical-8: var(--crimson-8);
+  --color-critical-9: var(--crimson-9);
+  --color-critical-10: var(--crimson-10);
+  --color-critical-11: var(--crimson-11);
+  --color-critical-12: var(--crimson-12);
+  /* Success → lime */
+  --color-success-1: var(--lime-1);
+  --color-success-2: var(--lime-2);
+  --color-success-3: var(--lime-3);
+  --color-success-4: var(--lime-4);
+  --color-success-5: var(--lime-5);
+  --color-success-6: var(--lime-6);
+  --color-success-7: var(--lime-7);
+  --color-success-8: var(--lime-8);
+  --color-success-9: var(--lime-9);
+  --color-success-10: var(--lime-10);
+  --color-success-11: var(--lime-11);
+  --color-success-12: var(--lime-12);
+  /* Caution → orange */
+  --color-caution-1: var(--orange-1);
+  --color-caution-2: var(--orange-2);
+  --color-caution-3: var(--orange-3);
+  --color-caution-4: var(--orange-4);
+  --color-caution-5: var(--orange-5);
+  --color-caution-6: var(--orange-6);
+  --color-caution-7: var(--orange-7);
+  --color-caution-8: var(--orange-8);
+  --color-caution-9: var(--orange-9);
+  --color-caution-10: var(--orange-10);
+  --color-caution-11: var(--orange-11);
+  --color-caution-12: var(--orange-12);
+  /* Info → amber */
+  --color-info-1: var(--amber-1);
+  --color-info-2: var(--amber-2);
+  --color-info-3: var(--amber-3);
+  --color-info-4: var(--amber-4);
+  --color-info-5: var(--amber-5);
+  --color-info-6: var(--amber-6);
+  --color-info-7: var(--amber-7);
+  --color-info-8: var(--amber-8);
+  --color-info-9: var(--amber-9);
+  --color-info-10: var(--amber-10);
+  --color-info-11: var(--amber-11);
+  --color-info-12: var(--amber-12);
+  /* Accent → slate */
+  --color-accent-1: var(--slate-1);
+  --color-accent-2: var(--slate-2);
+  --color-accent-3: var(--slate-3);
+  --color-accent-4: var(--slate-4);
+  --color-accent-5: var(--slate-5);
+  --color-accent-6: var(--slate-6);
+  --color-accent-7: var(--slate-7);
+  --color-accent-8: var(--slate-8);
+  --color-accent-9: var(--slate-9);
+  --color-accent-10: var(--slate-10);
+  --color-accent-11: var(--slate-11);
+  --color-accent-12: var(--slate-12);
+
+  /* Flow DS semantic overrides */
+  --color-background-page: var(--background);
+  --color-background-section: var(--card);
+  --color-background-popover: var(--popover);
+  --color-foreground-default: var(--foreground);
+  --color-foreground-section: var(--card-foreground);
+  --color-border-default: var(--border);
+  --color-border-focus: var(--ring);
+  --color-fill-critical: var(--destructive);
+  --color-lightest: white;
+  /* Fix info→amber side effects: links and focus should stay blue (brand) */
+  --color-foreground-link: var(--color-brand-11);
+  --color-foreground-link-hover: var(--color-brand-12);
 }
 
 .dark {
+  --overlay: rgba(0, 0, 0, 0.8);
   --slate-1: var(--slate-dark-1);
   --slate-2: var(--slate-dark-2);
   --slate-3: var(--slate-dark-3);
@@ -193,10 +345,130 @@
   --sidebar-accent-foreground: var(--slate-12);
   --sidebar-border: var(--slate-6);
   --sidebar-ring: var(--twblue-8);
+
+  /* Flow DS scales for dark mode (reference already-dark-swapped Radix values) */
+  /* Brand → twblue */
+  --color-brand-1: var(--twblue-1);
+  --color-brand-2: var(--twblue-2);
+  --color-brand-3: var(--twblue-3);
+  --color-brand-4: var(--twblue-4);
+  --color-brand-5: var(--twblue-5);
+  --color-brand-6: var(--twblue-6);
+  --color-brand-7: var(--twblue-7);
+  --color-brand-8: var(--twblue-8);
+  --color-brand-9: var(--twblue-9);
+  --color-brand-10: var(--twblue-10);
+  --color-brand-11: var(--twblue-11);
+  --color-brand-12: var(--twblue-12);
+  /* Brand alpha → twblue alpha */
+  --color-brand-alpha-1: var(--twblue-a1);
+  --color-brand-alpha-2: var(--twblue-a2);
+  --color-brand-alpha-3: var(--twblue-a3);
+  --color-brand-alpha-4: var(--twblue-a4);
+  --color-brand-alpha-5: var(--twblue-a5);
+  --color-brand-alpha-6: var(--twblue-a6);
+  --color-brand-alpha-7: var(--twblue-a7);
+  --color-brand-alpha-8: var(--twblue-a8);
+  --color-brand-alpha-9: var(--twblue-a9);
+  --color-brand-alpha-10: var(--twblue-a10);
+  --color-brand-alpha-11: var(--twblue-a11);
+  --color-brand-alpha-12: var(--twblue-a12);
+  /* Neutral → slate */
+  --color-neutral-1: var(--slate-1);
+  --color-neutral-2: var(--slate-2);
+  --color-neutral-3: var(--slate-3);
+  --color-neutral-4: var(--slate-4);
+  --color-neutral-5: var(--slate-5);
+  --color-neutral-6: var(--slate-6);
+  --color-neutral-7: var(--slate-7);
+  --color-neutral-8: var(--slate-8);
+  --color-neutral-9: var(--slate-9);
+  --color-neutral-10: var(--slate-10);
+  --color-neutral-11: var(--slate-11);
+  --color-neutral-12: var(--slate-12);
+  /* Critical → crimson */
+  --color-critical-1: var(--crimson-1);
+  --color-critical-2: var(--crimson-2);
+  --color-critical-3: var(--crimson-3);
+  --color-critical-4: var(--crimson-4);
+  --color-critical-5: var(--crimson-5);
+  --color-critical-6: var(--crimson-6);
+  --color-critical-7: var(--crimson-7);
+  --color-critical-8: var(--crimson-8);
+  --color-critical-9: var(--crimson-9);
+  --color-critical-10: var(--crimson-10);
+  --color-critical-11: var(--crimson-11);
+  --color-critical-12: var(--crimson-12);
+  /* Success → lime */
+  --color-success-1: var(--lime-1);
+  --color-success-2: var(--lime-2);
+  --color-success-3: var(--lime-3);
+  --color-success-4: var(--lime-4);
+  --color-success-5: var(--lime-5);
+  --color-success-6: var(--lime-6);
+  --color-success-7: var(--lime-7);
+  --color-success-8: var(--lime-8);
+  --color-success-9: var(--lime-9);
+  --color-success-10: var(--lime-10);
+  --color-success-11: var(--lime-11);
+  --color-success-12: var(--lime-12);
+  /* Caution → orange */
+  --color-caution-1: var(--orange-1);
+  --color-caution-2: var(--orange-2);
+  --color-caution-3: var(--orange-3);
+  --color-caution-4: var(--orange-4);
+  --color-caution-5: var(--orange-5);
+  --color-caution-6: var(--orange-6);
+  --color-caution-7: var(--orange-7);
+  --color-caution-8: var(--orange-8);
+  --color-caution-9: var(--orange-9);
+  --color-caution-10: var(--orange-10);
+  --color-caution-11: var(--orange-11);
+  --color-caution-12: var(--orange-12);
+  /* Info → amber */
+  --color-info-1: var(--amber-1);
+  --color-info-2: var(--amber-2);
+  --color-info-3: var(--amber-3);
+  --color-info-4: var(--amber-4);
+  --color-info-5: var(--amber-5);
+  --color-info-6: var(--amber-6);
+  --color-info-7: var(--amber-7);
+  --color-info-8: var(--amber-8);
+  --color-info-9: var(--amber-9);
+  --color-info-10: var(--amber-10);
+  --color-info-11: var(--amber-11);
+  --color-info-12: var(--amber-12);
+  /* Accent → slate */
+  --color-accent-1: var(--slate-1);
+  --color-accent-2: var(--slate-2);
+  --color-accent-3: var(--slate-3);
+  --color-accent-4: var(--slate-4);
+  --color-accent-5: var(--slate-5);
+  --color-accent-6: var(--slate-6);
+  --color-accent-7: var(--slate-7);
+  --color-accent-8: var(--slate-8);
+  --color-accent-9: var(--slate-9);
+  --color-accent-10: var(--slate-10);
+  --color-accent-11: var(--slate-11);
+  --color-accent-12: var(--slate-12);
+
+  /* Flow DS semantic dark overrides */
+  --color-background-page: var(--background);
+  --color-background-section: var(--card);
+  --color-background-popover: var(--popover);
+  --color-foreground-default: var(--foreground);
+  --color-foreground-section: var(--card-foreground);
+  --color-border-default: var(--border);
+  --color-border-focus: var(--ring);
+  --color-fill-critical: var(--destructive);
+  --color-lightest: var(--slate-1);
+  /* Fix info→amber side effects: links and focus should stay blue (brand) */
+  --color-foreground-link: var(--color-brand-11);
+  --color-foreground-link-hover: var(--color-brand-12);
 }
 
 @theme inline {
-  --font-sans: 'Inter Variable', sans-serif;
+  --font-sans: 'Inter', sans-serif;
   --color-slate-1: var(--slate-1);
   --color-slate-2: var(--slate-2);
   --color-twblue-1: var(--twblue-1);
@@ -302,14 +574,15 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-sm: var(--_radius-sm);
+  --radius-md: var(--_radius-md);
+  --radius-lg: var(--_radius-lg);
+  --radius-xl: var(--_radius-xl);
+  --radius-2xl: var(--_radius-2xl);
+  --radius-3xl: var(--_radius-3xl);
+  --radius-4xl: var(--_radius-4xl);
   --radius-input: var(--radius-input);
+  --color-overlay: var(--overlay);
 }
 
 @layer base {
@@ -398,6 +671,188 @@
 
 .animate-sparkle-idle {
   animation: sparkle-idle 2.8s ease-in-out infinite;
+}
+
+/* Flow DS default theme — resets TW brand overrides back to Flow defaults */
+.flow-theme {
+  /* Brand scale → Flow DS defaults (indigo) */
+  --color-brand-1: #f5f5f7;
+  --color-brand-2: #eff0f7;
+  --color-brand-3: #e6e9f6;
+  --color-brand-4: #dadff8;
+  --color-brand-5: #cdd3f9;
+  --color-brand-6: #bdc5f6;
+  --color-brand-7: #a8b1ef;
+  --color-brand-8: #8b95e6;
+  --color-brand-9: #272962;
+  --color-brand-10: #383d78;
+  --color-brand-11: #4e549e;
+  --color-brand-12: #272962;
+  /* Brand alpha scale */
+  --color-brand-alpha-1: rgba(57, 57, 185, 0.02);
+  --color-brand-alpha-2: rgba(19, 44, 223, 0.04);
+  --color-brand-alpha-3: rgba(6, 46, 221, 0.07);
+  --color-brand-alpha-4: rgba(2, 43, 249, 0.12);
+  --color-brand-alpha-5: rgba(0, 0, 255, 0.15);
+  --color-brand-alpha-6: rgba(2, 35, 240, 0.24);
+  --color-brand-alpha-7: rgba(3, 30, 221, 0.33);
+  --color-brand-alpha-8: rgba(3, 25, 208, 0.44);
+  --color-brand-alpha-9: rgba(0, 2, 70, 0.84);
+  --color-brand-alpha-10: rgba(1, 8, 84, 0.78);
+  --color-brand-alpha-11: rgba(0, 9, 117, 0.69);
+  --color-brand-alpha-12: rgba(0, 2, 70, 0.84);
+  /* Semantic overrides → Flow DS defaults */
+  --color-background-page: var(--color-neutral-2);
+  --color-background-section: var(--color-lightest);
+  --color-background-popover: var(--color-lightest);
+  --color-foreground-default: var(--color-neutral-12);
+  --color-foreground-section: var(--color-neutral-12);
+  --color-border-default: var(--color-neutral-7);
+  --color-border-focus: var(--color-info-9);
+  --color-fill-critical: var(--color-critical-10);
+  --color-lightest: var(--color-white-default);
+  --color-foreground-link: var(--color-info-11);
+  --color-foreground-link-hover: var(--color-brand-11);
+  /* Re-declare all intermediate tokens that transitively reference
+     --color-brand-* (CSS custom properties resolve var() at computed-value time
+     on the declaring element, so children inherit the resolved value from :root
+     rather than re-resolving against overridden brand vars) */
+  --btn-color-border-brand: var(--color-brand-9);
+  --btn-color-border-brand-strong: var(--color-brand-10);
+  --btn-color-fill-brand-enabled: var(--color-brand-9);
+  --btn-color-fill-brand-hover: var(--color-brand-10);
+  --btn-color-fill-ghost-hover: var(--color-brand-2);
+  --btn-color-fill-hover: var(--color-brand-2);
+  --btn-color-foreground-accent-enabled: var(--color-brand-12);
+  --btn-color-foreground-accent-hover: var(--color-brand-12);
+  --btn-color-foreground-brand-enabled: var(--color-brand-12);
+  --btn-color-foreground-brand-hover: var(--color-brand-11);
+  --btn-color-foreground-ghost: var(--color-brand-12);
+  --btn-color-foreground-outline: var(--color-brand-12);
+  --btn-color-foreground-outline-hover: var(--color-brand-11);
+  --color-background-section-inverse: var(--color-brand-12);
+  --color-border-brand: var(--color-brand-12);
+  --color-fill-contrast: var(--color-brand-9);
+  --color-fill-inactive: var(--color-brand-4);
+  --color-fill-selected-strong: var(--color-brand-11);
+  --color-fill-selected-subtle: var(--color-brand-4);
+  --color-foreground-caution: var(--color-brand-12);
+  --color-foreground-info: var(--color-brand-12);
+  --color-foreground-link-visited: var(--color-brand-11);
+  --color-foreground-page: var(--color-brand-12);
+  /* Tailwind utility-level mappings (third layer of indirection) */
+  --background-color-border-brand: var(--color-border-brand);
+  --background-color-btn-border-brand: var(--btn-color-border-brand);
+  --background-color-btn-border-brand-strong: var(
+    --btn-color-border-brand-strong
+  );
+  --background-color-btn-fill-brand-enabled: var(
+    --btn-color-fill-brand-enabled
+  );
+  --background-color-btn-fill-brand-hover: var(--btn-color-fill-brand-hover);
+  --background-color-btn-fill-ghost-hover: var(--btn-color-fill-ghost-hover);
+  --background-color-btn-fill-hover: var(--btn-color-fill-hover);
+  --background-color-fill-contrast: var(--color-fill-contrast);
+  --background-color-fill-inactive: var(--color-fill-inactive);
+  --background-color-fill-selected-strong: var(--color-fill-selected-strong);
+  --background-color-fill-selected-subtle: var(--color-fill-selected-subtle);
+  --background-color-section-inverse: var(--color-background-section-inverse);
+  --border-color-brand: var(--color-border-brand);
+  --border-color-btn-brand: var(--btn-color-border-brand);
+  --border-color-btn-brand-strong: var(--btn-color-border-brand-strong);
+  --color-btn-foreground-accent-enabled: var(
+    --btn-color-foreground-accent-enabled
+  );
+  --color-btn-foreground-accent-hover: var(--btn-color-foreground-accent-hover);
+  --color-btn-foreground-brand-enabled: var(
+    --btn-color-foreground-brand-enabled
+  );
+  --color-btn-foreground-brand-hover: var(--btn-color-foreground-brand-hover);
+  --color-btn-foreground-ghost: var(--btn-color-foreground-ghost);
+  --color-btn-foreground-outline: var(--btn-color-foreground-outline);
+  --color-btn-foreground-outline-hover: var(
+    --btn-color-foreground-outline-hover
+  );
+  --fill-background-section-inverse: var(--color-background-section-inverse);
+  --fill-btn-brand-enabled: var(--btn-color-fill-brand-enabled);
+  --fill-btn-brand-hover: var(--btn-color-fill-brand-hover);
+  --fill-btn-ghost-hover: var(--btn-color-fill-ghost-hover);
+  --fill-btn-hover: var(--btn-color-fill-hover);
+  --fill-contrast: var(--color-fill-contrast);
+  --fill-inactive: var(--color-fill-inactive);
+  --fill-selected-strong: var(--color-fill-selected-strong);
+  --fill-selected-subtle: var(--color-fill-selected-subtle);
+  --outline-color-border-brand: var(--color-border-brand);
+  --outline-color-btn-border-brand: var(--btn-color-border-brand);
+  --outline-color-btn-border-brand-strong: var(--btn-color-border-brand-strong);
+  --ring-color-border-brand: var(--color-border-brand);
+  --ring-color-btn-border-brand: var(--btn-color-border-brand);
+  --ring-color-btn-border-brand-strong: var(--btn-color-border-brand-strong);
+}
+
+/*
+ * TW look-and-feel: global overrides so Flow DS components match Shadcn styling.
+ * Radius/spacing/typography use overridable --_ primitives defined in :root.
+ * .flow-theme reverts all --_ primitives back to Flow DS defaults.
+ */
+
+/* Spacing & typography: wire Flow's internal token vars to our --_ primitives */
+:root {
+  --spacing-xs: var(--_spacing-xs);
+  --spacing-md: var(--_spacing-md);
+  --spacing-2xl: var(--_spacing-2xl);
+  --text-style-body-md-strong: var(--_text-body-md-strong);
+  --text-style-body-md: var(--_text-body-md);
+  --text-style-label-sm: var(--_text-label-sm);
+  --text-style-label-sm-strong: var(--_text-label-sm-strong);
+  --font-weight-style-body-md-strong: var(--_weight-body-md-strong);
+  --font-weight-style-label-sm-strong: var(--_weight-label-sm-strong);
+}
+
+/*
+ * Radius: buttons & tab triggers use pill (9999px) while everything else
+ * using rounded-lg gets the standard --_radius-lg value.
+ * This selector override is needed because both share the .rounded-lg class.
+ */
+button.rounded-lg,
+[role='tab'].rounded-lg {
+  border-radius: 9999px !important;
+}
+
+/* .flow-theme reverts all --_ primitives to Flow DS defaults */
+.flow-theme {
+  --_radius-sm: 6px;
+  --_radius-md: 8px;
+  --_radius-lg: 10px;
+  --_radius-xl: 14px;
+  --_radius-2xl: 16px;
+  --_radius-3xl: 24px;
+  --_radius-4xl: 32px;
+  --_spacing-xs: 0.5rem;
+  --_spacing-md: 1rem;
+  --_spacing-2xl: 2.5rem;
+  --_text-body-md: 1rem;
+  --_text-body-md-strong: 1rem;
+  --_text-label-sm: 0.875rem;
+  --_text-label-sm-strong: 0.875rem;
+  --_weight-body-md-strong: 600;
+  --_weight-label-sm-strong: 600;
+
+  /* Direct token overrides so Flow components see original sizes */
+  --text-style-body-md: var(--text-style-body-md-size);
+  --text-style-body-md-strong: var(--text-style-body-md-strong-size);
+  --text-style-label-sm: var(--text-style-label-sm-size);
+  --text-style-label-sm-strong: var(--text-style-label-sm-strong-size);
+  --font-weight-style-body-md-strong: var(--text-style-body-md-strong-weight);
+  --font-weight-style-label-sm-strong: var(--text-style-label-sm-strong-weight);
+  --spacing-xs: var(--_spacing-xs);
+  --spacing-md: var(--_spacing-md);
+  --spacing-2xl: var(--_spacing-2xl);
+}
+/* Flow theme: buttons also revert to 10px */
+.flow-theme button.rounded-lg,
+.flow-theme [role='tab'].rounded-lg {
+  border-radius: 10px !important;
 }
 
 /* Hide TanStack DevTools toggle button by default, show on hover */

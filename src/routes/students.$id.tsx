@@ -7,6 +7,7 @@ import { StudentProfile } from '@/components/students/student-profile'
 import { InsightBuddy } from '@/components/insight-buddy'
 import { getStudentById, mockStudents } from '@/data/mock-students'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
+import { useFeatureFlag } from '@/hooks/use-feature-flag'
 
 const PROFILE_PROMPTS = [
   "Summarise this student's wellbeing",
@@ -40,6 +41,7 @@ export const Route = createFileRoute('/students/$id')({
 
 function StudentProfilePage() {
   const { student, prevStudentId, nextStudentId } = Route.useLoaderData()
+  const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
 
   useEffect(() => {
     document.querySelector('[data-scroll-container]')?.scrollTo({ top: 0 })
@@ -107,12 +109,14 @@ function StudentProfilePage() {
       {/* Main profile content */}
       <StudentProfile student={student} headerControls={headerControls} />
 
-      {/* Insight Buddy floating */}
-      <InsightBuddy
-        examplePrompts={PROFILE_PROMPTS}
-        student={student}
-        floating
-      />
+      {/* Insight Buddy floating — gated behind student-analytics flag */}
+      {studentAnalyticsEnabled && (
+        <InsightBuddy
+          examplePrompts={PROFILE_PROMPTS}
+          student={student}
+          floating
+        />
+      )}
     </main>
   )
 }

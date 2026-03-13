@@ -34,6 +34,7 @@ export interface SubjectScore {
   percentage: number
 }
 
+
 export interface Student {
   id: string
   name: string
@@ -94,7 +95,7 @@ export interface Student {
   nextSteps: string | null
 }
 
-export type AttentionTag = 'FAS' | 'GEP' | 'LSM' | 'LSP' | 'SEN'
+export type AttentionTag = 'FAS' | 'GEP' | 'LSM' | 'LSP' | 'SEN' | 'LTA'
 
 export type ConductGrade = 'Excellent' | 'Very Good' | 'Good' | 'Fair' | 'Poor'
 

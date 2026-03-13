@@ -4,30 +4,62 @@ import type { LucideIcon } from 'lucide-react'
 import type { AppColor } from '@/data/apps'
 import { cn } from '@/lib/utils'
 
-const colorVariants: Record<AppColor, string> = {
-  pink: 'bg-pink-500',
-  blue: 'bg-twblue-9',
-  orange: 'bg-orange-500',
-  green: 'bg-green-500',
-  purple: 'bg-purple-500',
+const iconHoverColorVariants: Record<AppColor, string> = {
+  pink: 'group-hover:text-pink-500',
+  blue: 'group-hover:text-twblue-9',
+  orange: 'group-hover:text-orange-500',
+  green: 'group-hover:text-green-500',
+  purple: 'group-hover:text-purple-500',
 }
 
+const iconPaddingVariants = {
+  none: 'p-1',
+  sm: 'p-1.5',
+  md: 'p-3',
+} as const
+
 interface AppIconProps {
-  icon: LucideIcon
+  icon: LucideIcon | string
   color: AppColor
+  iconPadding?: 'none' | 'sm' | 'md'
   className?: string
 }
 
-export function AppIcon({ icon: Icon, color, className }: AppIconProps) {
+export function AppIcon({
+  icon,
+  color,
+  iconPadding = 'sm',
+  className,
+}: AppIconProps) {
+  if (typeof icon === 'string') {
+    return (
+      <div
+        className={cn(
+          'relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border bg-white',
+          iconPaddingVariants[iconPadding],
+          className,
+        )}
+      >
+        <img src={icon} alt="" className="h-full w-full object-contain" />
+        <div className="pointer-events-none absolute inset-0 bg-[#0064ff] mix-blend-color transition-opacity duration-200 will-change-[opacity] group-hover:opacity-0" />
+      </div>
+    )
+  }
+
+  const Icon = icon
   return (
     <div
       className={cn(
-        'flex size-16 shrink-0 items-center justify-center rounded-full',
-        colorVariants[color],
+        'flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border bg-white',
         className,
       )}
     >
-      <Icon className="size-8 text-white" />
+      <Icon
+        className={cn(
+          'size-8 text-[#0064ff] transition-colors duration-200',
+          iconHoverColorVariants[color],
+        )}
+      />
     </div>
   )
 }
@@ -35,9 +67,11 @@ export function AppIcon({ icon: Icon, color, className }: AppIconProps) {
 interface AppCardProps {
   name: string
   description: string
-  icon: LucideIcon
+  icon: LucideIcon | string
   color: AppColor
   href: string
+  onClick?: () => void
+  iconPadding?: 'none' | 'sm' | 'md'
   className?: string
 }
 
@@ -47,23 +81,38 @@ export function AppCard({
   icon,
   color,
   href,
+  onClick,
+  iconPadding,
   className,
 }: AppCardProps) {
-  return (
-    <Link
-      to={href}
-      className={cn(
-        'flex flex-col gap-4 rounded-3xl border bg-background p-4 transition-colors hover:bg-muted/50',
-        className,
-      )}
-    >
-      <AppIcon icon={icon} color={color} />
+  const cardClassName = cn(
+    'group flex flex-col gap-4 rounded-3xl border bg-background p-4 transition-colors hover:bg-muted/50 text-left',
+    className,
+  )
+
+  const content = (
+    <>
+      <AppIcon icon={icon} color={color} iconPadding={iconPadding} />
       <div className="flex flex-col gap-2">
         <h3 className="font-semibold text-foreground">{name}</h3>
         <p className="line-clamp-2 text-sm text-muted-foreground">
           {description}
         </p>
       </div>
+    </>
+  )
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={cardClassName}>
+        {content}
+      </button>
+    )
+  }
+
+  return (
+    <Link to={href} className={cardClassName}>
+      {content}
     </Link>
   )
 }
@@ -71,9 +120,11 @@ export function AppCard({
 interface FeaturedAppCardProps {
   name: string
   description: string
-  icon: LucideIcon
+  icon: LucideIcon | string
   color: AppColor
   href: string
+  badge?: string
+  iconPadding?: 'none' | 'sm' | 'md'
   className?: string
 }
 
@@ -83,19 +134,28 @@ export function FeaturedAppCard({
   icon,
   color,
   href,
+  badge,
+  iconPadding,
   className,
 }: FeaturedAppCardProps) {
   return (
     <Link
       to={href}
       className={cn(
-        'flex items-center gap-6 rounded-3xl border bg-muted/30 p-4 transition-colors hover:bg-muted/50',
+        'group flex h-[132px] items-center gap-4 rounded-3xl border border-[#C8C8C8] bg-white p-4 transition-colors hover:bg-muted/50',
         className,
       )}
     >
-      <AppIcon icon={icon} color={color} />
+      <AppIcon icon={icon} color={color} iconPadding={iconPadding} />
       <div className="flex flex-1 flex-col gap-2">
-        <h3 className="font-semibold text-foreground">{name}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-foreground">{name}</h3>
+          {badge && (
+            <span className="rounded-full border-0 bg-twblue-3 px-2 py-0.5 text-xs font-medium text-twblue-9">
+              {badge}
+            </span>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
     </Link>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Check, ChevronDown, Search } from 'lucide-react'
 
+import type { SchoolLevel } from '@/types/report'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,6 +15,8 @@ import { groupedClassOptions } from '@/data/mock-students'
 interface ClassSelectorProps {
   value: string
   onValueChange: (value: string) => void
+  schoolLevel?: SchoolLevel
+  onSchoolLevelChange?: (level: SchoolLevel) => void
   className?: string
 }
 
@@ -27,6 +30,8 @@ function getClassLabel(level: string, classValue: string) {
 export function ClassSelector({
   value,
   onValueChange,
+  schoolLevel,
+  onSchoolLevelChange,
   className,
 }: ClassSelectorProps) {
   const [open, setOpen] = useState(false)
@@ -45,11 +50,17 @@ export function ClassSelector({
     return value
   }, [value])
 
+  const filteredByLevel = useMemo(() => {
+    if (!schoolLevel) return groupedClassOptions
+    const prefix = schoolLevel === 'primary' ? 'Primary' : 'Secondary'
+    return groupedClassOptions.filter((g) => g.level.startsWith(prefix))
+  }, [schoolLevel])
+
   const filteredGroups = useMemo(() => {
-    if (!search) return groupedClassOptions
+    if (!search) return filteredByLevel
 
     const query = search.toLowerCase()
-    return groupedClassOptions
+    return filteredByLevel
       .map((group) => {
         const levelMatches = group.level.toLowerCase().includes(query)
         const matchingClasses = group.classes.filter((c) => {
@@ -70,7 +81,7 @@ export function ClassSelector({
         return null
       })
       .filter(Boolean) as typeof groupedClassOptions
-  }, [search])
+  }, [search, filteredByLevel])
 
   const handleSelect = (selectedValue: string) => {
     onValueChange(selectedValue)
@@ -95,9 +106,40 @@ export function ClassSelector({
         <ChevronDown className="h-5 w-5 text-muted-foreground" />
       </PopoverTrigger>
       <PopoverContent
-        className="w-64 overflow-hidden rounded-2xl p-0"
+        className="w-64 gap-0 overflow-hidden rounded-2xl p-0"
         align="start"
       >
+        {/* School level toggle */}
+        {schoolLevel && onSchoolLevelChange && (
+          <div className="mx-2 mt-2 flex rounded-full bg-muted p-[3px]">
+            <button
+              type="button"
+              onClick={() => onSchoolLevelChange('primary')}
+              className={cn(
+                'flex-1 rounded-full px-3 py-1 text-sm font-medium transition-all',
+                schoolLevel === 'primary'
+                  ? 'bg-background/90 text-foreground shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground/80',
+              )}
+            >
+              Primary
+            </button>
+            <button
+              type="button"
+              onClick={() => onSchoolLevelChange('secondary')}
+              className={cn(
+                'flex-1 rounded-full px-3 py-1 text-sm font-medium transition-all',
+                schoolLevel === 'secondary'
+                  ? 'bg-background/90 text-foreground shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground/80',
+              )}
+            >
+              Secondary
+            </button>
+          </div>
+        )}
+
+
         {/* Search input */}
         <div className="p-2">
           <div className="relative">

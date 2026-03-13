@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   ClipboardCheck,
@@ -42,7 +42,6 @@ import {
 import { CURRENT_ACADEMIC_YEAR, mockReports } from '@/data/mock-reports'
 import { getSchoolLevel } from '@/data/mock-students'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { Switch } from '@/components/ui/switch'
 import {
   Popover,
   PopoverContent,
@@ -58,7 +57,6 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { cn } from '@/lib/utils'
 
 type GroupBy = 'none' | 'student' | 'term'
 
@@ -293,94 +291,8 @@ function ReportsPage() {
   const sendLabel =
     schoolLevel === 'secondary' ? 'Send to Students' : 'Send to Parents'
 
-  // Draggable floating bar state
-  const floatingRef = useRef<HTMLDivElement>(null)
-  const dragState = useRef<{
-    startX: number
-    startY: number
-    origX: number
-    origY: number
-  } | null>(null)
-  const [position, setPosition] = useState({ x: 0, y: 0 })
-  const [hasDragged, setHasDragged] = useState(false)
-
-  const onMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if ((e.target as HTMLElement).closest('[data-slot="switch"]')) return
-      e.preventDefault()
-      const rect = floatingRef.current?.getBoundingClientRect()
-      if (!rect) return
-      dragState.current = {
-        startX: e.clientX,
-        startY: e.clientY,
-        origX: position.x,
-        origY: position.y,
-      }
-    },
-    [position],
-  )
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!dragState.current) return
-      const dx = e.clientX - dragState.current.startX
-      const dy = e.clientY - dragState.current.startY
-      setPosition({
-        x: dragState.current.origX + dx,
-        y: dragState.current.origY + dy,
-      })
-      if (Math.abs(dx) > 2 || Math.abs(dy) > 2) setHasDragged(true)
-    }
-    const onMouseUp = () => {
-      dragState.current = null
-      setTimeout(() => setHasDragged(false), 0)
-    }
-    window.addEventListener('mousemove', onMouseMove)
-    window.addEventListener('mouseup', onMouseUp)
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove)
-      window.removeEventListener('mouseup', onMouseUp)
-    }
-  }, [])
-
   return (
     <div className="flex flex-col">
-      {/* Floating draggable level switch */}
-      <div
-        ref={floatingRef}
-        onMouseDown={onMouseDown}
-        style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
-        className="fixed right-6 top-4 z-50 flex cursor-grab items-center gap-3 rounded-full border bg-white px-4 py-2 shadow-lg active:cursor-grabbing"
-      >
-        <span
-          className={cn(
-            'text-sm font-medium transition-colors',
-            schoolLevel === 'primary'
-              ? 'text-[#f26c47]'
-              : 'text-muted-foreground',
-          )}
-        >
-          Primary
-        </span>
-        <Switch
-          checked={schoolLevel === 'secondary'}
-          onCheckedChange={(checked: boolean) => {
-            if (!hasDragged)
-              handleLevelChange(checked ? 'secondary' : 'primary')
-          }}
-        />
-        <span
-          className={cn(
-            'text-sm font-medium transition-colors',
-            schoolLevel === 'secondary'
-              ? 'text-[#f26c47]'
-              : 'text-muted-foreground',
-          )}
-        >
-          Secondary
-        </span>
-      </div>
-
       {/* Fixed content area */}
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
@@ -398,6 +310,8 @@ function ReportsPage() {
           <ClassSelector
             value={selectedClass}
             onValueChange={setSelectedClass}
+            schoolLevel={schoolLevel}
+            onSchoolLevelChange={handleLevelChange}
           />
         </div>
 

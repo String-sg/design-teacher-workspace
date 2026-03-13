@@ -25,6 +25,7 @@ function HomePage() {
           icon={featuredApp.icon}
           color={featuredApp.color}
           href={featuredApp.href}
+          badge={featuredApp.badge}
         />
       </section>
 

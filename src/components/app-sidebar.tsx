@@ -5,11 +5,14 @@ import {
   BarChart3,
   Bot,
   CircleHelp,
+  ClipboardList,
   FileText,
   Home,
+  Mail,
   Megaphone,
   MessageSquare,
   ScrollText,
+  Settings,
   Users,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -49,7 +52,7 @@ interface MenuItem {
   transparent?: boolean
 }
 
-const navigationItems: Array<MenuItem> = [
+const mainNavItems: Array<MenuItem> = [
   {
     title: 'Announcements',
     url: '/announcements',
@@ -70,6 +73,7 @@ const studentInsightItems: Array<MenuItem> = [
     url: '/student-analytics',
     icon: BarChart3,
     conceptTag: true,
+    featureFlag: 'student-analytics',
   },
   {
     title: 'Profiles',
@@ -82,12 +86,27 @@ const studentInsightItems: Array<MenuItem> = [
     url: '/insight-buddy',
     icon: Bot,
     conceptTag: true,
+    featureFlag: 'student-analytics',
+  },
+]
+
+const parentsCommItems: Array<MenuItem> = [
+  {
+    title: 'Announcement',
+    url: '/parents-gateway',
+    icon: Mail,
+    featureFlag: 'parents-gateway',
   },
   {
     title: 'Reports',
     url: '/reports',
     icon: FileText,
     transparent: true,
+  },
+  {
+    title: 'Forms',
+    url: '/forms',
+    icon: ClipboardList,
   },
 ]
 
@@ -135,12 +154,24 @@ export function AppSidebar() {
   const location = useLocation()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
   const announcementsEnabled = useFeatureFlag('announcements')
+  const holisticReportsEnabled = useFeatureFlag('holistic-reports')
+  const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
+  const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
 
-  const filteredItems = navigationItems.filter((item) => {
-    if (!item.featureFlag) return true
-    if (item.featureFlag === 'announcements') return announcementsEnabled
-    return true
-  })
+  const filterItems = (items: Array<MenuItem>) =>
+    items.filter((item) => {
+      if (!item.featureFlag) return true
+      if (item.featureFlag === 'announcements') return announcementsEnabled
+      if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
+      if (item.featureFlag === 'parents-gateway') return parentsGatewayEnabled
+      return true
+    })
+
+  const filteredMainItems = filterItems(mainNavItems)
+  const filteredParentsItems = filterItems(parentsCommItems)
+  const filteredStudentItems = studentInsightItems.filter((item) =>
+    item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
+  )
 
   return (
     <Sidebar collapsible="icon">
@@ -148,6 +179,9 @@ export function AppSidebar() {
         <div className="flex h-14 items-center justify-center gap-2 px-4 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0">
           <span className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0 select-none cursor-default">
             Teacher Workspace
+            <span className="ml-1.5 rounded-full bg-twblue-3 px-1.5 py-0.5 text-xs font-medium text-twblue-9">
+              Beta
+            </span>
           </span>
           <SidebarTrigger />
         </div>
@@ -156,23 +190,48 @@ export function AppSidebar() {
         <SidebarGroup className="pb-0">
           <SidebarGroupContent>
             <SidebarMenuItems
-              items={filteredItems}
+              items={filteredMainItems}
               currentPath={location.pathname}
             />
           </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup className="pt-0">
-          <SidebarGroupLabel>Students</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenuItems
-              items={studentInsightItems}
-              currentPath={location.pathname}
-            />
-          </SidebarGroupContent>
+          <>
+            <SidebarGroupLabel className="mt-2">
+              Student Insights
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenuItems
+                items={filteredStudentItems}
+                currentPath={location.pathname}
+              />
+            </SidebarGroupContent>
+          </>
+          {filteredParentsItems.length > 0 && (
+            <>
+              <SidebarGroupLabel className="mt-2">
+                Parents Comm
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenuItems
+                  items={filteredParentsItems}
+                  currentPath={location.pathname}
+                />
+              </SidebarGroupContent>
+            </>
+          )}
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link to="/settings" />}
+              isActive={location.pathname === '/settings'}
+              tooltip="Settings"
+            >
+              <Settings className="size-4" />
+              <span>Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger

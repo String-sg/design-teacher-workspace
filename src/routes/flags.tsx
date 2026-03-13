@@ -40,6 +40,18 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
     description:
       'Enable holistic development reports showing student progress across academic and character development',
   },
+  {
+    key: 'student-analytics',
+    label: 'Student Analytics (Research)',
+    description:
+      'Show Student Analytics and Insight Buddy in the sidebar — attendance cohort analytics, academic analytics, export CSV, and AI-powered student insights',
+  },
+  {
+    key: 'lta-intervention',
+    label: 'LTA Intervention',
+    description:
+      'Show the LTA (long-term absenteeism) tag in the student list and the intervention banner and guidance dialog on the student profile',
+  },
 ]
 
 function FeatureFlagsPage() {

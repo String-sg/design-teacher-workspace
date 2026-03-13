@@ -4,10 +4,10 @@ import { cn } from '@/lib/utils'
 
 function Table({ className, ...props }: React.ComponentProps<'table'>) {
   return (
-    <div data-slot="table-container" className={cn('relative', className)}>
+    <div data-slot="table-container" className="relative">
       <table
         data-slot="table"
-        className="w-max min-w-full caption-bottom text-sm"
+        className={cn('min-w-full caption-bottom text-sm', className)}
         {...props}
       />
     </div>
@@ -18,7 +18,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
   return (
     <thead
       data-slot="table-header"
-      className={cn('bg-white', className)}
+      className={cn('bg-card', className)}
       {...props}
     />
   )
