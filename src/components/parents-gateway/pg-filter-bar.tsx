@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
 import type { PGOwnership, PGStatus } from '@/types/pg-announcement'
+import type { ResponseType } from '@/types/form'
 import { Button } from '@/components/ui/button'
 import {
   Popover,
@@ -12,6 +13,7 @@ import { cn } from '@/lib/utils'
 export interface PGFilters {
   statuses: Array<PGStatus>
   ownerships: Array<PGOwnership>
+  responseTypes: Array<ResponseType>
   dateFrom: string
   dateTo: string
 }
@@ -19,6 +21,7 @@ export interface PGFilters {
 export const EMPTY_PG_FILTERS: PGFilters = {
   statuses: [],
   ownerships: [],
+  responseTypes: [],
   dateFrom: '',
   dateTo: '',
 }
@@ -27,10 +30,17 @@ function countActiveFilters(filters: PGFilters): number {
   return (
     filters.statuses.length +
     filters.ownerships.length +
+    filters.responseTypes.length +
     (filters.dateFrom ? 1 : 0) +
     (filters.dateTo ? 1 : 0)
   )
 }
+
+const RESPONSE_TYPE_OPTIONS: Array<{ value: ResponseType; label: string }> = [
+  { value: 'view-only', label: 'View Only' },
+  { value: 'acknowledge', label: 'Acknowledge' },
+  { value: 'yes-no', label: 'Yes / No' },
+]
 
 interface PGFilterBarProps {
   filters: PGFilters
@@ -64,6 +74,13 @@ export function PGFilterBar({ filters, onChange }: PGFilterBarProps) {
       ? filters.ownerships.filter((o) => o !== ownership)
       : [...filters.ownerships, ownership]
     onChange({ ...filters, ownerships: next })
+  }
+
+  function toggleResponseType(rt: ResponseType) {
+    const next = filters.responseTypes.includes(rt)
+      ? filters.responseTypes.filter((r) => r !== rt)
+      : [...filters.responseTypes, rt]
+    onChange({ ...filters, responseTypes: next })
   }
 
   function clearAll() {
@@ -124,6 +141,30 @@ export function PGFilterBar({ filters, onChange }: PGFilterBarProps) {
                 className={cn(
                   'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
                   filters.ownerships.includes(opt.value)
+                    ? 'border-primary bg-twblue-2 text-twblue-9'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-primary hover:text-primary',
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Response Type */}
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Response Type
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {RESPONSE_TYPE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => toggleResponseType(opt.value)}
+                className={cn(
+                  'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
+                  filters.responseTypes.includes(opt.value)
                     ? 'border-primary bg-twblue-2 text-twblue-9'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-primary hover:text-primary',
                 )}

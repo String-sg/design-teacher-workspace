@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { AlertTriangle, Lock, Plus, Search, Users } from 'lucide-react'
+import { AlertTriangle, Copy, Lock, MoreHorizontal, Plus, Search, Trash2, Users } from 'lucide-react'
 import type { PGStatus } from '@/types/pg-announcement'
 import type { PGFilters } from '@/components/parents-gateway/pg-filter-bar'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
@@ -23,6 +23,13 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EmptyState } from '@/components/empty-state'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export const Route = createFileRoute('/parents-gateway/')({
   component: ParentsGatewayPage,
@@ -74,6 +81,11 @@ function ParentsGatewayPage() {
 
   const filtered = useMemo(() => {
     return mockPGAnnouncements.filter((a) => {
+      // Response type filter
+      if (filters.responseTypes.length > 0) {
+        const effectiveType = a.responseType ?? 'view-only'
+        if (!filters.responseTypes.includes(effectiveType)) return false
+      }
       // Status filter
       if (filters.statuses.length > 0 && !filters.statuses.includes(a.status))
         return false
@@ -111,6 +123,11 @@ function ParentsGatewayPage() {
         )
       }
       return true
+    })
+    .sort((a, b) => {
+      const dateA = getRelevantDate(a.status, a.postedAt, a.scheduledAt, a.createdAt) ?? ''
+      const dateB = getRelevantDate(b.status, b.postedAt, b.scheduledAt, b.createdAt) ?? ''
+      return new Date(dateB).getTime() - new Date(dateA).getTime()
     })
   }, [searchQuery, filters])
 
@@ -165,24 +182,24 @@ function ParentsGatewayPage() {
           {/* Metrics */}
           <div className="grid grid-cols-2 gap-4 px-6 md:grid-cols-5">
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Total</div>
-              <div className="text-2xl font-semibold">{metrics.total}</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total</div>
+              <div className="text-3xl font-semibold">{metrics.total}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Draft</div>
-              <div className="text-2xl font-semibold">{metrics.drafts}</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Draft</div>
+              <div className="text-3xl font-semibold">{metrics.drafts}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Posted</div>
-              <div className="text-2xl font-semibold">{metrics.posted}</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Posted</div>
+              <div className="text-3xl font-semibold">{metrics.posted}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Scheduled</div>
-              <div className="text-2xl font-semibold">{metrics.scheduled}</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Scheduled</div>
+              <div className="text-3xl font-semibold">{metrics.scheduled}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Avg Read Rate</div>
-              <div className="text-2xl font-semibold">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Avg Read Rate</div>
+              <div className="text-3xl font-semibold">
                 {metrics.avgReadRate}%
               </div>
             </div>
@@ -220,7 +237,8 @@ function ParentsGatewayPage() {
                     <TableHead className="w-[100px]">Status</TableHead>
                     <TableHead className="w-[90px]">Owner</TableHead>
                     <TableHead className="w-[130px]">To Parents Of</TableHead>
-                    <TableHead className="w-[150px] pr-6">Read</TableHead>
+                    <TableHead className="w-[150px]">Read / Response</TableHead>
+                    <TableHead className="w-[48px] pr-2" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -229,6 +247,18 @@ function ParentsGatewayPage() {
                     const readCount = announcement.recipients.filter(
                       (r) => r.readStatus === 'read',
                     ).length
+                    const responseCount = announcement.recipients.filter(
+                      (r) => r.respondedAt != null,
+                    ).length
+                    const yesCount = announcement.recipients.filter(
+                      (r) => r.formResponse === 'yes',
+                    ).length
+                    const noCount = announcement.recipients.filter(
+                      (r) => r.formResponse === 'no',
+                    ).length
+                    const hasResponseType =
+                      announcement.responseType === 'acknowledge' ||
+                      announcement.responseType === 'yes-no'
                     const showUrgency = isLowReadRate(
                       announcement.postedAt,
                       readCount,
@@ -261,6 +291,16 @@ function ParentsGatewayPage() {
                                 <span className="truncate font-medium">
                                   {announcement.title}
                                 </span>
+                                {announcement.responseType === 'acknowledge' && (
+                                  <span className="shrink-0 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 ring-1 ring-inset ring-blue-200">
+                                    Acknowledge
+                                  </span>
+                                )}
+                                {announcement.responseType === 'yes-no' && (
+                                  <span className="shrink-0 rounded-full bg-violet-50 px-1.5 py-0.5 text-[10px] font-medium text-violet-600 ring-1 ring-inset ring-violet-200">
+                                    Yes/No
+                                  </span>
+                                )}
                                 {showUrgency && (
                                   <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
                                 )}
@@ -311,16 +351,59 @@ function ParentsGatewayPage() {
                             : getUniqueClasses(announcement.recipients)}
                         </TableCell>
                         <TableCell className="pr-6">
-                          {announcement.status === 'posted' ? (
+                          {announcement.status !== 'posted' ? (
+                            <span className="text-sm text-muted-foreground">—</span>
+                          ) : hasResponseType ? (
+                            <div className="space-y-0.5">
+                              <PGReadRate
+                                readCount={responseCount}
+                                totalCount={totalCount}
+                              />
+                              {announcement.responseType === 'yes-no' && totalCount > 0 && (
+                                <p className="text-[11px] text-muted-foreground">
+                                  {yesCount} yes · {noCount} no
+                                </p>
+                              )}
+                              {announcement.responseType === 'acknowledge' && (
+                                <p className="text-[11px] text-muted-foreground">
+                                  Acknowledged
+                                </p>
+                              )}
+                            </div>
+                          ) : (
                             <PGReadRate
                               readCount={readCount}
                               totalCount={totalCount}
                             />
-                          ) : (
-                            <span className="text-sm text-muted-foreground">
-                              —
-                            </span>
                           )}
+                        </TableCell>
+                        <TableCell
+                          className="w-[48px] pr-2 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                aria-label="More actions"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Copy className="mr-2 h-4 w-4" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     )

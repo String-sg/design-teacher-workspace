@@ -27,7 +27,9 @@ import type {
   PGRecipient,
   Shortcut,
 } from '@/types/pg-announcement'
+import type { FormQuestion, ReminderType, ResponseType } from '@/types/form'
 import type { SelectedEntity } from '@/components/parents-gateway/entity-selector'
+import { QuestionBuilder } from '@/components/forms/question-builder'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { StudentRecipientSelector } from '@/components/parents-gateway/student-recipient-selector'
 import { SendConfirmationSheet } from '@/components/parents-gateway/send-confirmation-sheet'
@@ -88,8 +90,58 @@ function formatFileSize(bytes: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// Response type card mockups
+// ---------------------------------------------------------------------------
+function ViewOnlyMockup() {
+  return (
+    <div className="flex flex-col gap-1.5 p-2">
+      <div className="h-1.5 w-3/4 rounded bg-slate-200" />
+      <div className="h-1 w-full rounded bg-slate-100" />
+      <div className="h-1 w-5/6 rounded bg-slate-100" />
+      <div className="h-1 w-4/6 rounded bg-slate-100" />
+    </div>
+  )
+}
+
+function AcknowledgeMockup() {
+  return (
+    <div className="flex flex-col gap-1.5 p-2">
+      <div className="h-1.5 w-3/4 rounded bg-slate-200" />
+      <div className="h-1 w-full rounded bg-slate-100" />
+      <div className="h-1 w-5/6 rounded bg-slate-100" />
+      <div className="mt-1.5 h-6 rounded bg-primary/80 flex items-center justify-center">
+        <div className="h-1.5 w-14 rounded bg-white/70" />
+      </div>
+    </div>
+  )
+}
+
+function YesNoMockup() {
+  return (
+    <div className="flex flex-col gap-1.5 p-2">
+      <div className="h-1.5 w-3/4 rounded bg-slate-200" />
+      <div className="h-1 w-full rounded bg-slate-100" />
+      <div className="mt-1.5 flex gap-1.5">
+        <div className="flex h-6 flex-1 items-center justify-center rounded bg-green-100 text-[8px] font-semibold text-green-700">
+          Yes
+        </div>
+        <div className="flex h-6 flex-1 items-center justify-center rounded bg-red-100 text-[8px] font-semibold text-red-700">
+          No
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Preview pane — mirrors the Parents Gateway app layout as seen by parents
 // ---------------------------------------------------------------------------
+
+type AnnouncementPreviewScreen =
+  | 'main'
+  | 'submitted'
+  | { questionId: string; responseChoice: 'yes' | 'no' }
+
 interface AnnouncementPreviewProps {
   title: string
   description: string
@@ -97,6 +149,10 @@ interface AnnouncementPreviewProps {
   staffInCharge: string
   enquiryEmail: string
   recipients: Array<SelectedEntity>
+  responseType: ResponseType
+  dueDate?: string
+  questions?: FormQuestion[]
+  editingQuestionId?: string | null
 }
 
 function AnnouncementPreview({
@@ -106,8 +162,24 @@ function AnnouncementPreview({
   staffInCharge,
   enquiryEmail,
   recipients,
+  responseType,
+  dueDate,
+  questions = [],
+  editingQuestionId,
 }: AnnouncementPreviewProps) {
   const totalCount = recipients.reduce((s, r) => s + r.count, 0)
+  const [screen, setScreen] = useState<AnnouncementPreviewScreen>('main')
+
+  // Reset to main when responseType changes
+  useEffect(() => {
+    setScreen('main')
+  }, [responseType])
+
+  // Auto-navigate to question being edited
+  useEffect(() => {
+    if (!editingQuestionId) return
+    setScreen({ questionId: editingQuestionId, responseChoice: 'yes' })
+  }, [editingQuestionId])
 
   const previewDate = new Date()
     .toLocaleDateString('en-SG', {
@@ -125,14 +197,332 @@ function AnnouncementPreview({
     .toUpperCase()
   const timestamp = `${previewDate}, ${previewTime}`
 
+  const formattedDueDate = dueDate
+    ? new Date(dueDate).toLocaleDateString('en-SG', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : 'DD Mmm YYYY'
+
+  // Question screen helpers
+  const isMainScreen = screen === 'main'
+  const isSubmittedScreen = screen === 'submitted'
+  const isQuestionScreen = !isMainScreen && !isSubmittedScreen
+  const screenChoice = isQuestionScreen
+    ? (screen as { questionId: string; responseChoice: 'yes' | 'no' })
+        .responseChoice
+    : 'yes'
+  const currentQuestionId = isQuestionScreen
+    ? (screen as { questionId: string; responseChoice: 'yes' | 'no' })
+        .questionId
+    : null
+
+  function getRelevantQuestions(choice: 'yes' | 'no') {
+    return questions.filter(
+      (q) =>
+        !q.showAfter ||
+        q.showAfter === 'both' ||
+        q.showAfter === choice,
+    )
+  }
+
+  const relevantQuestions = getRelevantQuestions(screenChoice)
+  const currentQIndex = relevantQuestions.findIndex(
+    (q) => q.id === currentQuestionId,
+  )
+  const currentQ = relevantQuestions[currentQIndex] ?? null
+  const isLastQ = currentQIndex === relevantQuestions.length - 1
+  const progressPct = isSubmittedScreen
+    ? 100
+    : isQuestionScreen
+      ? ((currentQIndex + 1) / Math.max(relevantQuestions.length, 1)) * 100
+      : 0
+
+  function handleYesClick() {
+    const qs = getRelevantQuestions('yes')
+    if (qs.length > 0) setScreen({ questionId: qs[0].id, responseChoice: 'yes' })
+  }
+  function handleNoClick() {
+    const qs = getRelevantQuestions('no')
+    if (qs.length > 0) setScreen({ questionId: qs[0].id, responseChoice: 'no' })
+  }
+  function handleNextQuestion() {
+    const next = relevantQuestions[currentQIndex + 1]
+    if (next) setScreen({ questionId: next.id, responseChoice: screenChoice })
+    else setScreen('submitted')
+  }
+  function handleNavBack() {
+    if (isQuestionScreen || isSubmittedScreen) setScreen('main')
+  }
+
+  // ---------------------------------------------------------------------------
+  // Main announcement content (shared across all screens)
+  // ---------------------------------------------------------------------------
+  const announcementContent = (
+    <div className="flex-1 divide-y divide-slate-100 overflow-y-auto bg-white">
+      {/* Announcement header */}
+      <div className="px-4 py-4">
+        {title ? (
+          <h3 className="text-sm font-bold leading-snug text-slate-900">
+            {title}
+          </h3>
+        ) : (
+          <h3 className="text-sm font-bold leading-snug text-slate-300">
+            Announcement title
+          </h3>
+        )}
+        <p className="mt-1 text-[10px] text-slate-400">
+          {timestamp}
+          {' · DANIEL TAN'}
+        </p>
+        <div className="mt-2 flex items-center gap-1.5">
+          <User className="h-3 w-3 shrink-0 text-slate-400" />
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+            STUDENT NAME
+          </p>
+        </div>
+      </div>
+
+      {/* Details */}
+      <div className="px-4 py-4">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          Details
+        </p>
+        {description ? (
+          <div
+            className="text-xs leading-relaxed text-slate-700 [&_a]:text-primary [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-slate-200 [&_blockquote]:pl-2 [&_blockquote]:italic [&_h1]:text-sm [&_h1]:font-bold [&_h2]:text-xs [&_h2]:font-semibold [&_h3]:text-xs [&_h3]:font-semibold [&_mark]:bg-yellow-100 [&_ol]:ml-4 [&_ol]:list-decimal [&_ul]:ml-4 [&_ul]:list-disc"
+            dangerouslySetInnerHTML={{ __html: linkifyHtml(description) }}
+          />
+        ) : (
+          <p className="text-xs leading-relaxed text-slate-300">
+            Your announcement details will appear here.
+          </p>
+        )}
+      </div>
+
+      {/* Shortcuts */}
+      {shortcuts.length > 0 && (
+        <div className="px-4 py-4">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Shortcuts
+          </p>
+          <div className="space-y-2">
+            {shortcuts.map((s, i) => {
+              const preset = PG_SHORTCUT_PRESETS.find((p) => p.url === s.url)
+              return (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2.5"
+                >
+                  {preset ? (
+                    <span className="text-base leading-none">{preset.emoji}</span>
+                  ) : (
+                    <ExternalLink className="h-4 w-4 shrink-0 text-slate-400" />
+                  )}
+                  <span className="text-xs font-semibold text-slate-800">
+                    {s.label}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Enquiry footer */}
+      <div className="px-4 py-5">
+        <p className="text-center text-[10px] italic text-slate-500">
+          For enquiries on this post, please contact{' '}
+          {enquiryEmail ? (
+            <span className="not-italic text-primary">{enquiryEmail}</span>
+          ) : (
+            <span className="not-italic text-slate-300">
+              enquiry@school.edu.sg
+            </span>
+          )}
+        </p>
+      </div>
+    </div>
+  )
+
+  // ---------------------------------------------------------------------------
+  // Main screen (with footer based on responseType)
+  // ---------------------------------------------------------------------------
+  const mainScreenContent = (
+    <div className="flex flex-1 flex-col overflow-hidden">
+      {announcementContent}
+
+      {/* Footer — varies by responseType */}
+      {responseType === 'acknowledge' && (
+        <div className="shrink-0 border-t border-slate-100 bg-white px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="shrink-0">
+              <p className="text-[10px] text-slate-400">
+                Please acknowledge by
+              </p>
+              <p className="text-xs font-bold text-slate-700">
+                {formattedDueDate}
+              </p>
+            </div>
+            <div className="whitespace-nowrap rounded-lg bg-[#c47565] px-4 py-1.5 text-[11px] font-semibold text-white opacity-80">
+              Acknowledge
+            </div>
+          </div>
+        </div>
+      )}
+
+      {responseType === 'yes-no' && (
+        <div className="shrink-0 border-t border-slate-100 bg-white px-4 py-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="shrink-0">
+              <p className="text-[10px] text-slate-400">Please respond by</p>
+              <p className="text-xs font-bold text-slate-700">
+                {formattedDueDate}
+              </p>
+            </div>
+            <div className="flex gap-1.5">
+              <button
+                type="button"
+                disabled={questions.length === 0}
+                onClick={handleYesClick}
+                className={cn(
+                  'rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white transition-opacity',
+                  questions.length > 0
+                    ? 'bg-[#c47565] hover:opacity-90'
+                    : 'cursor-not-allowed bg-slate-300',
+                )}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                disabled={questions.length === 0}
+                onClick={handleNoClick}
+                className={cn(
+                  'rounded-lg border px-3 py-1.5 text-[11px] font-semibold transition-opacity',
+                  questions.length > 0
+                    ? 'border-[#c47565] text-[#c47565] hover:opacity-80'
+                    : 'cursor-not-allowed border-slate-300 text-slate-300',
+                )}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
+  // ---------------------------------------------------------------------------
+  // Question screen
+  // ---------------------------------------------------------------------------
+  const questionScreenContent = currentQ ? (
+    <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Progress bar */}
+      <div className="shrink-0 border-b border-slate-100 bg-white px-4 pb-2 pt-2">
+        <div className="flex items-center justify-between">
+          <div className="mr-3 h-0.5 flex-1 rounded-full bg-slate-100">
+            <div
+              className="h-0.5 rounded-full bg-slate-500 transition-all"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <span className="shrink-0 text-[10px] text-slate-400">
+            Q{currentQIndex + 1} of {relevantQuestions.length}
+          </span>
+        </div>
+      </div>
+
+      {/* Question body */}
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        <p className="mb-4 text-[11px] font-medium leading-snug text-slate-800">
+          {currentQ.required && <span className="text-red-500">* </span>}
+          {currentQ.text || (
+            <span className="text-slate-300">Question text</span>
+          )}
+        </p>
+
+        {(!currentQ.type || currentQ.type === 'open') && (
+          <div className="rounded-lg border border-slate-200 bg-white p-3">
+            <p className="text-[11px] text-slate-300">Type your answer here...</p>
+            <p className="mt-8 text-right text-[10px] text-slate-300">
+              500 characters left
+            </p>
+          </div>
+        )}
+
+        {currentQ.type === 'mcq' && (
+          <div className="space-y-2">
+            {(currentQ.options ?? []).map((opt, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2"
+              >
+                <div className="h-3.5 w-3.5 shrink-0 rounded-full border-2 border-slate-300" />
+                <span className="text-[11px] text-slate-700">{opt}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Next / Submit footer */}
+      <div className="shrink-0 border-t border-slate-100 bg-white px-4 py-3">
+        <button
+          type="button"
+          onClick={handleNextQuestion}
+          className="w-full rounded-lg bg-slate-700 py-2 text-[11px] font-semibold text-white hover:bg-slate-800"
+        >
+          {isLastQ ? 'Submit' : 'Next →'}
+        </button>
+      </div>
+    </div>
+  ) : null
+
+  // ---------------------------------------------------------------------------
+  // Submitted screen
+  // ---------------------------------------------------------------------------
+  const submittedContent = (
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="shrink-0 border-b border-slate-100 bg-white px-4 pb-2 pt-2">
+        <div className="flex items-center justify-between">
+          <div className="mr-3 h-0.5 flex-1 rounded-full bg-slate-100">
+            <div className="h-0.5 w-full rounded-full bg-slate-500" />
+          </div>
+          <span className="shrink-0 text-[10px] text-slate-400">Done</span>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-8">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+          <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+        </div>
+        <p className="text-center text-sm font-semibold text-slate-800">
+          Response submitted
+        </p>
+        <p className="text-center text-[11px] leading-relaxed text-slate-400">
+          This is a preview —<br />no data was sent.
+        </p>
+      </div>
+      <div className="shrink-0 border-t border-slate-100 bg-white px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setScreen('main')}
+          className="w-full rounded-lg border border-slate-200 py-2 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          Back to start
+        </button>
+      </div>
+    </div>
+  )
+
   return (
     <div className="overflow-hidden rounded-xl border bg-white">
       {/* Card header */}
       <div className="flex items-center justify-between border-b bg-slate-50 px-4 py-3">
         <span className="text-sm font-semibold">Preview</span>
-        <span className="text-xs text-muted-foreground">
-          As seen by parents
-        </span>
+        <span className="text-xs text-muted-foreground">As seen by parents</span>
       </div>
 
       <div className="p-4">
@@ -143,10 +533,18 @@ function AnnouncementPreview({
 
         {/* Phone mockup */}
         <div className="mx-auto max-w-[272px]">
-          <div className="overflow-hidden rounded-[28px] border-[7px] border-slate-900 bg-white shadow-md">
+          <div className="flex h-[520px] flex-col overflow-hidden rounded-[28px] border-[7px] border-slate-900 bg-white shadow-md">
             {/* Phone nav bar */}
             <div className="flex items-center justify-between border-b border-slate-100 bg-white px-3 py-2.5">
-              <ChevronLeft className="h-5 w-5 text-slate-400" />
+              <ChevronLeft
+                className={cn(
+                  'h-5 w-5 transition-colors',
+                  isQuestionScreen || isSubmittedScreen
+                    ? 'cursor-pointer text-slate-600 hover:text-slate-900'
+                    : 'text-slate-400',
+                )}
+                onClick={handleNavBack}
+              />
               <div className="flex items-center gap-3 text-slate-400">
                 <ArrowUp className="h-3.5 w-3.5" />
                 <ArrowDown className="h-3.5 w-3.5" />
@@ -154,99 +552,11 @@ function AnnouncementPreview({
               </div>
             </div>
 
-            {/* Scrollable content */}
-            <div className="max-h-[460px] divide-y divide-slate-100 overflow-y-auto bg-white">
-              {/* Announcement header */}
-              <div className="px-4 py-4">
-                {title ? (
-                  <h3 className="text-sm font-bold leading-snug text-slate-900">
-                    {title}
-                  </h3>
-                ) : (
-                  <h3 className="text-sm font-bold leading-snug text-slate-300">
-                    Announcement title
-                  </h3>
-                )}
-                <p className="mt-1 text-[10px] text-slate-400">
-                  {timestamp}
-                  {' · DANIEL TAN'}
-                </p>
-                <div className="mt-2 flex items-center gap-1.5">
-                  <User className="h-3 w-3 shrink-0 text-slate-400" />
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                    STUDENT NAME
-                  </p>
-                </div>
-              </div>
-
-              {/* Details */}
-              <div className="px-4 py-4">
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                  Details
-                </p>
-                {description ? (
-                  <div
-                    className="text-xs leading-relaxed text-slate-700 [&_a]:text-primary [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-slate-200 [&_blockquote]:pl-2 [&_blockquote]:italic [&_h1]:text-sm [&_h1]:font-bold [&_h2]:text-xs [&_h2]:font-semibold [&_h3]:text-xs [&_h3]:font-semibold [&_mark]:bg-yellow-100 [&_ol]:ml-4 [&_ol]:list-decimal [&_ul]:ml-4 [&_ul]:list-disc"
-                    dangerouslySetInnerHTML={{
-                      __html: linkifyHtml(description),
-                    }}
-                  />
-                ) : (
-                  <p className="text-xs leading-relaxed text-slate-300">
-                    Your announcement details will appear here.
-                  </p>
-                )}
-              </div>
-
-              {/* Shortcuts */}
-              {shortcuts.length > 0 && (
-                <div className="px-4 py-4">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                    Shortcuts
-                  </p>
-                  <div className="space-y-2">
-                    {shortcuts.map((s, i) => {
-                      const preset = PG_SHORTCUT_PRESETS.find(
-                        (p) => p.url === s.url,
-                      )
-                      return (
-                        <div
-                          key={i}
-                          className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2.5"
-                        >
-                          {preset ? (
-                            <span className="text-base leading-none">
-                              {preset.emoji}
-                            </span>
-                          ) : (
-                            <ExternalLink className="h-4 w-4 shrink-0 text-slate-400" />
-                          )}
-                          <span className="text-xs font-semibold text-slate-800">
-                            {s.label}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Enquiry footer */}
-              <div className="px-4 py-5">
-                <p className="text-center text-[10px] italic text-slate-500">
-                  For enquiries on this post, please contact{' '}
-                  {enquiryEmail ? (
-                    <span className="not-italic text-primary">
-                      {enquiryEmail}
-                    </span>
-                  ) : (
-                    <span className="not-italic text-slate-300">
-                      enquiry@school.edu.sg
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
+            {isSubmittedScreen
+              ? submittedContent
+              : isQuestionScreen
+                ? questionScreenContent
+                : mainScreenContent}
           </div>
         </div>
 
@@ -316,6 +626,37 @@ function NewAnnouncementPage() {
   >([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const photoInputRef = useRef<HTMLInputElement>(null)
+
+  // Response type
+  const [responseType, setResponseType] = useState<ResponseType>('view-only')
+  const [dueDate, setDueDate] = useState('')
+  const [reminderType, setReminderType] = useState<ReminderType>('none')
+  const [reminderDate, setReminderDate] = useState('')
+  const [questions, setQuestions] = useState<FormQuestion[]>([])
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null)
+
+  // Event details (acknowledge + yes-no)
+  const [eventStart, setEventStart] = useState('')
+  const [eventStartTime, setEventStartTime] = useState('')
+  const [eventEnd, setEventEnd] = useState('')
+  const [eventEndTime, setEventEndTime] = useState('')
+  const [venue, setVenue] = useState('')
+
+  function handleResponseTypeChange(type: ResponseType) {
+    setResponseType(type)
+    if (type === 'view-only') {
+      setDueDate('')
+      setReminderType('none')
+      setReminderDate('')
+      setQuestions([])
+      setEditingQuestionId(null)
+      setEventStart('')
+      setEventStartTime('')
+      setEventEnd('')
+      setEventEndTime('')
+      setVenue('')
+    }
+  }
 
   // Send options
   const [sendOption, setSendOption] = useState<SendOption>('now')
@@ -762,6 +1103,55 @@ function NewAnnouncementPage() {
         >
           {/* Form sections */}
           <div className="space-y-6">
+            {/* RECIPIENTS — first section */}
+            <section className="rounded-xl border bg-white p-6">
+              <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                Recipients
+              </h2>
+              <div className="space-y-5">
+                {/* Students */}
+                <div className="space-y-1.5">
+                  <Label>
+                    Students <span className="text-destructive">*</span>
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Parents of the selected students will receive this
+                    announcement via Parents Gateway.
+                  </p>
+                  <StudentRecipientSelector
+                    value={recipients}
+                    onChange={setRecipients}
+                  />
+                </div>
+
+                {/* Staff in charge */}
+                <div className="space-y-1.5">
+                  <Label>Staff in charge</Label>
+                  <p className="text-xs text-muted-foreground">
+                    These staff will be able to view read status, and delete the
+                    announcement.
+                  </p>
+                  <StaffSelector
+                    value={staffInCharge}
+                    onChange={setStaffInCharge}
+                  />
+                </div>
+
+                {/* Enquiry email */}
+                <div className="space-y-1.5">
+                  <Label>Enquiry email</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Select the preferred email address to receive enquiries from
+                    parents.
+                  </p>
+                  <EnquiryEmailSelector
+                    value={enquiryEmail}
+                    onChange={setEnquiryEmail}
+                  />
+                </div>
+              </div>
+            </section>
+
             {/* CONTENT */}
             <section className="rounded-xl border bg-white p-6">
               <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -969,54 +1359,214 @@ function NewAnnouncementPage() {
               </div>
             </section>
 
-            {/* RECIPIENTS */}
+            {/* RESPONSE TYPE */}
             <section className="rounded-xl border bg-white p-6">
-              <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Recipients
+              <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                Response
               </h2>
-              <div className="space-y-5">
-                {/* Students */}
-                <div className="space-y-1.5">
-                  <Label>
-                    Students <span className="text-destructive">*</span>
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Parents of the selected students will receive this
-                    announcement via Parents Gateway.
-                  </p>
-                  <StudentRecipientSelector
-                    value={recipients}
-                    onChange={setRecipients}
-                  />
-                </div>
-
-                {/* Staff in charge */}
-                <div className="space-y-1.5">
-                  <Label>Staff in charge</Label>
-                  <p className="text-xs text-muted-foreground">
-                    These staff will be able to view read status, and delete the
-                    announcement.
-                  </p>
-                  <StaffSelector
-                    value={staffInCharge}
-                    onChange={setStaffInCharge}
-                  />
-                </div>
-
-                {/* Enquiry email */}
-                <div className="space-y-1.5">
-                  <Label>Enquiry email</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Select the preferred email address to receive enquiries from
-                    parents.
-                  </p>
-                  <EnquiryEmailSelector
-                    value={enquiryEmail}
-                    onChange={setEnquiryEmail}
-                  />
-                </div>
+              <p className="mb-4 text-xs text-muted-foreground">
+                Choose how parents respond to this announcement.
+              </p>
+              <div className="flex gap-3">
+                {(
+                  [
+                    {
+                      value: 'view-only' as ResponseType,
+                      label: 'View Only',
+                      hint: 'Parents can read the announcement.',
+                      mockup: <ViewOnlyMockup />,
+                    },
+                    {
+                      value: 'acknowledge' as ResponseType,
+                      label: 'Acknowledge',
+                      hint: 'Parents tap a button to acknowledge.',
+                      mockup: <AcknowledgeMockup />,
+                    },
+                    {
+                      value: 'yes-no' as ResponseType,
+                      label: 'Yes or No',
+                      hint: 'Parents tap Yes or No. Supports follow-up questions.',
+                      mockup: <YesNoMockup />,
+                    },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => handleResponseTypeChange(opt.value)}
+                    className={cn(
+                      'flex flex-1 flex-col gap-2 rounded-lg border-2 p-3 text-left transition-all',
+                      responseType === opt.value
+                        ? 'border-primary bg-twblue-2'
+                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+                    )}
+                  >
+                    <div className="w-full rounded border border-slate-200 bg-white">
+                      {opt.mockup}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">
+                        {opt.label}
+                      </p>
+                      <p className="mt-0.5 text-[10px] text-muted-foreground">
+                        {opt.hint}
+                      </p>
+                    </div>
+                  </button>
+                ))}
               </div>
             </section>
+
+            {/* CUSTOM QUESTIONS — yes/no only */}
+            {responseType === 'yes-no' && (
+              <QuestionBuilder
+                questions={questions}
+                onChange={setQuestions}
+                responseType={responseType}
+                onEditQuestion={setEditingQuestionId}
+              />
+            )}
+
+            {/* EVENT DETAILS — acknowledge + yes/no */}
+            {responseType !== 'view-only' && (
+              <section className="rounded-xl border bg-white p-6">
+                <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Event Details
+                </h2>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label>Event start (optional)</Label>
+                      <div className="flex gap-2">
+                        <input
+                          type="date"
+                          value={eventStart}
+                          onChange={(e) => setEventStart(e.target.value)}
+                          className="flex-1 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
+                        />
+                        <input
+                          type="time"
+                          value={eventStartTime}
+                          onChange={(e) => setEventStartTime(e.target.value)}
+                          className="w-24 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Event end (optional)</Label>
+                      <div className="flex gap-2">
+                        <input
+                          type="date"
+                          value={eventEnd}
+                          onChange={(e) => setEventEnd(e.target.value)}
+                          className="flex-1 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
+                        />
+                        <input
+                          type="time"
+                          value={eventEndTime}
+                          onChange={(e) => setEventEndTime(e.target.value)}
+                          className="w-24 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-baseline justify-between">
+                      <Label>Venue (optional)</Label>
+                      <span className="text-xs tabular-nums text-muted-foreground">
+                        {venue.length}/100
+                      </span>
+                    </div>
+                    <Input
+                      placeholder="e.g. School hall, Pasir Ris Park"
+                      value={venue}
+                      onChange={(e) => setVenue(e.target.value)}
+                      maxLength={100}
+                    />
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* SETTINGS (due date + reminders) — acknowledge + yes/no */}
+            {responseType !== 'view-only' && (
+              <section className="rounded-xl border bg-white p-6">
+                <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Settings
+                </h2>
+                <div className="space-y-5">
+                  {/* Due date */}
+                  <div className="space-y-1.5">
+                    <Label>
+                      Due date to respond by{' '}
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    <input
+                      type="date"
+                      value={dueDate}
+                      min={new Date().toISOString().split('T')[0]}
+                      onChange={(e) => setDueDate(e.target.value)}
+                      className="rounded-md border border-input bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
+                    />
+                    {dueDate && (
+                      <p className="text-xs text-muted-foreground">
+                        Default reminder will be sent on:{' '}
+                        {new Date(dueDate).toLocaleDateString('en-SG', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Additional reminders */}
+                  <div className="space-y-2">
+                    <Label>Send additional reminder(s) to parents</Label>
+                    <div className="space-y-2">
+                      {(
+                        [
+                          { value: 'none', label: 'None' },
+                          { value: 'one-time', label: 'One Time' },
+                          { value: 'daily', label: 'Daily' },
+                        ] as const
+                      ).map((opt) => (
+                        <label
+                          key={opt.value}
+                          className="flex cursor-pointer items-center gap-2"
+                        >
+                          <input
+                            type="radio"
+                            name="pg-reminder"
+                            value={opt.value}
+                            checked={reminderType === opt.value}
+                            onChange={() => setReminderType(opt.value)}
+                            className="h-3.5 w-3.5 accent-primary"
+                          />
+                          <span className="text-sm">{opt.label}</span>
+                          {reminderType === opt.value &&
+                            opt.value !== 'none' && (
+                              <div className="ml-2 flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">
+                                  {opt.value === 'one-time' ? 'on' : 'from'}
+                                </span>
+                                <input
+                                  type="date"
+                                  value={reminderDate}
+                                  onChange={(e) =>
+                                    setReminderDate(e.target.value)
+                                  }
+                                  className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
+                                />
+                              </div>
+                            )}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Preview pane — sticky alongside form on lg screens */}
@@ -1029,6 +1579,10 @@ function NewAnnouncementPage() {
                 staffInCharge={staffInCharge.map((s) => s.label).join(', ')}
                 enquiryEmail={enquiryEmail}
                 recipients={recipients}
+                responseType={responseType}
+                dueDate={dueDate}
+                questions={questions}
+                editingQuestionId={editingQuestionId}
               />
             </div>
           )}

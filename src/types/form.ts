@@ -1,7 +1,7 @@
 export type FormStatus = 'draft' | 'active' | 'closed'
 export type FormOwnership = 'mine' | 'shared'
 export type FormType = 'quick' | 'allears' | 'link'
-export type ResponseType = 'yes-no' | 'acknowledge'
+export type ResponseType = 'view-only' | 'acknowledge' | 'yes-no'
 export type ReminderType = 'none' | 'one-time' | 'daily'
 
 export type QuestionType = 'open' | 'mcq'

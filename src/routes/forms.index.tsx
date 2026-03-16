@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Lock, Plus, Search, Users } from 'lucide-react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Plus, Search, Users } from 'lucide-react'
 
 import type { FormStatus } from '@/types/form'
 import { Badge } from '@/components/ui/badge'
@@ -21,8 +21,6 @@ import {
   FormsFilterBar,
   type FormsFilters,
 } from '@/components/forms/forms-filter-bar'
-import { ResponseTypePicker } from '@/components/forms/response-type-picker'
-import { PGReadRate } from '@/components/parents-gateway/pg-read-rate'
 import { mockForms } from '@/data/mock-forms'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
@@ -33,7 +31,7 @@ export const Route = createFileRoute('/forms/')({
 function getStatusBadge(status: FormStatus) {
   const config = {
     active: {
-      label: 'Active',
+      label: 'Open',
       className: 'bg-green-100 text-green-700 hover:bg-green-100',
     },
     draft: {
@@ -49,18 +47,10 @@ function getStatusBadge(status: FormStatus) {
   return <Badge className={className}>{label}</Badge>
 }
 
-function getTargetClasses(classes: string[]): string {
-  if (classes.length === 0) return '—'
-  if (classes.length <= 3) return classes.join(', ')
-  return `${classes.slice(0, 3).join(', ')} +${classes.length - 3}`
-}
-
 function FormsPage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<FormsFilters>(EMPTY_FORMS_FILTERS)
-  const [showPicker, setShowPicker] = useState(false)
-
   useSetBreadcrumbs([{ label: 'Forms', href: '/forms' }])
 
   const filteredForms = useMemo(() => {
@@ -95,25 +85,15 @@ function FormsPage() {
       }
       return true
     })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   }, [searchQuery, filters])
 
   const metrics = useMemo(() => {
-    const totalForms = mockForms.length
-    const activeForms = mockForms.filter((f) => f.status === 'active').length
-    const formsWithRecipients = mockForms.filter((f) => f.recipientCount > 0)
-    const totalSent = formsWithRecipients.reduce(
-      (sum, f) => sum + f.recipientCount,
-      0,
-    )
-    const totalCompleted = formsWithRecipients.reduce(
-      (sum, f) => sum + f.completedCount,
-      0,
-    )
-    const completionRate =
-      totalSent > 0 ? Math.round((totalCompleted / totalSent) * 100) : 0
-    const pendingResponses = totalSent - totalCompleted
-
-    return { totalForms, activeForms, completionRate, pendingResponses }
+    const total = mockForms.length
+    const active = mockForms.filter((f) => f.status === 'active').length
+    const draft = mockForms.filter((f) => f.status === 'draft').length
+    const closed = mockForms.filter((f) => f.status === 'closed').length
+    return { total, active, draft, closed }
   }, [])
 
   return (
@@ -123,10 +103,10 @@ function FormsPage() {
         <div>
           <h1 className="text-2xl font-semibold">Forms</h1>
           <p className="text-muted-foreground">
-            Create and manage forms for parents and students
+            Create and manage forms for parents
           </p>
         </div>
-        <Button onClick={() => setShowPicker(true)}>
+        <Button onClick={() => navigate({ to: '/allears/respond' })}>
           <Plus className="mr-2 h-4 w-4" />
           Create Form
         </Button>
@@ -138,32 +118,22 @@ function FormsPage() {
         </TabsList>
         <TabsContent value="for-parents" className="space-y-6 pt-6">
           {/* Metrics Cards */}
-          <div className="grid grid-cols-1 gap-4 px-6 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 px-6 md:grid-cols-4">
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Total Forms</div>
-              <div className="text-2xl font-semibold">{metrics.totalForms}</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total</div>
+              <div className="text-3xl font-semibold">{metrics.total}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">Active</div>
-              <div className="text-2xl font-semibold">
-                {metrics.activeForms}
-              </div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Open</div>
+              <div className="text-3xl font-semibold">{metrics.active}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">
-                Completion Rate
-              </div>
-              <div className="text-2xl font-semibold">
-                {metrics.completionRate}%
-              </div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Draft</div>
+              <div className="text-3xl font-semibold">{metrics.draft}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-sm text-muted-foreground">
-                Pending Responses
-              </div>
-              <div className="text-2xl font-semibold">
-                {metrics.pendingResponses}
-              </div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Closed</div>
+              <div className="text-3xl font-semibold">{metrics.closed}</div>
             </div>
           </div>
 
@@ -176,7 +146,7 @@ function FormsPage() {
                 placeholder="Search forms"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 md:w-[200px]"
+                className="w-full pl-9 md:w-[240px]"
                 aria-label="Search forms"
               />
             </div>
@@ -194,12 +164,10 @@ function FormsPage() {
               <Table tableClassName="table-fixed w-full">
                 <TableHeader className="border-b bg-white">
                   <TableRow className="border-0 hover:bg-transparent">
-                    <TableHead className="pl-6">Form Title</TableHead>
+                    <TableHead className="w-[500px] pl-6">Form Title</TableHead>
                     <TableHead className="w-[110px]">Date</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>
-                    <TableHead className="w-[90px]">Owner</TableHead>
-                    <TableHead className="w-[130px]">To Parents Of</TableHead>
-                    <TableHead className="w-[150px] pr-6">Responded</TableHead>
+                    <TableHead className="w-[90px] pr-6">Owner</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -210,23 +178,11 @@ function FormsPage() {
                         key={form.id}
                         className="cursor-pointer hover:bg-slate-50"
                         onClick={() =>
-                          form.formType === 'allears'
-                            ? navigate({ to: '/allears/responses' })
-                            : navigate({ to: '/forms/$id', params: { id: form.id } })
+                          navigate({ to: '/allears/responses' })
                         }
                       >
-                        <TableCell className="overflow-hidden whitespace-normal pl-6">
-                          <div className="flex items-center gap-1.5 font-medium">
-                            <span className="truncate">{form.title}</span>
-                            {form.formType === 'allears' && (
-                              <span className="inline-flex shrink-0 items-center rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
-                                AllEars
-                              </span>
-                            )}
-                          </div>
-                          <div className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
-                            {form.description}
-                          </div>
+                        <TableCell className="pl-6">
+                          <span className="font-medium">{form.title}</span>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {new Date(form.createdAt).toLocaleDateString(
@@ -239,27 +195,17 @@ function FormsPage() {
                           )}
                         </TableCell>
                         <TableCell>{getStatusBadge(form.status)}</TableCell>
-                        <TableCell>
+                        <TableCell className="pr-6">
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             {isShared ? (
                               <>
                                 <Users className="h-3.5 w-3.5 shrink-0" />
                                 <span>Shared</span>
-                                <Lock className="h-3 w-3 shrink-0 text-slate-400" />
                               </>
                             ) : (
                               <span>Mine</span>
                             )}
                           </div>
-                        </TableCell>
-                        <TableCell className="truncate max-w-0 text-sm text-muted-foreground">
-                          {getTargetClasses(form.targetClasses)}
-                        </TableCell>
-                        <TableCell className="pr-6">
-                          <PGReadRate
-                            readCount={form.completedCount}
-                            totalCount={form.recipientCount}
-                          />
                         </TableCell>
                       </TableRow>
                     )
@@ -271,17 +217,6 @@ function FormsPage() {
         </TabsContent>
       </Tabs>
 
-      <ResponseTypePicker
-        open={showPicker}
-        onOpenChange={setShowPicker}
-        onSelect={(type) => {
-          if (type === 'allears') {
-            navigate({ to: '/allears/respond' })
-          } else {
-            navigate({ to: '/forms/new', search: { type } })
-          }
-        }}
-      />
     </div>
   )
 }
