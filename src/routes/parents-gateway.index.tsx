@@ -69,7 +69,7 @@ function ParentsGatewayPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<PGFilters>(EMPTY_PG_FILTERS)
 
-  useSetBreadcrumbs([{ label: 'Announcement', href: '/parents-gateway' }])
+  useSetBreadcrumbs([{ label: 'Announcements', href: '/parents-gateway' }])
   const navigate = useNavigate()
 
   const filtered = useMemo(() => {
@@ -146,7 +146,7 @@ function ParentsGatewayPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between px-6 pt-6">
         <div>
-          <h1 className="text-2xl font-semibold">Announcement</h1>
+          <h1 className="text-2xl font-semibold">Announcements</h1>
           <p className="text-muted-foreground">
             Send announcements to parents and track who has read them
           </p>

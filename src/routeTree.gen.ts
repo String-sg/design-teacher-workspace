@@ -29,13 +29,17 @@ import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
 import { Route as ParentsGatewayNewRouteImport } from './routes/parents-gateway.new'
 import { Route as ParentsGatewayIdRouteImport } from './routes/parents-gateway.$id'
+import { Route as FormsNewRouteImport } from './routes/forms.new'
+import { Route as FormsIdRouteImport } from './routes/forms.$id'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
 import { Route as AllearsAllearsRouteImport } from './routes/_allears.allears'
 import { Route as AllearsAllearsIndexRouteImport } from './routes/_allears.allears.index'
 import { Route as GuestReportViewTokenRouteImport } from './routes/_guest.report-view.$token'
 import { Route as AllearsAllearsResponsesRouteImport } from './routes/_allears.allears.responses'
+import { Route as AllearsAllearsRespondRouteImport } from './routes/_allears.allears.respond'
 import { Route as AllearsAllearsQuestionsRouteImport } from './routes/_allears.allears.questions'
+import { Route as AllearsAllearsIndividualsRouteImport } from './routes/_allears.allears.individuals'
 
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
@@ -135,6 +139,16 @@ const ParentsGatewayIdRoute = ParentsGatewayIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ParentsGatewayRoute,
 } as any)
+const FormsNewRoute = FormsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => FormsRoute,
+} as any)
+const FormsIdRoute = FormsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => FormsRoute,
+} as any)
 const AnnouncementsIdRoute = AnnouncementsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -165,11 +179,22 @@ const AllearsAllearsResponsesRoute = AllearsAllearsResponsesRouteImport.update({
   path: '/responses',
   getParentRoute: () => AllearsAllearsRoute,
 } as any)
+const AllearsAllearsRespondRoute = AllearsAllearsRespondRouteImport.update({
+  id: '/respond',
+  path: '/respond',
+  getParentRoute: () => AllearsAllearsRoute,
+} as any)
 const AllearsAllearsQuestionsRoute = AllearsAllearsQuestionsRouteImport.update({
   id: '/questions',
   path: '/questions',
   getParentRoute: () => AllearsAllearsRoute,
 } as any)
+const AllearsAllearsIndividualsRoute =
+  AllearsAllearsIndividualsRouteImport.update({
+    id: '/individuals',
+    path: '/individuals',
+    getParentRoute: () => AllearsAllearsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -184,6 +209,8 @@ export interface FileRoutesByFullPath {
   '/allears': typeof AllearsAllearsRouteWithChildren
   '/login': typeof GuestLoginRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/forms/$id': typeof FormsIdRoute
+  '/forms/new': typeof FormsNewRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -193,7 +220,9 @@ export interface FileRoutesByFullPath {
   '/parents-gateway/': typeof ParentsGatewayIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
+  '/allears/individuals': typeof AllearsAllearsIndividualsRoute
   '/allears/questions': typeof AllearsAllearsQuestionsRoute
+  '/allears/respond': typeof AllearsAllearsRespondRoute
   '/allears/responses': typeof AllearsAllearsResponsesRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
   '/allears/': typeof AllearsAllearsIndexRoute
@@ -205,6 +234,8 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/login': typeof GuestLoginRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/forms/$id': typeof FormsIdRoute
+  '/forms/new': typeof FormsNewRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -214,7 +245,9 @@ export interface FileRoutesByTo {
   '/parents-gateway': typeof ParentsGatewayIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/students': typeof StudentsIndexRoute
+  '/allears/individuals': typeof AllearsAllearsIndividualsRoute
   '/allears/questions': typeof AllearsAllearsQuestionsRoute
+  '/allears/respond': typeof AllearsAllearsRespondRoute
   '/allears/responses': typeof AllearsAllearsResponsesRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
   '/allears': typeof AllearsAllearsIndexRoute
@@ -235,6 +268,8 @@ export interface FileRoutesById {
   '/_allears/allears': typeof AllearsAllearsRouteWithChildren
   '/_guest/login': typeof GuestLoginRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/forms/$id': typeof FormsIdRoute
+  '/forms/new': typeof FormsNewRoute
   '/parents-gateway/$id': typeof ParentsGatewayIdRoute
   '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
@@ -244,7 +279,9 @@ export interface FileRoutesById {
   '/parents-gateway/': typeof ParentsGatewayIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
+  '/_allears/allears/individuals': typeof AllearsAllearsIndividualsRoute
   '/_allears/allears/questions': typeof AllearsAllearsQuestionsRoute
+  '/_allears/allears/respond': typeof AllearsAllearsRespondRoute
   '/_allears/allears/responses': typeof AllearsAllearsResponsesRoute
   '/_guest/report-view/$token': typeof GuestReportViewTokenRoute
   '/_allears/allears/': typeof AllearsAllearsIndexRoute
@@ -264,6 +301,8 @@ export interface FileRouteTypes {
     | '/allears'
     | '/login'
     | '/announcements/$id'
+    | '/forms/$id'
+    | '/forms/new'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
@@ -273,7 +312,9 @@ export interface FileRouteTypes {
     | '/parents-gateway/'
     | '/reports/'
     | '/students/'
+    | '/allears/individuals'
     | '/allears/questions'
+    | '/allears/respond'
     | '/allears/responses'
     | '/report-view/$token'
     | '/allears/'
@@ -285,6 +326,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/login'
     | '/announcements/$id'
+    | '/forms/$id'
+    | '/forms/new'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
@@ -294,7 +337,9 @@ export interface FileRouteTypes {
     | '/parents-gateway'
     | '/reports'
     | '/students'
+    | '/allears/individuals'
     | '/allears/questions'
+    | '/allears/respond'
     | '/allears/responses'
     | '/report-view/$token'
     | '/allears'
@@ -314,6 +359,8 @@ export interface FileRouteTypes {
     | '/_allears/allears'
     | '/_guest/login'
     | '/announcements/$id'
+    | '/forms/$id'
+    | '/forms/new'
     | '/parents-gateway/$id'
     | '/parents-gateway/new'
     | '/reports/$id'
@@ -323,7 +370,9 @@ export interface FileRouteTypes {
     | '/parents-gateway/'
     | '/reports/'
     | '/students/'
+    | '/_allears/allears/individuals'
     | '/_allears/allears/questions'
+    | '/_allears/allears/respond'
     | '/_allears/allears/responses'
     | '/_guest/report-view/$token'
     | '/_allears/allears/'
@@ -485,6 +534,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParentsGatewayIdRouteImport
       parentRoute: typeof ParentsGatewayRoute
     }
+    '/forms/new': {
+      id: '/forms/new'
+      path: '/new'
+      fullPath: '/forms/new'
+      preLoaderRoute: typeof FormsNewRouteImport
+      parentRoute: typeof FormsRoute
+    }
+    '/forms/$id': {
+      id: '/forms/$id'
+      path: '/$id'
+      fullPath: '/forms/$id'
+      preLoaderRoute: typeof FormsIdRouteImport
+      parentRoute: typeof FormsRoute
+    }
     '/announcements/$id': {
       id: '/announcements/$id'
       path: '/$id'
@@ -527,6 +590,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AllearsAllearsResponsesRouteImport
       parentRoute: typeof AllearsAllearsRoute
     }
+    '/_allears/allears/respond': {
+      id: '/_allears/allears/respond'
+      path: '/respond'
+      fullPath: '/allears/respond'
+      preLoaderRoute: typeof AllearsAllearsRespondRouteImport
+      parentRoute: typeof AllearsAllearsRoute
+    }
     '/_allears/allears/questions': {
       id: '/_allears/allears/questions'
       path: '/questions'
@@ -534,17 +604,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AllearsAllearsQuestionsRouteImport
       parentRoute: typeof AllearsAllearsRoute
     }
+    '/_allears/allears/individuals': {
+      id: '/_allears/allears/individuals'
+      path: '/individuals'
+      fullPath: '/allears/individuals'
+      preLoaderRoute: typeof AllearsAllearsIndividualsRouteImport
+      parentRoute: typeof AllearsAllearsRoute
+    }
   }
 }
 
 interface AllearsAllearsRouteChildren {
+  AllearsAllearsIndividualsRoute: typeof AllearsAllearsIndividualsRoute
   AllearsAllearsQuestionsRoute: typeof AllearsAllearsQuestionsRoute
+  AllearsAllearsRespondRoute: typeof AllearsAllearsRespondRoute
   AllearsAllearsResponsesRoute: typeof AllearsAllearsResponsesRoute
   AllearsAllearsIndexRoute: typeof AllearsAllearsIndexRoute
 }
 
 const AllearsAllearsRouteChildren: AllearsAllearsRouteChildren = {
+  AllearsAllearsIndividualsRoute: AllearsAllearsIndividualsRoute,
   AllearsAllearsQuestionsRoute: AllearsAllearsQuestionsRoute,
+  AllearsAllearsRespondRoute: AllearsAllearsRespondRoute,
   AllearsAllearsResponsesRoute: AllearsAllearsResponsesRoute,
   AllearsAllearsIndexRoute: AllearsAllearsIndexRoute,
 }
@@ -591,10 +672,14 @@ const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
 )
 
 interface FormsRouteChildren {
+  FormsIdRoute: typeof FormsIdRoute
+  FormsNewRoute: typeof FormsNewRoute
   FormsIndexRoute: typeof FormsIndexRoute
 }
 
 const FormsRouteChildren: FormsRouteChildren = {
+  FormsIdRoute: FormsIdRoute,
+  FormsNewRoute: FormsNewRoute,
   FormsIndexRoute: FormsIndexRoute,
 }
 

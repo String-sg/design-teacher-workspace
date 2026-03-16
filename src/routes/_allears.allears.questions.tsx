@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   CheckCircle2,
@@ -14,11 +15,21 @@ import {
 import { toast } from 'sonner'
 
 import { AllearsHeader } from '@/components/allears/allears-header'
+import { AllEarsPreviewDialog } from '@/components/allears/allears-preview-dialog'
+import type { PreviewQuestion } from '@/components/allears/allears-preview-dialog'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 export const Route = createFileRoute('/_allears/allears/questions')({
   component: QuestionsPage,
 })
+
+const SHARE_LINK = 'https://form.allears.gov.sg/abc1234'
 
 const questions = [
   {
@@ -117,7 +128,113 @@ function YesNoQuestionCard({
   )
 }
 
+function PublishShareDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  function handleCopyLink() {
+    navigator.clipboard
+      .writeText(SHARE_LINK)
+      .then(() => toast.success('Link copied!'))
+      .catch(() => toast.error('Failed to copy link'))
+  }
+
+  function handleConfirmPublish() {
+    onOpenChange(false)
+    toast.success('Form published!', {
+      description:
+        'The form has been sent to Parents Gateway.',
+    })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Publish and share</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-1">
+          {/* Form title */}
+          <div>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Form title
+            </p>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+              <p className="text-sm text-slate-800">
+                Asking Parents — Sec 3 Science Centre Learning Journey
+              </p>
+            </div>
+          </div>
+
+          {/* Share link */}
+          <div>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Share link
+            </p>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+                <p className="truncate text-sm text-slate-700">{SHARE_LINK}</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 gap-1.5"
+                onClick={handleCopyLink}
+              >
+                <Copy className="h-3.5 w-3.5" />
+                Copy link
+              </Button>
+            </div>
+          </div>
+
+          {/* Audience */}
+          <div>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Audience
+            </p>
+            <p className="text-sm text-slate-800">
+              Specific custodians · Sec 3A, Sec 3B
+            </p>
+          </div>
+
+          {/* Due date */}
+          <div>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Due date
+            </p>
+            <p className="text-sm text-slate-800">15 Mar 2026</p>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 border-t pt-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmPublish}>
+            Confirm and publish →
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 function QuestionsPage() {
+  const [showPublish, setShowPublish] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
+
+  const previewQuestions: PreviewQuestion[] = questions.map((q) => ({
+    id: String(q.id),
+    type: 'multiple-choice' as const,
+    question: q.question,
+    options: [q.yesLabel, q.noLabel],
+    required: true,
+  }))
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       <AllearsHeader activeTab="QUESTIONS" />
@@ -144,6 +261,7 @@ function QuestionsPage() {
             <Button
               variant="outline"
               size="sm"
+              onClick={() => setShowPreview(true)}
               className="border-slate-300 text-xs font-semibold tracking-wide text-slate-600"
             >
               PREVIEW
@@ -151,14 +269,10 @@ function QuestionsPage() {
             <Button
               size="sm"
               className="gap-1.5 bg-red-500 text-xs font-semibold tracking-wide text-white hover:bg-red-600"
-              onClick={() => {
-                toast.success('Sent to PG', {
-                  description: 'The form has been successfully sent to PG.',
-                })
-              }}
+              onClick={() => setShowPublish(true)}
             >
               <Send className="h-3.5 w-3.5" />
-              SEND TO PG
+              PUBLISH AND SHARE
             </Button>
           </div>
         </div>
@@ -248,6 +362,14 @@ function QuestionsPage() {
           </div>
         </div>
       </main>
+
+      <PublishShareDialog open={showPublish} onOpenChange={setShowPublish} />
+      <AllEarsPreviewDialog
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        title="Asking Parents — Sec 3 Science Centre Learning Journey"
+        questions={previewQuestions}
+      />
     </div>
   )
 }

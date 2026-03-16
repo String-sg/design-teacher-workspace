@@ -70,7 +70,7 @@ const mainNavItems: Array<MenuItem> = [
 
 const parentsCommItems: Array<MenuItem> = [
   {
-    title: 'Announcement',
+    title: 'Announcements',
     url: '/parents-gateway',
     icon: Mail,
     featureFlag: 'parents-gateway',
@@ -161,7 +161,7 @@ export function AppSidebar() {
           {filteredParentsItems.length > 0 && (
             <>
               <SidebarGroupLabel className="mt-2">
-                Parents Comm
+                Parent Communication
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenuItems
