@@ -4,6 +4,8 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { useRouterState } from '@tanstack/react-router'
 import {
   Check,
+  ChevronDown,
+  ChevronRight,
   Copy,
   Info,
   Mail,
@@ -11,6 +13,7 @@ import {
   Minimize2,
   Minus,
   Pencil,
+  Plus,
   Sparkles,
   ThumbsDown,
   ThumbsUp,
@@ -294,6 +297,7 @@ export function HeyTaliaPanel() {
   const [thumbed, setThumbed] = useState<Record<number, 'up' | 'down'>>({})
   const [panelWidth, setPanelWidth] = useState(W_DEFAULT)
   const [isExpanded, setIsExpanded] = useState(false)
+  const [agentDropdownOpen, setAgentDropdownOpen] = useState(false)
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -464,25 +468,36 @@ export function HeyTaliaPanel() {
         )}
 
         {/* ── Header ── */}
-        <div className="flex h-14 shrink-0 items-center gap-3 border-b bg-background px-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
-            <img
-              src="/logos/heytalia-icon.png"
-              alt="HeyTalia"
-              className="h-5 w-5"
-            />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold text-foreground">
-                HeyTalia
-              </span>
-              <span className="rounded-full bg-twpurple-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-twpurple-9">
-                Beta
-              </span>
+        <div className="relative flex h-14 shrink-0 items-center gap-3 border-b bg-background px-3">
+          <button
+            type="button"
+            onClick={() => setAgentDropdownOpen((v) => !v)}
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-lg px-1 py-1 transition-colors hover:bg-muted"
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
+              <img
+                src="/logos/heytalia-icon.png"
+                alt="HeyTalia"
+                className="h-5 w-5"
+              />
             </div>
-          </div>
+            <div className="min-w-0 flex-1 text-left">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-semibold text-foreground">
+                  HeyTalia
+                </span>
+                <span className="rounded-full bg-twblue-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-twblue-9">
+                  Beta
+                </span>
+              </div>
+            </div>
+            <ChevronDown
+              className={cn(
+                'h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform',
+                agentDropdownOpen && 'rotate-180',
+              )}
+            />
+          </button>
 
           {/* 2 icons only: expand toggle + close */}
           <div className="flex items-center">
@@ -509,6 +524,23 @@ export function HeyTaliaPanel() {
               <Minus className="h-3.5 w-3.5" />
             </button>
           </div>
+
+          {/* ── Agent Picker Dropdown ── */}
+          {agentDropdownOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setAgentDropdownOpen(false)}
+              />
+              <AgentPickerDropdown
+                onSelect={(id) => {
+                  setAgentDropdownOpen(false)
+                  handleSelectAgent(id)
+                }}
+                onClose={() => setAgentDropdownOpen(false)}
+              />
+            </>
+          )}
         </div>
 
         {/* ── Messages ── */}
@@ -571,6 +603,87 @@ export function HeyTaliaPanel() {
         </div>
       </div>
     </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Agent picker dropdown
+// ---------------------------------------------------------------------------
+function AgentPickerDropdown({
+  onSelect,
+  onClose,
+}: {
+  onSelect: (agentId: string) => void
+  onClose: () => void
+}) {
+  return (
+    <div className="absolute left-3 right-3 top-[calc(100%+4px)] z-50 overflow-hidden rounded-xl border bg-white shadow-lg">
+      {/* Header */}
+      <div className="px-4 pt-3.5 pb-2.5">
+        <p className="text-sm font-semibold text-foreground">
+          Teacher Assistant
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          Choose an agent to help you
+        </p>
+      </div>
+
+      <div className="mx-4 border-t" />
+
+      {/* Agent rows */}
+      {AGENTS.map((agent) => (
+        <button
+          key={agent.id}
+          type="button"
+          onClick={() => onSelect(agent.id)}
+          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50"
+        >
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+            style={{ background: `${agent.color}18` }}
+          >
+            <img src={agent.icon} alt={agent.name} className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-medium text-foreground">
+                {agent.name}
+              </span>
+              {agent.tag && (
+                <span className="rounded-full bg-twblue-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-twblue-9">
+                  {agent.tag}
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {agent.description}
+            </p>
+          </div>
+          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+        </button>
+      ))}
+
+      <div className="mx-4 border-t" />
+
+      {/* Add new agents */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50"
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-dashed border-muted-foreground/40">
+          <Plus className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="text-sm font-medium text-foreground">
+            Add new agents
+          </span>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Browse and add more assistants
+          </p>
+        </div>
+      </button>
+    </div>
   )
 }
 

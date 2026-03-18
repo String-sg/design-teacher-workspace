@@ -1,6 +1,5 @@
 import { createRequire } from 'node:module'
 import { defineConfig } from 'vite'
-import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
@@ -18,7 +17,6 @@ const config = defineConfig({
     // devtools disabled to avoid port conflict with other worktree
     // devtools({ port: 42070 }),
     nitro(),
-    // this is the plugin that enables path aliases
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),

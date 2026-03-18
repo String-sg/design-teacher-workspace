@@ -2,6 +2,8 @@ import * as React from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
 import {
   ArrowUpRight,
+  BarChart3,
+  Bot,
   CircleHelp,
   ClipboardList,
   FileText,
@@ -46,6 +48,8 @@ interface MenuItem {
   icon: LucideIcon
   badge?: number
   featureFlag?: FeatureFlagKey
+  conceptTag?: boolean
+  transparent?: boolean
 }
 
 const mainNavItems: Array<MenuItem> = [
@@ -61,10 +65,28 @@ const mainNavItems: Array<MenuItem> = [
     url: '/',
     icon: Home,
   },
+]
+
+const studentInsightItems: Array<MenuItem> = [
   {
-    title: 'Students',
+    title: 'Analytics',
+    url: '/student-analytics',
+    icon: BarChart3,
+    conceptTag: true,
+    featureFlag: 'student-analytics',
+  },
+  {
+    title: 'Profiles',
     url: '/students',
     icon: Users,
+    conceptTag: true,
+  },
+  {
+    title: 'Insight Buddy',
+    url: '/insight-buddy',
+    icon: Bot,
+    conceptTag: true,
+    featureFlag: 'student-analytics',
   },
 ]
 
@@ -76,16 +98,16 @@ const parentsCommItems: Array<MenuItem> = [
     featureFlag: 'parents-gateway',
   },
   {
+    title: 'Reports',
+    url: '/reports',
+    icon: FileText,
+    transparent: true,
+  },
+  {
     title: 'Forms',
     url: '/forms',
     icon: ClipboardList,
     featureFlag: 'forms',
-  },
-  {
-    title: 'Reports',
-    url: '/reports',
-    icon: FileText,
-    featureFlag: 'holistic-reports',
   },
 ]
 
@@ -98,14 +120,25 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
   return (
     <SidebarMenu>
       {items.map((item) => (
-        <SidebarMenuItem key={item.title}>
+        <SidebarMenuItem
+          key={item.title}
+          className={item.transparent ? 'opacity-0 pointer-events-none' : ''}
+        >
           <SidebarMenuButton
             render={<Link to={item.url} />}
-            isActive={currentPath === item.url}
+            isActive={
+              currentPath === item.url ||
+              (item.url !== '/' && currentPath.startsWith(item.url))
+            }
             tooltip={item.title}
           >
             <item.icon className="size-4" />
             <span>{item.title}</span>
+            {item.conceptTag && (
+              <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-900 group-data-[collapsible=icon]:hidden">
+                Concept
+              </span>
+            )}
           </SidebarMenuButton>
           {item.badge && (
             <SidebarMenuBadge className="bg-muted text-muted-foreground">
@@ -121,11 +154,11 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
 export function AppSidebar() {
   const location = useLocation()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
-
   const announcementsEnabled = useFeatureFlag('announcements')
   const formsEnabled = useFeatureFlag('forms')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
   const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
+  const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
 
   const filterItems = (items: Array<MenuItem>) =>
     items.filter((item) => {
@@ -139,12 +172,15 @@ export function AppSidebar() {
 
   const filteredMainItems = filterItems(mainNavItems)
   const filteredParentsItems = filterItems(parentsCommItems)
+  const filteredStudentItems = studentInsightItems.filter((item) =>
+    item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
+  )
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-0">
         <div className="flex h-14 items-center justify-center gap-2 px-4 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0">
-          <span className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0">
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold transition-[opacity,flex] duration-150 group-data-[collapsible=icon]:flex-[0] group-data-[collapsible=icon]:opacity-0 select-none cursor-default">
             Teacher Workspace
             <span className="ml-1.5 rounded-full bg-twblue-3 px-1.5 py-0.5 text-xs font-medium text-twblue-9">
               Beta
@@ -154,17 +190,28 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="pb-0">
           <SidebarGroupContent>
             <SidebarMenuItems
               items={filteredMainItems}
               currentPath={location.pathname}
             />
           </SidebarGroupContent>
+          <>
+            <SidebarGroupLabel className="mt-2">
+              Student Insights
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenuItems
+                items={filteredStudentItems}
+                currentPath={location.pathname}
+              />
+            </SidebarGroupContent>
+          </>
           {filteredParentsItems.length > 0 && (
             <>
               <SidebarGroupLabel className="mt-2">
-                Parent Communication
+                Parents Comm
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenuItems

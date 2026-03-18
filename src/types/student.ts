@@ -1,23 +1,69 @@
+export interface OffenceDetail {
+  type: string
+  count: number
+  latestDate: string
+}
+
+export interface CounsellingSubcase {
+  name: string
+  count: number
+  latestDate: string
+}
+
+export interface CounsellingCase {
+  category: string
+  subcases?: Array<CounsellingSubcase>
+  count?: number
+  latestDate?: string
+}
+
+export interface RiskIndicatorRecord {
+  year: number
+  term: string
+  indicators: Array<string>
+}
+
+export interface SocialLinkPerson {
+  name: string
+  class: string
+  closenessRating: number | null
+}
+
+export interface SubjectScore {
+  subject: string
+  percentage: number
+}
+
+
 export interface Student {
   id: string
   name: string
   class: string
+  cca: string
   attentionTags: Array<AttentionTag>
   // Academic Performance
   overallPercentage: number
+  subjectScores?: Array<SubjectScore>
   conduct: ConductGrade
+  approvedMtl: string | null
   learningSupport: string | null
   postSecEligibility: string
   // Behaviour & Discipline
   offences: number
+  offenceDetails?: Array<OffenceDetail>
   absences: number
   lateComing: number
   ccaMissed: number
   // Wellbeing
   riskIndicators: number
+  riskIndicatorHistory?: Array<RiskIndicatorRecord>
   lowMoodFlagged: string | null
+  lowMoodTerms?: Array<string>
   socialLinks: number
+  selectedBy?: Array<SocialLinkPerson>
+  selectedFriends?: Array<SocialLinkPerson>
   counsellingSessions: number
+  counsellingCases?: Array<CounsellingCase>
   sen: string | null
   fas: string | null
   // Family, Housing, Finance
@@ -25,8 +71,15 @@ export interface Student {
   housingType: 'Owned' | 'Rented' | null
   custody: string | null
   custodyDetails: string | null
+  commuterStatus: string | null
+  afterSchoolArrangement: string | null
   siblings: number
+  siblingDetails?: Array<{ name: string; class: string }>
   externalAgencies: string | null
+  // Personal
+  birthday?: string
+  citizenship?: 'Singapore citizen' | 'Permanent resident' | 'Foreigner'
+  languagesSpoken?: string
   // School
   schoolName?: string
   // Student Identity
@@ -42,7 +95,7 @@ export interface Student {
   nextSteps: string | null
 }
 
-export type AttentionTag = 'FAS' | 'GEP' | 'LSM' | 'LSP' | 'SEN'
+export type AttentionTag = 'FAS' | 'GEP' | 'LSM' | 'LSP' | 'SEN' | 'LTA'
 
 export type ConductGrade = 'Excellent' | 'Very Good' | 'Good' | 'Fair' | 'Poor'
 
@@ -53,11 +106,12 @@ export interface ClassOption {
 
 export type FilterField =
   // General
-  | 'name'
   | 'class'
+  | 'cca'
   // Academic Performance
   | 'overallPercentage'
   | 'conduct'
+  | 'approvedMtl'
   | 'learningSupport'
   | 'postSecEligibility'
   // Behaviour and Discipline
@@ -76,6 +130,8 @@ export type FilterField =
   | 'housing'
   | 'housingType'
   | 'custody'
+  | 'commuterStatus'
+  | 'afterSchoolArrangement'
   | 'siblings'
   | 'externalAgencies'
 
@@ -86,6 +142,9 @@ export type FilterOperator =
   | 'lt'
   | 'lte'
   | 'eq'
+  | 'neq'
+  | 'between'
+  | 'not_between'
   // Text operators
   | 'contains'
   | 'not_contains'
@@ -94,11 +153,16 @@ export type FilterOperator =
   | 'is_empty'
   | 'is_not_empty'
 
+export interface FilterRangeValue {
+  min: number
+  max: number
+}
+
 export interface FilterCriterion {
   id: string
   field: FilterField
   operator: FilterOperator
-  value: string | number
+  value: string | number | FilterRangeValue | Array<string>
 }
 
 export type SortDirection = 'asc' | 'desc'

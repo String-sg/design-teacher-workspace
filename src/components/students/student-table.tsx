@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ChevronDown, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 
 import { ColumnHeaderMenu } from './column-header-menu'
 import type {
@@ -11,7 +11,7 @@ import type {
   Student,
 } from '@/types/student'
 import type { ColumnConfig } from './column-visibility-popover'
-import { cn, getStatusColor } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,14 +24,7 @@ import {
 } from '@/components/ui/table'
 import { usePagination } from '@/hooks/use-pagination'
 import { tagColors } from '@/data/mock-students'
-import {
-  absencesThresholds,
-  ccaMissedThresholds,
-  lateComingThresholds,
-  offencesThresholds,
-  overallPercentageThresholds,
-  riskIndicatorsThresholds,
-} from '@/data/threshold-config'
+import { useFeatureFlags } from '@/lib/feature-flags'
 
 interface StudentTableProps {
   students: Array<Student>
@@ -54,10 +47,30 @@ interface StudentTableProps {
   onAddQuickFilter: (field: FilterField) => void
   /** Handler for clearing a filter by field */
   onClearFilter: (field: FilterField) => void
+  /** Selected subjects for overall % computation (null = all subjects) */
+  selectedSubjects?: Array<string> | null
+  /** Opens the subject selector dialog */
+  onConfigureSubjects?: () => void
 }
 
 const tagVariantMap: Record<AttentionTag, 'default' | 'secondary' | 'outline'> =
   tagColors
+
+function computeOverallPct(
+  student: Student,
+  selectedSubjects: Array<string> | null | undefined,
+): number {
+  if (!selectedSubjects || !student.subjectScores) {
+    return student.overallPercentage
+  }
+  const relevant = student.subjectScores.filter((s) =>
+    selectedSubjects.includes(s.subject),
+  )
+  if (relevant.length === 0) return student.overallPercentage
+  return Math.round(
+    relevant.reduce((sum, s) => sum + s.percentage, 0) / relevant.length,
+  )
+}
 
 export function StudentTable({
   students,
@@ -72,11 +85,11 @@ export function StudentTable({
   onClearSort,
   onAddQuickFilter,
   onClearFilter,
+  selectedSubjects,
+  onConfigureSubjects,
 }: StudentTableProps) {
   const navigate = useNavigate()
-  const [isMatchedCollapsed, setIsMatchedCollapsed] = useState(false)
-  const [isUnmatchedCollapsed, setIsUnmatchedCollapsed] = useState(false)
-
+  const { isEnabled } = useFeatureFlags()
   // Sticky header state
   const tableContainerRef = useRef<HTMLDivElement>(null)
   const stickyHeaderRef = useRef<HTMLDivElement>(null)
@@ -205,12 +218,6 @@ export function StudentTable({
     pageSize,
   })
 
-  // Reset collapsed state when filters change
-  useEffect(() => {
-    setIsMatchedCollapsed(false)
-    setIsUnmatchedCollapsed(false)
-  }, [matchedIds, matchedCount])
-
   const paginatedStudents = useMemo(() => {
     return students.slice(startIndex, startIndex + pageSize)
   }, [students, startIndex, pageSize])
@@ -266,6 +273,18 @@ export function StudentTable({
           className="min-w-[90px]"
         />
       )}
+      {isVisible('cca') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'cca')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[130px]"
+        />
+      )}
       {isVisible('attentionTags') && (
         <ColumnHeaderMenu
           column={columns.find((c) => c.id === 'attentionTags')!}
@@ -278,9 +297,9 @@ export function StudentTable({
           className="min-w-[150px]"
         />
       )}
-      {isVisible('overallPercentage') && (
+      {isVisible('attendance') && (
         <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'overallPercentage')!}
+          column={columns.find((c) => c.id === 'attendance')!}
           currentSort={sort}
           activeFilterFields={activeFilterFields}
           onSort={onSort}
@@ -288,66 +307,6 @@ export function StudentTable({
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
           className="min-w-[120px]"
-        />
-      )}
-      {isVisible('conduct') && (
-        <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'conduct')!}
-          currentSort={sort}
-          activeFilterFields={activeFilterFields}
-          onSort={onSort}
-          onClearSort={onClearSort}
-          onAddQuickFilter={onAddQuickFilter}
-          onClearFilter={onClearFilter}
-          className="min-w-[115px]"
-        />
-      )}
-      {isVisible('learningSupport') && (
-        <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'learningSupport')!}
-          currentSort={sort}
-          activeFilterFields={activeFilterFields}
-          onSort={onSort}
-          onClearSort={onClearSort}
-          onAddQuickFilter={onAddQuickFilter}
-          onClearFilter={onClearFilter}
-          className="min-w-[180px]"
-        />
-      )}
-      {isVisible('postSecEligibility') && (
-        <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'postSecEligibility')!}
-          currentSort={sort}
-          activeFilterFields={activeFilterFields}
-          onSort={onSort}
-          onClearSort={onClearSort}
-          onAddQuickFilter={onAddQuickFilter}
-          onClearFilter={onClearFilter}
-          className="min-w-[200px]"
-        />
-      )}
-      {isVisible('offences') && (
-        <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'offences')!}
-          currentSort={sort}
-          activeFilterFields={activeFilterFields}
-          onSort={onSort}
-          onClearSort={onClearSort}
-          onAddQuickFilter={onAddQuickFilter}
-          onClearFilter={onClearFilter}
-          className="min-w-[115px]"
-        />
-      )}
-      {isVisible('absences') && (
-        <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'absences')!}
-          currentSort={sort}
-          activeFilterFields={activeFilterFields}
-          onSort={onSort}
-          onClearSort={onClearSort}
-          onAddQuickFilter={onAddQuickFilter}
-          onClearFilter={onClearFilter}
-          className="min-w-[115px]"
         />
       )}
       {isVisible('lateComing') && (
@@ -362,6 +321,18 @@ export function StudentTable({
           className="min-w-[135px]"
         />
       )}
+      {isVisible('absences') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'absences')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[115px]"
+        />
+      )}
       {isVisible('ccaMissed') && (
         <ColumnHeaderMenu
           column={columns.find((c) => c.id === 'ccaMissed')!}
@@ -372,6 +343,66 @@ export function StudentTable({
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
           className="min-w-[130px]"
+        />
+      )}
+      {isVisible('offences') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'offences')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[115px]"
+        />
+      )}
+      {isVisible('conduct') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'conduct')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[115px]"
+        />
+      )}
+      {isVisible('counsellingSessions') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'counsellingSessions')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[135px]"
+        />
+      )}
+      {isVisible('sen') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'sen')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[80px]"
+        />
+      )}
+      {isVisible('socialLinks') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'socialLinks')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[140px]"
         />
       )}
       {isVisible('riskIndicators') && (
@@ -398,40 +429,66 @@ export function StudentTable({
           className="min-w-[120px]"
         />
       )}
-      {isVisible('socialLinks') && (
+      {isVisible('overallPercentage') && (
         <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'socialLinks')!}
+          column={columns.find((c) => c.id === 'overallPercentage')!}
           currentSort={sort}
           activeFilterFields={activeFilterFields}
           onSort={onSort}
           onClearSort={onClearSort}
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
-          className="min-w-[140px]"
+          className="min-w-[120px]"
+          onConfigureSubjects={onConfigureSubjects}
+          hasCustomSubjects={!!selectedSubjects}
         />
       )}
-      {isVisible('counsellingSessions') && (
+      {isVisible('approvedMtl') && (
         <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'counsellingSessions')!}
+          column={columns.find((c) => c.id === 'approvedMtl')!}
           currentSort={sort}
           activeFilterFields={activeFilterFields}
           onSort={onSort}
           onClearSort={onClearSort}
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
-          className="min-w-[135px]"
+          className="min-w-[130px]"
         />
       )}
-      {isVisible('sen') && (
+      {isVisible('learningSupport') && (
         <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'sen')!}
+          column={columns.find((c) => c.id === 'learningSupport')!}
           currentSort={sort}
           activeFilterFields={activeFilterFields}
           onSort={onSort}
           onClearSort={onClearSort}
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
-          className="min-w-[80px]"
+          className="min-w-[180px]"
+        />
+      )}
+      {isVisible('postSecEligibility') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'postSecEligibility')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[200px]"
+        />
+      )}
+      {isVisible('fas') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'fas')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[75px]"
         />
       )}
       {isVisible('housing') && (
@@ -470,6 +527,30 @@ export function StudentTable({
           className="min-w-[110px]"
         />
       )}
+      {isVisible('commuterStatus') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'commuterStatus')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[140px]"
+        />
+      )}
+      {isVisible('afterSchoolArrangement') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'afterSchoolArrangement')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[180px]"
+        />
+      )}
       {isVisible('siblings') && (
         <ColumnHeaderMenu
           column={columns.find((c) => c.id === 'siblings')!}
@@ -479,31 +560,7 @@ export function StudentTable({
           onClearSort={onClearSort}
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
-          className="min-w-[110px]"
-        />
-      )}
-      {isVisible('externalAgencies') && (
-        <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'externalAgencies')!}
-          currentSort={sort}
-          activeFilterFields={activeFilterFields}
-          onSort={onSort}
-          onClearSort={onClearSort}
-          onAddQuickFilter={onAddQuickFilter}
-          onClearFilter={onClearFilter}
-          className="min-w-[155px]"
-        />
-      )}
-      {isVisible('fas') && (
-        <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'fas')!}
-          currentSort={sort}
-          activeFilterFields={activeFilterFields}
-          onSort={onSort}
-          onClearSort={onClearSort}
-          onAddQuickFilter={onAddQuickFilter}
-          onClearFilter={onClearFilter}
-          className="min-w-[75px] pr-6"
+          className="min-w-[110px] pr-6"
         />
       )}
     </TableRow>
@@ -542,305 +599,196 @@ export function StudentTable({
           </TableHeader>
           <TableBody>
             {paginatedStudents.map((student, index) => {
-              // startIndex from usePagination is already 0-based
-              const zeroBasedGlobalIndex = startIndex + index
-              const isInMatchedSection = zeroBasedGlobalIndex < matchedCount
-              const unmatchedCount = students.length - matchedCount
-              const visibleColumnCount = columns.filter((c) => c.visible).length
-
-              // Show matched header at the start when filters are active and there are matches
-              const showMatchedHeader =
-                matchedIds && matchedCount > 0 && zeroBasedGlobalIndex === 0
-
-              // Show unmatched header when:
-              // - Filters are active AND there are unmatched students
-              // - Either: transitioning from matched to unmatched (zeroBasedGlobalIndex === matchedCount)
-              // - Or: no matches exist and this is the first item (zeroBasedGlobalIndex === 0)
-              const showUnmatchedHeader =
-                matchedIds &&
-                unmatchedCount > 0 &&
-                ((matchedCount > 0 && zeroBasedGlobalIndex === matchedCount) ||
-                  (matchedCount === 0 && zeroBasedGlobalIndex === 0))
-
-              // Determine if this row should be hidden due to collapsed section
-              // When matchedCount is 0, all students are in the unmatched section
-              const isHidden =
-                matchedIds &&
-                ((matchedCount > 0 &&
-                  isInMatchedSection &&
-                  isMatchedCollapsed) ||
-                  (unmatchedCount > 0 &&
-                    !isInMatchedSection &&
-                    isUnmatchedCollapsed))
-
               return (
                 <React.Fragment key={student.id}>
-                  {showMatchedHeader && (
-                    <TableRow
-                      className="cursor-pointer hover:bg-muted/30"
-                      onClick={() => setIsMatchedCollapsed(!isMatchedCollapsed)}
-                    >
+                  <TableRow
+                    className="group cursor-pointer hover:bg-muted/50"
+                    onClick={() =>
+                      navigate({
+                        to: '/students/$id',
+                        params: { id: student.id },
+                      })
+                    }
+                  >
+                    {isVisible('index') && (
+                      <TableCell className="sticky left-0 z-10 bg-white pl-6 text-muted-foreground transition-colors group-hover:bg-muted/50">
+                        {displayStartIndex + index}
+                      </TableCell>
+                    )}
+                    {isVisible('name') && (
                       <TableCell
-                        colSpan={visibleColumnCount}
-                        className="bg-muted/50 py-2 pl-4 text-sm font-medium text-muted-foreground"
+                        className={cn(
+                          'sticky z-10 bg-white font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors group-hover:bg-muted/50',
+                          isVisible('index') ? 'left-12' : 'left-0',
+                        )}
                       >
                         <div className="flex items-center gap-2">
-                          <ChevronDown
-                            className={cn(
-                              'h-4 w-4 transition-transform',
-                              isMatchedCollapsed && '-rotate-90',
-                            )}
-                          />
-                          Matching filter criteria ({matchedCount})
+                          {student.name}
+                          <Link
+                            to="/students/$id"
+                            params={{ id: student.id }}
+                            className="text-muted-foreground hover:text-foreground"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <FileText className="size-4" />
+                          </Link>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  )}
-                  {showUnmatchedHeader && (
-                    <TableRow
-                      className="cursor-pointer hover:bg-muted/30"
-                      onClick={() =>
-                        setIsUnmatchedCollapsed(!isUnmatchedCollapsed)
-                      }
-                    >
-                      <TableCell
-                        colSpan={visibleColumnCount}
-                        className="bg-muted/50 py-2 pl-4 text-sm font-medium text-muted-foreground"
-                      >
-                        <div className="flex items-center gap-2">
-                          <ChevronDown
-                            className={cn(
-                              'h-4 w-4 transition-transform',
-                              isUnmatchedCollapsed && '-rotate-90',
-                            )}
-                          />
-                          Not matching filter criteria ({unmatchedCount})
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {!isHidden && (
-                    <TableRow
-                      className="group cursor-pointer hover:bg-muted/50"
-                      onClick={() =>
-                        navigate({
-                          to: '/students/$id',
-                          params: { id: student.id },
-                        })
-                      }
-                    >
-                      {isVisible('index') && (
-                        <TableCell className="sticky left-0 z-10 bg-white pl-6 text-muted-foreground transition-colors group-hover:bg-muted/50">
-                          {displayStartIndex + index}
-                        </TableCell>
-                      )}
-                      {isVisible('name') && (
-                        <TableCell
-                          className={cn(
-                            'sticky z-10 bg-white font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors group-hover:bg-muted/50',
-                            isVisible('index') ? 'left-12' : 'left-0',
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            {student.name}
-                            <Link
-                              to="/reports"
-                              search={{
-                                studentId: student.id,
-                                groupBy: 'student',
-                              }}
-                              className="text-muted-foreground hover:text-foreground"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <FileText className="size-4" />
-                            </Link>
+                    )}
+                    {isVisible('class') && (
+                      <TableCell>{student.class}</TableCell>
+                    )}
+                    {isVisible('cca') && <TableCell>{student.cca}</TableCell>}
+                    {isVisible('attentionTags') && (
+                      <TableCell>
+                        {student.attentionTags.length > 0 ? (
+                          <div className="flex gap-1">
+                            {student.attentionTags
+                              .filter(
+                                (tag) =>
+                                  tag !== 'LTA' || isEnabled('lta-intervention'),
+                              )
+                              .map((tag) => (
+                              <Badge
+                                key={tag}
+                                variant={tagVariantMap[tag]}
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
                           </div>
-                        </TableCell>
-                      )}
-                      {isVisible('class') && (
-                        <TableCell>{student.class}</TableCell>
-                      )}
-                      {isVisible('attentionTags') && (
-                        <TableCell>
-                          {student.attentionTags.length > 0 ? (
-                            <div className="flex gap-1">
-                              {student.attentionTags.map((tag) => (
-                                <Badge key={tag} variant={tagVariantMap[tag]}>
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('overallPercentage') && (
-                        <TableCell>
-                          <span
-                            className={getStatusColor(
-                              student.overallPercentage,
-                              overallPercentageThresholds,
-                            )}
-                          >
-                            {student.overallPercentage}%
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('attendance') && (
+                      <TableCell>
+                        {student.totalSchoolDays > 0
+                          ? Math.round(
+                              (student.daysPresent / student.totalSchoolDays) *
+                                100,
+                            )
+                          : 0}
+                        %
+                      </TableCell>
+                    )}
+                    {isVisible('lateComing') && (
+                      <TableCell>{student.lateComing}</TableCell>
+                    )}
+                    {isVisible('absences') && (
+                      <TableCell>{student.absences}</TableCell>
+                    )}
+                    {isVisible('ccaMissed') && (
+                      <TableCell>{student.ccaMissed}</TableCell>
+                    )}
+                    {isVisible('offences') && (
+                      <TableCell>{student.offences}</TableCell>
+                    )}
+                    {isVisible('conduct') && (
+                      <TableCell>{student.conduct}</TableCell>
+                    )}
+                    {isVisible('counsellingSessions') && (
+                      <TableCell>{student.counsellingSessions}</TableCell>
+                    )}
+                    {isVisible('sen') && (
+                      <TableCell>
+                        {student.sen || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('socialLinks') && (
+                      <TableCell>{student.socialLinks}</TableCell>
+                    )}
+                    {isVisible('riskIndicators') && (
+                      <TableCell>{student.riskIndicators}</TableCell>
+                    )}
+                    {isVisible('lowMoodFlagged') && (
+                      <TableCell>
+                        {student.lowMoodFlagged || (
+                          <span className="text-muted-foreground">No</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('overallPercentage') && (
+                      <TableCell>
+                        {computeOverallPct(student, selectedSubjects)}%
+                      </TableCell>
+                    )}
+                    {isVisible('approvedMtl') && (
+                      <TableCell>
+                        {student.approvedMtl || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('learningSupport') && (
+                      <TableCell>
+                        {student.learningSupport || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('postSecEligibility') && (
+                      <TableCell className="max-w-[150px] truncate">
+                        {student.postSecEligibility}
+                      </TableCell>
+                    )}
+                    {isVisible('fas') && (
+                      <TableCell>
+                        {student.fas || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('housing') && (
+                      <TableCell>
+                        {student.housing || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('housingType') && (
+                      <TableCell>
+                        {student.housingType === 'Rented' ? (
+                          'Rental'
+                        ) : student.housingType === 'Owned' ? (
+                          'Owner occupied'
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('custody') && (
+                      <TableCell>
+                        {student.custody || (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('commuterStatus') && (
+                      <TableCell>
+                        {student.commuterStatus || (
+                          <span className="text-muted-foreground">
+                            Non-commuter
                           </span>
-                        </TableCell>
-                      )}
-                      {isVisible('conduct') && (
-                        <TableCell>
-                          <Badge
-                            className={cn(
-                              student.conduct === 'Poor' &&
-                                'bg-red-100 text-red-700 hover:bg-red-100',
-                              student.conduct === 'Fair' &&
-                                'bg-amber-100 text-amber-700 hover:bg-amber-100',
-                              student.conduct === 'Good' &&
-                                'bg-slate-100 text-slate-700 hover:bg-slate-100',
-                              student.conduct === 'Excellent' &&
-                                'bg-green-100 text-green-700 hover:bg-green-100',
-                            )}
-                          >
-                            {student.conduct}
-                          </Badge>
-                        </TableCell>
-                      )}
-                      {isVisible('learningSupport') && (
-                        <TableCell>
-                          {student.learningSupport || (
-                            <span className="text-muted-foreground">N/A</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('postSecEligibility') && (
-                        <TableCell className="max-w-[150px] truncate">
-                          {student.postSecEligibility}
-                        </TableCell>
-                      )}
-                      {isVisible('offences') && (
-                        <TableCell>
-                          <span
-                            className={getStatusColor(
-                              student.offences,
-                              offencesThresholds,
-                            )}
-                          >
-                            {student.offences}
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('afterSchoolArrangement') && (
+                      <TableCell>
+                        {student.afterSchoolArrangement || (
+                          <span className="text-muted-foreground">
+                            No arrangement
                           </span>
-                        </TableCell>
-                      )}
-                      {isVisible('absences') && (
-                        <TableCell>
-                          <span
-                            className={getStatusColor(
-                              student.absences,
-                              absencesThresholds,
-                            )}
-                          >
-                            {student.absences}
-                          </span>
-                        </TableCell>
-                      )}
-                      {isVisible('lateComing') && (
-                        <TableCell>
-                          <span
-                            className={getStatusColor(
-                              student.lateComing,
-                              lateComingThresholds,
-                            )}
-                          >
-                            {student.lateComing}
-                          </span>
-                        </TableCell>
-                      )}
-                      {isVisible('ccaMissed') && (
-                        <TableCell>
-                          <span
-                            className={getStatusColor(
-                              student.ccaMissed,
-                              ccaMissedThresholds,
-                            )}
-                          >
-                            {student.ccaMissed}
-                          </span>
-                        </TableCell>
-                      )}
-                      {isVisible('riskIndicators') && (
-                        <TableCell>
-                          <span
-                            className={getStatusColor(
-                              student.riskIndicators,
-                              riskIndicatorsThresholds,
-                            )}
-                          >
-                            {student.riskIndicators}
-                          </span>
-                        </TableCell>
-                      )}
-                      {isVisible('lowMoodFlagged') && (
-                        <TableCell>
-                          {student.lowMoodFlagged || (
-                            <span className="text-muted-foreground">No</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('socialLinks') && (
-                        <TableCell>{student.socialLinks}</TableCell>
-                      )}
-                      {isVisible('counsellingSessions') && (
-                        <TableCell>{student.counsellingSessions}</TableCell>
-                      )}
-                      {isVisible('sen') && (
-                        <TableCell>
-                          {student.sen || (
-                            <span className="text-muted-foreground">N/A</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('housing') && (
-                        <TableCell>
-                          {student.housing || (
-                            <span className="text-muted-foreground">N/A</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('housingType') && (
-                        <TableCell>
-                          {student.housingType === 'Rented' ? (
-                            'Rental'
-                          ) : student.housingType === 'Owned' ? (
-                            'Owner occupied'
-                          ) : (
-                            <span className="text-muted-foreground">N/A</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('custody') && (
-                        <TableCell>
-                          {student.custody || (
-                            <span className="text-muted-foreground">N/A</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('siblings') && (
-                        <TableCell>{student.siblings}</TableCell>
-                      )}
-                      {isVisible('externalAgencies') && (
-                        <TableCell>
-                          {student.externalAgencies || (
-                            <span className="text-muted-foreground">N/A</span>
-                          )}
-                        </TableCell>
-                      )}
-                      {isVisible('fas') && (
-                        <TableCell className="pr-6">
-                          {student.fas || (
-                            <span className="text-muted-foreground">No</span>
-                          )}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  )}
+                        )}
+                      </TableCell>
+                    )}
+                    {isVisible('siblings') && (
+                      <TableCell className="pr-6">{student.siblings}</TableCell>
+                    )}
+                  </TableRow>
                 </React.Fragment>
               )
             })}
@@ -850,6 +798,8 @@ export function StudentTable({
         {/* Record count and Pagination */}
         <div className="flex shrink-0 items-center justify-between px-6 py-4">
           <div className="text-sm text-muted-foreground">
+            {displayStartIndex}–
+            {Math.min(startIndex + pageSize, students.length)} of{' '}
             {students.length} records
           </div>
           {totalPages > 1 && (

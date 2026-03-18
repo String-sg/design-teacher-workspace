@@ -1,6 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { AlertTriangle, Copy, Lock, MoreHorizontal, Plus, Search, Trash2, Users } from 'lucide-react'
+import {
+  AlertTriangle,
+  Copy,
+  Lock,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Trash2,
+  Users,
+} from 'lucide-react'
 import type { PGStatus } from '@/types/pg-announcement'
 import type { PGFilters } from '@/components/parents-gateway/pg-filter-bar'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
@@ -80,55 +89,60 @@ function ParentsGatewayPage() {
   const navigate = useNavigate()
 
   const filtered = useMemo(() => {
-    return mockPGAnnouncements.filter((a) => {
-      // Response type filter
-      if (filters.responseTypes.length > 0) {
-        const effectiveType = a.responseType ?? 'view-only'
-        if (!filters.responseTypes.includes(effectiveType)) return false
-      }
-      // Status filter
-      if (filters.statuses.length > 0 && !filters.statuses.includes(a.status))
-        return false
+    return mockPGAnnouncements
+      .filter((a) => {
+        // Response type filter
+        if (filters.responseTypes.length > 0) {
+          const effectiveType = a.responseType ?? 'view-only'
+          if (!filters.responseTypes.includes(effectiveType)) return false
+        }
+        // Status filter
+        if (filters.statuses.length > 0 && !filters.statuses.includes(a.status))
+          return false
 
-      // Ownership filter
-      if (
-        filters.ownerships.length > 0 &&
-        !filters.ownerships.includes(a.ownership)
-      )
-        return false
-
-      // Date range filter — compare against the relevant date for this status
-      const relevantDate = getRelevantDate(
-        a.status,
-        a.postedAt,
-        a.scheduledAt,
-        a.createdAt,
-      )
-      if (filters.dateFrom && relevantDate) {
-        if (new Date(relevantDate) < new Date(filters.dateFrom)) return false
-      }
-      if (filters.dateTo && relevantDate) {
-        // dateTo is inclusive — compare to end of day
-        const toEnd = new Date(filters.dateTo)
-        toEnd.setHours(23, 59, 59, 999)
-        if (new Date(relevantDate) > toEnd) return false
-      }
-
-      // Search query
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase()
-        return (
-          a.title.toLowerCase().includes(q) ||
-          a.description.toLowerCase().includes(q)
+        // Ownership filter
+        if (
+          filters.ownerships.length > 0 &&
+          !filters.ownerships.includes(a.ownership)
         )
-      }
-      return true
-    })
-    .sort((a, b) => {
-      const dateA = getRelevantDate(a.status, a.postedAt, a.scheduledAt, a.createdAt) ?? ''
-      const dateB = getRelevantDate(b.status, b.postedAt, b.scheduledAt, b.createdAt) ?? ''
-      return new Date(dateB).getTime() - new Date(dateA).getTime()
-    })
+          return false
+
+        // Date range filter — compare against the relevant date for this status
+        const relevantDate = getRelevantDate(
+          a.status,
+          a.postedAt,
+          a.scheduledAt,
+          a.createdAt,
+        )
+        if (filters.dateFrom && relevantDate) {
+          if (new Date(relevantDate) < new Date(filters.dateFrom)) return false
+        }
+        if (filters.dateTo && relevantDate) {
+          // dateTo is inclusive — compare to end of day
+          const toEnd = new Date(filters.dateTo)
+          toEnd.setHours(23, 59, 59, 999)
+          if (new Date(relevantDate) > toEnd) return false
+        }
+
+        // Search query
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase()
+          return (
+            a.title.toLowerCase().includes(q) ||
+            a.description.toLowerCase().includes(q)
+          )
+        }
+        return true
+      })
+      .sort((a, b) => {
+        const dateA =
+          getRelevantDate(a.status, a.postedAt, a.scheduledAt, a.createdAt) ??
+          ''
+        const dateB =
+          getRelevantDate(b.status, b.postedAt, b.scheduledAt, b.createdAt) ??
+          ''
+        return new Date(dateB).getTime() - new Date(dateA).getTime()
+      })
   }, [searchQuery, filters])
 
   const metrics = useMemo(() => {
@@ -162,11 +176,20 @@ function ParentsGatewayPage() {
     <div className="flex flex-col">
       {/* Page Header */}
       <div className="flex items-center justify-between px-6 pt-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Announcements</h1>
-          <p className="text-muted-foreground">
-            Send announcements to parents and track who has read them
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border bg-white p-1.5">
+            <img
+              src="/logos/parentsgateway.webp"
+              alt="Parents Gateway"
+              className="h-full w-full object-contain"
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold">Announcement</h1>
+            <p className="text-muted-foreground">
+              Send announcements to parents and track who has read them
+            </p>
+          </div>
         </div>
         <Button render={<Link to="/parents-gateway/new" />}>
           <Plus className="mr-2 h-4 w-4" />
@@ -182,23 +205,33 @@ function ParentsGatewayPage() {
           {/* Metrics */}
           <div className="grid grid-cols-2 gap-4 px-6 md:grid-cols-5">
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Total
+              </div>
               <div className="text-3xl font-semibold">{metrics.total}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Draft</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Draft
+              </div>
               <div className="text-3xl font-semibold">{metrics.drafts}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Posted</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Posted
+              </div>
               <div className="text-3xl font-semibold">{metrics.posted}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Scheduled</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Scheduled
+              </div>
               <div className="text-3xl font-semibold">{metrics.scheduled}</div>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Avg Read Rate</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Avg Read Rate
+              </div>
               <div className="text-3xl font-semibold">
                 {metrics.avgReadRate}%
               </div>
@@ -291,7 +324,8 @@ function ParentsGatewayPage() {
                                 <span className="truncate font-medium">
                                   {announcement.title}
                                 </span>
-                                {announcement.responseType === 'acknowledge' && (
+                                {announcement.responseType ===
+                                  'acknowledge' && (
                                   <span className="shrink-0 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 ring-1 ring-inset ring-blue-200">
                                     Acknowledge
                                   </span>
@@ -306,7 +340,6 @@ function ParentsGatewayPage() {
                                 )}
                               </div>
                               <div className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
-                                {/* Strip HTML tags for plain text preview */}
                                 {announcement.description.replace(
                                   /<[^>]*>/g,
                                   '',
@@ -352,18 +385,21 @@ function ParentsGatewayPage() {
                         </TableCell>
                         <TableCell className="pr-6">
                           {announcement.status !== 'posted' ? (
-                            <span className="text-sm text-muted-foreground">—</span>
+                            <span className="text-sm text-muted-foreground">
+                              —
+                            </span>
                           ) : hasResponseType ? (
                             <div className="space-y-0.5">
                               <PGReadRate
                                 readCount={responseCount}
                                 totalCount={totalCount}
                               />
-                              {announcement.responseType === 'yes-no' && totalCount > 0 && (
-                                <p className="text-[11px] text-muted-foreground">
-                                  {yesCount} yes · {noCount} no
-                                </p>
-                              )}
+                              {announcement.responseType === 'yes-no' &&
+                                totalCount > 0 && (
+                                  <p className="text-[11px] text-muted-foreground">
+                                    {yesCount} yes · {noCount} no
+                                  </p>
+                                )}
                               {announcement.responseType === 'acknowledge' && (
                                 <p className="text-[11px] text-muted-foreground">
                                   Acknowledged

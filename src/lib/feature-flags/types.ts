@@ -4,6 +4,8 @@ export type FeatureFlagKey =
   | 'notifications'
   | 'holistic-reports'
   | 'parents-gateway'
+  | 'student-analytics'
+  | 'lta-intervention'
 
 export type FeatureFlags = {
   [K in FeatureFlagKey]: boolean

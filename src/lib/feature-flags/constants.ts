@@ -8,4 +8,6 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   notifications: true,
   'holistic-reports': true,
   'parents-gateway': true,
+  'student-analytics': false,
+  'lta-intervention': false,
 }

@@ -8,12 +8,13 @@ function Table({
   ...props
 }: React.ComponentProps<'table'> & { tableClassName?: string }) {
   return (
-    <div data-slot="table-container" className={cn('relative', className)}>
+    <div data-slot="table-container" className="relative">
       <table
         data-slot="table"
         className={cn(
-          'w-max min-w-full caption-bottom text-sm',
+          'min-w-full caption-bottom text-sm',
           tableClassName,
+          className,
         )}
         {...props}
       />
@@ -25,7 +26,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
   return (
     <thead
       data-slot="table-header"
-      className={cn('bg-white', className)}
+      className={cn('bg-card', className)}
       {...props}
     />
   )

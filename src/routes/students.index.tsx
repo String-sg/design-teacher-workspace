@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 
 import type {
   FilterCriterion,
@@ -9,25 +9,69 @@ import type {
   Student,
 } from '@/types/student'
 import type { ColumnConfig } from '@/components/students/column-visibility-popover'
-import { useAuth } from '@/lib/auth'
-import { Button } from '@/components/ui/button'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { filterFieldConfigs } from '@/data/filter-config'
+import { filterFieldConfigs, isFilterComplete } from '@/data/filter-config'
 import { DataCard } from '@/components/data-card'
 import { StudentFilters } from '@/components/students/student-filters'
 import { StudentTable } from '@/components/students/student-table'
 import { ClassSelector } from '@/components/students/class-selector'
 import { defaultColumns } from '@/components/students/column-visibility-popover'
+import { SubjectSelectorDialog } from '@/components/students/subject-selector-dialog'
 
 import { getMetrics, mockStudents } from '@/data/mock-students'
+
+const SUBJECT_SELECTION_KEY = 'overall-pct-subjects'
+
+function loadSelectedSubjects(): Array<string> | null {
+  try {
+    const raw = localStorage.getItem(SUBJECT_SELECTION_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function saveSelectedSubjects(subjects: Array<string> | null) {
+  if (subjects === null) {
+    localStorage.removeItem(SUBJECT_SELECTION_KEY)
+  } else {
+    localStorage.setItem(SUBJECT_SELECTION_KEY, JSON.stringify(subjects))
+  }
+}
+
+function computeStudentOverall(
+  student: Student,
+  selectedSubjects: Array<string> | null,
+): number {
+  if (!selectedSubjects || !student.subjectScores) {
+    return student.overallPercentage
+  }
+  const relevant = student.subjectScores.filter((s) =>
+    selectedSubjects.includes(s.subject),
+  )
+  if (relevant.length === 0) return student.overallPercentage
+  return Math.round(
+    relevant.reduce((sum, s) => sum + s.percentage, 0) / relevant.length,
+  )
+}
 
 export const Route = createFileRoute('/students/')({
   component: StudentsPage,
 })
 
 // Check if a student matches a filter condition
-function matchesCondition(student: Student, filter: FilterCriterion): boolean {
-  const value = student[filter.field as keyof Student]
+function matchesCondition(
+  student: Student,
+  filter: FilterCriterion,
+  selectedSubjects?: Array<string> | null,
+): boolean {
+  // For overallPercentage, use the computed value based on selected subjects
+  const value =
+    filter.field === 'overallPercentage'
+      ? computeStudentOverall(student, selectedSubjects ?? null)
+      : student[filter.field as keyof Student]
 
   switch (filter.operator) {
     // Numeric operators
@@ -41,6 +85,16 @@ function matchesCondition(student: Student, filter: FilterCriterion): boolean {
       return Number(value) <= Number(filter.value)
     case 'eq':
       return Number(value) === Number(filter.value)
+    case 'neq':
+      return Number(value) !== Number(filter.value)
+    case 'between': {
+      const range = filter.value as { min: number; max: number }
+      return Number(value) >= range.min && Number(value) <= range.max
+    }
+    case 'not_between': {
+      const range = filter.value as { min: number; max: number }
+      return Number(value) < range.min || Number(value) > range.max
+    }
     // Text operators
     case 'contains':
       return String(value ?? '')
@@ -51,6 +105,9 @@ function matchesCondition(student: Student, filter: FilterCriterion): boolean {
         .toLowerCase()
         .includes(String(filter.value).toLowerCase())
     case 'is':
+      if (Array.isArray(filter.value)) {
+        return filter.value.includes(String(value ?? ''))
+      }
       return String(value ?? '') === String(filter.value)
     case 'is_not':
       return String(value ?? '') !== String(filter.value)
@@ -64,15 +121,21 @@ function matchesCondition(student: Student, filter: FilterCriterion): boolean {
 }
 
 function StudentsPage() {
-  useSetBreadcrumbs([{ label: 'Students', href: '/students' }])
-
-  const { isLoggedIn } = useAuth()
+  useSetBreadcrumbs([{ label: 'Profile', href: '/students' }])
 
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<Array<FilterCriterion>>([])
   const [columns, setColumns] = useState<Array<ColumnConfig>>(defaultColumns)
   const [sort, setSort] = useState<SortConfig | null>(null)
+  const [selectedSubjects, setSelectedSubjects] =
+    useState<Array<string> | null>(() => loadSelectedSubjects())
+  const [subjectDialogOpen, setSubjectDialogOpen] = useState(false)
+
+  const handleSubjectsApply = useCallback((subjects: Array<string> | null) => {
+    setSelectedSubjects(subjects)
+    saveSelectedSubjects(subjects)
+  }, [])
 
   // Get students for the selected class/level (this determines the base list)
   const classStudents = useMemo(() => {
@@ -81,11 +144,9 @@ function StudentsPage() {
     // Filter by class or level
     if (selectedClass !== 'all') {
       if (selectedClass.startsWith('Secondary')) {
+        // Extract level number and filter by classes starting with that number
         const levelNum = selectedClass.replace('Secondary ', '')
-        students = students.filter((s) => s.class.startsWith(`Sec ${levelNum}`))
-      } else if (selectedClass.startsWith('Primary')) {
-        const levelNum = selectedClass.replace('Primary ', '')
-        students = students.filter((s) => s.class.startsWith(`P${levelNum}`))
+        students = students.filter((s) => s.class.startsWith(levelNum))
       } else {
         students = students.filter((s) => s.class === selectedClass)
       }
@@ -97,7 +158,8 @@ function StudentsPage() {
   // Determine which students match the current filters (search + filter criteria)
   const { matchedIds, hasActiveFilters } = useMemo(() => {
     const hasSearch = !!searchQuery
-    const hasFilterCriteria = filters.length > 0
+    const completeFilters = filters.filter(isFilterComplete)
+    const hasFilterCriteria = completeFilters.length > 0
     const isFiltering = hasSearch || hasFilterCriteria
 
     if (!isFiltering) {
@@ -116,7 +178,9 @@ function StudentsPage() {
       // Check filter criteria
       const matchesFilters =
         !hasFilterCriteria ||
-        filters.every((filter) => matchesCondition(student, filter))
+        completeFilters.every((filter) =>
+          matchesCondition(student, filter, selectedSubjects),
+        )
 
       if (matchesSearch && matchesFilters) {
         matched.add(student.id)
@@ -124,11 +188,11 @@ function StudentsPage() {
     }
 
     return { matchedIds: matched, hasActiveFilters: isFiltering }
-  }, [classStudents, searchQuery, filters])
+  }, [classStudents, searchQuery, filters, selectedSubjects])
 
-  // Compute active filter fields for header indicators
+  // Compute active filter fields for header indicators (only complete filters)
   const activeFilterFields = useMemo(
-    () => new Set(filters.map((f) => f.field)),
+    () => new Set(filters.filter(isFilterComplete).map((f) => f.field)),
     [filters],
   )
 
@@ -167,8 +231,14 @@ function StudentsPage() {
     // Apply column sort first
     if (sort) {
       result.sort((a, b) => {
-        const aVal = a[sort.field as keyof Student]
-        const bVal = b[sort.field as keyof Student]
+        const aVal =
+          sort.field === 'overallPercentage'
+            ? computeStudentOverall(a, selectedSubjects)
+            : a[sort.field as keyof Student]
+        const bVal =
+          sort.field === 'overallPercentage'
+            ? computeStudentOverall(b, selectedSubjects)
+            : b[sort.field as keyof Student]
 
         // Handle null/undefined
         if (aVal == null && bVal == null) return 0
@@ -198,7 +268,7 @@ function StudentsPage() {
     }
 
     return result
-  }, [classStudents, sort, matchedIds, hasActiveFilters])
+  }, [classStudents, sort, matchedIds, hasActiveFilters, selectedSubjects])
 
   // For metrics, we only count the matched students
   const matchedStudents = useMemo(() => {
@@ -210,41 +280,19 @@ function StudentsPage() {
 
   const metrics = useMemo(() => getMetrics(matchedStudents), [matchedStudents])
 
-  if (!isLoggedIn) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="flex w-[467px] flex-col items-center gap-6 text-center">
-          <img
-            src="/students-illustration.png"
-            alt=""
-            className="size-[380px] object-cover"
-          />
-          <div className="flex flex-col gap-3">
-            <h1 className="text-[23px] font-semibold text-slate-12">
-              Students
-            </h1>
-            <p className="text-base text-slate-11">
-              View your student profiles in one place. Sign in to see the
-              complete list of your students and their details.{' '}
-              <span className="font-semibold text-[#0797b9]">Learn more</span>
-            </p>
-          </div>
-          <Button render={<Link to="/login" />}>
-            Sign In to View Students
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col">
       {/* Fixed content area */}
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
         <div className="px-6">
-          <h1 className="text-2xl font-semibold">Students</h1>
-          <p className="text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-semibold">Profiles</h1>
+            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
+              Concept illustration
+            </span>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
             Key data to understand your students holistically
           </p>
         </div>
@@ -262,17 +310,20 @@ function StudentsPage() {
           <DataCard
             label="Attendance"
             value={`${metrics.absenteeismRate}%`}
-            description="Absenteeism"
+            description="Current term"
+            trend="declining"
           />
           <DataCard
             label="Attendance"
             value={metrics.lateComing}
             description="Late-coming"
+            trend="improving"
           />
           <DataCard
             label="Tier 2-3"
             value={metrics.tier2_3Students}
             description="Students needing support"
+            trend="stable"
           />
         </div>
 
@@ -284,6 +335,8 @@ function StudentsPage() {
           onFiltersChange={setFilters}
           columns={columns}
           onColumnsChange={setColumns}
+          matchedCount={hasActiveFilters ? matchedIds.size : undefined}
+          totalCount={hasActiveFilters ? classStudents.length : undefined}
           className="px-6 pb-4"
         />
       </div>
@@ -301,6 +354,15 @@ function StudentsPage() {
         onClearSort={handleClearSort}
         onAddQuickFilter={handleAddQuickFilter}
         onClearFilter={handleClearFilter}
+        selectedSubjects={selectedSubjects}
+        onConfigureSubjects={() => setSubjectDialogOpen(true)}
+      />
+
+      <SubjectSelectorDialog
+        open={subjectDialogOpen}
+        onOpenChange={setSubjectDialogOpen}
+        selectedSubjects={selectedSubjects}
+        onApply={handleSubjectsApply}
       />
     </div>
   )

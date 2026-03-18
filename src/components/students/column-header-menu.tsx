@@ -1,5 +1,13 @@
 import { useState } from 'react'
-import { ArrowDown, ArrowUp, Check, ChevronDown, Filter, X } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  ChevronDown,
+  Filter,
+  Settings2,
+  X,
+} from 'lucide-react'
 
 import type { FilterField, SortConfig, SortDirection } from '@/types/student'
 import type { ColumnConfig } from './column-visibility-popover'
@@ -29,6 +37,10 @@ interface ColumnHeaderMenuProps {
   stickyLeft?: string
   /** Show shadow on right edge (for last sticky column) */
   showStickyShadow?: boolean
+  /** When provided, adds a "Select subjects..." item below sort options */
+  onConfigureSubjects?: () => void
+  /** Whether a custom subject selection is currently active */
+  hasCustomSubjects?: boolean
 }
 
 export function ColumnHeaderMenu({
@@ -43,6 +55,8 @@ export function ColumnHeaderMenu({
   isSticky,
   stickyLeft,
   showStickyShadow,
+  onConfigureSubjects,
+  hasCustomSubjects,
 }: ColumnHeaderMenuProps) {
   const [open, setOpen] = useState(false)
 
@@ -116,7 +130,7 @@ export function ColumnHeaderMenu({
           />
           <TooltipContent>{column.label}</TooltipContent>
         </Tooltip>
-        <PopoverContent align="start" className="w-48 gap-1 p-1">
+        <PopoverContent align="start" className="w-52 gap-1 p-3">
           {/* Sort options */}
           {column.sortable && (
             <>
@@ -127,14 +141,14 @@ export function ColumnHeaderMenu({
                   setOpen(false)
                 }}
                 className={cn(
-                  'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent',
-                  sortDirection === 'asc' && 'bg-accent',
+                  'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]',
+                  sortDirection === 'asc' && 'bg-[var(--slate-5)]',
                 )}
               >
-                <ArrowUp className="h-4 w-4" />
+                <ArrowUp className="h-4 w-4 text-[var(--slate-11)]" />
                 Sort ascending
                 {sortDirection === 'asc' && (
-                  <Check className="ml-auto h-4 w-4" />
+                  <Check className="ml-auto h-4 w-4 text-[var(--slate-11)]" />
                 )}
               </button>
               <button
@@ -144,14 +158,14 @@ export function ColumnHeaderMenu({
                   setOpen(false)
                 }}
                 className={cn(
-                  'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent',
-                  sortDirection === 'desc' && 'bg-accent',
+                  'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]',
+                  sortDirection === 'desc' && 'bg-[var(--slate-5)]',
                 )}
               >
-                <ArrowDown className="h-4 w-4" />
+                <ArrowDown className="h-4 w-4 text-[var(--slate-11)]" />
                 Sort descending
                 {sortDirection === 'desc' && (
-                  <Check className="ml-auto h-4 w-4" />
+                  <Check className="ml-auto h-4 w-4 text-[var(--slate-11)]" />
                 )}
               </button>
               {isSortedBy && (
@@ -161,54 +175,57 @@ export function ColumnHeaderMenu({
                     onClearSort()
                     setOpen(false)
                   }}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4 text-[var(--slate-11)]" />
                   Clear sort
                 </button>
               )}
             </>
           )}
-
-          {/* Separator */}
-          {column.sortable && column.filterable && (
-            <div className="my-1 h-px bg-border" />
-          )}
-
-          {/* Filter option */}
-          {column.filterable && column.filterField && (
+          {/* Configure subjects (only for overallPercentage column) */}
+          {onConfigureSubjects && (
             <>
+              <div className="my-1 h-px bg-border" />
               <button
                 type="button"
                 onClick={() => {
-                  if (!hasActiveFilter) {
-                    onAddQuickFilter(column.filterField!)
-                    setOpen(false)
-                  }
+                  onConfigureSubjects()
+                  setOpen(false)
                 }}
-                disabled={hasActiveFilter}
-                className={cn(
-                  'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent',
-                  hasActiveFilter && 'bg-accent cursor-default',
-                )}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]"
               >
-                <Filter className="h-4 w-4" />
-                {hasActiveFilter ? 'Filter active' : 'Filter by this column'}
-                {hasActiveFilter && <Check className="ml-auto h-4 w-4" />}
+                <Settings2 className="h-4 w-4 text-[var(--slate-11)]" />
+                Select subjects...
               </button>
-              {hasActiveFilter && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClearFilter(column.filterField!)
-                    setOpen(false)
-                  }}
-                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
-                >
-                  <X className="h-4 w-4" />
-                  Clear filter
-                </button>
-              )}
+            </>
+          )}
+          {/* Source / last updated footer */}
+          {(column.source || column.lastUpdated) && (
+            <>
+              <div className="my-1 h-px bg-border" />
+              <div className="px-3 py-1 space-y-1.5">
+                {column.source && (
+                  <div>
+                    <p className="text-xs font-medium text-foreground">
+                      Source:
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {column.source}
+                    </p>
+                  </div>
+                )}
+                {column.lastUpdated && (
+                  <div>
+                    <p className="text-xs font-medium text-foreground">
+                      Last updated:
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {column.lastUpdated}
+                    </p>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </PopoverContent>
