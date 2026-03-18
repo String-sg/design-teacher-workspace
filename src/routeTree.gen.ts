@@ -577,14 +577,14 @@ declare module '@tanstack/react-router' {
     '/_guest': {
       id: '/_guest'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof GuestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_allears': {
       id: '/_allears'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AllearsRouteImport
       parentRoute: typeof rootRouteImport
     }
