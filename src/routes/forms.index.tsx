@@ -1,17 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { Plus, Search } from 'lucide-react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Plus, Search, Users } from 'lucide-react'
 
 import type { FormStatus } from '@/types/form'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select'
 import {
   Table,
   TableBody,
@@ -20,6 +14,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { EmptyState } from '@/components/empty-state'
+import {
+  EMPTY_FORMS_FILTERS,
+  FormsFilterBar,
+  type FormsFilters,
+} from '@/components/forms/forms-filter-bar'
 import { mockForms } from '@/data/mock-forms'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
@@ -30,7 +31,7 @@ export const Route = createFileRoute('/forms/')({
 function getStatusBadge(status: FormStatus) {
   const config = {
     active: {
-      label: 'Active',
+      label: 'Open',
       className: 'bg-green-100 text-green-700 hover:bg-green-100',
     },
     draft: {
@@ -47,14 +48,34 @@ function getStatusBadge(status: FormStatus) {
 }
 
 function FormsPage() {
+  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState<FormStatus | ''>('')
-
+  const [filters, setFilters] = useState<FormsFilters>(EMPTY_FORMS_FILTERS)
   useSetBreadcrumbs([{ label: 'Forms', href: '/forms' }])
 
   const filteredForms = useMemo(() => {
     return mockForms.filter((form) => {
-      if (selectedStatus && form.status !== selectedStatus) return false
+      if (
+        filters.statuses.length > 0 &&
+        !filters.statuses.includes(form.status)
+      )
+        return false
+
+      if (
+        filters.ownerships.length > 0 &&
+        !filters.ownerships.includes(form.ownership)
+      )
+        return false
+
+      if (filters.dateFrom) {
+        if (new Date(form.createdAt) < new Date(filters.dateFrom)) return false
+      }
+      if (filters.dateTo) {
+        const end = new Date(filters.dateTo)
+        end.setHours(23, 59, 59, 999)
+        if (new Date(form.createdAt) > end) return false
+      }
+
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
         return (
@@ -64,152 +85,138 @@ function FormsPage() {
       }
       return true
     })
-  }, [searchQuery, selectedStatus])
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  }, [searchQuery, filters])
 
   const metrics = useMemo(() => {
-    const totalForms = mockForms.length
-    const activeForms = mockForms.filter((f) => f.status === 'active').length
-    const formsWithRecipients = mockForms.filter((f) => f.recipientCount > 0)
-    const totalSent = formsWithRecipients.reduce(
-      (sum, f) => sum + f.recipientCount,
-      0,
-    )
-    const totalCompleted = formsWithRecipients.reduce(
-      (sum, f) => sum + f.completedCount,
-      0,
-    )
-    const completionRate =
-      totalSent > 0 ? Math.round((totalCompleted / totalSent) * 100) : 0
-    const pendingResponses = totalSent - totalCompleted
-
-    return { totalForms, activeForms, completionRate, pendingResponses }
+    const total = mockForms.length
+    const active = mockForms.filter((f) => f.status === 'active').length
+    const draft = mockForms.filter((f) => f.status === 'draft').length
+    const closed = mockForms.filter((f) => f.status === 'closed').length
+    return { total, active, draft, closed }
   }, [])
 
   return (
     <div className="flex flex-col">
-      <div className="shrink-0 space-y-6 pt-6">
-        {/* Page Header */}
-        <div className="flex items-center justify-between px-6">
-          <div>
-            <h1 className="text-2xl font-semibold">Forms</h1>
-            <p className="text-muted-foreground">
-              Create and manage forms for parents and students
-            </p>
-          </div>
-          <Button render={<Link to="/allears" />}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Form
-          </Button>
+      {/* Page Header */}
+      <div className="flex items-center justify-between px-6 pt-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Forms</h1>
+          <p className="text-muted-foreground">
+            Create and manage forms for parents
+          </p>
         </div>
-
-        {/* Metrics Cards */}
-        <div className="grid grid-cols-1 gap-4 px-6 md:grid-cols-4">
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">Total Forms</div>
-            <div className="text-2xl font-semibold">{metrics.totalForms}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">Active</div>
-            <div className="text-2xl font-semibold">{metrics.activeForms}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">Completion Rate</div>
-            <div className="text-2xl font-semibold">
-              {metrics.completionRate}%
-            </div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-sm text-muted-foreground">
-              Pending Responses
-            </div>
-            <div className="text-2xl font-semibold">
-              {metrics.pendingResponses}
-            </div>
-          </div>
-        </div>
-
-        {/* Search & Filter */}
-        <div className="flex items-center gap-3 px-6 pb-4">
-          <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search forms"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 md:w-[200px]"
-              aria-label="Search forms"
-            />
-          </div>
-          <Select
-            value={selectedStatus || 'all'}
-            onValueChange={(val) =>
-              setSelectedStatus(val === 'all' ? '' : (val as FormStatus))
-            }
-          >
-            <SelectTrigger className="w-[140px]">
-              {selectedStatus
-                ? { active: 'Active', draft: 'Draft', closed: 'Closed' }[
-                    selectedStatus
-                  ]
-                : 'All status'}
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Button onClick={() => navigate({ to: '/allears/respond' })}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Form
+        </Button>
       </div>
 
-      {/* Forms Table */}
-      <div className="max-w-full overflow-x-auto bg-white">
-        <Table>
-          <TableHeader className="border-b bg-white">
-            <TableRow className="border-0 hover:bg-transparent">
-              <TableHead className="min-w-[250px] pl-6">Form Title</TableHead>
-              <TableHead className="min-w-[100px]">Status</TableHead>
-              <TableHead className="min-w-[80px]">Sent</TableHead>
-              <TableHead className="min-w-[100px]">Completed</TableHead>
-              <TableHead className="min-w-[100px] pr-6">Created</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      <Tabs defaultValue="for-parents" className="mt-6 w-full">
+        <TabsList variant="line" className="px-6">
+          <TabsTrigger value="for-parents">For Parents</TabsTrigger>
+        </TabsList>
+        <TabsContent value="for-parents" className="space-y-6 pt-6">
+          {/* Metrics Cards */}
+          <div className="grid grid-cols-2 gap-4 px-6 md:grid-cols-4">
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total</div>
+              <div className="text-3xl font-semibold">{metrics.total}</div>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Open</div>
+              <div className="text-3xl font-semibold">{metrics.active}</div>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Draft</div>
+              <div className="text-3xl font-semibold">{metrics.draft}</div>
+            </div>
+            <div className="rounded-lg border bg-card p-4">
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Closed</div>
+              <div className="text-3xl font-semibold">{metrics.closed}</div>
+            </div>
+          </div>
+
+          {/* Search & Filter */}
+          <div className="flex items-center gap-3 px-6 pb-2">
+            <div className="relative flex-1 md:flex-none">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search forms"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 md:w-[240px]"
+                aria-label="Search forms"
+              />
+            </div>
+            <FormsFilterBar filters={filters} onChange={setFilters} />
+          </div>
+
+          {/* Forms Table */}
+          <div className="max-w-full overflow-x-auto bg-white">
             {filteredForms.length === 0 ? (
-              <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={5} className="h-48 text-center">
-                  <div className="text-muted-foreground">
-                    No forms found. Try adjusting your search or filter.
-                  </div>
-                </TableCell>
-              </TableRow>
+              <EmptyState
+                title="No forms found"
+                description="Try adjusting your search or filter, or create a new form."
+              />
             ) : (
-              filteredForms.map((form) => (
-                <TableRow key={form.id} className="cursor-pointer">
-                  <TableCell className="pl-6">
-                    <div className="font-medium">{form.title}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {form.description}
-                    </div>
-                  </TableCell>
-                  <TableCell>{getStatusBadge(form.status)}</TableCell>
-                  <TableCell>{form.recipientCount}</TableCell>
-                  <TableCell>{form.completedCount}</TableCell>
-                  <TableCell className="pr-6">
-                    {new Date(form.createdAt).toLocaleDateString('en-SG', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </TableCell>
-                </TableRow>
-              ))
+              <Table tableClassName="table-fixed w-full">
+                <TableHeader className="border-b bg-white">
+                  <TableRow className="border-0 hover:bg-transparent">
+                    <TableHead className="w-[500px] pl-6">Form Title</TableHead>
+                    <TableHead className="w-[110px]">Date</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
+                    <TableHead className="w-[90px] pr-6">Owner</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredForms.map((form) => {
+                    const isShared = form.ownership === 'shared'
+                    return (
+                      <TableRow
+                        key={form.id}
+                        className="cursor-pointer hover:bg-slate-50"
+                        onClick={() =>
+                          navigate({ to: '/allears/responses' })
+                        }
+                      >
+                        <TableCell className="pl-6">
+                          <span className="font-medium">{form.title}</span>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(form.createdAt).toLocaleDateString(
+                            'en-SG',
+                            {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            },
+                          )}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(form.status)}</TableCell>
+                        <TableCell className="pr-6">
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            {isShared ? (
+                              <>
+                                <Users className="h-3.5 w-3.5 shrink-0" />
+                                <span>Shared</span>
+                              </>
+                            ) : (
+                              <span>Mine</span>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
             )}
-          </TableBody>
-        </Table>
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+
     </div>
   )
 }

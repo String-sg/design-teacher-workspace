@@ -5,6 +5,7 @@ import {
   CalendarClock,
   Lock,
   Mail,
+  MessageSquare,
   Paperclip,
   Plus,
   User,
@@ -102,11 +103,24 @@ function AnnouncementDetailPage() {
   // ---------------------------------------------------------------------------
   // Derived values
   // ---------------------------------------------------------------------------
+  const responseType = announcement.responseType ?? 'view-only'
   const totalCount = savedData.recipients.length
   const readCount = savedData.recipients.filter(
     (r) => r.readStatus === 'read',
   ).length
   const unreadCount = totalCount - readCount
+
+  // Response-type-aware stats
+  const acknowledgedCount = savedData.recipients.filter(
+    (r) => r.respondedAt != null || r.acknowledgedAt != null,
+  ).length
+  const pendingAckCount = totalCount - acknowledgedCount
+  const respondedCount = savedData.recipients.filter(
+    (r) => r.respondedAt != null,
+  ).length
+  const yesCount = savedData.recipients.filter((r) => r.formResponse === 'yes').length
+  const noCount = savedData.recipients.filter((r) => r.formResponse === 'no').length
+  const pendingResponseCount = totalCount - respondedCount
 
   const uniqueClasses = useMemo(
     () => [...new Set(savedData.recipients.map((r) => r.classLabel))].sort(),
@@ -134,7 +148,7 @@ function AnnouncementDetailPage() {
   const contentLocked = announcement.status === 'posted'
 
   useSetBreadcrumbs([
-    { label: 'Announcement', href: '/parents-gateway' },
+    { label: 'Announcements', href: '/parents-gateway' },
     { label: announcement.title, href: `/parents-gateway/${announcement.id}` },
   ])
 
@@ -348,11 +362,11 @@ function AnnouncementDetailPage() {
       <div className="grid gap-6 px-6 lg:grid-cols-3">
         {/* ── Left: read tracking (2/3) ── */}
         <div className="space-y-6 lg:col-span-2">
-          {announcement.status === 'posted' && (
-            <div className="rounded-xl border bg-white p-6">
+          {announcement.status === 'posted' && responseType === 'view-only' && (
+            <div className="rounded-lg border bg-white p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     Read by parents
                   </p>
                   <p className="mt-1 text-3xl font-bold">
@@ -384,8 +398,87 @@ function AnnouncementDetailPage() {
             </div>
           )}
 
+          {announcement.status === 'posted' && responseType === 'acknowledge' && (
+            <div className="rounded-lg border bg-white p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Acknowledged by parents
+                  </p>
+                  <p className="mt-1 text-3xl font-bold">
+                    {acknowledgedCount}
+                    <span className="text-xl font-normal text-muted-foreground">
+                      {' '}
+                      / {totalCount}
+                    </span>
+                  </p>
+                  {pendingAckCount > 0 ? (
+                    <p className="mt-1 text-sm text-amber-600">
+                      {pendingAckCount} pending
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-green-700">All acknowledged</p>
+                  )}
+                </div>
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-twblue-2">
+                  <Users className="h-7 w-7 text-twblue-9" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <PGReadRate
+                  readCount={acknowledgedCount}
+                  totalCount={totalCount}
+                  className="w-full [&>div:first-child]:h-2 [&>div:first-child]:w-full"
+                />
+              </div>
+            </div>
+          )}
+
+          {announcement.status === 'posted' && responseType === 'yes-no' && (
+            <div className="rounded-lg border bg-white p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Responses received
+                  </p>
+                  <p className="mt-1 text-3xl font-bold">
+                    {respondedCount}
+                    <span className="text-xl font-normal text-muted-foreground">
+                      {' '}
+                      / {totalCount}
+                    </span>
+                  </p>
+                  {pendingResponseCount > 0 ? (
+                    <p className="mt-1 text-sm text-amber-600">
+                      {pendingResponseCount} no response
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-green-700">All responded</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-6 text-center">
+                  <div className="text-center">
+                    <p className="text-3xl font-semibold text-green-700">{yesCount}</p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Yes</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-3xl font-semibold text-rose-600">{noCount}</p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">No</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <PGReadRate
+                  readCount={respondedCount}
+                  totalCount={totalCount}
+                  className="w-full [&>div:first-child]:h-2 [&>div:first-child]:w-full"
+                />
+              </div>
+            </div>
+          )}
+
           {announcement.status === 'scheduled' && (
-            <div className="flex h-40 items-center justify-center rounded-xl border bg-white">
+            <div className="flex h-40 items-center justify-center rounded-lg border bg-white">
               <div className="flex flex-col items-center gap-2 text-center">
                 <CalendarClock className="h-8 w-8 text-blue-400" />
                 <p className="text-sm text-muted-foreground">
@@ -397,19 +490,25 @@ function AnnouncementDetailPage() {
           )}
 
           {announcement.status === 'posted' && totalCount > 0 && (
-            <div className="rounded-xl border bg-white p-6">
-              <h2 className="mb-4 text-base font-semibold">
-                Recipient read status
+            <div className="rounded-lg border bg-white p-6">
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {responseType === 'acknowledge'
+                  ? 'Acknowledgement status'
+                  : responseType === 'yes-no'
+                    ? 'Response status'
+                    : 'Recipient read status'}
               </h2>
               <RecipientReadTable
                 recipients={savedData.recipients}
                 announcementTitle={announcement.title}
+                responseType={responseType}
+                questions={announcement.questions}
               />
             </div>
           )}
 
           {announcement.status === 'draft' && (
-            <div className="flex h-40 items-center justify-center rounded-xl border bg-white">
+            <div className="flex h-40 items-center justify-center rounded-lg border bg-white">
               <p className="text-sm text-muted-foreground">
                 Send this announcement to start tracking read status.
               </p>
@@ -420,8 +519,8 @@ function AnnouncementDetailPage() {
         {/* ── Right: announcement content (1/3) ── */}
         <div className="space-y-4">
           {/* Announcement card */}
-          <div className="rounded-xl border bg-white p-5">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="rounded-lg border bg-white p-6">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Announcement
             </h2>
             <div className="space-y-3">
@@ -549,6 +648,57 @@ function AnnouncementDetailPage() {
                   </div>
                 )}
 
+              {/* Questions — shown for acknowledge / yes-no types */}
+              {announcement.questions && announcement.questions.length > 0 && (
+                <div className="space-y-2 border-t pt-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Questions asked
+                  </p>
+                  {announcement.questions.map((q, i) => (
+                    <div key={q.id} className="rounded-md bg-slate-50 px-3 py-2.5">
+                      <div className="flex items-start gap-2">
+                        <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-slate-600">
+                          {i + 1}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm leading-snug text-foreground">
+                            {q.text}
+                          </p>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                            {q.type === 'mcq' && q.options ? (
+                              q.options.map((opt) => (
+                                <span
+                                  key={opt}
+                                  className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] text-muted-foreground"
+                                >
+                                  {opt}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                                <MessageSquare className="h-3 w-3" />
+                                Open-ended
+                              </span>
+                            )}
+                          </div>
+                          {q.showAfter && q.showAfter !== 'both' && (
+                            <p className="mt-1 text-[11px] text-muted-foreground">
+                              Shown after:{' '}
+                              <span className={cn(
+                                'font-medium',
+                                q.showAfter === 'yes' ? 'text-green-700' : 'text-rose-600',
+                              )}>
+                                {q.showAfter === 'yes' ? 'Yes' : 'No'}
+                              </span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Enquiry email — above staff in charge */}
               {isEditing ? (
                 <div className="space-y-1 border-t pt-3">
@@ -568,32 +718,22 @@ function AnnouncementDetailPage() {
                 </div>
               ) : (
                 announcement.enquiryEmail && (
-                  <div className="flex items-center gap-2 border-t pt-3">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100">
-                      <Mail className="h-3.5 w-3.5 text-slate-500" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground">
-                        Enquiry contact
-                      </p>
-                      <a
-                        href={`mailto:${announcement.enquiryEmail}`}
-                        className="truncate text-sm font-medium hover:text-primary hover:underline"
-                      >
-                        {announcement.enquiryEmail}
-                      </a>
-                    </div>
+                  <div className="border-t pt-3">
+                    <p className="text-xs text-muted-foreground">
+                      Enquiry contact
+                    </p>
+                    <a
+                      href={`mailto:${announcement.enquiryEmail}`}
+                      className="truncate text-sm font-medium hover:text-primary hover:underline"
+                    >
+                      {announcement.enquiryEmail}
+                    </a>
                   </div>
                 )
               )}
 
               {/* Staff in charge — always editable */}
-              <div
-                className={cn(
-                  'border-t pt-3',
-                  isEditing ? '' : 'flex items-center gap-2',
-                )}
-              >
+              <div className="border-t pt-3">
                 {isEditing ? (
                   <div className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground">
@@ -611,19 +751,14 @@ function AnnouncementDetailPage() {
                   </div>
                 ) : (
                   announcement.staffInCharge && (
-                    <>
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100">
-                        <User className="h-3.5 w-3.5 text-slate-500" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs text-muted-foreground">
-                          Staff in charge
-                        </p>
-                        <p className="truncate text-sm font-medium">
-                          {announcement.staffInCharge}
-                        </p>
-                      </div>
-                    </>
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground">
+                        Staff in charge
+                      </p>
+                      <p className="truncate text-sm font-medium">
+                        {announcement.staffInCharge}
+                      </p>
+                    </div>
                   )
                 )}
               </div>

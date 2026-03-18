@@ -1,5 +1,6 @@
 export type FeatureFlagKey =
   | 'announcements'
+  | 'forms'
   | 'notifications'
   | 'holistic-reports'
   | 'parents-gateway'

@@ -26,12 +26,12 @@ import { useIsMobile } from '@/hooks/use-mobile'
 // Colour constants
 // ---------------------------------------------------------------------------
 const HT = {
-  primary: 'var(--twblue-9)',
-  hover: 'var(--twblue-10)',
-  ultraLight: 'var(--twblue-2)',
-  light: 'var(--twblue-3)',
-  border: 'var(--twblue-5)',
-  text: 'var(--twblue-11)',
+  primary: 'var(--twpurple-9)',
+  hover: 'var(--twpurple-10)',
+  ultraLight: 'var(--twpurple-2)',
+  light: 'var(--twpurple-3)',
+  border: 'var(--twpurple-5)',
+  text: 'var(--twpurple-11)',
 } as const
 
 // Width presets
@@ -463,7 +463,7 @@ export function HeyTaliaPanel() {
             onMouseDown={startResize}
           >
             {/* Visible indicator line */}
-            <div className="h-full w-0.5 translate-x-0.5 bg-transparent transition-colors group-hover:bg-border group-active:bg-twblue-9" />
+            <div className="h-full w-0.5 translate-x-0.5 bg-transparent transition-colors group-hover:bg-border group-active:bg-twpurple-9" />
           </div>
         )}
 
@@ -582,7 +582,7 @@ export function HeyTaliaPanel() {
               type="button"
               onClick={() => sendMessage(input)}
               disabled={!input.trim()}
-              className="absolute right-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-twblue-9 text-white transition-all disabled:opacity-40"
+              className="absolute right-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-twpurple-9 text-white transition-all disabled:opacity-40"
             >
               <svg
                 className="h-3 w-3"
@@ -737,7 +737,7 @@ function MessageBubble({
   return (
     <div className={cn('flex gap-2', !isAI && 'flex-row-reverse')}>
       {isAI && (
-        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twblue-3">
+        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twpurple-3">
           <img
             src="/logos/heytalia-icon.png"
             alt="HeyTalia"
@@ -760,7 +760,7 @@ function MessageBubble({
               ? 'rounded-tl-sm border border-border bg-white text-foreground shadow-xs'
               : 'rounded-tr-sm text-white',
           )}
-          style={!isAI ? { background: 'var(--twblue-9)' } : undefined}
+          style={!isAI ? { background: HT.primary } : undefined}
         >
           <MarkdownText text={msg.text} isUser={!isAI} />
         </div>
@@ -784,7 +784,7 @@ function MessageBubble({
                 key={chip}
                 type="button"
                 onClick={() => onChipClick(chip)}
-                className="inline-flex h-8 items-center rounded-4xl border border-twblue-5 bg-twblue-3 px-3.5 text-sm font-medium text-twblue-11 transition-colors hover:bg-twblue-4"
+                className="inline-flex h-8 items-center rounded-4xl border border-twpurple-5 bg-twpurple-3 px-3.5 text-sm font-medium text-twpurple-11 transition-colors hover:bg-twpurple-4"
               >
                 {chip}
               </button>
@@ -892,14 +892,14 @@ function DraftCard({
         <div className="ml-auto flex items-center gap-1.5">
           <button
             type="button"
-            className="inline-flex h-7 items-center gap-1 rounded-4xl border border-twblue-9 bg-white px-2.5 text-xs font-medium text-twblue-9 transition-colors hover:bg-twblue-2"
+            className="inline-flex h-7 items-center gap-1 rounded-4xl border border-twpurple-9 bg-white px-2.5 text-xs font-medium text-twpurple-9 transition-colors hover:bg-twpurple-2"
           >
             <Mail className="h-3 w-3" />
             Send email
           </button>
           <button
             type="button"
-            className="inline-flex h-7 items-center gap-1 rounded-4xl bg-twblue-9 px-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+            className="inline-flex h-7 items-center gap-1 rounded-4xl bg-twpurple-9 px-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
           >
             <svg
               className="h-3 w-3"
@@ -943,7 +943,7 @@ function DraftIconBtn({
       className={cn(
         'flex h-6 w-6 items-center justify-center rounded-md transition-colors',
         active
-          ? 'bg-twblue-9 text-white'
+          ? 'bg-twpurple-9 text-white'
           : 'text-muted-foreground hover:bg-muted hover:text-foreground',
       )}
     >
@@ -988,7 +988,7 @@ function DraftBody({ body }: { body: string }) {
 function TypingIndicator() {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twblue-3">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twpurple-3">
         <img
           src="/logos/heytalia-icon.png"
           alt="HeyTalia"
@@ -999,7 +999,7 @@ function TypingIndicator() {
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="h-1.5 w-1.5 animate-bounce rounded-full bg-twblue-9"
+            className="h-1.5 w-1.5 animate-bounce rounded-full bg-twpurple-9"
             style={{ animationDelay: `${i * 0.15}s` }}
           />
         ))}

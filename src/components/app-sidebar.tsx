@@ -92,7 +92,7 @@ const studentInsightItems: Array<MenuItem> = [
 
 const parentsCommItems: Array<MenuItem> = [
   {
-    title: 'Announcement',
+    title: 'Announcements',
     url: '/parents-gateway',
     icon: Mail,
     featureFlag: 'parents-gateway',
@@ -107,6 +107,7 @@ const parentsCommItems: Array<MenuItem> = [
     title: 'Forms',
     url: '/forms',
     icon: ClipboardList,
+    featureFlag: 'forms',
   },
 ]
 
@@ -154,6 +155,7 @@ export function AppSidebar() {
   const location = useLocation()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
   const announcementsEnabled = useFeatureFlag('announcements')
+  const formsEnabled = useFeatureFlag('forms')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
   const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
   const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
@@ -162,6 +164,7 @@ export function AppSidebar() {
     items.filter((item) => {
       if (!item.featureFlag) return true
       if (item.featureFlag === 'announcements') return announcementsEnabled
+      if (item.featureFlag === 'forms') return formsEnabled
       if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
       if (item.featureFlag === 'parents-gateway') return parentsGatewayEnabled
       return true

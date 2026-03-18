@@ -3,6 +3,14 @@ export type ReadStatus = 'read' | 'unread'
 export type PGOwnership = 'mine' | 'shared'
 export type PGRole = 'editor' | 'viewer'
 
+export interface PGQuestion {
+  id: string
+  text: string
+  type: 'open' | 'mcq'
+  options?: string[]
+  showAfter?: 'yes' | 'no' | 'both'
+}
+
 export interface Shortcut {
   label: string
   url: string
@@ -24,6 +32,10 @@ export interface PGRecipient {
   pgStatus: 'onboarded' | 'not_onboarded' // whether parent has PG account
   readStatus: ReadStatus
   readAt?: string // ISO timestamp if read
+  acknowledgedAt?: string // ISO timestamp if acknowledged (acknowledge type)
+  formResponse?: 'yes' | 'no' // response for yes-no type
+  respondedAt?: string // ISO timestamp if responded (acknowledge or yes-no)
+  questionAnswers?: Record<string, string> // keyed by question id
 }
 
 export interface PGAttachment {
@@ -47,4 +59,7 @@ export interface PGAnnouncement {
   createdAt: string
   postedAt?: string
   scheduledAt?: string // set when status === 'scheduled'
+  responseType?: 'view-only' | 'acknowledge' | 'yes-no'
+  dueDate?: string // ISO date string for acknowledge/yes-no
+  questions?: Array<PGQuestion>
 }

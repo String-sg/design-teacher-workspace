@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
-import type { PGOwnership, PGStatus } from '@/types/pg-announcement'
-import type { ResponseType } from '@/types/form'
+import type { FormOwnership, FormStatus } from '@/types/form'
 import { Button } from '@/components/ui/button'
 import {
   Popover,
@@ -10,81 +9,65 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 
-export interface PGFilters {
-  statuses: Array<PGStatus>
-  ownerships: Array<PGOwnership>
-  responseTypes: Array<ResponseType>
+export interface FormsFilters {
+  statuses: Array<FormStatus>
+  ownerships: Array<FormOwnership>
   dateFrom: string
   dateTo: string
 }
 
-export const EMPTY_PG_FILTERS: PGFilters = {
+export const EMPTY_FORMS_FILTERS: FormsFilters = {
   statuses: [],
   ownerships: [],
-  responseTypes: [],
   dateFrom: '',
   dateTo: '',
 }
 
-function countActiveFilters(filters: PGFilters): number {
+function countActiveFilters(filters: FormsFilters): number {
   return (
     filters.statuses.length +
     filters.ownerships.length +
-    filters.responseTypes.length +
     (filters.dateFrom ? 1 : 0) +
     (filters.dateTo ? 1 : 0)
   )
 }
 
-const RESPONSE_TYPE_OPTIONS: Array<{ value: ResponseType; label: string }> = [
-  { value: 'view-only', label: 'View Only' },
-  { value: 'acknowledge', label: 'Acknowledge' },
-  { value: 'yes-no', label: 'Yes / No' },
-]
-
-interface PGFilterBarProps {
-  filters: PGFilters
-  onChange: (filters: PGFilters) => void
+interface FormsFilterBarProps {
+  filters: FormsFilters
+  onChange: (filters: FormsFilters) => void
 }
 
-const STATUS_OPTIONS: Array<{ value: PGStatus; label: string }> = [
-  { value: 'posted', label: 'Posted' },
+const STATUS_OPTIONS: Array<{ value: FormStatus; label: string }> = [
+  { value: 'active', label: 'Active' },
   { value: 'draft', label: 'Draft' },
-  { value: 'scheduled', label: 'Scheduled' },
+  { value: 'closed', label: 'Closed' },
 ]
 
-const OWNERSHIP_OPTIONS: Array<{ value: PGOwnership; label: string }> = [
+const OWNERSHIP_OPTIONS: Array<{ value: FormOwnership; label: string }> = [
   { value: 'mine', label: 'Created by me' },
   { value: 'shared', label: 'Shared with me' },
 ]
 
-export function PGFilterBar({ filters, onChange }: PGFilterBarProps) {
+export function FormsFilterBar({ filters, onChange }: FormsFilterBarProps) {
   const [open, setOpen] = useState(false)
   const activeCount = countActiveFilters(filters)
 
-  function toggleStatus(status: PGStatus) {
+  function toggleStatus(status: FormStatus) {
     const next = filters.statuses.includes(status)
       ? filters.statuses.filter((s) => s !== status)
       : [...filters.statuses, status]
     onChange({ ...filters, statuses: next })
   }
 
-  function toggleOwnership(ownership: PGOwnership) {
+  function toggleOwnership(ownership: FormOwnership) {
     const next = filters.ownerships.includes(ownership)
       ? filters.ownerships.filter((o) => o !== ownership)
       : [...filters.ownerships, ownership]
     onChange({ ...filters, ownerships: next })
   }
 
-  function toggleResponseType(rt: ResponseType) {
-    const next = filters.responseTypes.includes(rt)
-      ? filters.responseTypes.filter((r) => r !== rt)
-      : [...filters.responseTypes, rt]
-    onChange({ ...filters, responseTypes: next })
-  }
-
   function clearAll() {
-    onChange(EMPTY_PG_FILTERS)
+    onChange(EMPTY_FORMS_FILTERS)
   }
 
   return (
@@ -151,34 +134,10 @@ export function PGFilterBar({ filters, onChange }: PGFilterBarProps) {
           </div>
         </div>
 
-        {/* Response Type */}
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Response Type
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {RESPONSE_TYPE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => toggleResponseType(opt.value)}
-                className={cn(
-                  'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
-                  filters.responseTypes.includes(opt.value)
-                    ? 'border-primary bg-twblue-2 text-twblue-9'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-primary hover:text-primary',
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Date range */}
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Date (posted / scheduled)
+            Date (created)
           </p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
