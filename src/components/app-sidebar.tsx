@@ -101,7 +101,7 @@ const parentsCommItems: Array<MenuItem> = [
     title: 'Reports',
     url: '/reports',
     icon: FileText,
-    transparent: true,
+    featureFlag: 'holistic-reports',
   },
   {
     title: 'Forms',
