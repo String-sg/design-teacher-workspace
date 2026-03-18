@@ -30,6 +30,11 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
       'Show or hide the Announcements page in the sidebar navigation',
   },
   {
+    key: 'forms',
+    label: 'Forms',
+    description: 'Show or hide the Forms page in the sidebar navigation',
+  },
+  {
     key: 'notifications',
     label: 'Notifications',
     description: 'Enable notification features',
