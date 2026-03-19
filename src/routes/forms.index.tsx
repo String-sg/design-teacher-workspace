@@ -4,6 +4,7 @@ import { Search, Users } from 'lucide-react'
 
 import type { FormSource, FormStatus } from '@/types/form'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -13,7 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EmptyState } from '@/components/empty-state'
 import {
   EMPTY_FORMS_FILTERS,
@@ -104,34 +104,10 @@ function FormsPage() {
       )
   }, [searchQuery, filters, sourceFilter])
 
-  const sourceCounts = useMemo(() => {
-    const custom = mockForms.filter(
-      (f) => (f.source ?? 'custom') === 'custom',
-    ).length
-    const announcement = mockForms.filter(
-      (f) => f.source === 'announcement-response',
-    ).length
-    return { all: mockForms.length, custom, announcement }
-  }, [])
-
   return (
     <div className="flex flex-col">
-      {/* Quick filter, Search & Filter */}
+      {/* Search, Filter & Quick filter */}
       <div className="mt-4 flex items-center gap-3 px-6">
-        <Tabs
-          value={sourceFilter}
-          onValueChange={(val) => setSourceFilter(val as SourceFilter)}
-        >
-          <TabsList>
-            <TabsTrigger value="all">All ({sourceCounts.all})</TabsTrigger>
-            <TabsTrigger value="custom">
-              Custom Forms ({sourceCounts.custom})
-            </TabsTrigger>
-            <TabsTrigger value="announcement-response">
-              Announcement Responses ({sourceCounts.announcement})
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
         <div className="relative flex-1 md:flex-none">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -144,6 +120,29 @@ function FormsPage() {
           />
         </div>
         <FormsFilterBar filters={filters} onChange={setFilters} />
+        <div className="flex items-center gap-1">
+          {(
+            [
+              { value: 'all', label: 'All' },
+              { value: 'custom', label: 'Custom Forms' },
+              { value: 'announcement-response', label: 'Responses' },
+            ] as const
+          ).map(({ value, label }) => (
+            <Button
+              key={value}
+              variant={sourceFilter === value ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setSourceFilter(value)}
+              className={
+                sourceFilter === value
+                  ? 'bg-muted font-medium'
+                  : 'text-muted-foreground'
+              }
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Forms Table */}
