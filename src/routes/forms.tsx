@@ -26,7 +26,7 @@ function FormsLayout() {
 
   return (
     <div className="flex flex-col">
-      <div className="border-b px-4 pt-4 md:px-6">
+      <div className="border-b px-4 pt-4">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold md:text-2xl">
             Announcements & Forms
