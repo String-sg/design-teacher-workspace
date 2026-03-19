@@ -194,7 +194,7 @@ export function AppSidebar() {
             />
           </SidebarGroupContent>
           <>
-            <SidebarGroupLabel className="mt-2">
+            <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
               Student Insights
             </SidebarGroupLabel>
             <SidebarGroupContent>
