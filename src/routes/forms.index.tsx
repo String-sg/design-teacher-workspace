@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Plus, Search, Users } from 'lucide-react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Search, Users } from 'lucide-react'
 
 import type { FormStatus } from '@/types/form'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -97,16 +96,8 @@ function FormsPage() {
 
   return (
     <div className="flex flex-col">
-      {/* Action Bar */}
-      <div className="flex items-center justify-end px-6 pt-4">
-        <Button render={<Link to="/forms/new" />}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Form
-        </Button>
-      </div>
-
       {/* Search & Filter */}
-      <div className="mt-4 flex items-center gap-3 px-6 pb-2">
+      <div className="mt-4 flex items-center gap-3 px-6">
         <div className="relative flex-1 md:flex-none">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input

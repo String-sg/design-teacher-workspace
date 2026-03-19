@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   AlertTriangle,
   Copy,
   Lock,
   MoreHorizontal,
-  Plus,
   Search,
   Trash2,
   Users,
@@ -148,79 +147,11 @@ function ParentsGatewayPage() {
       })
   }, [searchQuery, filters])
 
-  const metrics = useMemo(() => {
-    const total = mockPGAnnouncements.length
-    const drafts = mockPGAnnouncements.filter(
-      (a) => a.status === 'draft',
-    ).length
-    const posted = mockPGAnnouncements.filter(
-      (a) => a.status === 'posted',
-    ).length
-    const scheduled = mockPGAnnouncements.filter(
-      (a) => a.status === 'scheduled',
-    ).length
-    const postedAnnouncements = mockPGAnnouncements.filter(
-      (a) => a.status === 'posted' && a.recipients.length > 0,
-    )
-    const totalSent = postedAnnouncements.reduce(
-      (s, a) => s + a.recipients.length,
-      0,
-    )
-    const totalRead = postedAnnouncements.reduce(
-      (s, a) => s + a.recipients.filter((r) => r.readStatus === 'read').length,
-      0,
-    )
-    const avgReadRate =
-      totalSent > 0 ? Math.round((totalRead / totalSent) * 100) : 0
-    return { total, drafts, posted, scheduled, avgReadRate }
-  }, [])
-
   return (
     <div className="flex flex-col">
-      {/* Action Bar */}
-      <div className="flex items-center justify-end px-6 pt-4">
-        <Button render={<Link to="/announcements/new" />}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Announcement
-        </Button>
-      </div>
-      <div className="mt-6 w-full space-y-6">
-        {/* Metrics */}
-        <div className="grid grid-cols-2 gap-4 px-6 md:grid-cols-5">
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Total
-            </div>
-            <div className="text-3xl font-semibold">{metrics.total}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Draft
-            </div>
-            <div className="text-3xl font-semibold">{metrics.drafts}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Posted
-            </div>
-            <div className="text-3xl font-semibold">{metrics.posted}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Scheduled
-            </div>
-            <div className="text-3xl font-semibold">{metrics.scheduled}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Avg Read Rate
-            </div>
-            <div className="text-3xl font-semibold">{metrics.avgReadRate}%</div>
-          </div>
-        </div>
-
-        {/* Search & Filter */}
-        <div className="flex items-center gap-3 px-6 pb-2">
+      {/* Search & Filter */}
+      <div className="mt-4 space-y-4">
+        <div className="flex items-center gap-3 px-6">
           <div className="relative flex-1 md:flex-none">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
