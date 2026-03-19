@@ -1,7 +1,7 @@
 import type {
   EntityItem,
   EntityScope,
-} from '@/components/parents-gateway/entity-selector'
+} from '@/components/comms/entity-selector'
 import { mockStudents } from '@/data/mock-students'
 
 // Derive class groups dynamically from live mock data (Bandung Secondary only).

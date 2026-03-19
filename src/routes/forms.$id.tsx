@@ -5,7 +5,7 @@ import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { getFormById } from '@/data/mock-forms'
 import { getFormRecipients } from '@/data/mock-form-responses'
 import { FormResponseTable } from '@/components/forms/form-response-table'
-import { PGReadRate } from '@/components/parents-gateway/pg-read-rate'
+import { ReadRate } from '@/components/comms/read-rate'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
@@ -38,18 +38,8 @@ function getStatusBadge(status: string) {
   return <Badge className={className}>{label}</Badge>
 }
 
-function getFormTypeLabel(
-  formType?: string,
-  responseType?: string,
-): string {
-  if (!formType) return 'Form'
-  if (formType === 'quick') {
-    if (responseType === 'yes-no') return 'Quick · Yes or No'
-    if (responseType === 'acknowledge') return 'Quick · Acknowledge'
-    return 'Quick Form'
-  }
-  if (formType === 'allears') return 'Custom · AllEars'
-  if (formType === 'link') return '3rd-Party Link'
+function getFormTypeLabel(formType?: string): string {
+  if (formType === 'standard') return 'Standard Form'
   return 'Form'
 }
 
@@ -133,9 +123,7 @@ function FormDetailPage() {
                       {pendingCount} pending
                     </p>
                   ) : totalCount > 0 ? (
-                    <p className="mt-1 text-sm text-green-700">
-                      All responded
-                    </p>
+                    <p className="mt-1 text-sm text-green-700">All responded</p>
                   ) : null}
                 </div>
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-twblue-2">
@@ -144,7 +132,7 @@ function FormDetailPage() {
               </div>
               {totalCount > 0 && (
                 <div className="mt-4">
-                  <PGReadRate
+                  <ReadRate
                     readCount={respondedCount}
                     totalCount={totalCount}
                     className="w-full [&>div:first-child]:h-2 [&>div:first-child]:w-full"
@@ -204,7 +192,7 @@ function FormDetailPage() {
               <div>
                 <p className="text-xs text-muted-foreground">Type</p>
                 <p className="text-sm font-medium">
-                  {getFormTypeLabel(form.formType, form.responseType)}
+                  {getFormTypeLabel(form.formType)}
                 </p>
               </div>
 
@@ -219,9 +207,7 @@ function FormDetailPage() {
               {/* Recipients */}
               {form.targetClasses.length > 0 && (
                 <div>
-                  <p className="text-xs text-muted-foreground">
-                    To parents of
-                  </p>
+                  <p className="text-xs text-muted-foreground">To parents of</p>
                   <div className="mt-1 flex flex-wrap gap-1">
                     {form.targetClasses.map((cls) => (
                       <span
@@ -248,10 +234,22 @@ function FormDetailPage() {
                           Q{i + 1}. {q.text}
                         </p>
                         <p className="text-xs text-muted-foreground capitalize">
-                          {q.type === 'mcq' ? 'Multiple choice' : 'Open-ended'}
-                          {q.showAfter && q.showAfter !== 'both'
-                            ? ` · After "${q.showAfter}"`
-                            : ''}
+                          {q.type === 'yes-no'
+                            ? 'Yes / No'
+                            : q.type === 'mcq'
+                              ? 'Multiple choice'
+                              : q.type === 'checkbox'
+                                ? 'Checkbox'
+                                : q.type === 'free-text'
+                                  ? 'Free text'
+                                  : q.type === 'ranking'
+                                    ? 'Ranking'
+                                    : q.type === 'date'
+                                      ? 'Date'
+                                      : q.type === 'file-upload'
+                                        ? 'File upload'
+                                        : q.type}
+                          {q.required === false ? ' · Optional' : ''}
                         </p>
                       </div>
                     ))}

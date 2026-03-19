@@ -28,15 +28,15 @@ import type {
   Shortcut,
 } from '@/types/pg-announcement'
 import type { FormQuestion, ReminderType, ResponseType } from '@/types/form'
-import type { SelectedEntity } from '@/components/parents-gateway/entity-selector'
-import { QuestionBuilder } from '@/components/forms/question-builder'
+import type { SelectedEntity } from '@/components/comms/entity-selector'
+import { QuestionBuilder } from '@/components/comms/question-builder'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { StudentRecipientSelector } from '@/components/parents-gateway/student-recipient-selector'
-import { SendConfirmationSheet } from '@/components/parents-gateway/send-confirmation-sheet'
-import { RichTextArea } from '@/components/parents-gateway/rich-text-area'
-import { PGShortcutsSelector } from '@/components/parents-gateway/pg-shortcuts-selector'
-import { StaffSelector } from '@/components/parents-gateway/staff-selector'
-import { EnquiryEmailSelector } from '@/components/parents-gateway/enquiry-email-selector'
+import { StudentRecipientSelector } from '@/components/comms/student-recipient-selector'
+import { SendConfirmationSheet } from '@/components/comms/send-confirmation-sheet'
+import { RichTextArea } from '@/components/comms/rich-text-area'
+import { PGShortcutsSelector } from '@/components/comms/pg-shortcuts-selector'
+import { StaffSelector } from '@/components/comms/staff-selector'
+import { EnquiryEmailSelector } from '@/components/comms/enquiry-email-selector'
 import { mockStudents } from '@/data/mock-students'
 import {
   getPGAnnouncementById,
@@ -55,9 +55,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-export const Route = createFileRoute('/parents-gateway/new')({
+export const Route = createFileRoute('/announcements/new')({
   validateSearch: (search: Record<string, unknown>) => ({
     edit: typeof search.edit === 'string' ? search.edit : undefined,
+    responseType:
+      typeof search.responseType === 'string' ? search.responseType : undefined,
   }),
   component: NewAnnouncementPage,
 })
@@ -219,10 +221,8 @@ function AnnouncementPreview({
         .questionId
     : null
 
-  function getRelevantQuestions(choice: 'yes' | 'no') {
-    return questions.filter(
-      (q) => !q.showAfter || q.showAfter === 'both' || q.showAfter === choice,
-    )
+  function getRelevantQuestions(_choice: 'yes' | 'no') {
+    return questions
   }
 
   const relevantQuestions = getRelevantQuestions(screenChoice)
@@ -445,7 +445,7 @@ function AnnouncementPreview({
           )}
         </p>
 
-        {(!currentQ.type || currentQ.type === 'open') && (
+        {currentQ.type === 'free-text' && (
           <div className="rounded-lg border border-slate-200 bg-white p-3">
             <p className="text-[11px] text-slate-300">
               Type your answer here...
@@ -601,17 +601,17 @@ function getValidationHint(
 // Page component
 // ---------------------------------------------------------------------------
 function NewAnnouncementPage() {
-  const { edit: editId } = Route.useSearch()
+  const { edit: editId, responseType: initialResponseType } = Route.useSearch()
   const isEditing = Boolean(editId)
   const existingAnnouncement = editId
     ? getPGAnnouncementById(editId)
     : undefined
 
   useSetBreadcrumbs([
-    { label: 'Announcements', href: '/parents-gateway' },
+    { label: 'Announcements', href: '/announcements' },
     {
       label: isEditing ? 'Edit Announcement' : 'New Announcement',
-      href: '/parents-gateway/new',
+      href: '/announcements/new',
     },
   ])
 
@@ -634,7 +634,13 @@ function NewAnnouncementPage() {
   const photoInputRef = useRef<HTMLInputElement>(null)
 
   // Response type
-  const [responseType, setResponseType] = useState<ResponseType>('view-only')
+  const [responseType, setResponseType] = useState<ResponseType>(
+    initialResponseType === 'acknowledge'
+      ? 'acknowledge'
+      : initialResponseType === 'yes-no'
+        ? 'yes-no'
+        : 'view-only',
+  )
   const [dueDate, setDueDate] = useState('')
   const [reminderType, setReminderType] = useState<ReminderType>('none')
   const [reminderDate, setReminderDate] = useState('')
@@ -912,7 +918,7 @@ function NewAnnouncementPage() {
       toast.success(
         isScheduled ? 'Schedule updated' : 'Announcement sent to parents',
       )
-      navigate({ to: '/parents-gateway/$id', params: { id: editId } })
+      navigate({ to: '/announcements/$id', params: { id: editId } })
     } else {
       mockPGAnnouncements.unshift(newAnnouncement)
       setShowConfirmSheet(false)
@@ -920,7 +926,7 @@ function NewAnnouncementPage() {
         isScheduled ? 'Announcement scheduled' : 'Announcement sent to parents',
       )
       navigate({
-        to: '/parents-gateway/$id',
+        to: '/announcements/$id',
         params: { id: newAnnouncement.id },
       })
     }
@@ -952,7 +958,7 @@ function NewAnnouncementPage() {
             variant="ghost"
             size="icon"
             className="shrink-0"
-            render={<Link to="/parents-gateway" />}
+            render={<Link to="/announcements" />}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -1370,12 +1376,12 @@ function NewAnnouncementPage() {
             {/* RESPONSE TYPE */}
             <section className="rounded-xl border bg-white p-6">
               <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Response
+                Response Type
               </h2>
               <p className="mb-4 text-xs text-muted-foreground">
                 Choose how parents respond to this announcement.
               </p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 {(
                   [
                     {
@@ -1436,6 +1442,27 @@ function NewAnnouncementPage() {
                     </div>
                   </button>
                 ))}
+
+                {/* Attach a Form — links to a standalone form from the Forms section */}
+                <Link
+                  to="/forms/new"
+                  className="flex flex-col gap-3 rounded-xl border-2 border-dashed border-slate-200 p-3 text-left transition-all hover:border-slate-300 hover:bg-slate-50"
+                >
+                  <div className="flex h-[88px] w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                    <FileText className="h-8 w-8 text-slate-300" />
+                  </div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">
+                        Attach a Form
+                      </p>
+                      <p className="mt-0.5 text-[10px] leading-relaxed text-muted-foreground">
+                        Create a custom form in the Forms section.
+                      </p>
+                    </div>
+                    <ExternalLink className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" />
+                  </div>
+                </Link>
               </div>
             </section>
 

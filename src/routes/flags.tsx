@@ -24,6 +24,12 @@ interface FeatureFlagConfig {
 
 const featureFlagConfigs: Array<FeatureFlagConfig> = [
   {
+    key: 'allears',
+    label: 'AllEars',
+    description:
+      'Enable AllEars standalone form builder (legacy). When disabled, forms use the native TW builder.',
+  },
+  {
     key: 'announcements',
     label: 'Announcements',
     description:

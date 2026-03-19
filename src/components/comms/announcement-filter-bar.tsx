@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 
-export interface PGFilters {
+export interface AnnouncementFilters {
   statuses: Array<PGStatus>
   ownerships: Array<PGOwnership>
   responseTypes: Array<ResponseType>
@@ -18,7 +18,7 @@ export interface PGFilters {
   dateTo: string
 }
 
-export const EMPTY_PG_FILTERS: PGFilters = {
+export const EMPTY_ANNOUNCEMENT_FILTERS: AnnouncementFilters = {
   statuses: [],
   ownerships: [],
   responseTypes: [],
@@ -26,7 +26,7 @@ export const EMPTY_PG_FILTERS: PGFilters = {
   dateTo: '',
 }
 
-function countActiveFilters(filters: PGFilters): number {
+function countActiveFilters(filters: AnnouncementFilters): number {
   return (
     filters.statuses.length +
     filters.ownerships.length +
@@ -42,9 +42,9 @@ const RESPONSE_TYPE_OPTIONS: Array<{ value: ResponseType; label: string }> = [
   { value: 'yes-no', label: 'Yes / No' },
 ]
 
-interface PGFilterBarProps {
-  filters: PGFilters
-  onChange: (filters: PGFilters) => void
+interface AnnouncementFilterBarProps {
+  filters: AnnouncementFilters
+  onChange: (filters: AnnouncementFilters) => void
 }
 
 const STATUS_OPTIONS: Array<{ value: PGStatus; label: string }> = [
@@ -58,7 +58,10 @@ const OWNERSHIP_OPTIONS: Array<{ value: PGOwnership; label: string }> = [
   { value: 'shared', label: 'Shared with me' },
 ]
 
-export function PGFilterBar({ filters, onChange }: PGFilterBarProps) {
+export function AnnouncementFilterBar({
+  filters,
+  onChange,
+}: AnnouncementFilterBarProps) {
   const [open, setOpen] = useState(false)
   const activeCount = countActiveFilters(filters)
 
@@ -84,7 +87,7 @@ export function PGFilterBar({ filters, onChange }: PGFilterBarProps) {
   }
 
   function clearAll() {
-    onChange(EMPTY_PG_FILTERS)
+    onChange(EMPTY_ANNOUNCEMENT_FILTERS)
   }
 
   return (

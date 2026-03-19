@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Component Reuse Policy
+
+**Do NOT create new components.** Always reuse existing components first.
+
+Before building anything new, search `src/components/` for existing components that solve the same or similar problem. Compose existing primitives rather than creating new ones. If you must create a new component, justify why no existing component can be adapted.
+
+Key reusable components:
+
+- `src/components/ui/` — Shadcn UI primitives (Button, Input, Table, Badge, Tabs, Dialog, Sheet, etc.)
+- `src/components/comms/` — Shared communication components (EntitySelector, StudentRecipientSelector, StaffSelector, EnquiryEmailSelector, RichTextEditor, ReadRate, StatusBadge, AnnouncementFilterBar, SendConfirmationSheet, RecipientReadTable, QuestionBuilder)
+- `src/components/forms/` — Form-specific components (FormResponseTable, FormsFilterBar)
+- `src/components/` — App-level components (EmptyState, AppSidebar, FeedbackDialog)
+
+See `AGENTS.md` for the full reuse policy that applies to all AI agents.
+
 ## Development Commands
 
 ```bash
@@ -22,12 +37,14 @@ bun run check          # Format and lint (prettier + eslint)
 
 ### Key Structure
 
-- `src/routes/` - File-based routes. `__root.tsx` contains the shell layout with sidebar.
-- `src/components/ui/` - Shadcn UI components (add new ones via `bunx shadcn@latest add <component>`)
-- `src/components/` - App-specific components (e.g., `app-sidebar.tsx`, `empty-state.tsx`)
-- `src/hooks/` - Custom React hooks
-- `src/lib/utils.ts` - Utility functions including `cn()` for className merging
-- `todos/project-todos.json` - Project task tracking
+- `src/routes/` — File-based routes. `__root.tsx` contains the shell layout with sidebar.
+- `src/components/ui/` — Shadcn UI components (add new ones via `bunx shadcn@latest add <component>`)
+- `src/components/comms/` — Shared communication components used by both Announcements and Forms
+- `src/components/forms/` — Form-specific components (builder, preview, response table)
+- `src/components/` — App-specific components (e.g., `app-sidebar.tsx`, `empty-state.tsx`)
+- `src/hooks/` — Custom React hooks
+- `src/lib/utils.ts` — Utility functions including `cn()` for className merging
+- `todos/project-todos.json` — Project task tracking
 
 ### Path Aliases
 

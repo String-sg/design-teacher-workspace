@@ -2,12 +2,12 @@ import type { PGStatus } from '@/types/pg-announcement'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
-interface PGStatusBadgeProps {
+interface StatusBadgeProps {
   status: PGStatus
   className?: string
 }
 
-export function PGStatusBadge({ status, className }: PGStatusBadgeProps) {
+export function StatusBadge({ status, className }: StatusBadgeProps) {
   if (status === 'posted') {
     return (
       <Badge

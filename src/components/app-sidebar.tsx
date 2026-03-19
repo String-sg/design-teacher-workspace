@@ -5,7 +5,6 @@ import {
   BarChart3,
   Bot,
   CircleHelp,
-  ClipboardList,
   FileText,
   Home,
   Mail,
@@ -30,6 +29,7 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import {
@@ -50,6 +50,7 @@ interface MenuItem {
   featureFlag?: FeatureFlagKey
   conceptTag?: boolean
   transparent?: boolean
+  alsoActiveFor?: string[]
 }
 
 const mainNavItems: Array<MenuItem> = [
@@ -92,22 +93,17 @@ const studentInsightItems: Array<MenuItem> = [
 
 const parentsCommItems: Array<MenuItem> = [
   {
-    title: 'Announcements',
-    url: '/parents-gateway',
+    title: 'Announcements & Forms',
+    url: '/announcements',
     icon: Mail,
     featureFlag: 'parents-gateway',
+    alsoActiveFor: ['/forms'],
   },
   {
     title: 'Reports',
     url: '/reports',
     icon: FileText,
     featureFlag: 'holistic-reports',
-  },
-  {
-    title: 'Forms',
-    url: '/forms',
-    icon: ClipboardList,
-    featureFlag: 'forms',
   },
 ]
 
@@ -128,7 +124,9 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
             render={<Link to={item.url} />}
             isActive={
               currentPath === item.url ||
-              (item.url !== '/' && currentPath.startsWith(item.url))
+              (item.url !== '/' && currentPath.startsWith(item.url)) ||
+              (item.alsoActiveFor?.some((p) => currentPath.startsWith(p)) ??
+                false)
             }
             tooltip={item.title}
           >
@@ -155,7 +153,6 @@ export function AppSidebar() {
   const location = useLocation()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
   const announcementsEnabled = useFeatureFlag('announcements')
-  const formsEnabled = useFeatureFlag('forms')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
   const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
   const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
@@ -164,7 +161,6 @@ export function AppSidebar() {
     items.filter((item) => {
       if (!item.featureFlag) return true
       if (item.featureFlag === 'announcements') return announcementsEnabled
-      if (item.featureFlag === 'forms') return formsEnabled
       if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
       if (item.featureFlag === 'parents-gateway') return parentsGatewayEnabled
       return true
@@ -198,7 +194,7 @@ export function AppSidebar() {
             />
           </SidebarGroupContent>
           <>
-            <SidebarGroupLabel className="mt-2">
+            <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
               Student Insights
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -210,10 +206,8 @@ export function AppSidebar() {
           </>
           {filteredParentsItems.length > 0 && (
             <>
-              <SidebarGroupLabel className="mt-2">
-                Parents Comm
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
+              <SidebarSeparator className="mx-0 mt-3" />
+              <SidebarGroupContent className="mt-2">
                 <SidebarMenuItems
                   items={filteredParentsItems}
                   currentPath={location.pathname}

@@ -6,7 +6,7 @@ export type PGRole = 'editor' | 'viewer'
 export interface PGQuestion {
   id: string
   text: string
-  type: 'open' | 'mcq'
+  type: 'free-text' | 'mcq'
   options?: string[]
   showAfter?: 'yes' | 'no' | 'both'
 }
@@ -62,4 +62,5 @@ export interface PGAnnouncement {
   responseType?: 'view-only' | 'acknowledge' | 'yes-no'
   dueDate?: string // ISO date string for acknowledge/yes-no
   questions?: Array<PGQuestion>
+  linkedFormId?: string // links to a standalone form from the Forms section
 }
