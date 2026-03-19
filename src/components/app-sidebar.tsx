@@ -29,6 +29,7 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import {
@@ -204,12 +205,15 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </>
           {filteredParentsItems.length > 0 && (
-            <SidebarGroupContent className="mt-2">
-              <SidebarMenuItems
-                items={filteredParentsItems}
-                currentPath={location.pathname}
-              />
-            </SidebarGroupContent>
+            <>
+              <SidebarSeparator className="mx-0 mt-3" />
+              <SidebarGroupContent className="mt-2">
+                <SidebarMenuItems
+                  items={filteredParentsItems}
+                  currentPath={location.pathname}
+                />
+              </SidebarGroupContent>
+            </>
           )}
         </SidebarGroup>
       </SidebarContent>
