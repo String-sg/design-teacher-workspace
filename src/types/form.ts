@@ -1,6 +1,7 @@
 export type FormStatus = 'draft' | 'active' | 'closed'
 export type FormOwnership = 'mine' | 'shared'
 export type FormType = 'standard'
+export type FormSource = 'custom' | 'announcement-response'
 export type ResponseType = 'view-only' | 'acknowledge' | 'yes-no'
 export type ReminderType = 'none' | 'one-time' | 'daily'
 
@@ -32,6 +33,8 @@ export interface Form {
   ownership: FormOwnership
   targetClasses: string[]
   formType?: FormType
+  source?: FormSource
+  linkedAnnouncementId?: string
   responseType?: ResponseType
   questions?: FormQuestion[]
   eventStart?: string

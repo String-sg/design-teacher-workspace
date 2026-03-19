@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Search, Users } from 'lucide-react'
 
-import type { FormStatus } from '@/types/form'
+import type { FormSource, FormStatus } from '@/types/form'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import {
@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EmptyState } from '@/components/empty-state'
 import {
   EMPTY_FORMS_FILTERS,
@@ -46,10 +47,13 @@ function getStatusBadge(status: FormStatus) {
   return <Badge className={className}>{label}</Badge>
 }
 
+type SourceFilter = 'all' | FormSource
+
 function FormsPage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<FormsFilters>(EMPTY_FORMS_FILTERS)
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
   useSetBreadcrumbs([
     { label: 'Announcements & Forms', href: '/announcements' },
   ])
@@ -57,6 +61,12 @@ function FormsPage() {
   const filteredForms = useMemo(() => {
     return mockForms
       .filter((form) => {
+        // Source quick filter
+        if (sourceFilter !== 'all') {
+          const formSource = form.source ?? 'custom'
+          if (formSource !== sourceFilter) return false
+        }
+
         if (
           filters.statuses.length > 0 &&
           !filters.statuses.includes(form.status)
@@ -92,12 +102,36 @@ function FormsPage() {
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
-  }, [searchQuery, filters])
+  }, [searchQuery, filters, sourceFilter])
+
+  const sourceCounts = useMemo(() => {
+    const custom = mockForms.filter(
+      (f) => (f.source ?? 'custom') === 'custom',
+    ).length
+    const announcement = mockForms.filter(
+      (f) => f.source === 'announcement-response',
+    ).length
+    return { all: mockForms.length, custom, announcement }
+  }, [])
 
   return (
     <div className="flex flex-col">
-      {/* Search & Filter */}
+      {/* Quick filter, Search & Filter */}
       <div className="mt-4 flex items-center gap-3 px-6">
+        <Tabs
+          value={sourceFilter}
+          onValueChange={(val) => setSourceFilter(val as SourceFilter)}
+        >
+          <TabsList>
+            <TabsTrigger value="all">All ({sourceCounts.all})</TabsTrigger>
+            <TabsTrigger value="custom">
+              Custom Forms ({sourceCounts.custom})
+            </TabsTrigger>
+            <TabsTrigger value="announcement-response">
+              Announcement Responses ({sourceCounts.announcement})
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
         <div className="relative flex-1 md:flex-none">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
