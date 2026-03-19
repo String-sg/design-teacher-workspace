@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, X } from 'lucide-react'
+import { X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
@@ -105,10 +105,6 @@ function CreateCard({ option }: { option: CreateOption }) {
           <p className="mt-1 text-xs leading-relaxed text-slate-500">
             {option.description}
           </p>
-        </div>
-        <div className="mt-3 flex items-center text-xs font-medium text-primary">
-          Get started
-          <ArrowRight className="ml-1 h-3 w-3 transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
         </div>
       </div>
     </button>
