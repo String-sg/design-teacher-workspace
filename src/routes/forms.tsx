@@ -27,36 +27,31 @@ function FormsLayout() {
   return (
     <div className="flex flex-col">
       <div className="border-b px-4 pt-4 md:px-6">
-        <h1 className="text-lg font-semibold md:text-2xl">
-          Announcements & Forms
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-semibold md:text-2xl">
+            Announcements & Forms
+          </h1>
+          <Button size="sm" render={<Link to="/forms/new" />}>
+            <Plus className="mr-1.5 h-4 w-4" />
+            Create
+          </Button>
+        </div>
         <p className="mt-1 hidden text-sm text-muted-foreground md:block">
           Manage parent communications, announcements, and forms
         </p>
-        <div className="mt-3 flex items-center justify-between md:mt-4">
-          <Tabs value="forms">
-            <TabsList variant="line">
-              <TabsTrigger
-                value="announcements"
-                render={<Link to="/announcements" />}
-              >
-                Announcements
-              </TabsTrigger>
-              <TabsTrigger value="forms" render={<Link to="/forms" />}>
-                Forms
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Button
-            size="sm"
-            className="shrink-0 md:size-default"
-            render={<Link to="/forms/new" />}
-          >
-            <Plus className="mr-1.5 h-4 w-4 md:mr-2" />
-            <span className="hidden sm:inline">Create Form</span>
-            <span className="sm:hidden">New</span>
-          </Button>
-        </div>
+        <Tabs value="forms" className="mt-3 md:mt-4">
+          <TabsList variant="line">
+            <TabsTrigger
+              value="announcements"
+              render={<Link to="/announcements" />}
+            >
+              Announcements
+            </TabsTrigger>
+            <TabsTrigger value="forms" render={<Link to="/forms" />}>
+              Forms
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       <Outlet />
     </div>
