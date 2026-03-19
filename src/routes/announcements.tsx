@@ -31,7 +31,7 @@ function AnnouncementsLayout() {
           <h1 className="text-lg font-semibold md:text-2xl">
             Announcements & Forms
           </h1>
-          <Button size="sm" render={<Link to="/announcements/new" />}>
+          <Button size="sm" render={<Link to="/create" />}>
             <Plus className="mr-1.5 h-4 w-4" />
             Create
           </Button>

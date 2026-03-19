@@ -38,6 +38,7 @@ import { Route as AnnouncementsNewRouteImport } from './routes/announcements.new
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 import { Route as GuestPreviewMenuRouteImport } from './routes/_guest.preview-menu'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
+import { Route as GuestCreateRouteImport } from './routes/_guest.create'
 import { Route as GuestReportViewTokenRouteImport } from './routes/_guest.report-view.$token'
 
 const StudentsRoute = StudentsRouteImport.update({
@@ -184,6 +185,11 @@ const GuestLoginRoute = GuestLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => GuestRoute,
 } as any)
+const GuestCreateRoute = GuestCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => GuestRoute,
+} as any)
 const GuestReportViewTokenRoute = GuestReportViewTokenRouteImport.update({
   id: '/report-view/$token',
   path: '/report-view/$token',
@@ -202,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/student-analytics': typeof StudentAnalyticsRoute
   '/students': typeof StudentsRouteWithChildren
+  '/create': typeof GuestCreateRoute
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/insight-buddy': typeof InsightBuddyRoute
   '/settings': typeof SettingsRoute
   '/student-analytics': typeof StudentAnalyticsRoute
+  '/create': typeof GuestCreateRoute
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
@@ -261,6 +269,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/student-analytics': typeof StudentAnalyticsRoute
   '/students': typeof StudentsRouteWithChildren
+  '/_guest/create': typeof GuestCreateRoute
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
@@ -294,6 +303,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/student-analytics'
     | '/students'
+    | '/create'
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
@@ -320,6 +330,7 @@ export interface FileRouteTypes {
     | '/insight-buddy'
     | '/settings'
     | '/student-analytics'
+    | '/create'
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
@@ -352,6 +363,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/student-analytics'
     | '/students'
+    | '/_guest/create'
     | '/_guest/login'
     | '/_guest/preview-menu'
     | '/announcements/$id'
@@ -593,6 +605,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestLoginRouteImport
       parentRoute: typeof GuestRoute
     }
+    '/_guest/create': {
+      id: '/_guest/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof GuestCreateRouteImport
+      parentRoute: typeof GuestRoute
+    }
     '/_guest/report-view/$token': {
       id: '/_guest/report-view/$token'
       path: '/report-view/$token'
@@ -604,12 +623,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface GuestRouteChildren {
+  GuestCreateRoute: typeof GuestCreateRoute
   GuestLoginRoute: typeof GuestLoginRoute
   GuestPreviewMenuRoute: typeof GuestPreviewMenuRoute
   GuestReportViewTokenRoute: typeof GuestReportViewTokenRoute
 }
 
 const GuestRouteChildren: GuestRouteChildren = {
+  GuestCreateRoute: GuestCreateRoute,
   GuestLoginRoute: GuestLoginRoute,
   GuestPreviewMenuRoute: GuestPreviewMenuRoute,
   GuestReportViewTokenRoute: GuestReportViewTokenRoute,

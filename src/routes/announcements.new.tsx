@@ -58,6 +58,8 @@ import { cn } from '@/lib/utils'
 export const Route = createFileRoute('/announcements/new')({
   validateSearch: (search: Record<string, unknown>) => ({
     edit: typeof search.edit === 'string' ? search.edit : undefined,
+    responseType:
+      typeof search.responseType === 'string' ? search.responseType : undefined,
   }),
   component: NewAnnouncementPage,
 })
@@ -599,7 +601,7 @@ function getValidationHint(
 // Page component
 // ---------------------------------------------------------------------------
 function NewAnnouncementPage() {
-  const { edit: editId } = Route.useSearch()
+  const { edit: editId, responseType: initialResponseType } = Route.useSearch()
   const isEditing = Boolean(editId)
   const existingAnnouncement = editId
     ? getPGAnnouncementById(editId)
@@ -632,7 +634,13 @@ function NewAnnouncementPage() {
   const photoInputRef = useRef<HTMLInputElement>(null)
 
   // Response type
-  const [responseType, setResponseType] = useState<ResponseType>('view-only')
+  const [responseType, setResponseType] = useState<ResponseType>(
+    initialResponseType === 'acknowledge'
+      ? 'acknowledge'
+      : initialResponseType === 'yes-no'
+        ? 'yes-no'
+        : 'view-only',
+  )
   const [dueDate, setDueDate] = useState('')
   const [reminderType, setReminderType] = useState<ReminderType>('none')
   const [reminderDate, setReminderDate] = useState('')
