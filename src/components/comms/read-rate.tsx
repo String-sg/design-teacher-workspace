@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-interface PGReadRateProps {
+interface ReadRateProps {
   readCount: number
   totalCount: number
   /** Show just the bar without the fraction label */
@@ -8,12 +8,12 @@ interface PGReadRateProps {
   className?: string
 }
 
-export function PGReadRate({
+export function ReadRate({
   readCount,
   totalCount,
   compact = false,
   className,
-}: PGReadRateProps) {
+}: ReadRateProps) {
   if (totalCount === 0) {
     return <span className="text-sm text-muted-foreground">—</span>
   }

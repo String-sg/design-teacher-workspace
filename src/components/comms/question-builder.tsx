@@ -1,11 +1,4 @@
-import {
-  ArrowDown,
-  ArrowUp,
-  GripVertical,
-  Plus,
-  Trash2,
-  X,
-} from 'lucide-react'
+import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2, X } from 'lucide-react'
 import type { FormQuestion, QuestionType, ResponseType } from '@/types/form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,7 +13,6 @@ interface QuestionBuilderProps {
   onChange: (questions: FormQuestion[]) => void
   responseType?: ResponseType
   onEditQuestion?: (id: string | null) => void
-  onSwitchToAllEars?: () => void
 }
 
 export function QuestionBuilder({
@@ -28,7 +20,6 @@ export function QuestionBuilder({
   onChange,
   responseType,
   onEditQuestion,
-  onSwitchToAllEars,
 }: QuestionBuilderProps) {
   const isYesNo = responseType === 'yes-no'
 
@@ -37,7 +28,7 @@ export function QuestionBuilder({
     const newQ: FormQuestion = {
       id: crypto.randomUUID(),
       text: '',
-      type: 'open',
+      type: 'free-text',
       options: ['', ''],
       showAfter: 'both',
     }
@@ -173,7 +164,7 @@ export function QuestionBuilder({
             {/* Type toggle */}
             <div className="mt-2.5 ml-10 flex items-center gap-3">
               <span className="text-xs text-muted-foreground">Type:</span>
-              {(['open', 'mcq'] as QuestionType[]).map((t) => (
+              {(['free-text', 'mcq'] as QuestionType[]).map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -188,7 +179,7 @@ export function QuestionBuilder({
                   }
                   className={cn(
                     'flex items-center gap-1.5 text-xs',
-                    q.type === t || (!q.type && t === 'open')
+                    q.type === t || (!q.type && t === 'free-text')
                       ? 'font-semibold text-slate-800'
                       : 'text-slate-400 hover:text-slate-600',
                   )}
@@ -196,22 +187,22 @@ export function QuestionBuilder({
                   <div
                     className={cn(
                       'h-3.5 w-3.5 rounded-full border-2',
-                      q.type === t || (!q.type && t === 'open')
+                      q.type === t || (!q.type && t === 'free-text')
                         ? 'border-slate-700 bg-slate-700'
                         : 'border-slate-300',
                     )}
                   >
-                    {(q.type === t || (!q.type && t === 'open')) && (
+                    {(q.type === t || (!q.type && t === 'free-text')) && (
                       <div className="h-full w-full rounded-full bg-white scale-[0.4]" />
                     )}
                   </div>
-                  {t === 'open' ? 'Open-ended' : 'MCQ'}
+                  {t === 'free-text' ? 'Open-ended' : 'MCQ'}
                 </button>
               ))}
             </div>
 
             {/* MCQ options */}
-            {(q.type === 'mcq') && (
+            {q.type === 'mcq' && (
               <div className="mt-2.5 ml-10 space-y-1.5">
                 {(q.options ?? ['', '']).map((opt, oi) => (
                   <div key={oi} className="flex items-center gap-1.5">
@@ -277,21 +268,6 @@ export function QuestionBuilder({
           </div>
         ))}
       </div>
-
-      {atMax && onSwitchToAllEars && (
-        <div className="mt-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3">
-          <p className="text-xs text-muted-foreground">
-            Need more than {MAX_QUESTIONS} questions?{' '}
-            <button
-              type="button"
-              onClick={onSwitchToAllEars}
-              className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-            >
-              Switch to Custom Form (AllEars) →
-            </button>
-          </p>
-        </div>
-      )}
     </section>
   )
 }

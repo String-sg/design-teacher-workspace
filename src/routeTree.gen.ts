@@ -13,42 +13,32 @@ import { Route as StudentsRouteImport } from './routes/students'
 import { Route as StudentAnalyticsRouteImport } from './routes/student-analytics'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as ParentsGatewayRouteImport } from './routes/parents-gateway'
 import { Route as InsightBuddyRouteImport } from './routes/insight-buddy'
 import { Route as FormsRouteImport } from './routes/forms'
 import { Route as FlagsRouteImport } from './routes/flags'
 import { Route as DsRouteImport } from './routes/ds'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as GuestRouteImport } from './routes/_guest'
-import { Route as AllearsRouteImport } from './routes/_allears'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsIndexRouteImport } from './routes/students.index'
 import { Route as ReportsIndexRouteImport } from './routes/reports.index'
-import { Route as ParentsGatewayIndexRouteImport } from './routes/parents-gateway.index'
 import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as DsIndexRouteImport } from './routes/ds.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
-import { Route as ParentsGatewayNewRouteImport } from './routes/parents-gateway.new'
-import { Route as ParentsGatewayIdRouteImport } from './routes/parents-gateway.$id'
 import { Route as GlowStudentIdRouteImport } from './routes/glow.$studentId'
 import { Route as FormsNewRouteImport } from './routes/forms.new'
 import { Route as FormsIdRouteImport } from './routes/forms.$id'
 import { Route as DsTwThemeRouteImport } from './routes/ds.tw-theme'
 import { Route as DsFlowTokensRouteImport } from './routes/ds.flow-tokens'
 import { Route as DsFlowComponentsRouteImport } from './routes/ds.flow-components'
+import { Route as AnnouncementsNewRouteImport } from './routes/announcements.new'
 import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 import { Route as GuestPreviewMenuRouteImport } from './routes/_guest.preview-menu'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
-import { Route as AllearsAllearsRouteImport } from './routes/_allears.allears'
-import { Route as AllearsAllearsIndexRouteImport } from './routes/_allears.allears.index'
 import { Route as GuestReportViewTokenRouteImport } from './routes/_guest.report-view.$token'
-import { Route as AllearsAllearsResponsesRouteImport } from './routes/_allears.allears.responses'
-import { Route as AllearsAllearsRespondRouteImport } from './routes/_allears.allears.respond'
-import { Route as AllearsAllearsQuestionsRouteImport } from './routes/_allears.allears.questions'
-import { Route as AllearsAllearsIndividualsRouteImport } from './routes/_allears.allears.individuals'
 
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
@@ -68,11 +58,6 @@ const SettingsRoute = SettingsRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ParentsGatewayRoute = ParentsGatewayRouteImport.update({
-  id: '/parents-gateway',
-  path: '/parents-gateway',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InsightBuddyRoute = InsightBuddyRouteImport.update({
@@ -104,10 +89,6 @@ const GuestRoute = GuestRouteImport.update({
   id: '/_guest',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AllearsRoute = AllearsRouteImport.update({
-  id: '/_allears',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
@@ -127,11 +108,6 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ReportsRoute,
-} as any)
-const ParentsGatewayIndexRoute = ParentsGatewayIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ParentsGatewayRoute,
 } as any)
 const FormsIndexRoute = FormsIndexRouteImport.update({
   id: '/',
@@ -157,16 +133,6 @@ const ReportsIdRoute = ReportsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ReportsRoute,
-} as any)
-const ParentsGatewayNewRoute = ParentsGatewayNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => ParentsGatewayRoute,
-} as any)
-const ParentsGatewayIdRoute = ParentsGatewayIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ParentsGatewayRoute,
 } as any)
 const GlowStudentIdRoute = GlowStudentIdRouteImport.update({
   id: '/glow/$studentId',
@@ -198,6 +164,11 @@ const DsFlowComponentsRoute = DsFlowComponentsRouteImport.update({
   path: '/flow-components',
   getParentRoute: () => DsRoute,
 } as any)
+const AnnouncementsNewRoute = AnnouncementsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AnnouncementsRoute,
+} as any)
 const AnnouncementsIdRoute = AnnouncementsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -213,42 +184,11 @@ const GuestLoginRoute = GuestLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => GuestRoute,
 } as any)
-const AllearsAllearsRoute = AllearsAllearsRouteImport.update({
-  id: '/allears',
-  path: '/allears',
-  getParentRoute: () => AllearsRoute,
-} as any)
-const AllearsAllearsIndexRoute = AllearsAllearsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AllearsAllearsRoute,
-} as any)
 const GuestReportViewTokenRoute = GuestReportViewTokenRouteImport.update({
   id: '/report-view/$token',
   path: '/report-view/$token',
   getParentRoute: () => GuestRoute,
 } as any)
-const AllearsAllearsResponsesRoute = AllearsAllearsResponsesRouteImport.update({
-  id: '/responses',
-  path: '/responses',
-  getParentRoute: () => AllearsAllearsRoute,
-} as any)
-const AllearsAllearsRespondRoute = AllearsAllearsRespondRouteImport.update({
-  id: '/respond',
-  path: '/respond',
-  getParentRoute: () => AllearsAllearsRoute,
-} as any)
-const AllearsAllearsQuestionsRoute = AllearsAllearsQuestionsRouteImport.update({
-  id: '/questions',
-  path: '/questions',
-  getParentRoute: () => AllearsAllearsRoute,
-} as any)
-const AllearsAllearsIndividualsRoute =
-  AllearsAllearsIndividualsRouteImport.update({
-    id: '/individuals',
-    path: '/individuals',
-    getParentRoute: () => AllearsAllearsRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -258,37 +198,28 @@ export interface FileRoutesByFullPath {
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
-  '/parents-gateway': typeof ParentsGatewayRouteWithChildren
   '/reports': typeof ReportsRouteWithChildren
   '/settings': typeof SettingsRoute
   '/student-analytics': typeof StudentAnalyticsRoute
   '/students': typeof StudentsRouteWithChildren
-  '/allears': typeof AllearsAllearsRouteWithChildren
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/announcements/new': typeof AnnouncementsNewRoute
   '/ds/flow-components': typeof DsFlowComponentsRoute
   '/ds/flow-tokens': typeof DsFlowTokensRoute
   '/ds/tw-theme': typeof DsTwThemeRoute
   '/forms/$id': typeof FormsIdRoute
   '/forms/new': typeof FormsNewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
-  '/parents-gateway/$id': typeof ParentsGatewayIdRoute
-  '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/ds/': typeof DsIndexRoute
   '/forms/': typeof FormsIndexRoute
-  '/parents-gateway/': typeof ParentsGatewayIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
-  '/allears/individuals': typeof AllearsAllearsIndividualsRoute
-  '/allears/questions': typeof AllearsAllearsQuestionsRoute
-  '/allears/respond': typeof AllearsAllearsRespondRoute
-  '/allears/responses': typeof AllearsAllearsResponsesRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
-  '/allears/': typeof AllearsAllearsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -300,71 +231,54 @@ export interface FileRoutesByTo {
   '/login': typeof GuestLoginRoute
   '/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/announcements/new': typeof AnnouncementsNewRoute
   '/ds/flow-components': typeof DsFlowComponentsRoute
   '/ds/flow-tokens': typeof DsFlowTokensRoute
   '/ds/tw-theme': typeof DsTwThemeRoute
   '/forms/$id': typeof FormsIdRoute
   '/forms/new': typeof FormsNewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
-  '/parents-gateway/$id': typeof ParentsGatewayIdRoute
-  '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
   '/ds': typeof DsIndexRoute
   '/forms': typeof FormsIndexRoute
-  '/parents-gateway': typeof ParentsGatewayIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/students': typeof StudentsIndexRoute
-  '/allears/individuals': typeof AllearsAllearsIndividualsRoute
-  '/allears/questions': typeof AllearsAllearsQuestionsRoute
-  '/allears/respond': typeof AllearsAllearsRespondRoute
-  '/allears/responses': typeof AllearsAllearsResponsesRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
-  '/allears': typeof AllearsAllearsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
-  '/_allears': typeof AllearsRouteWithChildren
   '/_guest': typeof GuestRouteWithChildren
   '/announcements': typeof AnnouncementsRouteWithChildren
   '/ds': typeof DsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
-  '/parents-gateway': typeof ParentsGatewayRouteWithChildren
   '/reports': typeof ReportsRouteWithChildren
   '/settings': typeof SettingsRoute
   '/student-analytics': typeof StudentAnalyticsRoute
   '/students': typeof StudentsRouteWithChildren
-  '/_allears/allears': typeof AllearsAllearsRouteWithChildren
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/preview-menu': typeof GuestPreviewMenuRoute
   '/announcements/$id': typeof AnnouncementsIdRoute
+  '/announcements/new': typeof AnnouncementsNewRoute
   '/ds/flow-components': typeof DsFlowComponentsRoute
   '/ds/flow-tokens': typeof DsFlowTokensRoute
   '/ds/tw-theme': typeof DsTwThemeRoute
   '/forms/$id': typeof FormsIdRoute
   '/forms/new': typeof FormsNewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
-  '/parents-gateway/$id': typeof ParentsGatewayIdRoute
-  '/parents-gateway/new': typeof ParentsGatewayNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/ds/': typeof DsIndexRoute
   '/forms/': typeof FormsIndexRoute
-  '/parents-gateway/': typeof ParentsGatewayIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
-  '/_allears/allears/individuals': typeof AllearsAllearsIndividualsRoute
-  '/_allears/allears/questions': typeof AllearsAllearsQuestionsRoute
-  '/_allears/allears/respond': typeof AllearsAllearsRespondRoute
-  '/_allears/allears/responses': typeof AllearsAllearsResponsesRoute
   '/_guest/report-view/$token': typeof GuestReportViewTokenRoute
-  '/_allears/allears/': typeof AllearsAllearsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -376,37 +290,28 @@ export interface FileRouteTypes {
     | '/flags'
     | '/forms'
     | '/insight-buddy'
-    | '/parents-gateway'
     | '/reports'
     | '/settings'
     | '/student-analytics'
     | '/students'
-    | '/allears'
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
+    | '/announcements/new'
     | '/ds/flow-components'
     | '/ds/flow-tokens'
     | '/ds/tw-theme'
     | '/forms/$id'
     | '/forms/new'
     | '/glow/$studentId'
-    | '/parents-gateway/$id'
-    | '/parents-gateway/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
     | '/ds/'
     | '/forms/'
-    | '/parents-gateway/'
     | '/reports/'
     | '/students/'
-    | '/allears/individuals'
-    | '/allears/questions'
-    | '/allears/respond'
-    | '/allears/responses'
     | '/report-view/$token'
-    | '/allears/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -418,83 +323,64 @@ export interface FileRouteTypes {
     | '/login'
     | '/preview-menu'
     | '/announcements/$id'
+    | '/announcements/new'
     | '/ds/flow-components'
     | '/ds/flow-tokens'
     | '/ds/tw-theme'
     | '/forms/$id'
     | '/forms/new'
     | '/glow/$studentId'
-    | '/parents-gateway/$id'
-    | '/parents-gateway/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements'
     | '/ds'
     | '/forms'
-    | '/parents-gateway'
     | '/reports'
     | '/students'
-    | '/allears/individuals'
-    | '/allears/questions'
-    | '/allears/respond'
-    | '/allears/responses'
     | '/report-view/$token'
-    | '/allears'
   id:
     | '__root__'
     | '/'
     | '/$'
-    | '/_allears'
     | '/_guest'
     | '/announcements'
     | '/ds'
     | '/flags'
     | '/forms'
     | '/insight-buddy'
-    | '/parents-gateway'
     | '/reports'
     | '/settings'
     | '/student-analytics'
     | '/students'
-    | '/_allears/allears'
     | '/_guest/login'
     | '/_guest/preview-menu'
     | '/announcements/$id'
+    | '/announcements/new'
     | '/ds/flow-components'
     | '/ds/flow-tokens'
     | '/ds/tw-theme'
     | '/forms/$id'
     | '/forms/new'
     | '/glow/$studentId'
-    | '/parents-gateway/$id'
-    | '/parents-gateway/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
     | '/ds/'
     | '/forms/'
-    | '/parents-gateway/'
     | '/reports/'
     | '/students/'
-    | '/_allears/allears/individuals'
-    | '/_allears/allears/questions'
-    | '/_allears/allears/respond'
-    | '/_allears/allears/responses'
     | '/_guest/report-view/$token'
-    | '/_allears/allears/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
-  AllearsRoute: typeof AllearsRouteWithChildren
   GuestRoute: typeof GuestRouteWithChildren
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
   DsRoute: typeof DsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
   FormsRoute: typeof FormsRouteWithChildren
   InsightBuddyRoute: typeof InsightBuddyRoute
-  ParentsGatewayRoute: typeof ParentsGatewayRouteWithChildren
   ReportsRoute: typeof ReportsRouteWithChildren
   SettingsRoute: typeof SettingsRoute
   StudentAnalyticsRoute: typeof StudentAnalyticsRoute
@@ -530,13 +416,6 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/parents-gateway': {
-      id: '/parents-gateway'
-      path: '/parents-gateway'
-      fullPath: '/parents-gateway'
-      preLoaderRoute: typeof ParentsGatewayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/insight-buddy': {
@@ -581,13 +460,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_allears': {
-      id: '/_allears'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AllearsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/$': {
       id: '/$'
       path: '/$'
@@ -615,13 +487,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/'
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof ReportsRoute
-    }
-    '/parents-gateway/': {
-      id: '/parents-gateway/'
-      path: '/'
-      fullPath: '/parents-gateway/'
-      preLoaderRoute: typeof ParentsGatewayIndexRouteImport
-      parentRoute: typeof ParentsGatewayRoute
     }
     '/forms/': {
       id: '/forms/'
@@ -657,20 +522,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/$id'
       preLoaderRoute: typeof ReportsIdRouteImport
       parentRoute: typeof ReportsRoute
-    }
-    '/parents-gateway/new': {
-      id: '/parents-gateway/new'
-      path: '/new'
-      fullPath: '/parents-gateway/new'
-      preLoaderRoute: typeof ParentsGatewayNewRouteImport
-      parentRoute: typeof ParentsGatewayRoute
-    }
-    '/parents-gateway/$id': {
-      id: '/parents-gateway/$id'
-      path: '/$id'
-      fullPath: '/parents-gateway/$id'
-      preLoaderRoute: typeof ParentsGatewayIdRouteImport
-      parentRoute: typeof ParentsGatewayRoute
     }
     '/glow/$studentId': {
       id: '/glow/$studentId'
@@ -714,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DsFlowComponentsRouteImport
       parentRoute: typeof DsRoute
     }
+    '/announcements/new': {
+      id: '/announcements/new'
+      path: '/new'
+      fullPath: '/announcements/new'
+      preLoaderRoute: typeof AnnouncementsNewRouteImport
+      parentRoute: typeof AnnouncementsRoute
+    }
     '/announcements/$id': {
       id: '/announcements/$id'
       path: '/$id'
@@ -735,20 +593,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestLoginRouteImport
       parentRoute: typeof GuestRoute
     }
-    '/_allears/allears': {
-      id: '/_allears/allears'
-      path: '/allears'
-      fullPath: '/allears'
-      preLoaderRoute: typeof AllearsAllearsRouteImport
-      parentRoute: typeof AllearsRoute
-    }
-    '/_allears/allears/': {
-      id: '/_allears/allears/'
-      path: '/'
-      fullPath: '/allears/'
-      preLoaderRoute: typeof AllearsAllearsIndexRouteImport
-      parentRoute: typeof AllearsAllearsRoute
-    }
     '/_guest/report-view/$token': {
       id: '/_guest/report-view/$token'
       path: '/report-view/$token'
@@ -756,67 +600,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestReportViewTokenRouteImport
       parentRoute: typeof GuestRoute
     }
-    '/_allears/allears/responses': {
-      id: '/_allears/allears/responses'
-      path: '/responses'
-      fullPath: '/allears/responses'
-      preLoaderRoute: typeof AllearsAllearsResponsesRouteImport
-      parentRoute: typeof AllearsAllearsRoute
-    }
-    '/_allears/allears/respond': {
-      id: '/_allears/allears/respond'
-      path: '/respond'
-      fullPath: '/allears/respond'
-      preLoaderRoute: typeof AllearsAllearsRespondRouteImport
-      parentRoute: typeof AllearsAllearsRoute
-    }
-    '/_allears/allears/questions': {
-      id: '/_allears/allears/questions'
-      path: '/questions'
-      fullPath: '/allears/questions'
-      preLoaderRoute: typeof AllearsAllearsQuestionsRouteImport
-      parentRoute: typeof AllearsAllearsRoute
-    }
-    '/_allears/allears/individuals': {
-      id: '/_allears/allears/individuals'
-      path: '/individuals'
-      fullPath: '/allears/individuals'
-      preLoaderRoute: typeof AllearsAllearsIndividualsRouteImport
-      parentRoute: typeof AllearsAllearsRoute
-    }
   }
 }
-
-interface AllearsAllearsRouteChildren {
-  AllearsAllearsIndividualsRoute: typeof AllearsAllearsIndividualsRoute
-  AllearsAllearsQuestionsRoute: typeof AllearsAllearsQuestionsRoute
-  AllearsAllearsRespondRoute: typeof AllearsAllearsRespondRoute
-  AllearsAllearsResponsesRoute: typeof AllearsAllearsResponsesRoute
-  AllearsAllearsIndexRoute: typeof AllearsAllearsIndexRoute
-}
-
-const AllearsAllearsRouteChildren: AllearsAllearsRouteChildren = {
-  AllearsAllearsIndividualsRoute: AllearsAllearsIndividualsRoute,
-  AllearsAllearsQuestionsRoute: AllearsAllearsQuestionsRoute,
-  AllearsAllearsRespondRoute: AllearsAllearsRespondRoute,
-  AllearsAllearsResponsesRoute: AllearsAllearsResponsesRoute,
-  AllearsAllearsIndexRoute: AllearsAllearsIndexRoute,
-}
-
-const AllearsAllearsRouteWithChildren = AllearsAllearsRoute._addFileChildren(
-  AllearsAllearsRouteChildren,
-)
-
-interface AllearsRouteChildren {
-  AllearsAllearsRoute: typeof AllearsAllearsRouteWithChildren
-}
-
-const AllearsRouteChildren: AllearsRouteChildren = {
-  AllearsAllearsRoute: AllearsAllearsRouteWithChildren,
-}
-
-const AllearsRouteWithChildren =
-  AllearsRoute._addFileChildren(AllearsRouteChildren)
 
 interface GuestRouteChildren {
   GuestLoginRoute: typeof GuestLoginRoute
@@ -834,11 +619,13 @@ const GuestRouteWithChildren = GuestRoute._addFileChildren(GuestRouteChildren)
 
 interface AnnouncementsRouteChildren {
   AnnouncementsIdRoute: typeof AnnouncementsIdRoute
+  AnnouncementsNewRoute: typeof AnnouncementsNewRoute
   AnnouncementsIndexRoute: typeof AnnouncementsIndexRoute
 }
 
 const AnnouncementsRouteChildren: AnnouncementsRouteChildren = {
   AnnouncementsIdRoute: AnnouncementsIdRoute,
+  AnnouncementsNewRoute: AnnouncementsNewRoute,
   AnnouncementsIndexRoute: AnnouncementsIndexRoute,
 }
 
@@ -876,22 +663,6 @@ const FormsRouteChildren: FormsRouteChildren = {
 
 const FormsRouteWithChildren = FormsRoute._addFileChildren(FormsRouteChildren)
 
-interface ParentsGatewayRouteChildren {
-  ParentsGatewayIdRoute: typeof ParentsGatewayIdRoute
-  ParentsGatewayNewRoute: typeof ParentsGatewayNewRoute
-  ParentsGatewayIndexRoute: typeof ParentsGatewayIndexRoute
-}
-
-const ParentsGatewayRouteChildren: ParentsGatewayRouteChildren = {
-  ParentsGatewayIdRoute: ParentsGatewayIdRoute,
-  ParentsGatewayNewRoute: ParentsGatewayNewRoute,
-  ParentsGatewayIndexRoute: ParentsGatewayIndexRoute,
-}
-
-const ParentsGatewayRouteWithChildren = ParentsGatewayRoute._addFileChildren(
-  ParentsGatewayRouteChildren,
-)
-
 interface ReportsRouteChildren {
   ReportsIdRoute: typeof ReportsIdRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
@@ -922,14 +693,12 @@ const StudentsRouteWithChildren = StudentsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
-  AllearsRoute: AllearsRouteWithChildren,
   GuestRoute: GuestRouteWithChildren,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
   DsRoute: DsRouteWithChildren,
   FlagsRoute: FlagsRoute,
   FormsRoute: FormsRouteWithChildren,
   InsightBuddyRoute: InsightBuddyRoute,
-  ParentsGatewayRoute: ParentsGatewayRouteWithChildren,
   ReportsRoute: ReportsRouteWithChildren,
   SettingsRoute: SettingsRoute,
   StudentAnalyticsRoute: StudentAnalyticsRoute,

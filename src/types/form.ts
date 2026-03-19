@@ -1,17 +1,24 @@
 export type FormStatus = 'draft' | 'active' | 'closed'
 export type FormOwnership = 'mine' | 'shared'
-export type FormType = 'quick' | 'allears' | 'link'
+export type FormType = 'standard'
 export type ResponseType = 'view-only' | 'acknowledge' | 'yes-no'
 export type ReminderType = 'none' | 'one-time' | 'daily'
 
-export type QuestionType = 'open' | 'mcq'
+export type QuestionType =
+  | 'yes-no'
+  | 'mcq'
+  | 'checkbox'
+  | 'free-text'
+  | 'ranking'
+  | 'date'
+  | 'file-upload'
 
 export interface FormQuestion {
   id: string
   text: string
-  type?: QuestionType       // 'open' | 'mcq' (default: 'open')
-  options?: string[]        // MCQ only: custom answer choices (min 2, max 6)
-  showAfter?: 'yes' | 'no' | 'both' // yes-no forms only (default: 'both')
+  type: QuestionType
+  options?: string[] // for mcq, checkbox, ranking
+  required?: boolean
 }
 
 export interface Form {
@@ -33,8 +40,6 @@ export interface Form {
   dueDate?: string
   reminderType?: ReminderType
   reminderDate?: string
-  formLink?: string
-  allEarsFormId?: string
   scheduledAt?: string
 }
 

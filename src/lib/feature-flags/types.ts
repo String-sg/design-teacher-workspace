@@ -1,4 +1,5 @@
 export type FeatureFlagKey =
+  | 'allears'
   | 'announcements'
   | 'forms'
   | 'notifications'

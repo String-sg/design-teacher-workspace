@@ -731,7 +731,7 @@ export const mockPGAnnouncements: Array<PGAnnouncement> = [
       {
         id: 'q2',
         text: 'Any dietary restrictions we should know about?',
-        type: 'open',
+        type: 'free-text',
         showAfter: 'both',
       },
     ],
@@ -842,13 +842,13 @@ export const mockPGAnnouncements: Array<PGAnnouncement> = [
       {
         id: 'cq2',
         text: 'Please briefly share why your child will not be attending.',
-        type: 'open',
+        type: 'free-text',
         showAfter: 'no',
       },
       {
         id: 'cq3',
         text: 'Does your child have any medical conditions or special needs we should be aware of?',
-        type: 'open',
+        type: 'free-text',
         showAfter: 'both',
       },
     ],

@@ -178,9 +178,9 @@ interface Message {
 // ---------------------------------------------------------------------------
 function usePageContext(): PageContext {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
-  if (pathname === '/parents-gateway') return 'list'
-  if (pathname.startsWith('/parents-gateway/new')) return 'create'
-  if (/^\/parents-gateway\/pg-/.test(pathname)) return 'detail'
+  if (pathname === '/announcements') return 'list'
+  if (pathname.startsWith('/announcements/new')) return 'create'
+  if (/^\/announcements\/pg-/.test(pathname)) return 'detail'
   return 'other'
 }
 
