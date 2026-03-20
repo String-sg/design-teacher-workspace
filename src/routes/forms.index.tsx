@@ -2,8 +2,9 @@ import { useMemo, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Search, Users } from 'lucide-react'
 
-import type { FormStatus } from '@/types/form'
+import type { FormSource, FormStatus } from '@/types/form'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -46,10 +47,13 @@ function getStatusBadge(status: FormStatus) {
   return <Badge className={className}>{label}</Badge>
 }
 
+type SourceFilter = 'all' | FormSource
+
 function FormsPage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<FormsFilters>(EMPTY_FORMS_FILTERS)
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
   useSetBreadcrumbs([
     { label: 'Announcements & Forms', href: '/announcements' },
   ])
@@ -57,6 +61,12 @@ function FormsPage() {
   const filteredForms = useMemo(() => {
     return mockForms
       .filter((form) => {
+        // Source quick filter
+        if (sourceFilter !== 'all') {
+          const formSource = form.source ?? 'custom'
+          if (formSource !== sourceFilter) return false
+        }
+
         if (
           filters.statuses.length > 0 &&
           !filters.statuses.includes(form.status)
@@ -92,11 +102,11 @@ function FormsPage() {
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
-  }, [searchQuery, filters])
+  }, [searchQuery, filters, sourceFilter])
 
   return (
     <div className="flex flex-col">
-      {/* Search & Filter */}
+      {/* Search, Filter & Quick filter */}
       <div className="mt-4 flex items-center gap-3 px-6">
         <div className="relative flex-1 md:flex-none">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -110,6 +120,29 @@ function FormsPage() {
           />
         </div>
         <FormsFilterBar filters={filters} onChange={setFilters} />
+        <div className="flex items-center gap-1">
+          {(
+            [
+              { value: 'all', label: 'All' },
+              { value: 'custom', label: 'Custom Forms' },
+              { value: 'announcement-response', label: 'Responses' },
+            ] as const
+          ).map(({ value, label }) => (
+            <Button
+              key={value}
+              variant={sourceFilter === value ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setSourceFilter(value)}
+              className={
+                sourceFilter === value
+                  ? 'bg-muted font-medium'
+                  : 'text-muted-foreground'
+              }
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Forms Table */}
