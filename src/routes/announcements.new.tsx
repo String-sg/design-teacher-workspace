@@ -1378,10 +1378,10 @@ function NewAnnouncementPage() {
               <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 Response Type
               </h2>
-              <p className="mb-4 text-xs text-muted-foreground">
+              <p className="mb-5 text-xs text-muted-foreground">
                 Choose how parents respond to this announcement.
               </p>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-3 gap-4">
                 {(
                   [
                     {
@@ -1409,61 +1409,59 @@ function NewAnnouncementPage() {
                     type="button"
                     onClick={() => handleResponseTypeChange(opt.value)}
                     className={cn(
-                      'flex flex-col gap-3 rounded-xl border-2 p-3 text-left transition-all',
+                      'flex flex-col gap-3 rounded-xl border-2 p-4 text-left transition-all',
                       responseType === opt.value
-                        ? 'border-primary bg-blue-50'
+                        ? 'border-primary bg-primary/[0.04] ring-1 ring-primary/20'
                         : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
                     )}
                   >
                     <div
                       className={cn(
-                        'w-full overflow-hidden rounded-lg border bg-white',
+                        'flex h-[100px] w-full items-center justify-center overflow-hidden rounded-lg border',
                         responseType === opt.value
-                          ? 'border-primary/20'
-                          : 'border-slate-200',
+                          ? 'border-primary/15 bg-white'
+                          : 'border-slate-100 bg-slate-50/50',
                       )}
                     >
-                      {opt.mockup}
+                      <div className="w-full">{opt.mockup}</div>
                     </div>
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="text-xs font-semibold text-foreground">
+                        <p className="text-sm font-semibold text-foreground">
                           {opt.label}
                         </p>
-                        <p className="mt-0.5 text-[10px] leading-relaxed text-muted-foreground">
+                        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                           {opt.hint}
                         </p>
                       </div>
                       {responseType === opt.value && (
                         <div className="mt-0.5 shrink-0 rounded-full bg-primary p-0.5 text-white">
-                          <Check className="h-2.5 w-2.5" />
+                          <Check className="h-3 w-3" />
                         </div>
                       )}
                     </div>
                   </button>
                 ))}
-
-                {/* Attach a Form — links to a standalone form from the Forms section */}
-                <Link
-                  to="/forms/new"
-                  className="flex flex-col gap-3 rounded-xl border-2 border-dashed border-slate-200 p-3 text-left transition-all hover:border-slate-300 hover:bg-slate-50"
-                >
-                  <div className="flex h-[88px] w-full items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
-                    <FileText className="h-8 w-8 text-slate-300" />
-                  </div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">
-                        Attach a Form
-                      </p>
-                      <p className="mt-0.5 text-[10px] leading-relaxed text-muted-foreground">
-                        Create a custom form in the Forms section.
-                      </p>
-                    </div>
-                    <ExternalLink className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" />
-                  </div>
-                </Link>
               </div>
+
+              {/* Attach a Form — distinct action, not a response type */}
+              <Link
+                to="/forms/new"
+                className="mt-4 flex items-center gap-3 rounded-lg border border-dashed border-slate-300 px-4 py-3 transition-colors hover:border-slate-400 hover:bg-slate-50"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                  <FileText className="h-4 w-4 text-slate-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">
+                    Attach a Form
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Create a custom form in the Forms section.
+                  </p>
+                </div>
+                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              </Link>
             </section>
 
             {/* CUSTOM QUESTIONS — yes/no only */}

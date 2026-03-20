@@ -23,6 +23,7 @@ import {
 import { ReadRate } from '@/components/comms/read-rate'
 import { mockForms } from '@/data/mock-forms'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
+import { useFeatureFlag } from '@/hooks/use-feature-flag'
 
 export const Route = createFileRoute('/forms/')({
   component: FormsPage,
@@ -54,6 +55,7 @@ function FormsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<FormsFilters>(EMPTY_FORMS_FILTERS)
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
+  const formsEnabled = useFeatureFlag('forms')
   useSetBreadcrumbs([
     { label: 'Announcements & Forms', href: '/announcements' },
   ])
@@ -61,6 +63,9 @@ function FormsPage() {
   const filteredForms = useMemo(() => {
     return mockForms
       .filter((form) => {
+        // When forms flag is off, only show announcement-response forms
+        if (!formsEnabled && (form.source ?? 'custom') === 'custom') return false
+
         // Source quick filter
         if (sourceFilter !== 'all') {
           const formSource = form.source ?? 'custom'
@@ -102,7 +107,7 @@ function FormsPage() {
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
-  }, [searchQuery, filters, sourceFilter])
+  }, [searchQuery, filters, sourceFilter, formsEnabled])
 
   return (
     <div className="flex flex-col">
@@ -120,29 +125,31 @@ function FormsPage() {
           />
         </div>
         <FormsFilterBar filters={filters} onChange={setFilters} />
-        <div className="flex items-center gap-1">
-          {(
-            [
-              { value: 'all', label: 'All' },
-              { value: 'custom', label: 'Custom Forms' },
-              { value: 'announcement-response', label: 'Responses' },
-            ] as const
-          ).map(({ value, label }) => (
-            <Button
-              key={value}
-              variant={sourceFilter === value ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setSourceFilter(value)}
-              className={
-                sourceFilter === value
-                  ? 'bg-muted font-medium'
-                  : 'text-muted-foreground'
-              }
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
+        {formsEnabled && (
+          <div className="flex items-center gap-1">
+            {(
+              [
+                { value: 'all', label: 'All' },
+                { value: 'custom', label: 'Custom Forms' },
+                { value: 'announcement-response', label: 'Responses' },
+              ] as const
+            ).map(({ value, label }) => (
+              <Button
+                key={value}
+                variant={sourceFilter === value ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setSourceFilter(value)}
+                className={
+                  sourceFilter === value
+                    ? 'bg-muted font-medium'
+                    : 'text-muted-foreground'
+                }
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Forms Table */}

@@ -2,6 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import {
+  DEFAULT_FEATURE_FLAGS,
+  FEATURE_FLAGS_STORAGE_KEY,
+} from '@/lib/feature-flags/constants'
+import type { FeatureFlags } from '@/lib/feature-flags/types'
 
 export const Route = createFileRoute('/_guest/create')({
   component: CreatePage,
@@ -111,7 +116,26 @@ function CreateCard({ option }: { option: CreateOption }) {
   )
 }
 
+function getFormsEnabled(): boolean {
+  try {
+    const stored = localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY)
+    if (stored) {
+      const flags = JSON.parse(stored) as Partial<FeatureFlags>
+      return flags.forms ?? DEFAULT_FEATURE_FLAGS.forms
+    }
+  } catch {
+    // ignore
+  }
+  return DEFAULT_FEATURE_FLAGS.forms
+}
+
 function CreatePage() {
+  const formsEnabled = getFormsEnabled()
+
+  const options = formsEnabled
+    ? CREATE_OPTIONS
+    : CREATE_OPTIONS.filter((o) => o.title !== 'Custom Form')
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       {/* Top bar */}
@@ -141,8 +165,8 @@ function CreatePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {CREATE_OPTIONS.map((option) => (
+          <div className={`grid grid-cols-1 gap-4 ${formsEnabled ? 'sm:grid-cols-3' : 'mx-auto max-w-2xl sm:grid-cols-2'}`}>
+            {options.map((option) => (
               <CreateCard key={option.title} option={option} />
             ))}
           </div>
