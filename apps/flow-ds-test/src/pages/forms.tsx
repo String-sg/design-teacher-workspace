@@ -1,14 +1,9 @@
 import { useState } from "react"
-import { Plus, Search, MoreHorizontal, FileText, Users, Calendar, ArrowUpDown } from "lucide-react"
+import { Plus, Search, MoreHorizontal, FileText, Users, TrendingUp, ArrowUpDown, ClipboardList } from "lucide-react"
 import {
   Button,
   Input,
   Badge,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   Table,
   TableBody,
   TableCell,
@@ -112,7 +107,7 @@ export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void 
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Forms</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               Create and manage forms for parents, students, and staff.
             </p>
           </div>
@@ -122,50 +117,41 @@ export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void 
           </Button>
         </div>
 
-        <Separator className="my-6" />
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Total Forms</CardDescription>
-              <CardTitle className="text-3xl">{stats.total}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                <FileText className="mr-1 inline size-3" />
-                Across all statuses
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Active Forms</CardDescription>
-              <CardTitle className="text-3xl">{stats.active}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                <Users className="mr-1 inline size-3" />
-                Currently collecting responses
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Total Responses</CardDescription>
-              <CardTitle className="text-3xl">{stats.totalResponses}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                <Calendar className="mr-1 inline size-3" />
-                All time
-              </p>
-            </CardContent>
-          </Card>
+        {/* Stats — using a lighter treatment, no heavy Cards */}
+        <div className="mt-8 grid grid-cols-3 gap-6">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="size-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-semibold tabular-nums">{stats.total}</p>
+              <p className="text-xs text-muted-foreground">Total forms</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
+              <TrendingUp className="size-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-semibold tabular-nums">{stats.active}</p>
+              <p className="text-xs text-muted-foreground">Active now</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
+              <Users className="size-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-semibold tabular-nums">{stats.totalResponses}</p>
+              <p className="text-xs text-muted-foreground">Total responses</p>
+            </div>
+          </div>
         </div>
 
+        <Separator className="my-6" />
+
         {/* Filters */}
-        <div className="mt-6 flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -189,7 +175,7 @@ export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void 
         </div>
 
         {/* Table */}
-        <Card className="mt-4">
+        <div className="mt-4 rounded-lg border border-border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -208,7 +194,10 @@ export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void 
             </TableHeader>
             <TableBody>
               {filtered.map((form) => (
-                <TableRow key={form.id}>
+                <TableRow
+                  key={form.id}
+                  className="cursor-pointer transition-colors hover:bg-muted/50"
+                >
                   <TableCell className="font-medium">{form.title}</TableCell>
                   <TableCell>
                     <Badge variant={statusVariant[form.status]} className="capitalize">
@@ -237,14 +226,22 @@ export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void 
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                    No forms found.
+                  <TableCell colSpan={6} className="h-32 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <ClipboardList className="size-8 text-muted-foreground/50" />
+                      <p className="text-sm font-medium text-muted-foreground">
+                        No forms found
+                      </p>
+                      <p className="text-xs text-muted-foreground/70">
+                        Try adjusting your search or filters.
+                      </p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
-        </Card>
+        </div>
       </div>
     </div>
   )
