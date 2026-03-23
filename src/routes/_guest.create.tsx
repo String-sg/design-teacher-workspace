@@ -165,7 +165,9 @@ function CreatePage() {
             </p>
           </div>
 
-          <div className={`grid grid-cols-1 gap-4 ${formsEnabled ? 'sm:grid-cols-3' : 'mx-auto max-w-2xl sm:grid-cols-2'}`}>
+          <div
+            className={`grid grid-cols-1 gap-4 ${formsEnabled ? 'sm:grid-cols-3' : 'mx-auto max-w-2xl sm:grid-cols-2'}`}
+          >
             {options.map((option) => (
               <CreateCard key={option.title} option={option} />
             ))}

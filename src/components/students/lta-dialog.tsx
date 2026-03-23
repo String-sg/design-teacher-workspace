@@ -20,12 +20,17 @@ interface GuidanceAction {
   resources: Array<{ label: string; href: string; external?: boolean }>
 }
 
-
 // ── Linear-style priority icons ──────────────────────────────
 
 function PriorityUrgentIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      aria-hidden="true"
+    >
       <rect width="16" height="16" rx="3" />
       <rect x="7" y="3" width="2" height="6" rx="1" fill="white" />
       <rect x="7" y="11" width="2" height="2" rx="1" fill="white" />
@@ -35,7 +40,13 @@ function PriorityUrgentIcon() {
 
 function PriorityMediumIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      aria-hidden="true"
+    >
       <rect x="1" y="9" width="3" height="5" rx="1" />
       <rect x="6.5" y="5" width="3" height="9" rx="1" />
       <rect x="12" y="1" width="3" height="13" rx="1" opacity="0.35" />
@@ -45,7 +56,13 @@ function PriorityMediumIcon() {
 
 function PriorityLowIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      aria-hidden="true"
+    >
       <rect x="1" y="9" width="3" height="5" rx="1" />
       <rect x="6.5" y="5" width="3" height="9" rx="1" opacity="0.35" />
       <rect x="12" y="1" width="3" height="13" rx="1" opacity="0.35" />
@@ -156,9 +173,25 @@ function GlowBotIcon({ size = 28 }: { size?: number }) {
           }}
         />
         {/* Stand base */}
-        <line x1="7" y1="14" x2="11" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+        <line
+          x1="7"
+          y1="14"
+          x2="11"
+          y2="14"
+          stroke="white"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
         {/* Stand neck */}
-        <line x1="9" y1="12" x2="9" y2="14" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+        <line
+          x1="9"
+          y1="12"
+          x2="9"
+          y2="14"
+          stroke="white"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
       </svg>
     </span>
   )
@@ -328,7 +361,6 @@ export function GlowStudentSupportPage({
           </div>
 
           <div className="overflow-y-auto p-5">
-
             {/* Student identity */}
             <div className="mt-4 flex items-center gap-3">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-xs font-bold text-white">
@@ -380,7 +412,6 @@ export function GlowStudentSupportPage({
                 Low mood in class
               </div>
             </div>
-
           </div>
         </aside>
 
@@ -421,67 +452,67 @@ export function GlowStudentSupportPage({
                         key={i}
                         className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-4 transition-colors hover:bg-[var(--muted)]"
                       >
-                          <div className="min-w-0 flex-1">
-                            {/* Urgency badge then title */}
-                            <div className="flex flex-col gap-1.5">
-                              <span
-                                className={cn(
-                                  'inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
-                                  action.urgency.badgeBg,
-                                  action.urgency.textColor,
-                                )}
-                              >
-                                {action.urgency.icon}
-                                {action.urgency.label}
-                              </span>
-                              <h4 className="text-sm font-semibold leading-snug">
-                                {action.title}
-                              </h4>
-                            </div>
+                        <div className="min-w-0 flex-1">
+                          {/* Urgency badge then title */}
+                          <div className="flex flex-col gap-1.5">
+                            <span
+                              className={cn(
+                                'inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+                                action.urgency.badgeBg,
+                                action.urgency.textColor,
+                              )}
+                            >
+                              {action.urgency.icon}
+                              {action.urgency.label}
+                            </span>
+                            <h4 className="text-sm font-semibold leading-snug">
+                              {action.title}
+                            </h4>
+                          </div>
 
-                            <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                              {action.description}
-                            </p>
+                          <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                            {action.description}
+                          </p>
 
-                            {/* Contact chips */}
-                            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-medium text-[var(--muted-foreground)]">
-                                  Contact
-                                </span>
-                                {action.contacts.map((c) => (
-                                  <button
-                                    key={c}
-                                    className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--foreground)] underline-offset-2 hover:underline"
-                                    onClick={(e) => e.preventDefault()}
-                                  >
-                                    <User className="h-3 w-3 shrink-0 text-[var(--muted-foreground)]" />
-                                    {c}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Resources */}
-                            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                          {/* Contact chips */}
+                          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                            <div className="flex items-center gap-1.5">
                               <span className="text-xs font-medium text-[var(--muted-foreground)]">
-                                Resources
+                                Contact
                               </span>
-                              {action.resources.map((r) => (
-                                <a
-                                  key={r.label}
-                                  href={r.href}
-                                  className="inline-flex items-center gap-0.5 text-xs text-[var(--foreground)] underline-offset-2 hover:underline"
+                              {action.contacts.map((c) => (
+                                <button
+                                  key={c}
+                                  className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--foreground)] underline-offset-2 hover:underline"
                                   onClick={(e) => e.preventDefault()}
                                 >
-                                  {r.label}
-                                  {r.external && (
-                                    <ExternalLink className="ml-0.5 inline h-3 w-3" />
-                                  )}
-                                </a>
+                                  <User className="h-3 w-3 shrink-0 text-[var(--muted-foreground)]" />
+                                  {c}
+                                </button>
                               ))}
                             </div>
                           </div>
+
+                          {/* Resources */}
+                          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                              Resources
+                            </span>
+                            {action.resources.map((r) => (
+                              <a
+                                key={r.label}
+                                href={r.href}
+                                className="inline-flex items-center gap-0.5 text-xs text-[var(--foreground)] underline-offset-2 hover:underline"
+                                onClick={(e) => e.preventDefault()}
+                              >
+                                {r.label}
+                                {r.external && (
+                                  <ExternalLink className="ml-0.5 inline h-3 w-3" />
+                                )}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     )
                   })}
@@ -564,7 +595,6 @@ export function GlowStudentSupportPage({
           <div className="flex-1 overflow-y-auto p-4">
             {activeTab === 'resources' ? (
               <>
-
                 <ul className="space-y-0.5">
                   {caseResources.map((r) => (
                     <li key={r.label}>

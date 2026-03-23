@@ -11,7 +11,7 @@ import {
   ThumbsUp,
   X,
 } from 'lucide-react'
-import type { PGQuestion, PGRecipient } from '@/types/pg-announcement'
+import type { PGQuestion, PGRecipient } from '@/types/forms2-announcement'
 import type { ResponseType } from '@/types/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'

@@ -14,6 +14,7 @@ import { Route as StudentAnalyticsRouteImport } from './routes/student-analytics
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as InsightBuddyRouteImport } from './routes/insight-buddy'
+import { Route as Forms2RouteImport } from './routes/forms2'
 import { Route as FormsRouteImport } from './routes/forms'
 import { Route as FlagsRouteImport } from './routes/flags'
 import { Route as DsRouteImport } from './routes/ds'
@@ -23,12 +24,15 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsIndexRouteImport } from './routes/students.index'
 import { Route as ReportsIndexRouteImport } from './routes/reports.index'
+import { Route as Forms2IndexRouteImport } from './routes/forms2.index'
 import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as DsIndexRouteImport } from './routes/ds.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
 import { Route as GlowStudentIdRouteImport } from './routes/glow.$studentId'
+import { Route as Forms2NewRouteImport } from './routes/forms2.new'
+import { Route as Forms2IdRouteImport } from './routes/forms2.$id'
 import { Route as FormsNewRouteImport } from './routes/forms.new'
 import { Route as FormsIdRouteImport } from './routes/forms.$id'
 import { Route as DsTwThemeRouteImport } from './routes/ds.tw-theme'
@@ -64,6 +68,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const InsightBuddyRoute = InsightBuddyRouteImport.update({
   id: '/insight-buddy',
   path: '/insight-buddy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Forms2Route = Forms2RouteImport.update({
+  id: '/forms2',
+  path: '/forms2',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FormsRoute = FormsRouteImport.update({
@@ -110,6 +119,11 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ReportsRoute,
 } as any)
+const Forms2IndexRoute = Forms2IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => Forms2Route,
+} as any)
 const FormsIndexRoute = FormsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -139,6 +153,16 @@ const GlowStudentIdRoute = GlowStudentIdRouteImport.update({
   id: '/glow/$studentId',
   path: '/glow/$studentId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const Forms2NewRoute = Forms2NewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => Forms2Route,
+} as any)
+const Forms2IdRoute = Forms2IdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => Forms2Route,
 } as any)
 const FormsNewRoute = FormsNewRouteImport.update({
   id: '/new',
@@ -203,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/ds': typeof DsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
+  '/forms2': typeof Forms2RouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
   '/reports': typeof ReportsRouteWithChildren
   '/settings': typeof SettingsRoute
@@ -218,12 +243,15 @@ export interface FileRoutesByFullPath {
   '/ds/tw-theme': typeof DsTwThemeRoute
   '/forms/$id': typeof FormsIdRoute
   '/forms/new': typeof FormsNewRoute
+  '/forms2/$id': typeof Forms2IdRoute
+  '/forms2/new': typeof Forms2NewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/ds/': typeof DsIndexRoute
   '/forms/': typeof FormsIndexRoute
+  '/forms2/': typeof Forms2IndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
@@ -245,12 +273,15 @@ export interface FileRoutesByTo {
   '/ds/tw-theme': typeof DsTwThemeRoute
   '/forms/$id': typeof FormsIdRoute
   '/forms/new': typeof FormsNewRoute
+  '/forms2/$id': typeof Forms2IdRoute
+  '/forms2/new': typeof Forms2NewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
   '/ds': typeof DsIndexRoute
   '/forms': typeof FormsIndexRoute
+  '/forms2': typeof Forms2IndexRoute
   '/reports': typeof ReportsIndexRoute
   '/students': typeof StudentsIndexRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
@@ -264,6 +295,7 @@ export interface FileRoutesById {
   '/ds': typeof DsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
+  '/forms2': typeof Forms2RouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
   '/reports': typeof ReportsRouteWithChildren
   '/settings': typeof SettingsRoute
@@ -279,12 +311,15 @@ export interface FileRoutesById {
   '/ds/tw-theme': typeof DsTwThemeRoute
   '/forms/$id': typeof FormsIdRoute
   '/forms/new': typeof FormsNewRoute
+  '/forms2/$id': typeof Forms2IdRoute
+  '/forms2/new': typeof Forms2NewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/ds/': typeof DsIndexRoute
   '/forms/': typeof FormsIndexRoute
+  '/forms2/': typeof Forms2IndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
   '/_guest/report-view/$token': typeof GuestReportViewTokenRoute
@@ -298,6 +333,7 @@ export interface FileRouteTypes {
     | '/ds'
     | '/flags'
     | '/forms'
+    | '/forms2'
     | '/insight-buddy'
     | '/reports'
     | '/settings'
@@ -313,12 +349,15 @@ export interface FileRouteTypes {
     | '/ds/tw-theme'
     | '/forms/$id'
     | '/forms/new'
+    | '/forms2/$id'
+    | '/forms2/new'
     | '/glow/$studentId'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
     | '/ds/'
     | '/forms/'
+    | '/forms2/'
     | '/reports/'
     | '/students/'
     | '/report-view/$token'
@@ -340,12 +379,15 @@ export interface FileRouteTypes {
     | '/ds/tw-theme'
     | '/forms/$id'
     | '/forms/new'
+    | '/forms2/$id'
+    | '/forms2/new'
     | '/glow/$studentId'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements'
     | '/ds'
     | '/forms'
+    | '/forms2'
     | '/reports'
     | '/students'
     | '/report-view/$token'
@@ -358,6 +400,7 @@ export interface FileRouteTypes {
     | '/ds'
     | '/flags'
     | '/forms'
+    | '/forms2'
     | '/insight-buddy'
     | '/reports'
     | '/settings'
@@ -373,12 +416,15 @@ export interface FileRouteTypes {
     | '/ds/tw-theme'
     | '/forms/$id'
     | '/forms/new'
+    | '/forms2/$id'
+    | '/forms2/new'
     | '/glow/$studentId'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
     | '/ds/'
     | '/forms/'
+    | '/forms2/'
     | '/reports/'
     | '/students/'
     | '/_guest/report-view/$token'
@@ -392,6 +438,7 @@ export interface RootRouteChildren {
   DsRoute: typeof DsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
   FormsRoute: typeof FormsRouteWithChildren
+  Forms2Route: typeof Forms2RouteWithChildren
   InsightBuddyRoute: typeof InsightBuddyRoute
   ReportsRoute: typeof ReportsRouteWithChildren
   SettingsRoute: typeof SettingsRoute
@@ -435,6 +482,13 @@ declare module '@tanstack/react-router' {
       path: '/insight-buddy'
       fullPath: '/insight-buddy'
       preLoaderRoute: typeof InsightBuddyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forms2': {
+      id: '/forms2'
+      path: '/forms2'
+      fullPath: '/forms2'
+      preLoaderRoute: typeof Forms2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forms': {
@@ -500,6 +554,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/forms2/': {
+      id: '/forms2/'
+      path: '/'
+      fullPath: '/forms2/'
+      preLoaderRoute: typeof Forms2IndexRouteImport
+      parentRoute: typeof Forms2Route
+    }
     '/forms/': {
       id: '/forms/'
       path: '/'
@@ -541,6 +602,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/glow/$studentId'
       preLoaderRoute: typeof GlowStudentIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/forms2/new': {
+      id: '/forms2/new'
+      path: '/new'
+      fullPath: '/forms2/new'
+      preLoaderRoute: typeof Forms2NewRouteImport
+      parentRoute: typeof Forms2Route
+    }
+    '/forms2/$id': {
+      id: '/forms2/$id'
+      path: '/$id'
+      fullPath: '/forms2/$id'
+      preLoaderRoute: typeof Forms2IdRouteImport
+      parentRoute: typeof Forms2Route
     }
     '/forms/new': {
       id: '/forms/new'
@@ -684,6 +759,21 @@ const FormsRouteChildren: FormsRouteChildren = {
 
 const FormsRouteWithChildren = FormsRoute._addFileChildren(FormsRouteChildren)
 
+interface Forms2RouteChildren {
+  Forms2IdRoute: typeof Forms2IdRoute
+  Forms2NewRoute: typeof Forms2NewRoute
+  Forms2IndexRoute: typeof Forms2IndexRoute
+}
+
+const Forms2RouteChildren: Forms2RouteChildren = {
+  Forms2IdRoute: Forms2IdRoute,
+  Forms2NewRoute: Forms2NewRoute,
+  Forms2IndexRoute: Forms2IndexRoute,
+}
+
+const Forms2RouteWithChildren =
+  Forms2Route._addFileChildren(Forms2RouteChildren)
+
 interface ReportsRouteChildren {
   ReportsIdRoute: typeof ReportsIdRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
@@ -719,6 +809,7 @@ const rootRouteChildren: RootRouteChildren = {
   DsRoute: DsRouteWithChildren,
   FlagsRoute: FlagsRoute,
   FormsRoute: FormsRouteWithChildren,
+  Forms2Route: Forms2RouteWithChildren,
   InsightBuddyRoute: InsightBuddyRoute,
   ReportsRoute: ReportsRouteWithChildren,
   SettingsRoute: SettingsRoute,

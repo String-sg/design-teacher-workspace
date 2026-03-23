@@ -34,7 +34,6 @@ export interface SubjectScore {
   percentage: number
 }
 
-
 export interface Student {
   id: string
   name: string

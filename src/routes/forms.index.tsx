@@ -64,7 +64,8 @@ function FormsPage() {
     return mockForms
       .filter((form) => {
         // When forms flag is off, only show announcement-response forms
-        if (!formsEnabled && (form.source ?? 'custom') === 'custom') return false
+        if (!formsEnabled && (form.source ?? 'custom') === 'custom')
+          return false
 
         // Source quick filter
         if (sourceFilter !== 'all') {
