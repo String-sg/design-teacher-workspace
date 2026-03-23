@@ -1,11 +1,11 @@
 ---
-name: apply-flow-ds
+name: ds-tw-theme
 description: >
   Install and configure the Flow Design System in a consumer app.
   Sets up @flow/core components, @flow/design-tokens, the 3-layer CSS token bridge
   (Radix -> Flow DS -> Shadcn/TW), dark mode, and the .flow-theme escape hatch.
   Works with Next.js, Vite, TanStack Start, or any Tailwind CSS v4 project.
-  Use: /apply-flow-ds [full|tokens-only]
+  Use: /ds-tw-theme [full|tokens-only]
 argument-hint: "[full|tokens-only]"
 ---
 
@@ -15,8 +15,21 @@ This skill installs and configures the Flow Design System in any Tailwind CSS pr
 
 ## Mode
 
-Parse `$ARGUMENTS`:
-- **`full`** (default if no argument): Install `@flow/core` (components) + `@flow/design-tokens` + `@radix-ui/colors` + fonts
+If `$ARGUMENTS` is provided (`full` or `tokens-only`), use that mode directly.
+
+If no argument is provided, **ask the user before proceeding**:
+
+> **Which mode would you like?**
+>
+> 1. **Full** — Installs `@flow/core` components + `@flow/design-tokens` + `@radix-ui/colors` + fonts. Gives you the full Flow DS component library alongside your existing Shadcn components.
+> 2. **Tokens only** — Installs `@flow/design-tokens` + `@radix-ui/colors` only. Sets up the 3-layer token bridge (design tokens, dark mode, brand colors) without adding the component library.
+>
+> Which one? (1 or 2)
+
+Wait for the user's response before continuing.
+
+Modes:
+- **`full`**: Install `@flow/core` (components) + `@flow/design-tokens` + `@radix-ui/colors` + fonts
 - **`tokens-only`**: Install `@flow/design-tokens` + `@radix-ui/colors` only (no component library)
 
 ---
