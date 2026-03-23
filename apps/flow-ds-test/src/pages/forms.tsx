@@ -1,31 +1,27 @@
 import { useState } from "react"
 import { Plus, Search, MoreHorizontal, FileText, Users, Calendar, ArrowUpDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import {
+  Button,
+  Input,
+  Badge,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
+  Separator,
+} from "@flow/core"
 
 interface Form {
   id: string
@@ -233,7 +229,7 @@ export default function FormsPage() {
                     })}
                   </TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon-xs">
+                    <Button variant="ghost" size="icon">
                       <MoreHorizontal />
                     </Button>
                   </TableCell>
