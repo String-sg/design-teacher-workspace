@@ -45,22 +45,65 @@ Before creating the page, scan the project for existing pages to match conventio
 
 ---
 
-## Step 2: Design the Page
+## Step 2: Design Thinking
 
-Think through the page structure before coding:
+Before writing any code, think through the design intentionally. Each page should feel *designed*, not assembled from a template.
 
-1. **What data does this page show?** Define TypeScript interfaces and mock data.
-2. **What actions can users take?** (create, filter, sort, edit, delete)
-3. **What's the layout?** Header with title + action button, optional stats cards, filter bar, main content area (table, grid, or list).
-4. **What states exist?** Empty state, loading, populated, filtered-no-results.
+### 2a. Purpose & Structure
 
-### Design Principles
+- **What problem does this page solve?** Who uses it, and when?
+- **What data does it show?** Define TypeScript interfaces and mock data.
+- **What actions can users take?** (create, filter, sort, edit, delete)
+- **What's the information hierarchy?** What's the most important thing on the page? Design around that.
+- **What states exist?** Empty state, loading, populated, filtered-no-results.
+
+### 2b. Layout & Spatial Composition
+
+Don't default to the same layout every time. Consider what fits the content:
+
+- **List/table pages** (browsing many items): header + filter bar + data table
+- **Builder/editor pages** (creating/editing one item): sidebar + main content area, or stepped flow
+- **Dashboard pages** (overview): stats cards + charts + activity feed
+- **Detail pages** (viewing one item): hero section + tabbed content
+
+Use **intentional spatial composition**:
+- Generous negative space where content needs breathing room
+- Tighter spacing in dense data areas (tables, forms)
+- Consider 2-column and 3-column layouts, not just single-column
+- Break visual monotony — not every section needs to be a Card
+
+### 2c. Typography & Visual Hierarchy
+
+Use typography to create clear hierarchy, not just size differences:
+- **Page titles**: `text-2xl font-semibold tracking-tight` — confident, not shouty
+- **Section titles**: `text-base font-medium` or `text-lg font-semibold`
+- **Body text**: `text-sm` is the default; `text-xs` for metadata and captions
+- **Contrast**: Pair `text-foreground` (high emphasis) with `text-muted-foreground` (low emphasis) deliberately
+- **Weight**: Use `font-medium` and `font-semibold` to create emphasis; avoid overusing bold
+
+### 2d. Motion & Micro-interactions
+
+Add subtle interactions where they add clarity, not decoration:
+- Hover states on interactive rows and cards
+- Focus rings on form inputs (Flow DS handles this via tokens)
+- Transition on state changes (e.g., a field appearing when a type is selected)
+- Use CSS transitions (`transition-colors`, `transition-opacity`) — keep them fast (150-200ms)
+- Don't animate everything; one or two well-placed transitions per page is enough
+
+### 2e. Empty States & Edge Cases
+
+Design for the empty case first — it's often the first thing users see:
+- Use a centered message with an icon and a call-to-action
+- Make the empty state guide the user toward the primary action
+- Consider filtered-no-results as a separate state from truly-empty
+
+### Design Constraints
 
 - **Use `@flow/core` components** — import everything from `@flow/core`, NOT from `@/components/ui/*`
 - **Use Tailwind CSS utilities** for layout (flex, grid, spacing, typography)
 - **Use Flow DS token colors** via Tailwind classes: `bg-background`, `text-foreground`, `text-muted-foreground`, `bg-card`, `border-border`, `bg-primary`, `text-primary-foreground`
 - **Use `lucide-react` for icons**
-- **Typography**: Use the Inter font (already configured via Flow DS tokens). Use Tailwind's `text-sm`, `text-xs`, `text-2xl`, `font-semibold`, `tracking-tight` etc.
+- **Typography**: Inter font (configured via Flow DS tokens)
 - **Spacing**: Be generous but consistent — `px-6 py-8` for page padding, `gap-4` for card grids, `my-6` for section separators
 
 ### What NOT to do
@@ -69,7 +112,8 @@ Think through the page structure before coding:
 - Do NOT use custom colors or hex values — use Tailwind token classes
 - Do NOT create new reusable components — compose `@flow/core` primitives directly
 - Do NOT add external dependencies without asking
-- Do NOT use generic AI aesthetics (gratuitous gradients, purple-on-white, excessive shadows)
+- Do NOT use generic AI aesthetics (gratuitous gradients, purple-on-white, excessive shadows, generic stock-photo layouts)
+- Do NOT converge on the same layout for every page — let the content drive the structure
 
 ---
 

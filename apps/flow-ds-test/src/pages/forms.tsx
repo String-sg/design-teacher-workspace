@@ -89,7 +89,7 @@ const statusVariant: Record<Form["status"], "default" | "secondary" | "outline">
   closed: "outline",
 }
 
-export default function FormsPage() {
+export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void }) {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
 
@@ -116,7 +116,7 @@ export default function FormsPage() {
               Create and manage forms for parents, students, and staff.
             </p>
           </div>
-          <Button>
+          <Button onClick={onCreateForm}>
             <Plus />
             New Form
           </Button>
