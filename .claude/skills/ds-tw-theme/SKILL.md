@@ -17,14 +17,12 @@ This skill installs and configures the Flow Design System in any Tailwind CSS pr
 
 If `$ARGUMENTS` is provided (`full` or `tokens-only`), use that mode directly.
 
-If no argument is provided, **ask the user before proceeding**:
+If no argument is provided, use the `AskUserQuestion` tool to ask:
 
-> **Which mode would you like?**
->
-> 1. **Full** — Installs `@flow/core` components + `@flow/design-tokens` + `@radix-ui/colors` + fonts. Gives you the full Flow DS component library alongside your existing Shadcn components.
-> 2. **Tokens only** — Installs `@flow/design-tokens` + `@radix-ui/colors` only. Sets up the 3-layer token bridge (design tokens, dark mode, brand colors) without adding the component library.
->
-> Which one? (1 or 2)
+Question: "Which mode would you like?"
+Options:
+- "Full — @flow/core components + @flow/design-tokens + @radix-ui/colors + fonts"
+- "Tokens only — @flow/design-tokens + @radix-ui/colors (no component library)"
 
 Wait for the user's response before continuing.
 
