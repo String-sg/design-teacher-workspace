@@ -2,6 +2,7 @@
   "name": "moe-teacher-workspace-v0",
   "private": true,
   "type": "module",
+  "workspaces": ["apps/*"],
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
