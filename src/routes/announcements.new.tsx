@@ -67,6 +67,40 @@ export const Route = createFileRoute('/announcements/new')({
 type SendOption = 'now' | 'scheduled'
 
 // ---------------------------------------------------------------------------
+// Response type mockups
+// ---------------------------------------------------------------------------
+
+function AcknowledgeMockup() {
+  return (
+    <div className="flex flex-col gap-1.5 p-2">
+      <div className="h-1.5 w-3/4 rounded bg-slate-200" />
+      <div className="h-1 w-full rounded bg-slate-100" />
+      <div className="h-1 w-5/6 rounded bg-slate-100" />
+      <div className="mt-1.5 h-6 rounded bg-primary/80 flex items-center justify-center">
+        <div className="h-1.5 w-14 rounded bg-white/70" />
+      </div>
+    </div>
+  )
+}
+
+function YesNoMockup() {
+  return (
+    <div className="flex flex-col gap-1.5 p-2">
+      <div className="h-1.5 w-3/4 rounded bg-slate-200" />
+      <div className="h-1 w-full rounded bg-slate-100" />
+      <div className="mt-1.5 flex gap-1.5">
+        <div className="flex h-6 flex-1 items-center justify-center rounded bg-green-100 text-[8px] font-semibold text-green-700">
+          Yes
+        </div>
+        <div className="flex h-6 flex-1 items-center justify-center rounded bg-red-100 text-[8px] font-semibold text-red-700">
+          No
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -588,17 +622,22 @@ function NewAnnouncementPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const photoInputRef = useRef<HTMLInputElement>(null)
 
-  // Response type (read-only — selector removed; derived from URL param)
-  const responseType: ResponseType =
+  // Response type
+  const [responseType, setResponseType] = useState<ResponseType>(
     initialResponseType === 'acknowledge'
       ? 'acknowledge'
       : initialResponseType === 'yes-no'
         ? 'yes-no'
-        : 'view-only'
+        : 'view-only',
+  )
   const [dueDate, setDueDate] = useState('')
   const [reminderType, setReminderType] = useState<ReminderType>('none')
   const [reminderDate, setReminderDate] = useState('')
   const [questions, setQuestions] = useState<FormQuestion[]>([])
+  function handleResponseTypeChange(type: ResponseType) {
+    setResponseType(type)
+    setQuestions([])
+  }
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(
     null,
   )
@@ -1311,6 +1350,59 @@ function NewAnnouncementPage() {
               </div>
             </section>
 
+            {/* RESPONSE TYPE — only shown for "w/ response" flow */}
+            {initialResponseType !== undefined && (
+              <section className="rounded-xl border bg-white p-6">
+                <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Response
+                </h2>
+                <p className="mb-4 text-xs text-muted-foreground">
+                  Choose how parents respond to this announcement.
+                </p>
+                <div className="flex gap-3">
+                  {(
+                    [
+                      {
+                        value: 'acknowledge' as ResponseType,
+                        label: 'Acknowledge',
+                        hint: 'Parents tap a button to acknowledge.',
+                        mockup: <AcknowledgeMockup />,
+                      },
+                      {
+                        value: 'yes-no' as ResponseType,
+                        label: 'Yes or No',
+                        hint: 'Parents tap Yes or No. Supports follow-up questions.',
+                        mockup: <YesNoMockup />,
+                      },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => handleResponseTypeChange(opt.value)}
+                      className={cn(
+                        'flex flex-1 flex-col gap-2 rounded-lg border-2 p-3 text-left transition-all',
+                        responseType === opt.value
+                          ? 'border-primary bg-twblue-2'
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
+                      )}
+                    >
+                      <div className="w-full rounded border border-slate-200 bg-white">
+                        {opt.mockup}
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-foreground">
+                          {opt.label}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                          {opt.hint}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* CUSTOM QUESTIONS — yes/no only */}
             {responseType === 'yes-no' && (

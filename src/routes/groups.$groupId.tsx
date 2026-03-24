@@ -122,7 +122,9 @@ function SharingSheet({
     if (!addSearch) return []
     const q = addSearch.toLowerCase().trim()
     // Match "sec 3" / "level 3" / "3" to formClass like "3A"
-    const levelMatch = q.match(/(?:sec\s*|level\s*)?^(\d)$|(?:sec\s*|level\s*)(\d)/i)
+    const levelMatch = q.match(
+      /(?:sec\s*|level\s*)?^(\d)$|(?:sec\s*|level\s*)(\d)/i,
+    )
     const levelDigit = levelMatch?.[1] ?? levelMatch?.[2]
     return MOCK_STAFF.filter((s) => {
       if (sharedWith.some((sw) => sw.staffId === s.id)) return false
@@ -230,46 +232,48 @@ function SharingSheet({
                     .filter(Boolean)
                     .join(' · ')
                   return (
-                  <div
-                    key={sw.staffId}
-                    className="flex items-center gap-3 rounded-lg border px-3 py-2"
-                  >
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                      {sw.name
-                        .split(' ')
-                        .slice(-2)
-                        .map((n) => n[0])
-                        .join('')}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{sw.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {sublabel}
-                      </p>
-                    </div>
-                    <Select
-                      value={sw.role}
-                      onValueChange={(val) =>
-                        updateRole(sw.staffId, val as 'viewer' | 'editor')
-                      }
+                    <div
+                      key={sw.staffId}
+                      className="flex items-center gap-3 rounded-lg border px-3 py-2"
                     >
-                      <SelectTrigger className="w-24 h-7 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="viewer">Viewer</SelectItem>
-                        <SelectItem value="editor">Editor</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-7 text-muted-foreground hover:text-destructive"
-                      onClick={() => removeStaff(sw.staffId)}
-                    >
-                      <X className="size-3.5" />
-                    </Button>
-                  </div>
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                        {sw.name
+                          .split(' ')
+                          .slice(-2)
+                          .map((n) => n[0])
+                          .join('')}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {sw.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {sublabel}
+                        </p>
+                      </div>
+                      <Select
+                        value={sw.role}
+                        onValueChange={(val) =>
+                          updateRole(sw.staffId, val as 'viewer' | 'editor')
+                        }
+                      >
+                        <SelectTrigger className="w-24 h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="viewer">Viewer</SelectItem>
+                          <SelectItem value="editor">Editor</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-7 text-muted-foreground hover:text-destructive"
+                        onClick={() => removeStaff(sw.staffId)}
+                      >
+                        <X className="size-3.5" />
+                      </Button>
+                    </div>
                   )
                 })}
               </div>
