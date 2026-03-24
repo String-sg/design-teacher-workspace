@@ -28,6 +28,7 @@ export function WelcomeModal() {
   function handleDismiss() {
     sessionStorage.setItem(SESSION_KEY, '1')
     setOpen(false)
+    window.dispatchEvent(new CustomEvent('welcome-dismissed'))
   }
 
   return (

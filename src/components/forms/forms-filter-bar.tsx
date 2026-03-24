@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { SlidersHorizontal } from 'lucide-react'
+import { Filter, RotateCcw } from 'lucide-react'
 import type { FormOwnership, FormStatus } from '@/types/form'
 import { Button } from '@/components/ui/button'
 import {
@@ -66,7 +66,7 @@ export function FormsFilterBar({ filters, onChange }: FormsFilterBarProps) {
     onChange({ ...filters, ownerships: next })
   }
 
-  function clearAll() {
+  function handleReset() {
     onChange(EMPTY_FORMS_FILTERS)
   }
 
@@ -74,118 +74,111 @@ export function FormsFilterBar({ filters, onChange }: FormsFilterBarProps) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         render={
-          <Button variant="outline" size="sm" className="gap-2">
-            <SlidersHorizontal className="h-4 w-4" />
-            Filter
-            {activeCount > 0 && (
-              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
-                {activeCount}
-              </span>
-            )}
-          </Button>
+          <Button
+            variant="outline"
+            className="h-9 gap-2 aria-expanded:bg-white"
+          />
         }
-      />
-      <PopoverContent align="start" className="w-72 gap-5">
-        {/* Status */}
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Status
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {STATUS_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => toggleStatus(opt.value)}
-                className={cn(
-                  'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
-                  filters.statuses.includes(opt.value)
-                    ? 'border-primary bg-twblue-2 text-twblue-9'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-primary hover:text-primary',
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+      >
+        <Filter className="h-4 w-4" />
+        Filter
+        {activeCount > 0 && (
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+            {activeCount}
+          </span>
+        )}
+      </PopoverTrigger>
+
+      <PopoverContent className="w-[460px] gap-0 p-0" align="start">
+        {/* Header */}
+        <div className="px-5 pb-3 pt-4">
+          <h3 className="text-sm font-semibold">Show records</h3>
         </div>
 
-        {/* Ownership */}
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Ownership
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {OWNERSHIP_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => toggleOwnership(opt.value)}
-                className={cn(
-                  'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
-                  filters.ownerships.includes(opt.value)
-                    ? 'border-primary bg-twblue-2 text-twblue-9'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-primary hover:text-primary',
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
+        {/* Filter rows */}
+        <div className="space-y-3 px-5 pb-4">
+          {/* Status */}
+          <div className="flex items-center gap-3">
+            <span className="w-24 shrink-0 text-sm font-medium">Status</span>
+            <div className="flex flex-1 flex-wrap gap-1.5">
+              {STATUS_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => toggleStatus(opt.value)}
+                  className={cn(
+                    'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
+                    filters.statuses.includes(opt.value)
+                      ? 'border-primary bg-twblue-2 text-twblue-9'
+                      : 'border-border bg-card text-foreground hover:border-primary hover:text-primary',
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Date range */}
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Date (created)
-          </p>
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <label className="w-10 shrink-0 text-xs text-muted-foreground">
-                From
-              </label>
+          {/* Ownership */}
+          <div className="flex items-center gap-3">
+            <span className="w-24 shrink-0 text-sm font-medium">
+              Ownership
+            </span>
+            <div className="flex flex-1 flex-wrap gap-1.5">
+              {OWNERSHIP_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => toggleOwnership(opt.value)}
+                  className={cn(
+                    'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
+                    filters.ownerships.includes(opt.value)
+                      ? 'border-primary bg-twblue-2 text-twblue-9'
+                      : 'border-border bg-card text-foreground hover:border-primary hover:text-primary',
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Date range */}
+          <div className="flex items-center gap-3">
+            <span className="w-24 shrink-0 text-sm font-medium">Date</span>
+            <div className="flex flex-1 items-center gap-1.5">
               <input
                 type="date"
                 value={filters.dateFrom}
                 onChange={(e) =>
                   onChange({ ...filters, dateFrom: e.target.value })
                 }
-                className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground outline-none focus:ring-1 focus:ring-ring"
+                className="h-9 flex-1 rounded-[14px] border border-input bg-background px-3 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring"
               />
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="w-10 shrink-0 text-xs text-muted-foreground">
-                To
-              </label>
+              <span className="shrink-0 text-sm text-muted-foreground">–</span>
               <input
                 type="date"
                 value={filters.dateTo}
                 onChange={(e) =>
                   onChange({ ...filters, dateTo: e.target.value })
                 }
-                className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground outline-none focus:ring-1 focus:ring-ring"
+                className="h-9 flex-1 rounded-[14px] border border-input bg-background px-3 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between border-t pt-1">
+        <div className="flex items-center justify-end px-5 py-3">
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 text-xs text-muted-foreground"
-            onClick={clearAll}
+            onClick={handleReset}
             disabled={activeCount === 0}
+            className="gap-2 text-sm font-medium"
           >
-            Clear all
-          </Button>
-          <Button
-            size="sm"
-            className="h-8 text-xs"
-            onClick={() => setOpen(false)}
-          >
-            Done
+            <RotateCcw className="h-4 w-4" />
+            Reset
           </Button>
         </div>
       </PopoverContent>
