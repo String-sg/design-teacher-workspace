@@ -108,9 +108,18 @@ bun add -d shadcn
 
 ---
 
-## Step 4: Set Up CSS Token Layer
+## Step 4: Set Up CSS Token Layer (Two-File Architecture)
 
-Read the CSS template from `${CLAUDE_SKILL_DIR}/css/flow-tokens-template.css`.
+The token layer uses **two files**:
+
+| File | Purpose | Portable? |
+|------|---------|-----------|
+| `flow-ds-theme.css` | Flow DS override layer — maps Flow semantic tokens to your app's Radix/Shadcn palette | **Yes** — copy as-is to any project |
+| Main CSS entry (e.g., `styles.css`) | App-specific — brand scales, Shadcn tokens, Tier 1 primitives, dark mode, `@theme`, `@layer base` | **No** — per-project |
+
+Read both templates:
+- `${CLAUDE_SKILL_DIR}/css/flow-ds-theme-template.css` (portable override layer)
+- `${CLAUDE_SKILL_DIR}/css/styles-template.css` (app scaffold)
 
 ### Brand color selection
 
@@ -123,27 +132,29 @@ Options:
 - "Radix violet — Built-in Radix violet scale"
 - "Radix crimson — Built-in Radix crimson scale"
 
-Then adapt the template based on the answer:
-- **TWBlue** (default): Use the template as-is — no changes needed.
-- **Flow DS default**: Remove the custom TWBlue scale (`:root` hex values in Section 2 and `.dark` block), and remove the brand override mappings (Section 5). Flow DS will use its built-in indigo.
-- **Radix scale**: Replace `var(--twblue-N)` references with `var(--<scale>-N)` throughout. Remove the TWBlue hex declarations. Add the chosen scale's CSS imports if not already present.
+Then adapt **both templates** based on the answer:
+- **TWBlue** (default): Use both templates as-is — no changes needed.
+- **Flow DS default**: In `styles-template.css`, remove the custom TWBlue scale hex values and dark values. In `flow-ds-theme-template.css`, remove the brand override mappings in Section A (Flow DS will use its built-in indigo). Keep all other sections.
+- **Radix scale**: In both templates, replace `var(--twblue-N)` references with `var(--<scale>-N)`. In `styles-template.css`, remove TWBlue hex declarations and add the chosen scale's Radix CSS imports + dark imports.
 
 ### Other adaptations
 
-1. **Fonts**: The template defaults to Inter. If the user wants a different font, replace `@import '@fontsource/inter'` and update `--font-sans` in the `@theme inline` block.
+1. **Fonts**: The template defaults to Inter. If the user wants a different font, replace `@import '@fontsource/inter'` and update `--font-sans` in the `@theme inline` block in `styles-template.css`.
 
-2. **Shadcn tokens**: If Shadcn is NOT present, remove the Shadcn semantic token blocks (lines with `--background`, `--foreground`, `--primary`, etc.) and the `shadcn/tailwind.css` import.
+2. **Shadcn tokens**: If Shadcn is NOT present, remove the Shadcn semantic token blocks in `styles-template.css` (lines with `--background`, `--foreground`, `--primary`, etc.) and the `shadcn/tailwind.css` import. In `flow-ds-theme-template.css`, remove Section B semantic surface overrides that reference Shadcn tokens.
 
-3. **TW v3 projects**: Remove the `@theme inline` block. Instead, instruct the user to add tokens to `tailwind.config.js` under `theme.extend.colors`.
+3. **TW v3 projects**: In `styles-template.css`, remove the `@theme inline` block. Instead, instruct the user to add tokens to `tailwind.config.js` under `theme.extend.colors`.
 
 4. **Flow core CSS import**:
    - If the project already has a CSS reset (e.g., Tailwind's preflight), use `@flow/core/tailwind.no-reset.css`
    - Otherwise use `@flow/core/tailwind.css`
    - In tokens-only mode, omit this import entirely
 
-### Inject into CSS entry point
+### Write both files
 
-**Replace** the existing CSS entry file content with the adapted template. The template already includes `@import "tailwindcss"`, the `@custom-variant dark`, `@theme inline`, and `@layer base` blocks — so the old content is fully superseded.
+1. **Write `flow-ds-theme.css`** next to the main CSS entry file (e.g., `src/flow-ds-theme.css`). Use the adapted `flow-ds-theme-template.css`.
+
+2. **Replace the main CSS entry file** with the adapted `styles-template.css`. It already includes `@import './flow-ds-theme.css'`, `@import "tailwindcss"`, `@custom-variant dark`, `@theme inline`, and `@layer base` — so the old content is fully superseded.
 
 If the existing CSS has custom styles beyond Shadcn/Tailwind boilerplate, preserve those by appending them after the template content.
 
@@ -260,7 +271,7 @@ Missing `@flow/core/tailwind.no-reset.css` (or `tailwind.css`) import. Check tha
 CSS custom properties resolve at computed-value time. The `.flow-theme` class re-declares ALL derived tokens (button fills, borders, foregrounds) because overriding `--color-brand-*` alone won't cascade to children that inherited the already-resolved value from `:root`. Make sure `.flow-theme` includes the full transitive token block.
 
 ### Dark mode colors look wrong
-Ensure the `.dark` block re-maps ALL Radix scales to their dark variants (`--slate-1: var(--slate-dark-1)`, etc.) AND re-declares the Flow DS semantic mappings. Both layers must be present.
+Ensure the `.dark` block in `styles.css` re-maps ALL Radix scales to their dark variants (`--slate-1: var(--slate-dark-1)`, etc.) and includes dark hex values for custom brand scales (e.g., TWBlue). The Flow DS semantic mappings in `flow-ds-theme.css` do NOT need re-declaration in `.dark` — they auto-resolve because `.dark` is on `<html>` (same element as `:root`). Only tokens whose **formula** changes need dark overrides (e.g., `--card: white` → `var(--slate-2)`).
 
 ### Monorepo: packages not found after install
 In workspaces, `node_modules/@flow/core` may be hoisted to the workspace root. This is fine — bundlers resolve it correctly. If not, try installing from the workspace root instead.

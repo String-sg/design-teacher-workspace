@@ -243,16 +243,22 @@ function ShowcaseRow({
 
 // --- Component Sections ---
 
-function ButtonSection() {
+function ButtonSection({ theme = 'tw' }: { theme?: string }) {
   return (
     <Section id="button" title="Button">
       <div className="space-y-6">
         <ShowcaseRow label="Variants">
           <Button variant="default">Default</Button>
-          <Button variant="accent">Accent</Button>
+          {theme === 'flow' ? (
+            <Button variant="accent">Accent</Button>
+          ) : (
+            <Button variant="neutral">Secondary</Button>
+          )}
           <Button variant="critical">Critical</Button>
           <Button variant="outline">Outline</Button>
-          <Button variant="neutral">Neutral</Button>
+          {theme === 'flow' && (
+            <Button variant="neutral">Neutral</Button>
+          )}
           <Button variant="ghost">Ghost</Button>
           <Button variant="link">Link</Button>
         </ShowcaseRow>
@@ -1025,7 +1031,7 @@ function FlowComponentsPage() {
           <div className={cn(theme === 'flow' && 'flow-theme')}>
             {/* Buttons & Toggles */}
             <div className="space-y-16">
-              <ButtonSection />
+              <ButtonSection theme={theme} />
               <ToggleSection />
               <ToggleGroupSection />
 
