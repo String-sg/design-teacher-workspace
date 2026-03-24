@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import {
   AlertTriangle,
   Copy,
@@ -61,13 +61,6 @@ function isLowReadRate(
   return hoursElapsed >= 48 && readCount / total < 0.5
 }
 
-function getUniqueClasses(recipients: Array<{ classLabel: string }>): string {
-  const classes = [...new Set(recipients.map((r) => r.classLabel))].sort()
-  if (classes.length === 0) return '—'
-  if (classes.length <= 3) return classes.join(', ')
-  return `${classes.slice(0, 3).join(', ')} +${classes.length - 3}`
-}
-
 function getRelevantDate(
   status: PGStatus,
   postedAt?: string,
@@ -85,9 +78,7 @@ function ParentsGatewayPage() {
     EMPTY_ANNOUNCEMENT_FILTERS,
   )
 
-  useSetBreadcrumbs([
-    { label: 'Announcements & Forms', href: '/announcements' },
-  ])
+  useSetBreadcrumbs([{ label: 'Posts', href: '/announcements' }])
   const navigate = useNavigate()
 
   const filtered = useMemo(() => {
@@ -149,21 +140,39 @@ function ParentsGatewayPage() {
 
   return (
     <div className="flex flex-col">
-      {/* Search & Filter */}
+      {/* Tab buttons, Search & Filter */}
       <div className="mt-4 space-y-4">
-        <div className="flex items-center gap-3 px-6">
-          <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search announcements"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 md:w-[240px]"
-              aria-label="Search announcements"
-            />
+        <div className="flex flex-col gap-4 px-6 pb-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 md:flex-none">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search posts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 md:w-[240px]"
+                aria-label="Search announcements"
+              />
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="secondary"
+                className="h-9 bg-muted font-medium"
+                render={<Link to="/announcements" />}
+              >
+                View-only posts
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-9 text-muted-foreground"
+                render={<Link to="/forms" />}
+              >
+                Posts with responses
+              </Button>
+            </div>
+            <AnnouncementFilterBar filters={filters} onChange={setFilters} />
           </div>
-          <AnnouncementFilterBar filters={filters} onChange={setFilters} />
         </div>
 
         {/* Table */}
@@ -181,7 +190,6 @@ function ParentsGatewayPage() {
                   <TableHead className="w-[110px]">Date</TableHead>
                   <TableHead className="w-[100px]">Status</TableHead>
                   <TableHead className="w-[90px]">Owner</TableHead>
-                  <TableHead className="w-[130px]">To Parents Of</TableHead>
                   <TableHead className="w-[150px]">Read / Response</TableHead>
                   <TableHead className="w-[48px] pr-2" />
                 </TableRow>
@@ -284,12 +292,6 @@ function ParentsGatewayPage() {
                             <span>Mine</span>
                           )}
                         </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {announcement.status === 'draft' ||
-                        announcement.status === 'scheduled'
-                          ? '—'
-                          : getUniqueClasses(announcement.recipients)}
                       </TableCell>
                       <TableCell className="pr-6">
                         {announcement.status !== 'posted' ? (

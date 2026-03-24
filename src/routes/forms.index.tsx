@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Search, Users } from 'lucide-react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Copy, MoreHorizontal, Search, Trash2, Users } from 'lucide-react'
 
 import type { FormSource, FormStatus } from '@/types/form'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +14,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/empty-state'
 import {
   EMPTY_FORMS_FILTERS,
@@ -56,9 +63,7 @@ function FormsPage() {
   const [filters, setFilters] = useState<FormsFilters>(EMPTY_FORMS_FILTERS)
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
   const formsEnabled = useFeatureFlag('forms')
-  useSetBreadcrumbs([
-    { label: 'Announcements & Forms', href: '/announcements' },
-  ])
+  useSetBreadcrumbs([{ label: 'Posts', href: '/announcements' }])
 
   const filteredForms = useMemo(() => {
     return mockForms
@@ -111,20 +116,38 @@ function FormsPage() {
 
   return (
     <div className="flex flex-col">
-      {/* Search, Filter & Quick filter */}
-      <div className="mt-4 flex items-center gap-3 px-6">
-        <div className="relative flex-1 md:flex-none">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search forms"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 md:w-[240px]"
-            aria-label="Search forms"
-          />
+      {/* Tab buttons, Search, Filter & Quick filter */}
+      <div className="mt-4 flex flex-col gap-4 px-6 pb-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative flex-1 md:flex-none">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search posts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 md:w-[240px]"
+              aria-label="Search forms"
+            />
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              className="h-9 text-muted-foreground"
+              render={<Link to="/announcements" />}
+            >
+              View-only posts
+            </Button>
+            <Button
+              variant="secondary"
+              className="h-9 bg-muted font-medium"
+              render={<Link to="/forms" />}
+            >
+              Posts with responses
+            </Button>
+          </div>
+          <FormsFilterBar filters={filters} onChange={setFilters} />
         </div>
-        <FormsFilterBar filters={filters} onChange={setFilters} />
         {formsEnabled && (
           <div className="flex items-center gap-1">
             {(
@@ -163,11 +186,12 @@ function FormsPage() {
           <Table tableClassName="table-fixed w-full">
             <TableHeader className="border-b bg-white">
               <TableRow className="border-0 hover:bg-transparent">
-                <TableHead className="w-[40%] pl-6">Form Title</TableHead>
+                <TableHead className="w-[500px] pl-6">Title</TableHead>
                 <TableHead className="w-[110px]">Date</TableHead>
                 <TableHead className="w-[100px]">Status</TableHead>
                 <TableHead className="w-[90px]">Owner</TableHead>
-                <TableHead className="w-[150px] pr-6">Responses</TableHead>
+                <TableHead className="w-[150px]">Read / Response</TableHead>
+                <TableHead className="w-[48px] pr-2" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -185,10 +209,16 @@ function FormsPage() {
                     }
                   >
                     <TableCell className="overflow-hidden whitespace-normal pl-6">
-                      <div className="min-w-0">
-                        <span className="font-medium">{form.title}</span>
-                        <div className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
-                          {form.description}
+                      <div className="flex items-start gap-2">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="truncate font-medium">
+                              {form.title}
+                            </span>
+                          </div>
+                          <div className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
+                            {form.description}
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -221,6 +251,34 @@ function FormsPage() {
                           totalCount={form.recipientCount}
                         />
                       )}
+                    </TableCell>
+                    <TableCell
+                      className="w-[48px] pr-2 text-right"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            aria-label="More actions"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Copy className="mr-2 h-4 w-4" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive focus:text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 )

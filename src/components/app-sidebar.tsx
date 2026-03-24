@@ -39,8 +39,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
 import { FeedbackDialog } from '@/components/feedback-dialog'
 import { useFeatureFlag } from '@/hooks/use-feature-flag'
+import { useAuth } from '@/lib/auth'
 
 interface MenuItem {
   title: string
@@ -93,7 +103,7 @@ const studentInsightItems: Array<MenuItem> = [
 
 const parentsCommItems: Array<MenuItem> = [
   {
-    title: 'Announcements & Forms',
+    title: 'Posts',
     url: '/announcements',
     icon: Mail,
     featureFlag: 'parents-gateway',
@@ -149,13 +159,47 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
   )
 }
 
+const WELCOME_KEY = 'tw_welcome_seen'
+const COACHMARK_KEY = 'tw_posts_coachmark_seen'
+
 export function AppSidebar() {
   const location = useLocation()
+  const { isLoggedIn } = useAuth()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
+  const [showCoachMark, setShowCoachMark] = React.useState(false)
   const announcementsEnabled = useFeatureFlag('announcements')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
   const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
   const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
+
+  React.useEffect(() => {
+    if (localStorage.getItem(COACHMARK_KEY)) return
+
+    let timerId: ReturnType<typeof setTimeout> | undefined
+
+    const show = () => {
+      timerId = setTimeout(() => setShowCoachMark(true), 500)
+    }
+
+    // Welcome modal won't show for logged-in users or if already dismissed
+    if (isLoggedIn || sessionStorage.getItem(WELCOME_KEY)) {
+      show()
+      return () => clearTimeout(timerId)
+    }
+
+    // Welcome modal is open — wait for it to close
+    const handler = () => show()
+    window.addEventListener('welcome-dismissed', handler)
+    return () => {
+      window.removeEventListener('welcome-dismissed', handler)
+      clearTimeout(timerId)
+    }
+  }, [isLoggedIn])
+
+  function dismissCoachMark() {
+    localStorage.setItem(COACHMARK_KEY, '1')
+    setShowCoachMark(false)
+  }
 
   const filterItems = (items: Array<MenuItem>) =>
     items.filter((item) => {
@@ -207,12 +251,35 @@ export function AppSidebar() {
           {filteredParentsItems.length > 0 && (
             <>
               <SidebarSeparator className="mx-0 mt-3" />
-              <SidebarGroupContent className="mt-2">
-                <SidebarMenuItems
-                  items={filteredParentsItems}
-                  currentPath={location.pathname}
-                />
-              </SidebarGroupContent>
+              <Popover
+                open={showCoachMark}
+                onOpenChange={(o) => {
+                  if (!o) dismissCoachMark()
+                }}
+              >
+                <PopoverTrigger
+                  render={<SidebarGroupContent className="mt-2" />}
+                >
+                  <SidebarMenuItems
+                    items={filteredParentsItems}
+                    currentPath={location.pathname}
+                  />
+                </PopoverTrigger>
+                <PopoverContent side="right" sideOffset={12}>
+                  <PopoverHeader>
+                    <PopoverTitle>Parents Gateway</PopoverTitle>
+                    <PopoverDescription>
+                      Manage communication with parents and send announcements
+                      to parents via Parents Gateway here.
+                    </PopoverDescription>
+                  </PopoverHeader>
+                  <div className="flex justify-end">
+                    <Button size="sm" onClick={dismissCoachMark}>
+                      Got it
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </>
           )}
         </SidebarGroup>
