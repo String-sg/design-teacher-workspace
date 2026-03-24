@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Check, ChevronDown, Search, User, Users, X } from 'lucide-react'
+import { Check, ChevronDown, Plus, Search, User, Users, X } from 'lucide-react'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
@@ -21,6 +21,9 @@ export type GroupType =
 export interface MemberDetail {
   name: string
   sublabel?: string // e.g. "3A · tanml@school.edu.sg" for staff
+  nric?: string
+  index?: number
+  class?: string
 }
 
 export interface EntityItem {
@@ -44,10 +47,18 @@ export interface SelectedEntity {
   memberNames?: Array<string>
 }
 
+export interface EntityScopeSection {
+  label: string
+  items: Array<EntityItem>
+}
+
 export interface EntityScope {
   id: string
   label: string
   items: Array<EntityItem>
+  sections?: Array<EntityScopeSection>
+  createHref?: string
+  createLabel?: string
 }
 
 export interface SearchResults {
@@ -191,6 +202,10 @@ interface ResultRowProps {
   isExpanded?: boolean
   onToggleExpand?: () => void
   selectedIndividualNames?: Set<string>
+  // Exclusion props
+  excludedNames?: Set<string>
+  onToggleMember?: (name: string, detail: MemberDetail) => void
+  onResetExclusions?: () => void
 }
 
 function ResultRow({
@@ -200,11 +215,23 @@ function ResultRow({
   isExpanded = false,
   onToggleExpand,
   selectedIndividualNames = new Set(),
+  excludedNames = new Set(),
+  onToggleMember,
+  onResetExclusions,
 }: ResultRowProps) {
   const hasMembers =
     item.type === 'group' &&
     ((item.memberDetails?.length ?? 0) > 0 ||
       (item.memberNames?.length ?? 0) > 0)
+
+  const memberList: Array<MemberDetail> =
+    item.memberDetails ?? item.memberNames?.map((name) => ({ name })) ?? []
+
+  const activeCount = memberList.length - excludedNames.size
+  const showExclusionCount = isSelected && excludedNames.size > 0
+
+  // Whether to suppress class tag in Tier 2 rows
+  const suppressClassTag = item.groupType === 'class'
 
   return (
     <>
@@ -223,11 +250,18 @@ function ResultRow({
           aria-pressed={isSelected}
           className="flex flex-1 items-center gap-3 px-3 py-2 text-left text-sm"
         >
-          {item.type === 'group' ? (
-            <Users className="h-4 w-4 shrink-0 text-slate-400" />
-          ) : (
-            <User className="h-4 w-4 shrink-0 text-slate-400" />
-          )}
+          {/* Checkbox indicator on LEFT for all row types */}
+          <span
+            className={cn(
+              'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
+              isSelected
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-slate-300 bg-white',
+            )}
+          >
+            {isSelected && <Check className="h-2.5 w-2.5" />}
+          </span>
+
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium">{item.label}</p>
             {item.sublabel && (
@@ -238,16 +272,17 @@ function ResultRow({
           </div>
           {item.type === 'group' && item.count !== undefined && (
             <span className="shrink-0 text-xs text-muted-foreground">
-              {item.count} {getCountUnit(item.groupType, item.count)}
+              {showExclusionCount ? `${activeCount}/${item.count}` : item.count}{' '}
+              {getCountUnit(
+                item.groupType,
+                showExclusionCount ? activeCount : item.count,
+              )}
             </span>
           )}
           {item.badge && (
             <span className="shrink-0 font-mono text-xs text-muted-foreground">
               {item.badge}
             </span>
-          )}
-          {isSelected && (
-            <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
           )}
         </button>
 
@@ -273,66 +308,110 @@ function ResultRow({
         )}
       </div>
 
-      {/* Expanded member list */}
+      {/* Expanded member list — Tier 2 accordion with interactive checkboxes */}
       {isExpanded && hasMembers && (
         <div className="border-b border-slate-100 bg-slate-50/60 px-4 pb-3 pt-2.5">
-          {/* Header: member count */}
-          {(() => {
-            const shown = item.memberDetails?.length ?? item.memberNames!.length
-            return (
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                {shown}{' '}
-                {item.count !== undefined && item.count > shown
-                  ? `of ${item.count} `
-                  : ''}
-                {getCountUnit(item.groupType, shown)}
-              </p>
-            )
-          })()}
+          {/* Header: member count + reset exclusions link */}
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {memberList.length}{' '}
+              {item.count !== undefined && item.count > memberList.length
+                ? `of ${item.count} `
+                : ''}
+              {getCountUnit(item.groupType, memberList.length)}
+            </p>
+            {isSelected && excludedNames.size > 0 && onResetExclusions && (
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={onResetExclusions}
+                className="text-[10px] text-twblue-7 hover:underline"
+              >
+                Reset ({excludedNames.size} excluded)
+              </button>
+            )}
+          </div>
 
-          {/* Scrollable numbered list */}
+          {/* Scrollable interactive member list */}
           <ol
-            className="max-h-[200px] overflow-y-auto"
+            className="max-h-[160px] overflow-y-auto"
             style={{ scrollbarWidth: 'thin' }}
           >
-            {(
-              item.memberDetails ?? item.memberNames!.map((name) => ({ name }))
-            ).map((detail, index) => {
-              const isAlsoSelected = selectedIndividualNames.has(detail.name)
+            {memberList.map((detail, index) => {
+              const isAlsoSelectedIndividual = selectedIndividualNames.has(
+                detail.name,
+              )
+              const isMemberExcluded =
+                isSelected && excludedNames.has(detail.name)
+              const isMemberIncluded =
+                isSelected && !excludedNames.has(detail.name)
+
               return (
-                <li
-                  key={detail.name}
-                  className={cn(
-                    'flex items-start gap-2.5 rounded px-1.5 py-1 text-xs',
-                    isAlsoSelected
-                      ? 'font-medium text-twblue-9'
-                      : 'text-slate-700',
-                  )}
-                >
-                  <span className="w-5 shrink-0 pt-px text-right text-[10px] tabular-nums text-slate-400">
-                    {index + 1}
-                  </span>
-                  {isAlsoSelected ? (
-                    <Check className="mt-px h-2.5 w-2.5 shrink-0 text-twblue-9" />
-                  ) : (
-                    <span className="h-2.5 w-2.5 shrink-0" />
-                  )}
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate">{detail.name}</span>
-                    {detail.sublabel && (
-                      <span className="block truncate text-[10px] font-normal text-muted-foreground">
-                        {detail.sublabel}
+                <li key={detail.name}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => onToggleMember?.(detail.name, detail)}
+                    className={cn(
+                      'flex w-full items-center gap-2 rounded px-1.5 py-1 text-xs transition-colors',
+                      isMemberExcluded
+                        ? 'opacity-40 hover:bg-slate-100'
+                        : isAlsoSelectedIndividual
+                          ? 'text-twblue-9 hover:bg-twblue-1'
+                          : 'text-slate-700 hover:bg-slate-100',
+                    )}
+                  >
+                    {/* Checkbox */}
+                    <span
+                      className={cn(
+                        'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border transition-colors',
+                        isMemberIncluded
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'border-slate-300 bg-white',
+                      )}
+                    >
+                      {isMemberIncluded && <Check className="h-2 w-2" />}
+                    </span>
+
+                    {/* Index number */}
+                    <span className="w-5 shrink-0 text-right text-[10px] tabular-nums text-slate-400">
+                      {detail.index !== undefined
+                        ? `#${String(detail.index).padStart(2, '0')}`
+                        : index + 1}
+                    </span>
+
+                    {/* Name + class tag */}
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-1.5 truncate">
+                        <span className="truncate">{detail.name}</span>
+                        {detail.class && !suppressClassTag && (
+                          <span className="shrink-0 rounded bg-slate-200 px-1 py-px text-[9px] font-medium text-slate-500">
+                            {detail.class}
+                          </span>
+                        )}
+                      </span>
+                      {detail.sublabel && (
+                        <span className="block truncate text-[10px] font-normal text-muted-foreground">
+                          {detail.sublabel}
+                        </span>
+                      )}
+                    </span>
+
+                    {/* NRIC */}
+                    {detail.nric && (
+                      <span className="shrink-0 font-mono text-[10px] text-slate-400">
+                        {detail.nric}
                       </span>
                     )}
-                  </span>
+                  </button>
                 </li>
               )
             })}
           </ol>
 
-          {/* Note when roster is incomplete (data not available in preview) */}
+          {/* Note when roster is incomplete */}
           {(() => {
-            const shown = item.memberDetails?.length ?? item.memberNames!.length
+            const shown = memberList.length
             return (
               item.count !== undefined &&
               item.count > shown && (
@@ -352,9 +431,11 @@ function ResultRow({
 function EntityChip({
   entity,
   onRemove,
+  excludedCount = 0,
 }: {
   entity: SelectedEntity
   onRemove: () => void
+  excludedCount?: number
 }) {
   const names = entity.memberNames ?? []
   const tooltipTitle =
@@ -363,6 +444,11 @@ function EntityChip({
         ? `${names.slice(0, 12).join(', ')} and ${names.length - 12} more`
         : names.join(', ')
       : undefined
+
+  const displayCount =
+    excludedCount > 0
+      ? `${entity.count - excludedCount}/${entity.count}`
+      : entity.count
 
   return (
     <span
@@ -376,7 +462,7 @@ function EntityChip({
       )}
       <span className="truncate">{entity.label}</span>
       {entity.type === 'group' && (
-        <span className="shrink-0 opacity-60">· {entity.count}</span>
+        <span className="shrink-0 opacity-60">· {displayCount}</span>
       )}
       <button
         type="button"
@@ -405,12 +491,16 @@ export function EntitySelector({
   searchPlaceholder = 'Search…',
   noResultsText = 'No results found',
   emptyTabText = 'No items in this category',
-  maxScrollHeight = '240px',
+  maxScrollHeight = '360px',
 }: EntitySelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [activeScope, setActiveScope] = useState(scopes?.[0]?.id ?? '')
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null)
+  // Per-group exclusion map: groupId → Set of excluded member names
+  const [excludedMembers, setExcludedMembers] = useState<
+    Map<string, Set<string>>
+  >(new Map())
 
   const wrapperRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -439,6 +529,11 @@ export function EntitySelector({
     setExpandedGroupId(null)
   }, [query])
 
+  // Collapse expanded group when tab switches
+  useEffect(() => {
+    setExpandedGroupId(null)
+  }, [activeScope])
+
   // Outside-click to close (desktop only — Sheet handles its own dismissal)
   useEffect(() => {
     if (isMobile) return
@@ -459,8 +554,18 @@ export function EntitySelector({
     const isSelected = value.some((e) => e.id === item.id)
     if (isSelected) {
       onChange(value.filter((e) => e.id !== item.id))
+      // Clear exclusions when deselecting
+      setExcludedMembers((prev) => {
+        const next = new Map(prev)
+        next.delete(item.id)
+        return next
+      })
     } else if (multiSelect) {
       onChange([...value, toSelectedEntity(item)])
+      // Auto-expand Tier 2 when a group is selected
+      if (item.type === 'group') {
+        setExpandedGroupId(item.id)
+      }
     } else {
       onChange([toSelectedEntity(item)])
       setIsOpen(false)
@@ -468,8 +573,49 @@ export function EntitySelector({
     }
   }
 
+  function handleToggleMember(
+    groupId: string,
+    groupItem: EntityItem,
+    memberName: string,
+  ) {
+    const isGroupSelected = value.some((e) => e.id === groupId)
+
+    // If the group isn't selected yet, auto-select it first
+    if (!isGroupSelected) {
+      onChange([...value, toSelectedEntity(groupItem)])
+      // Don't exclude — just selecting the group includes everyone
+      return
+    }
+
+    // Toggle exclusion for this member
+    setExcludedMembers((prev) => {
+      const next = new Map(prev)
+      const current = new Set(next.get(groupId) ?? [])
+      if (current.has(memberName)) {
+        current.delete(memberName)
+      } else {
+        current.add(memberName)
+      }
+      next.set(groupId, current)
+      return next
+    })
+  }
+
+  function handleResetExclusions(groupId: string) {
+    setExcludedMembers((prev) => {
+      const next = new Map(prev)
+      next.delete(groupId)
+      return next
+    })
+  }
+
   function handleRemove(entity: SelectedEntity) {
     onChange(value.filter((e) => e.id !== entity.id))
+    setExcludedMembers((prev) => {
+      const next = new Map(prev)
+      next.delete(entity.id)
+      return next
+    })
   }
 
   function closePanel() {
@@ -492,6 +638,50 @@ export function EntitySelector({
     )
   }
 
+  function renderResultRow(item: EntityItem) {
+    const groupExcluded = excludedMembers.get(item.id) ?? new Set<string>()
+    return (
+      <ResultRow
+        key={item.id}
+        item={item}
+        isSelected={value.some((e) => e.id === item.id)}
+        onToggle={() => handleToggle(item)}
+        isExpanded={expandedGroupId === item.id}
+        onToggleExpand={() =>
+          setExpandedGroupId((prev) => (prev === item.id ? null : item.id))
+        }
+        selectedIndividualNames={selectedIndividualNames}
+        excludedNames={groupExcluded}
+        onToggleMember={(name, detail) =>
+          handleToggleMember(item.id, item, name)
+        }
+        onResetExclusions={() => handleResetExclusions(item.id)}
+      />
+    )
+  }
+
+  function renderCreateCta(scope: EntityScope) {
+    if (!scope.createHref) return null
+    return (
+      <div className="border-t px-3 py-2">
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            // Navigation would happen here in a real implementation
+          }}
+          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-slate-50 hover:text-foreground"
+        >
+          <Plus className="h-3.5 w-3.5 shrink-0" />
+          <span>{scope.createLabel ?? 'Create new'}</span>
+          <span className="ml-auto rounded bg-slate-100 px-1.5 py-px text-[10px] font-medium text-slate-400">
+            Coming soon
+          </span>
+        </button>
+      </div>
+    )
+  }
+
   function renderBrowseTab() {
     const scope = scopes?.find((s) => s.id === activeScope)
     if (!scope || scope.items.length === 0) {
@@ -501,21 +691,28 @@ export function EntitySelector({
         </p>
       )
     }
+
+    // If scope has sections, render with section headers and dividers
+    if (scope.sections && scope.sections.length > 0) {
+      return (
+        <>
+          {scope.sections.map((section, sectionIndex) => (
+            <div key={section.label}>
+              {sectionIndex > 0 && <div className="mx-3 my-0.5 border-t" />}
+              {renderSectionHeader(section.label)}
+              {section.items.map((item) => renderResultRow(item))}
+            </div>
+          ))}
+          {renderCreateCta(scope)}
+        </>
+      )
+    }
+
+    // Flat list
     return (
       <>
-        {scope.items.map((item) => (
-          <ResultRow
-            key={item.id}
-            item={item}
-            isSelected={value.some((e) => e.id === item.id)}
-            onToggle={() => handleToggle(item)}
-            isExpanded={expandedGroupId === item.id}
-            onToggleExpand={() =>
-              setExpandedGroupId((prev) => (prev === item.id ? null : item.id))
-            }
-            selectedIndividualNames={selectedIndividualNames}
-          />
-        ))}
+        {scope.items.map((item) => renderResultRow(item))}
+        {renderCreateCta(scope)}
       </>
     )
   }
@@ -534,21 +731,7 @@ export function EntitySelector({
         {groups.length > 0 && (
           <>
             {renderSectionHeader('Groups')}
-            {groups.map((item) => (
-              <ResultRow
-                key={item.id}
-                item={item}
-                isSelected={value.some((e) => e.id === item.id)}
-                onToggle={() => handleToggle(item)}
-                isExpanded={expandedGroupId === item.id}
-                onToggleExpand={() =>
-                  setExpandedGroupId((prev) =>
-                    prev === item.id ? null : item.id,
-                  )
-                }
-                selectedIndividualNames={selectedIndividualNames}
-              />
-            ))}
+            {groups.map((item) => renderResultRow(item))}
           </>
         )}
         {groups.length > 0 && individuals.length > 0 && (
@@ -557,21 +740,7 @@ export function EntitySelector({
         {individuals.length > 0 && (
           <>
             {renderSectionHeader('Individuals')}
-            {individuals.map((item) => (
-              <ResultRow
-                key={item.id}
-                item={item}
-                isSelected={value.some((e) => e.id === item.id)}
-                onToggle={() => handleToggle(item)}
-                isExpanded={expandedGroupId === item.id}
-                onToggleExpand={() =>
-                  setExpandedGroupId((prev) =>
-                    prev === item.id ? null : item.id,
-                  )
-                }
-                selectedIndividualNames={selectedIndividualNames}
-              />
-            ))}
+            {individuals.map((item) => renderResultRow(item))}
           </>
         )}
       </>
@@ -650,6 +819,7 @@ export function EntitySelector({
           key={entity.id}
           entity={entity}
           onRemove={() => handleRemove(entity)}
+          excludedCount={excludedMembers.get(entity.id)?.size ?? 0}
         />
       ))}
 
@@ -684,7 +854,10 @@ export function EntitySelector({
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
-          onClick={() => onChange([])}
+          onClick={() => {
+            onChange([])
+            setExcludedMembers(new Map())
+          }}
           className="ml-auto shrink-0 text-xs text-muted-foreground transition-colors hover:text-rose-500"
         >
           Clear all
@@ -716,7 +889,7 @@ export function EntitySelector({
 
       {/* Desktop: inline dropdown panel */}
       {!isMobile && isOpen && (
-        <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border bg-white shadow-md">
+        <div className="absolute z-20 mt-1 w-full rounded-lg border bg-white shadow-md">
           {panelBody}
         </div>
       )}
