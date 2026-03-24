@@ -18,7 +18,7 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-blue-600">
           <Activity className="h-4 w-4" />
-          <span className="text-sm font-semibold">Action required</span>
+          <span className="text-sm font-semibold">Recommended action</span>
         </div>
         <div className="flex items-center gap-0.5">
           <Button variant="ghost" size="icon-sm" disabled>
@@ -33,11 +33,11 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
       {/* Content */}
       <div className="mt-3">
         <h3 className="text-sm font-semibold text-foreground">
-          Multiple concerns: bullying offence, missed CCA, low mood
+          Follow-up areas: bullying incident, missed CCA, low mood
         </h3>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-          Co-occurring behavioural, social-emotional, and engagement challenges
-          require a sequenced, differentiated approach.
+          Behavioural, social-emotional, and engagement patterns observed across
+          multiple areas — consider a sequenced, differentiated approach.
         </p>
       </div>
 
@@ -50,7 +50,7 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
             <Link to="/glow/$studentId" params={{ studentId: student.id }} />
           }
         >
-          Check
+          View guidance
         </Button>
       </div>
     </div>

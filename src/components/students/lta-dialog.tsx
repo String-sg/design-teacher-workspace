@@ -176,9 +176,9 @@ function getStudentInitials(name: string): string {
 
 const guidanceActions: Array<GuidanceAction> = [
   {
-    title: 'Do a 1-on-1 check-in within 48 hours',
+    title: 'Consider a 1-on-1 check-in within 48 hours',
     description:
-      "Low mood is the most time-sensitive signal here — it could point to something deeper. Validate feelings first; don't address the bullying incident in the same conversation.",
+      "Low mood may be the most time-sensitive signal here. Validating feelings first, before addressing the bullying incident, may be more effective.",
     urgency: {
       label: 'Urgent',
       icon: <PriorityUrgentIcon />,
@@ -192,9 +192,9 @@ const guidanceActions: Array<GuidanceAction> = [
     ],
   },
   {
-    title: 'Consult SEN Officer before setting expectations',
+    title: 'Consider consulting the SEN Officer before setting expectations',
     description:
-      'Before re-engaging CCA or setting behavioural targets, understand his specific profile. Generic interventions may not apply — adjust communication style, consequences, and support.',
+      'Before re-engaging CCA or setting behavioural targets, it may help to understand his specific profile. Communication style, expectations, and support approaches may need adjusting.',
     urgency: {
       label: 'This week',
       icon: <PriorityMediumIcon />,
@@ -205,9 +205,9 @@ const guidanceActions: Array<GuidanceAction> = [
     resources: [{ label: 'SwAN differentiation guide', href: '#' }],
   },
   {
-    title: 'Convene a 15-min SDT/CMT case discussion',
+    title: 'Consider a brief SDT/CMT case discussion',
     description:
-      'Pull RIOT data (attendance, discipline, teacher observations — past 4 weeks). Assign a single Case Manager to coordinate across all three concerns: YH, SC, and SEN Officer all looped in.',
+      'Review RIOT data (attendance, discipline, teacher observations — past 4 weeks). Consider having a single Case Manager coordinate across all three areas, with YH, SC, and SEN Officer looped in.',
     urgency: {
       label: 'This week',
       icon: <PriorityMediumIcon />,
@@ -221,9 +221,9 @@ const guidanceActions: Array<GuidanceAction> = [
     ],
   },
   {
-    title: 'Re-engage CCA with a phased plan',
+    title: 'Consider re-engaging CCA with a phased plan',
     description:
-      'Once low mood and safety are stabilised, meet CCA TIC + student to agree on a 4-week plan — buddy system, reduced role, clear expectations. CCA can be protective if the environment is right.',
+      'Once low mood and safety have settled, consider meeting with the CCA TIC and student to explore a phased return — buddy system, reduced role, clear expectations. CCA can be a protective factor if the environment is supportive.',
     urgency: {
       label: 'Monitor',
       icon: <PriorityLowIcon />,
@@ -369,7 +369,7 @@ export function GlowStudentSupportPage({
             <div className="mt-2.5 space-y-1.5">
               <div className="flex items-center gap-2 rounded-[var(--radius)] bg-red-50 px-3 py-2 text-sm font-medium text-red-800">
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
-                Bullying offence
+                Bullying incident
               </div>
               <div className="flex items-center gap-2 rounded-[var(--radius)] bg-orange-50 px-3 py-2 text-sm font-medium text-orange-800">
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
@@ -404,13 +404,12 @@ export function GlowStudentSupportPage({
 
               <div className="min-w-0 flex-1">
                 <p className="text-sm leading-relaxed text-[var(--foreground)]">
-                  {firstName} is flagged at <strong>Tier 2 risk</strong> because
-                  three concerns are presenting at the same time — a bullying
-                  offence, disengagement from CCA, and observed low mood. Each
-                  alone may be manageable; together, they suggest an emerging
-                  pattern that warrants coordinated support before it escalates
-                  to Tier 3. Here's a sequenced approach, prioritised by
-                  urgency:
+                  Three areas have been flagged for {firstName} at the same
+                  time — a bullying incident, disengagement from CCA, and
+                  observed low mood. Each alone may be manageable; together,
+                  they suggest a pattern worth monitoring with a coordinated
+                  approach. Here are some suggested considerations, organised
+                  by priority:
                 </p>
 
                 {/* Action cards */}
