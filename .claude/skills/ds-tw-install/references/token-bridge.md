@@ -2,17 +2,28 @@
 
 The Flow Design System uses a 3-layer token bridge that maps raw color primitives through semantic meanings to app-level design tokens. This architecture lets Flow DS components and Shadcn/TW components share a single color system.
 
+## File Architecture
+
+The token bridge is split across two CSS files:
+
+| File | Contents | Portable? |
+|------|----------|-----------|
+| `flow-ds-theme.css` | Sections A–F: color scale mappings, semantic overrides, spacing/typography wiring, dark mode formula changes, selector radius overrides, `.flow-theme` escape hatch | **Yes** — copy to any project |
+| `styles.css` | Brand scale hex values, Shadcn tokens, Tier 1 `--_` primitives, dark mode Radix swaps + brand dark values, `@theme inline`, `@layer base` | **No** — per-project |
+
 ## Token Resolution Chain
 
 ```
-Layer 1: Radix Primitives        Layer 2: Flow DS Semantic        Layer 3: App Tokens (Shadcn/TW)
-─────────────────────────        ──────────────────────────        ──────────────────────────────
+Layer 1: Radix/Custom Primitives  Layer 2: Flow DS Semantic         Layer 3: App Tokens (Shadcn/TW)
+(defined in styles.css)           (overridden in flow-ds-theme.css) (defined in styles.css)
+──────────────────────────        ───────────────────────────        ──────────────────────────────
 --slate-1..12          ──────>   --color-neutral-1..12
 --crimson-1..12        ──────>   --color-critical-1..12
 --lime-1..12           ──────>   --color-success-1..12
 --orange-1..12         ──────>   --color-caution-1..12
---amber-1..12          ──────>   --color-info-1..12
+--twblue-1..12 (custom)──────>   --color-info-1..12
 --twblue-1..12 (custom)──────>   --color-brand-1..12
+--slate-1..12          ──────>   --color-accent-1..12
 
                                  --color-background-page   <──>   --background
                                  --color-background-section <──>  --card
@@ -40,32 +51,31 @@ Radix provides 12-step color scales following a specific purpose pattern:
 Each scale has both light and dark variants (e.g., `slate.css` + `slate-dark.css`). Dark mode works by swapping `--slate-1: var(--slate-dark-1)` in the `.dark` block.
 
 **Scales used:**
-| Radix Scale | Role |
-|-------------|------|
-| `slate` | Neutral grays |
-| `crimson` | Critical / destructive |
-| `lime` | Success |
-| `orange` | Caution / warning |
-| `amber` | Info |
-| `violet` | Secondary accent |
+| Radix Scale | Role | Overrides Flow DS Internal |
+|-------------|------|---------------------------|
+| `slate` | Neutral grays, accent | `--color-slate-*` (Flow's own slate) |
+| `crimson` | Critical / destructive | `--color-ruby-*` |
+| `lime` | Success | `--color-green-*` |
+| `orange` | Caution / warning | `--color-orange-*` (Flow's own orange) |
+| `violet` | Secondary accent (twpurple alias) | — |
 
-**Custom scales:** TWBlue is a hand-crafted 12-step scale (with alpha variants) that doesn't come from Radix. It's defined directly in `:root` with dark variants in `.dark`.
+**Custom scales:** TWBlue is a hand-crafted 12-step scale (with alpha variants) that doesn't come from Radix. It's defined directly in `:root` with dark variants in `.dark`. It overrides Flow's built-in `--color-blue-*` (for info) and the hard-coded indigo brand hex values.
 
 ## Layer 2: Flow DS Semantic Tokens
 
-Source: `@flow/design-tokens` (base tokens) + custom overrides in CSS
+Source: `@flow/design-tokens` (base tokens) + custom overrides in `flow-ds-theme.css`
 
-Flow DS maps Radix primitives to semantic meanings:
+Flow DS ships its own internal primitives. Our override layer remaps the semantic scales:
 
-| Semantic Scale | Default Mapping | Purpose |
-|---------------|----------------|---------|
-| `--color-brand-*` | TWBlue (custom) | Primary brand, buttons, links |
-| `--color-neutral-*` | Slate | Grays, borders, text |
-| `--color-critical-*` | Crimson | Errors, destructive actions |
-| `--color-success-*` | Lime | Success states |
-| `--color-caution-*` | Orange | Warnings |
-| `--color-info-*` | Amber | Informational |
-| `--color-accent-*` | Slate | Secondary emphasis |
+| Semantic Scale | Flow DS Default | Our Override (Radix/Custom) | Purpose |
+|---------------|-----------------|---------------------------|---------|
+| `--color-brand-*` | Indigo (hard-coded hex) | `var(--twblue-*)` | Primary brand, buttons, links |
+| `--color-neutral-*` | `--color-slate-*` (Flow) | `var(--slate-*)` (Radix) | Grays, borders, text |
+| `--color-critical-*` | `--color-ruby-*` (Flow) | `var(--crimson-*)` (Radix) | Errors, destructive actions |
+| `--color-success-*` | `--color-green-*` (Flow) | `var(--lime-*)` (Radix) | Success states |
+| `--color-caution-*` | `--color-orange-*` (Flow) | `var(--orange-*)` (Radix) | Warnings |
+| `--color-info-*` | `--color-blue-*` (Flow) | `var(--twblue-*)` | Informational (same as brand) |
+| `--color-accent-*` | `--color-mint-*` (Flow) | `var(--slate-*)` (Radix) | Secondary emphasis (neutral) |
 
 Flow DS also defines **surface tokens** that control component backgrounds, text, and borders:
 - `--color-background-page`, `--color-background-section`, `--color-background-popover`
@@ -141,11 +151,12 @@ The underscore prefix distinguishes these from Flow's internal tokens. `.flow-th
 
 ## Dark Mode
 
-Dark mode uses a class-based strategy (`.dark` on `<html>` or a parent element). The `.dark` block:
+Dark mode uses a class-based strategy (`.dark` on `<html>`). The `.dark` block only needs to:
 
-1. Swaps ALL Radix scales to their dark variants: `--slate-1: var(--slate-dark-1)`
-2. Redefines custom brand scales with dark-appropriate hex values
-3. Re-declares Shadcn semantic tokens with dark values
-4. Re-declares Flow DS semantic mappings (they reference the same Radix vars, which are now dark-swapped)
+1. Swap Radix scales to their dark variants: `--slate-1: var(--slate-dark-1)`
+2. Redefine custom brand scales with dark-appropriate hex values
+3. Override tokens whose **formula** changes (e.g., `--card: white` → `var(--slate-2)`)
+
+Shadcn semantic tokens and Flow DS scale mappings do **not** need re-declaration in `.dark`. Since `.dark` is applied to `<html>` (same element as `:root`), CSS custom properties resolve `var()` references at computed-value time against the overridden primitives on that same element. Only tokens whose formula changes (not just the underlying value) need explicit dark overrides.
 
 The Tailwind `@custom-variant dark (&:is(.dark *))` directive enables dark-mode utility classes like `dark:bg-slate-2`.

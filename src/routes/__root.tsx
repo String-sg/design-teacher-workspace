@@ -36,6 +36,47 @@ export const Route = createRootRoute({
       {
         title: 'MOE Workspace Homepage',
       },
+      {
+        name: 'description',
+        content:
+          'Your central hub for school management, student insights, and daily tools.',
+      },
+      {
+        property: 'og:title',
+        content: 'MOE Teacher Workspace',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Your central hub for school management, student insights, and daily tools.',
+      },
+      {
+        property: 'og:image',
+        content:
+          'https://teacherworkspace-alpha.vercel.app/og-image.png',
+      },
+      {
+        property: 'og:type',
+        content: 'website',
+      },
+      {
+        name: 'twitter:card',
+        content: 'summary_large_image',
+      },
+      {
+        name: 'twitter:title',
+        content: 'MOE Teacher Workspace',
+      },
+      {
+        name: 'twitter:description',
+        content:
+          'Your central hub for school management, student insights, and daily tools.',
+      },
+      {
+        name: 'twitter:image',
+        content:
+          'https://teacherworkspace-alpha.vercel.app/og-image.png',
+      },
     ],
     links: [
       {
