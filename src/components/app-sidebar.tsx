@@ -7,6 +7,7 @@ import {
   CircleHelp,
   FileText,
   Home,
+  Layers,
   Mail,
   Megaphone,
   MessageSquare,
@@ -88,6 +89,12 @@ const studentInsightItems: Array<MenuItem> = [
     icon: Bot,
     conceptTag: true,
     featureFlag: 'student-analytics',
+  },
+  {
+    title: 'Groups',
+    url: '/groups',
+    icon: Layers,
+    conceptTag: true,
   },
 ]
 
