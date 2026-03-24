@@ -72,12 +72,14 @@ type SendOption = 'now' | 'scheduled'
 
 function AcknowledgeMockup() {
   return (
-    <div className="flex flex-col gap-1.5 p-2">
-      <div className="h-1.5 w-3/4 rounded bg-slate-200" />
-      <div className="h-1 w-full rounded bg-slate-100" />
-      <div className="h-1 w-5/6 rounded bg-slate-100" />
-      <div className="mt-1.5 h-6 rounded bg-primary/80 flex items-center justify-center">
-        <div className="h-1.5 w-14 rounded bg-white/70" />
+    <div className="flex flex-col gap-2 p-4">
+      <div className="h-2 w-2/3 rounded bg-slate-200" />
+      <div className="h-1.5 w-full rounded bg-slate-100" />
+      <div className="h-1.5 w-5/6 rounded bg-slate-100" />
+      <div className="h-1.5 w-4/5 rounded bg-slate-100" />
+      <div className="h-1.5 w-full rounded bg-slate-100" />
+      <div className="mt-2 h-8 rounded-md bg-primary/80 flex items-center justify-center">
+        <div className="h-2 w-20 rounded bg-white/70" />
       </div>
     </div>
   )
@@ -85,14 +87,15 @@ function AcknowledgeMockup() {
 
 function YesNoMockup() {
   return (
-    <div className="flex flex-col gap-1.5 p-2">
-      <div className="h-1.5 w-3/4 rounded bg-slate-200" />
-      <div className="h-1 w-full rounded bg-slate-100" />
-      <div className="mt-1.5 flex gap-1.5">
-        <div className="flex h-6 flex-1 items-center justify-center rounded bg-green-100 text-[8px] font-semibold text-green-700">
+    <div className="flex flex-col gap-2 p-4">
+      <div className="h-2 w-2/3 rounded bg-slate-200" />
+      <div className="h-1.5 w-full rounded bg-slate-100" />
+      <div className="h-1.5 w-5/6 rounded bg-slate-100" />
+      <div className="mt-2 flex gap-2">
+        <div className="flex h-8 flex-1 items-center justify-center rounded-md bg-green-100 text-[9px] font-semibold text-green-700">
           Yes
         </div>
-        <div className="flex h-6 flex-1 items-center justify-center rounded bg-red-100 text-[8px] font-semibold text-red-700">
+        <div className="flex h-8 flex-1 items-center justify-center rounded-md bg-red-100 text-[9px] font-semibold text-red-700">
           No
         </div>
       </div>
@@ -1387,14 +1390,19 @@ function NewAnnouncementPage() {
                           : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
                       )}
                     >
-                      <div className="w-full rounded border border-slate-200 bg-white">
+                      <div className="w-full rounded-md border border-slate-200 bg-white">
                         {opt.mockup}
                       </div>
-                      <div>
-                        <p className="text-xs font-semibold text-foreground">
-                          {opt.label}
-                        </p>
-                        <p className="mt-0.5 text-[10px] text-muted-foreground">
+                      <div className="pt-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-semibold text-foreground">
+                            {opt.label}
+                          </p>
+                          {responseType === opt.value && (
+                            <CheckCircle2 className="h-4 w-4 shrink-0 fill-primary text-white" />
+                          )}
+                        </div>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
                           {opt.hint}
                         </p>
                       </div>

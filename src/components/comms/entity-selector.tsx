@@ -664,20 +664,14 @@ export function EntitySelector({
     if (!scope.createHref) return null
     return (
       <div className="border-t px-3 py-2">
-        <button
-          type="button"
+        <a
+          href={scope.createHref}
           onMouseDown={(e) => e.preventDefault()}
-          onClick={() => {
-            // Navigation would happen here in a real implementation
-          }}
           className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-slate-50 hover:text-foreground"
         >
           <Plus className="h-3.5 w-3.5 shrink-0" />
           <span>{scope.createLabel ?? 'Create new'}</span>
-          <span className="ml-auto rounded bg-slate-100 px-1.5 py-px text-[10px] font-medium text-slate-400">
-            Coming soon
-          </span>
-        </button>
+        </a>
       </div>
     )
   }
