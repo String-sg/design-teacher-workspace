@@ -90,11 +90,13 @@ const studentInsightItems: Array<MenuItem> = [
     conceptTag: true,
     featureFlag: 'student-analytics',
   },
+]
+
+const manageItems: Array<MenuItem> = [
   {
     title: 'Groups',
     url: '/groups',
     icon: Layers,
-    conceptTag: true,
   },
 ]
 
@@ -178,6 +180,7 @@ export function AppSidebar() {
   const filteredStudentItems = studentInsightItems.filter((item) =>
     item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
   )
+  const filteredManageItems = manageItems
 
   return (
     <Sidebar collapsible="icon">
@@ -207,6 +210,18 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenuItems
                 items={filteredStudentItems}
+                currentPath={location.pathname}
+              />
+            </SidebarGroupContent>
+          </>
+          <>
+            <SidebarSeparator className="mx-0 mt-3" />
+            <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
+              Manage
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenuItems
+                items={filteredManageItems}
                 currentPath={location.pathname}
               />
             </SidebarGroupContent>

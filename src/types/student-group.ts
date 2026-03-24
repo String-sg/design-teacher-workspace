@@ -19,10 +19,20 @@ export interface StaffInCharge {
   type: 'individual' | 'group'
 }
 
+export type StructuredGroupType = 'class' | 'level' | 'cca' | 'teaching'
+export type GroupTypeFilterOption =
+  | 'regular'
+  | 'class'
+  | 'level'
+  | 'cca'
+  | 'teaching'
+
 export interface StudentGroup {
   id: string
   name: string
   description?: string
+  kind: 'regular'
+  source?: 'created' | 'saved-from-sdt'
   members: Array<GroupMember>
   staffInCharge: Array<StaffInCharge>
   visibility: 'private' | 'school'
@@ -31,4 +41,24 @@ export interface StudentGroup {
   createdAt: string
   updatedAt: string
   lastUsedAt?: string
+}
+
+export interface StructuredGroup {
+  id: string
+  kind: 'structured'
+  structuredType: StructuredGroupType
+  name: string
+  members: Array<GroupMember>
+  syncedAt: string
+}
+
+export type UnifiedGroup = StudentGroup | StructuredGroup
+
+export function getStructuredTypeLabel(type: StructuredGroupType): string {
+  return {
+    class: 'Class',
+    level: 'Level',
+    cca: 'CCA',
+    teaching: 'Teaching Group',
+  }[type]
 }

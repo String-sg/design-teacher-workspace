@@ -4,7 +4,7 @@ import {
   ALL_STUDENT_GROUP_ITEMS,
   STUDENT_INDIVIDUAL_ITEMS,
   STUDENT_OVERLAP_MAP,
-  STUDENT_SCOPES,
+  getStudentScopes,
 } from '@/data/mock-student-groups'
 
 // Backward-compatible type alias — existing code that imports SelectedRecipient continues to work
@@ -40,7 +40,7 @@ export function StudentRecipientSelector({
       <EntitySelector
         value={value}
         onChange={onChange}
-        scopes={STUDENT_SCOPES}
+        scopes={getStudentScopes()}
         searchFn={studentSearchFn}
         placeholder="Search students, classes, CCAs…"
         searchPlaceholder="Search by name, class, or group…"

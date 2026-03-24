@@ -57,6 +57,8 @@ const endeavourStudents = mockStudents
 export const MOCK_GROUPS: Array<StudentGroup> = [
   {
     id: 'cg-learning-support',
+    kind: 'regular',
+    source: 'created',
     name: 'Learning Support Students',
     description:
       'Students enrolled in the Learning Support Programme (LSP) or Learning Support for Mathematics (LSM) across all classes.',
@@ -98,6 +100,8 @@ export const MOCK_GROUPS: Array<StudentGroup> = [
   },
   {
     id: 'cg-drama-festival',
+    kind: 'regular',
+    source: 'created',
     name: 'Drama Festival Cast',
     description:
       'Selected students from Sec 3 Aspiration and Creativity classes performing in the school Drama Festival 2025.',
@@ -133,6 +137,8 @@ export const MOCK_GROUPS: Array<StudentGroup> = [
   },
   {
     id: 'cg-science-olympiad',
+    kind: 'regular',
+    source: 'created',
     name: 'Science Olympiad Team',
     description:
       'Top Sec 4 Science students from Dedication and Endeavour classes selected for the National Science Olympiad 2025.',

@@ -3,6 +3,7 @@ import type {
   EntityScope,
 } from '@/components/comms/entity-selector'
 import { mockStudents } from '@/data/mock-students'
+import { MOCK_GROUPS } from '@/data/mock-groups'
 
 // ─── NRIC helpers ─────────────────────────────────────────────────────────────
 
@@ -444,31 +445,27 @@ const dramaNames = [
   'Priya Sundaram',
 ]
 
-export const CUSTOM_GROUPS: Array<EntityItem> = [
-  {
-    id: 'cg:learning-support',
-    label: 'Learning Support Students',
+// Derived from MOCK_GROUPS so the student selector always reflects the Groups page
+function groupToEntityItem(g: (typeof MOCK_GROUPS)[number]): EntityItem {
+  return {
+    id: `cg:${g.id}`,
+    label: g.name,
     type: 'group',
-    count: lsStudents.length,
+    count: g.members.length,
     groupType: 'custom',
-    memberNames: lsStudents.map((s) => s.name),
-    memberDetails: lsStudents.map((s) => ({
-      name: s.name,
-      nric: s.nric,
-      index: s.indexNumber,
-      class: s.class,
+    memberNames: g.members.map((m) => m.name),
+    memberDetails: g.members.map((m) => ({
+      name: m.name,
+      nric: m.nric,
+      index: m.indexNumber,
+      class: m.class,
     })),
-  },
-  {
-    id: 'cg:drama-festival',
-    label: 'Drama Festival Cast',
-    type: 'group',
-    count: 12,
-    groupType: 'custom',
-    memberNames: dramaNames,
-    memberDetails: dramaNames.map((name, i) => memberDetail(name, i + 1)),
-  },
-]
+  }
+}
+
+/** @deprecated Use getStudentScopes() for live MOCK_GROUPS data */
+export const CUSTOM_GROUPS: Array<EntityItem> =
+  MOCK_GROUPS.map(groupToEntityItem)
 
 // ─── Flat array ───────────────────────────────────────────────────────────────
 
@@ -504,39 +501,45 @@ const otherCCAs = CCA_GROUPS.filter((g) => g.id !== MY_CCA_ID)
 // ─── Browse scopes ────────────────────────────────────────────────────────────
 // 5 tabs: Class · Level/School · CCA · Teaching Group · Custom Group
 
-export const STUDENT_SCOPES: Array<EntityScope> = [
-  {
-    id: 'classes',
-    label: 'Class',
-    items: CLASS_GROUPS,
-    sections: [
-      { label: 'My class', items: [myClass] },
-      { label: 'Other classes', items: otherClasses },
-    ],
-  },
-  {
-    id: 'levels',
-    label: 'Level/School',
-    items: [SCHOOL_GROUP, ...LEVEL_GROUPS],
-  },
-  {
-    id: 'ccas',
-    label: 'CCA',
-    items: CCA_GROUPS,
-    sections: [
-      { label: 'My CCA', items: [myCCA] },
-      { label: 'Other CCAs', items: otherCCAs },
-    ],
-  },
-  { id: 'teaching-groups', label: 'Teaching Group', items: TEACHING_GROUPS },
-  {
-    id: 'my-groups',
-    label: 'Custom Group',
-    items: CUSTOM_GROUPS,
-    createHref: '/groups/new',
-    createLabel: 'Create custom group',
-  },
-]
+/** Returns scopes with live MOCK_GROUPS data for the Custom Group tab. */
+export function getStudentScopes(): Array<EntityScope> {
+  return [
+    {
+      id: 'classes',
+      label: 'Class',
+      items: CLASS_GROUPS,
+      sections: [
+        { label: 'My class', items: [myClass] },
+        { label: 'Other classes', items: otherClasses },
+      ],
+    },
+    {
+      id: 'levels',
+      label: 'Level/School',
+      items: [SCHOOL_GROUP, ...LEVEL_GROUPS],
+    },
+    {
+      id: 'ccas',
+      label: 'CCA',
+      items: CCA_GROUPS,
+      sections: [
+        { label: 'My CCA', items: [myCCA] },
+        { label: 'Other CCAs', items: otherCCAs },
+      ],
+    },
+    { id: 'teaching-groups', label: 'Teaching Group', items: TEACHING_GROUPS },
+    {
+      id: 'my-groups',
+      label: 'Custom Group',
+      items: MOCK_GROUPS.map(groupToEntityItem),
+      createHref: '/groups/new',
+      createLabel: 'Create custom group',
+    },
+  ]
+}
+
+/** @deprecated Use getStudentScopes() */
+export const STUDENT_SCOPES: Array<EntityScope> = getStudentScopes()
 
 // ─── Overlap map ──────────────────────────────────────────────────────────────
 
