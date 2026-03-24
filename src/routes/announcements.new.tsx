@@ -92,51 +92,6 @@ function formatFileSize(bytes: number): string {
 }
 
 // ---------------------------------------------------------------------------
-// Response type card mockups
-// ---------------------------------------------------------------------------
-function ViewOnlyMockup() {
-  return (
-    <div className="flex flex-col gap-2 p-3">
-      <div className="h-2 w-2/3 rounded-full bg-slate-300" />
-      <div className="h-1.5 w-full rounded-full bg-slate-200" />
-      <div className="h-1.5 w-5/6 rounded-full bg-slate-200" />
-      <div className="h-1.5 w-4/6 rounded-full bg-slate-200" />
-      <div className="h-1.5 w-full rounded-full bg-slate-200" />
-    </div>
-  )
-}
-
-function AcknowledgeMockup() {
-  return (
-    <div className="flex flex-col gap-2 p-3">
-      <div className="h-2 w-2/3 rounded-full bg-slate-300" />
-      <div className="h-1.5 w-full rounded-full bg-slate-200" />
-      <div className="h-1.5 w-5/6 rounded-full bg-slate-200" />
-      <div className="mt-1 flex h-7 items-center justify-center rounded-md bg-primary/80">
-        <div className="h-1.5 w-14 rounded-full bg-white/70" />
-      </div>
-    </div>
-  )
-}
-
-function YesNoMockup() {
-  return (
-    <div className="flex flex-col gap-2 p-3">
-      <div className="h-2 w-2/3 rounded-full bg-slate-300" />
-      <div className="h-1.5 w-full rounded-full bg-slate-200" />
-      <div className="mt-1 flex gap-2">
-        <div className="flex h-7 flex-1 items-center justify-center rounded-md bg-green-100 text-[9px] font-semibold text-green-700">
-          Yes
-        </div>
-        <div className="flex h-7 flex-1 items-center justify-center rounded-md bg-red-100 text-[9px] font-semibold text-red-700">
-          No
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
 // Preview pane — mirrors the Parents Gateway app layout as seen by parents
 // ---------------------------------------------------------------------------
 
@@ -633,14 +588,13 @@ function NewAnnouncementPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const photoInputRef = useRef<HTMLInputElement>(null)
 
-  // Response type
-  const [responseType, setResponseType] = useState<ResponseType>(
+  // Response type (read-only — selector removed; derived from URL param)
+  const responseType: ResponseType =
     initialResponseType === 'acknowledge'
       ? 'acknowledge'
       : initialResponseType === 'yes-no'
         ? 'yes-no'
-        : 'view-only',
-  )
+        : 'view-only'
   const [dueDate, setDueDate] = useState('')
   const [reminderType, setReminderType] = useState<ReminderType>('none')
   const [reminderDate, setReminderDate] = useState('')
@@ -655,22 +609,6 @@ function NewAnnouncementPage() {
   const [eventEnd, setEventEnd] = useState('')
   const [eventEndTime, setEventEndTime] = useState('')
   const [venue, setVenue] = useState('')
-
-  function handleResponseTypeChange(type: ResponseType) {
-    setResponseType(type)
-    if (type === 'view-only') {
-      setDueDate('')
-      setReminderType('none')
-      setReminderDate('')
-      setQuestions([])
-      setEditingQuestionId(null)
-      setEventStart('')
-      setEventStartTime('')
-      setEventEnd('')
-      setEventEndTime('')
-      setVenue('')
-    }
-  }
 
   // Send options
   const [sendOption, setSendOption] = useState<SendOption>('now')
@@ -1373,96 +1311,6 @@ function NewAnnouncementPage() {
               </div>
             </section>
 
-            {/* RESPONSE TYPE */}
-            <section className="rounded-xl border bg-white p-6">
-              <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Response Type
-              </h2>
-              <p className="mb-5 text-xs text-muted-foreground">
-                Choose how parents respond to this announcement.
-              </p>
-              <div className="grid grid-cols-3 gap-4">
-                {(
-                  [
-                    {
-                      value: 'view-only' as ResponseType,
-                      label: 'View Only',
-                      hint: 'Parents can read the announcement.',
-                      mockup: <ViewOnlyMockup />,
-                    },
-                    {
-                      value: 'acknowledge' as ResponseType,
-                      label: 'Acknowledge',
-                      hint: 'Parents tap a button to acknowledge.',
-                      mockup: <AcknowledgeMockup />,
-                    },
-                    {
-                      value: 'yes-no' as ResponseType,
-                      label: 'Yes or No',
-                      hint: 'Parents tap Yes or No. Supports follow-up questions.',
-                      mockup: <YesNoMockup />,
-                    },
-                  ] as const
-                ).map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => handleResponseTypeChange(opt.value)}
-                    className={cn(
-                      'flex flex-col gap-3 rounded-xl border-2 p-4 text-left transition-all',
-                      responseType === opt.value
-                        ? 'border-primary bg-primary/[0.04] ring-1 ring-primary/20'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        'flex h-[100px] w-full items-center justify-center overflow-hidden rounded-lg border',
-                        responseType === opt.value
-                          ? 'border-primary/15 bg-white'
-                          : 'border-slate-100 bg-slate-50/50',
-                      )}
-                    >
-                      <div className="w-full">{opt.mockup}</div>
-                    </div>
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">
-                          {opt.label}
-                        </p>
-                        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                          {opt.hint}
-                        </p>
-                      </div>
-                      {responseType === opt.value && (
-                        <div className="mt-0.5 shrink-0 rounded-full bg-primary p-0.5 text-white">
-                          <Check className="h-3 w-3" />
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {/* Attach a Form — distinct action, not a response type */}
-              <Link
-                to="/forms/new"
-                className="mt-4 flex items-center gap-3 rounded-lg border border-dashed border-slate-300 px-4 py-3 transition-colors hover:border-slate-400 hover:bg-slate-50"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                  <FileText className="h-4 w-4 text-slate-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">
-                    Attach a Form
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Create a custom form in the Forms section.
-                  </p>
-                </div>
-                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              </Link>
-            </section>
 
             {/* CUSTOM QUESTIONS — yes/no only */}
             {responseType === 'yes-no' && (

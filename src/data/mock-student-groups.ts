@@ -533,7 +533,7 @@ export const STUDENT_SCOPES: Array<EntityScope> = [
     id: 'my-groups',
     label: 'Custom Group',
     items: CUSTOM_GROUPS,
-    createHref: '/custom-groups/new',
+    createHref: '/groups/new',
     createLabel: 'Create custom group',
   },
 ]

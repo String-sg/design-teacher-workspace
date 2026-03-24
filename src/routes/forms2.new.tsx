@@ -92,17 +92,6 @@ function formatFileSize(bytes: number): string {
 // ---------------------------------------------------------------------------
 // Response type card mockups
 // ---------------------------------------------------------------------------
-function ViewOnlyMockup() {
-  return (
-    <div className="flex flex-col gap-1.5 p-2">
-      <div className="h-1.5 w-3/4 rounded bg-slate-200" />
-      <div className="h-1 w-full rounded bg-slate-100" />
-      <div className="h-1 w-5/6 rounded bg-slate-100" />
-      <div className="h-1 w-4/6 rounded bg-slate-100" />
-    </div>
-  )
-}
-
 function AcknowledgeMockup() {
   return (
     <div className="flex flex-col gap-1.5 p-2">
@@ -633,7 +622,7 @@ function NewAnnouncementPage() {
   const photoInputRef = useRef<HTMLInputElement>(null)
 
   // Response type
-  const [responseType, setResponseType] = useState<ResponseType>('view-only')
+  const [responseType, setResponseType] = useState<ResponseType>('acknowledge')
   const [dueDate, setDueDate] = useState('')
   const [reminderType, setReminderType] = useState<ReminderType>('none')
   const [reminderDate, setReminderDate] = useState('')
@@ -1377,12 +1366,6 @@ function NewAnnouncementPage() {
               <div className="flex gap-3">
                 {(
                   [
-                    {
-                      value: 'view-only' as ResponseType,
-                      label: 'View Only',
-                      hint: 'Parents can read the announcement.',
-                      mockup: <ViewOnlyMockup />,
-                    },
                     {
                       value: 'acknowledge' as ResponseType,
                       label: 'Acknowledge',
