@@ -38,17 +38,17 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
     stage: 'Release 2',
   },
   {
-    key: 'lta-intervention',
-    label: 'Contextual Intelligence',
-    description:
-      'Show the LTA (long-term absenteeism) tag in the student list and the intervention banner and guidance dialog on the student profile',
-    stage: 'Release 2/3',
-  },
-  {
     key: 'forms',
     label: 'Posts with Custom Forms',
     description: 'Show or hide the Custom Forms tab on the Posts page',
     stage: 'Release 3',
+  },
+  {
+    key: 'lta-intervention',
+    label: 'Contextual Intelligence',
+    description:
+      'Show the LTA (long-term absenteeism) tag in the student list and the intervention banner and guidance dialog on the student profile',
+    stage: 'Release 2',
   },
   {
     key: 'holistic-reports',
@@ -86,12 +86,21 @@ function FeatureFlagsPage() {
               className="flex items-center justify-between gap-4"
             >
               <div className="space-y-0.5">
-                <Label htmlFor={config.key} className="text-sm font-medium">
-                  {config.label}
-                  <Badge variant="outline" className="ml-2">
+                <div className="flex items-center gap-1.5">
+                  <Label htmlFor={config.key} className="text-sm font-medium">
+                    {config.label}
+                  </Label>
+                  <Badge
+                    variant="outline"
+                    className={
+                      config.stage === 'Experiment'
+                        ? 'border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-700 dark:bg-purple-950 dark:text-purple-300'
+                        : undefined
+                    }
+                  >
                     {config.stage}
                   </Badge>
-                </Label>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   {config.description}
                 </p>

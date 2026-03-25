@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MonitoringAcademicAnalytics } from '@/components/students/academic-analytics'
 import { AttendanceLevelAnalytics } from '@/components/students/attendance-analytics'
 import { InsightBuddy } from '@/components/insight-buddy'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 const ANALYTICS_PROMPTS = [
@@ -58,9 +59,12 @@ function StudentAnalyticsPage() {
         {/* Page header */}
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-semibold">Analytics</h1>
-          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
-            Concept illustration
-          </span>
+          <Badge
+            variant="outline"
+            className="border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-700 dark:bg-purple-950 dark:text-purple-300"
+          >
+            Experiment
+          </Badge>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Monitor trends and explore student data
