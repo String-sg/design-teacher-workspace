@@ -46,6 +46,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { FeedbackDialog } from '@/components/feedback-dialog'
 import { cn } from '@/lib/utils'
@@ -145,9 +146,12 @@ function SidebarMenuItems({
             <item.icon className="size-4" />
             <span>{item.title}</span>
             {item.conceptTag && (
-              <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-900 group-data-[collapsible=icon]:hidden">
+              <Badge
+                variant="outline"
+                className="group-data-[collapsible=icon]:hidden"
+              >
                 Concept
-              </span>
+              </Badge>
             )}
           </SidebarMenuButton>
           {item.badge && (

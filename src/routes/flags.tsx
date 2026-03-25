@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 
@@ -20,6 +21,7 @@ interface FeatureFlagConfig {
   key: FeatureFlagKey
   label: string
   description: string
+  stage: string
 }
 
 const featureFlagConfigs: Array<FeatureFlagConfig> = [
@@ -27,35 +29,40 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
     key: 'notifications',
     label: 'Notifications',
     description: 'Enable notification features',
+    stage: 'Release 2',
   },
   {
     key: 'posts',
     label: 'Posts',
-    description:
-      'Show or hide the Posts page in the sidebar navigation',
-  },
-  {
-    key: 'forms',
-    label: 'Posts with Custom Forms',
-    description: 'Show or hide the Custom Forms tab on the Posts page',
-  },
-  {
-    key: 'holistic-reports',
-    label: 'Holistic Reports',
-    description:
-      'Enable holistic development reports showing student progress across academic and character development',
-  },
-  {
-    key: 'student-analytics',
-    label: 'Student Analytics (Research)',
-    description:
-      'Show Student Analytics and Insight Buddy in the sidebar — attendance cohort analytics, academic analytics, export CSV, and AI-powered student insights',
+    description: 'Show or hide the Posts page in the sidebar navigation',
+    stage: 'Release 2',
   },
   {
     key: 'lta-intervention',
     label: 'Contextual Intelligence',
     description:
       'Show the LTA (long-term absenteeism) tag in the student list and the intervention banner and guidance dialog on the student profile',
+    stage: 'Release 2/3',
+  },
+  {
+    key: 'forms',
+    label: 'Posts with Custom Forms',
+    description: 'Show or hide the Custom Forms tab on the Posts page',
+    stage: 'Release 3',
+  },
+  {
+    key: 'holistic-reports',
+    label: 'Holistic Reports',
+    description:
+      'Enable holistic development reports showing student progress across academic and character development',
+    stage: 'Experiment',
+  },
+  {
+    key: 'student-analytics',
+    label: 'Student Analytics (Research)',
+    description:
+      'Show Student Analytics and Insight Buddy in the sidebar — attendance cohort analytics, academic analytics, export CSV, and AI-powered student insights',
+    stage: 'Experiment',
   },
 ]
 
@@ -81,6 +88,9 @@ function FeatureFlagsPage() {
               <div className="space-y-0.5">
                 <Label htmlFor={config.key} className="text-sm font-medium">
                   {config.label}
+                  <Badge variant="outline" className="ml-2">
+                    {config.stage}
+                  </Badge>
                 </Label>
                 <p className="text-sm text-muted-foreground">
                   {config.description}
