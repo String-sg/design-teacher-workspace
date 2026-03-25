@@ -14,7 +14,7 @@ function HomePage() {
   useSetBreadcrumbs([{ label: 'Home', href: '/' }])
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-8 px-4 py-8">
+    <main className="mx-auto flex max-w-[760px] flex-col gap-8 px-4 py-8">
       <Greeting />
 
       <section className="flex flex-col gap-4">

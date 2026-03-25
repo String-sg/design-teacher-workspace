@@ -35,7 +35,7 @@ export function AppIcon({
     return (
       <div
         className={cn(
-          'relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border bg-white',
+          'relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border bg-white',
           iconPaddingVariants[iconPadding],
           className,
         )}
@@ -50,7 +50,7 @@ export function AppIcon({
   return (
     <div
       className={cn(
-        'flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border bg-white',
+        'flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border bg-white',
         className,
       )}
     >
@@ -86,7 +86,7 @@ export function AppCard({
   className,
 }: AppCardProps) {
   const cardClassName = cn(
-    'group flex flex-col gap-4 rounded-3xl border bg-background p-4 transition-colors hover:bg-muted/50 text-left',
+    'group flex min-w-0 flex-col gap-4 rounded-[14px] border bg-background p-4 transition-colors hover:bg-muted/50 text-left',
     className,
   )
 
@@ -142,7 +142,7 @@ export function FeaturedAppCard({
     <Link
       to={href}
       className={cn(
-        'group flex h-[132px] items-center gap-4 rounded-3xl border border-[#C8C8C8] bg-white p-4 transition-colors hover:bg-muted/50',
+        'group flex h-[132px] items-center gap-4 rounded-[14px] border border-[#C8C8C8] bg-white p-4 transition-colors hover:bg-muted/50',
         className,
       )}
     >

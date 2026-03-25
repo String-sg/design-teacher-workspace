@@ -258,7 +258,7 @@ export function AppSidebar() {
                 }}
               >
                 <PopoverTrigger
-                  render={<SidebarGroupContent className="mt-2" />}
+                  render={<SidebarGroupContent className="mt-2 focus:outline-none" />}
                 >
                   <SidebarMenuItems
                     items={filteredParentsItems}
