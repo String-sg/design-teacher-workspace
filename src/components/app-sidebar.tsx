@@ -49,6 +49,7 @@ import {
 } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { FeedbackDialog } from '@/components/feedback-dialog'
+import { cn } from '@/lib/utils'
 import { useFeatureFlag } from '@/hooks/use-feature-flag'
 import { useAuth } from '@/lib/auth'
 
@@ -120,9 +121,14 @@ const parentsCommItems: Array<MenuItem> = [
 interface SidebarMenuItemsProps {
   items: Array<MenuItem>
   currentPath: string
+  highlightTitle?: string
 }
 
-function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
+function SidebarMenuItems({
+  items,
+  currentPath,
+  highlightTitle,
+}: SidebarMenuItemsProps) {
   return (
     <SidebarMenu>
       {items.map((item) => (
@@ -139,6 +145,11 @@ function SidebarMenuItems({ items, currentPath }: SidebarMenuItemsProps) {
                 false)
             }
             tooltip={item.title}
+            className={
+              highlightTitle === item.title
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                : undefined
+            }
           >
             <item.icon className="size-4" />
             <span>{item.title}</span>
@@ -263,14 +274,15 @@ export function AppSidebar() {
                   <SidebarMenuItems
                     items={filteredParentsItems}
                     currentPath={location.pathname}
+                    highlightTitle={showCoachMark ? 'Posts' : undefined}
                   />
                 </PopoverTrigger>
                 <PopoverContent side="right" sideOffset={12}>
                   <PopoverHeader>
-                    <PopoverTitle>Parents Gateway</PopoverTitle>
+                    <PopoverTitle>New! Parents Gateway posts are here</PopoverTitle>
                     <PopoverDescription>
-                      Manage communication with parents and send announcements
-                      to parents via Parents Gateway here.
+                      Send announcements, collect responses, and manage all
+                      parent communications in one place.
                     </PopoverDescription>
                   </PopoverHeader>
                   <div className="flex justify-end">

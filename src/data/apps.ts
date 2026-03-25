@@ -1,9 +1,4 @@
-import {
-  Briefcase,
-  CircleDollarSign,
-
-  Gift,
-} from 'lucide-react'
+import { Briefcase, CircleDollarSign, Gift } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export type AppColor = 'pink' | 'blue' | 'orange' | 'green' | 'purple'
@@ -29,7 +24,7 @@ export interface AppCategory {
 export const featuredApp: App = {
   id: 'featured-students',
   name: 'Students',
-  description: 'Key data to understand your students holistically.',
+  description: 'Key student information from multiple systems in one holistic view.',
   icon: '/logos/Student-logo.svg',
   color: 'purple',
   href: '/students',
@@ -80,24 +75,15 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'all-ears',
         name: 'All Ears',
-        description: 'Listen, support, empower',
+        description: 'Personalised surveys for students, staff, and parents',
         icon: '/logos/ae-logo.png',
         color: 'pink',
         href: '/all-ears',
       },
       {
-        id: 'formsg',
-        name: 'FormSG',
-        description: 'Build government forms in minutes',
-        icon: '/logos/formsg.png',
-        color: 'blue',
-        href: '/formsg',
-        iconPadding: 'md',
-      },
-      {
         id: 'sdt-data-tool',
         name: 'Students',
-        description: 'Key data to understand your students holistically',
+        description: 'Key student information from multiple systems in one holistic view',
         icon: '/logos/Student-logo.svg',
         color: 'blue',
         href: '/students',
@@ -113,7 +99,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'heytalia',
         name: 'HeyTalia',
-        description: 'Smart parent communication assistant',
+        description: 'AI assistant for clear, parent-friendly school communications',
         icon: '/logos/heytalia-icon.png',
         color: 'purple',
         href: '/heytalia',
@@ -137,7 +123,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'markly',
         name: 'Mark.ly',
-        description: 'Reimagining marking with AI',
+        description: 'AI-driven rubric-based marking for Humanities and Languages',
         icon: '/logos/Markly.svg',
         color: 'blue',
         href: '/markly',
@@ -146,7 +132,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'appraiser',
         name: 'Appraiser',
-        description: 'AI-powered student testimonials in minutes',
+        description: 'AI-generated draft student testimonials in minutes',
         icon: '/logos/appraiser-logo.svg',
         color: 'blue',
         href: '/appraiser',
@@ -208,7 +194,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'glow',
         name: 'Glow',
-        description: 'On-the-go professional learning',
+        description: 'Bite-sized daily learning in just 5 minutes',
         icon: '/logos/glow-logo.svg',
         color: 'blue',
         href: '/glow',
