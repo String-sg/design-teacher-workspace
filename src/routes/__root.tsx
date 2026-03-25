@@ -123,9 +123,11 @@ function RootComponent() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <ErrorBoundary>
-              <Outlet />
-            </ErrorBoundary>
+            <FeatureFlagProvider>
+              <ErrorBoundary>
+                <Outlet />
+              </ErrorBoundary>
+            </FeatureFlagProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>

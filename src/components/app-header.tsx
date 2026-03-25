@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 import { useBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 export function AppHeader() {
@@ -35,6 +36,7 @@ export function AppHeader() {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4">
       <div className="flex items-center gap-2">
+        <SidebarTrigger className="md:hidden" />
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((item, index) => {

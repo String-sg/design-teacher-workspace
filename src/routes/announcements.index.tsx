@@ -142,7 +142,7 @@ function ParentsGatewayPage() {
     <div className="flex flex-col">
       {/* Tab buttons, Search & Filter */}
       <div className="mt-4 space-y-4">
-        <div className="flex flex-col gap-4 px-6 pb-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 px-6 pb-0 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative flex-1 md:flex-none">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
