@@ -59,7 +59,7 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
   },
   {
     key: 'lta-intervention',
-    label: 'LTA Intervention',
+    label: 'Contextual Intelligent',
     description:
       'Show the LTA (long-term absenteeism) tag in the student list and the intervention banner and guidance dialog on the student profile',
   },
