@@ -14,6 +14,7 @@ import { Route as StudentAnalyticsRouteImport } from './routes/student-analytics
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as InsightBuddyRouteImport } from './routes/insight-buddy'
+import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as FormsRouteImport } from './routes/forms'
 import { Route as FlagsRouteImport } from './routes/flags'
 import { Route as DsRouteImport } from './routes/ds'
@@ -23,11 +24,14 @@ import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentsIndexRouteImport } from './routes/students.index'
 import { Route as ReportsIndexRouteImport } from './routes/reports.index'
+import { Route as GroupsIndexRouteImport } from './routes/groups.index'
 import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as DsIndexRouteImport } from './routes/ds.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
+import { Route as GroupsNewRouteImport } from './routes/groups.new'
+import { Route as GroupsGroupIdRouteImport } from './routes/groups.$groupId'
 import { Route as GlowStudentIdRouteImport } from './routes/glow.$studentId'
 import { Route as FormsNewRouteImport } from './routes/forms.new'
 import { Route as FormsIdRouteImport } from './routes/forms.$id'
@@ -39,6 +43,7 @@ import { Route as AnnouncementsIdRouteImport } from './routes/announcements.$id'
 import { Route as GuestPreviewMenuRouteImport } from './routes/_guest.preview-menu'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
 import { Route as GuestCreateRouteImport } from './routes/_guest.create'
+import { Route as GroupsStructuredGroupIdRouteImport } from './routes/groups.structured.$groupId'
 import { Route as GuestReportViewTokenRouteImport } from './routes/_guest.report-view.$token'
 
 const StudentsRoute = StudentsRouteImport.update({
@@ -64,6 +69,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const InsightBuddyRoute = InsightBuddyRouteImport.update({
   id: '/insight-buddy',
   path: '/insight-buddy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroupsRoute = GroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FormsRoute = FormsRouteImport.update({
@@ -110,6 +120,11 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ReportsRoute,
 } as any)
+const GroupsIndexRoute = GroupsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GroupsRoute,
+} as any)
 const FormsIndexRoute = FormsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -134,6 +149,16 @@ const ReportsIdRoute = ReportsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ReportsRoute,
+} as any)
+const GroupsNewRoute = GroupsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => GroupsRoute,
+} as any)
+const GroupsGroupIdRoute = GroupsGroupIdRouteImport.update({
+  id: '/$groupId',
+  path: '/$groupId',
+  getParentRoute: () => GroupsRoute,
 } as any)
 const GlowStudentIdRoute = GlowStudentIdRouteImport.update({
   id: '/glow/$studentId',
@@ -190,6 +215,11 @@ const GuestCreateRoute = GuestCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => GuestRoute,
 } as any)
+const GroupsStructuredGroupIdRoute = GroupsStructuredGroupIdRouteImport.update({
+  id: '/structured/$groupId',
+  path: '/structured/$groupId',
+  getParentRoute: () => GroupsRoute,
+} as any)
 const GuestReportViewTokenRoute = GuestReportViewTokenRouteImport.update({
   id: '/report-view/$token',
   path: '/report-view/$token',
@@ -203,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/ds': typeof DsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
+  '/groups': typeof GroupsRouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
   '/reports': typeof ReportsRouteWithChildren
   '/settings': typeof SettingsRoute
@@ -219,14 +250,18 @@ export interface FileRoutesByFullPath {
   '/forms/$id': typeof FormsIdRoute
   '/forms/new': typeof FormsNewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
+  '/groups/$groupId': typeof GroupsGroupIdRoute
+  '/groups/new': typeof GroupsNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/ds/': typeof DsIndexRoute
   '/forms/': typeof FormsIndexRoute
+  '/groups/': typeof GroupsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
+  '/groups/structured/$groupId': typeof GroupsStructuredGroupIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -246,14 +281,18 @@ export interface FileRoutesByTo {
   '/forms/$id': typeof FormsIdRoute
   '/forms/new': typeof FormsNewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
+  '/groups/$groupId': typeof GroupsGroupIdRoute
+  '/groups/new': typeof GroupsNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
   '/ds': typeof DsIndexRoute
   '/forms': typeof FormsIndexRoute
+  '/groups': typeof GroupsIndexRoute
   '/reports': typeof ReportsIndexRoute
   '/students': typeof StudentsIndexRoute
   '/report-view/$token': typeof GuestReportViewTokenRoute
+  '/groups/structured/$groupId': typeof GroupsStructuredGroupIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -264,6 +303,7 @@ export interface FileRoutesById {
   '/ds': typeof DsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
+  '/groups': typeof GroupsRouteWithChildren
   '/insight-buddy': typeof InsightBuddyRoute
   '/reports': typeof ReportsRouteWithChildren
   '/settings': typeof SettingsRoute
@@ -280,14 +320,18 @@ export interface FileRoutesById {
   '/forms/$id': typeof FormsIdRoute
   '/forms/new': typeof FormsNewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
+  '/groups/$groupId': typeof GroupsGroupIdRoute
+  '/groups/new': typeof GroupsNewRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
   '/ds/': typeof DsIndexRoute
   '/forms/': typeof FormsIndexRoute
+  '/groups/': typeof GroupsIndexRoute
   '/reports/': typeof ReportsIndexRoute
   '/students/': typeof StudentsIndexRoute
   '/_guest/report-view/$token': typeof GuestReportViewTokenRoute
+  '/groups/structured/$groupId': typeof GroupsStructuredGroupIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -298,6 +342,7 @@ export interface FileRouteTypes {
     | '/ds'
     | '/flags'
     | '/forms'
+    | '/groups'
     | '/insight-buddy'
     | '/reports'
     | '/settings'
@@ -314,14 +359,18 @@ export interface FileRouteTypes {
     | '/forms/$id'
     | '/forms/new'
     | '/glow/$studentId'
+    | '/groups/$groupId'
+    | '/groups/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
     | '/ds/'
     | '/forms/'
+    | '/groups/'
     | '/reports/'
     | '/students/'
     | '/report-view/$token'
+    | '/groups/structured/$groupId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -341,14 +390,18 @@ export interface FileRouteTypes {
     | '/forms/$id'
     | '/forms/new'
     | '/glow/$studentId'
+    | '/groups/$groupId'
+    | '/groups/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements'
     | '/ds'
     | '/forms'
+    | '/groups'
     | '/reports'
     | '/students'
     | '/report-view/$token'
+    | '/groups/structured/$groupId'
   id:
     | '__root__'
     | '/'
@@ -358,6 +411,7 @@ export interface FileRouteTypes {
     | '/ds'
     | '/flags'
     | '/forms'
+    | '/groups'
     | '/insight-buddy'
     | '/reports'
     | '/settings'
@@ -374,14 +428,18 @@ export interface FileRouteTypes {
     | '/forms/$id'
     | '/forms/new'
     | '/glow/$studentId'
+    | '/groups/$groupId'
+    | '/groups/new'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
     | '/ds/'
     | '/forms/'
+    | '/groups/'
     | '/reports/'
     | '/students/'
     | '/_guest/report-view/$token'
+    | '/groups/structured/$groupId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -392,6 +450,7 @@ export interface RootRouteChildren {
   DsRoute: typeof DsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
   FormsRoute: typeof FormsRouteWithChildren
+  GroupsRoute: typeof GroupsRouteWithChildren
   InsightBuddyRoute: typeof InsightBuddyRoute
   ReportsRoute: typeof ReportsRouteWithChildren
   SettingsRoute: typeof SettingsRoute
@@ -435,6 +494,13 @@ declare module '@tanstack/react-router' {
       path: '/insight-buddy'
       fullPath: '/insight-buddy'
       preLoaderRoute: typeof InsightBuddyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/groups': {
+      id: '/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof GroupsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forms': {
@@ -500,6 +566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/groups/': {
+      id: '/groups/'
+      path: '/'
+      fullPath: '/groups/'
+      preLoaderRoute: typeof GroupsIndexRouteImport
+      parentRoute: typeof GroupsRoute
+    }
     '/forms/': {
       id: '/forms/'
       path: '/'
@@ -534,6 +607,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/$id'
       preLoaderRoute: typeof ReportsIdRouteImport
       parentRoute: typeof ReportsRoute
+    }
+    '/groups/new': {
+      id: '/groups/new'
+      path: '/new'
+      fullPath: '/groups/new'
+      preLoaderRoute: typeof GroupsNewRouteImport
+      parentRoute: typeof GroupsRoute
+    }
+    '/groups/$groupId': {
+      id: '/groups/$groupId'
+      path: '/$groupId'
+      fullPath: '/groups/$groupId'
+      preLoaderRoute: typeof GroupsGroupIdRouteImport
+      parentRoute: typeof GroupsRoute
     }
     '/glow/$studentId': {
       id: '/glow/$studentId'
@@ -612,6 +699,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestCreateRouteImport
       parentRoute: typeof GuestRoute
     }
+    '/groups/structured/$groupId': {
+      id: '/groups/structured/$groupId'
+      path: '/structured/$groupId'
+      fullPath: '/groups/structured/$groupId'
+      preLoaderRoute: typeof GroupsStructuredGroupIdRouteImport
+      parentRoute: typeof GroupsRoute
+    }
     '/_guest/report-view/$token': {
       id: '/_guest/report-view/$token'
       path: '/report-view/$token'
@@ -684,6 +778,23 @@ const FormsRouteChildren: FormsRouteChildren = {
 
 const FormsRouteWithChildren = FormsRoute._addFileChildren(FormsRouteChildren)
 
+interface GroupsRouteChildren {
+  GroupsGroupIdRoute: typeof GroupsGroupIdRoute
+  GroupsNewRoute: typeof GroupsNewRoute
+  GroupsIndexRoute: typeof GroupsIndexRoute
+  GroupsStructuredGroupIdRoute: typeof GroupsStructuredGroupIdRoute
+}
+
+const GroupsRouteChildren: GroupsRouteChildren = {
+  GroupsGroupIdRoute: GroupsGroupIdRoute,
+  GroupsNewRoute: GroupsNewRoute,
+  GroupsIndexRoute: GroupsIndexRoute,
+  GroupsStructuredGroupIdRoute: GroupsStructuredGroupIdRoute,
+}
+
+const GroupsRouteWithChildren =
+  GroupsRoute._addFileChildren(GroupsRouteChildren)
+
 interface ReportsRouteChildren {
   ReportsIdRoute: typeof ReportsIdRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
@@ -719,6 +830,7 @@ const rootRouteChildren: RootRouteChildren = {
   DsRoute: DsRouteWithChildren,
   FlagsRoute: FlagsRoute,
   FormsRoute: FormsRouteWithChildren,
+  GroupsRoute: GroupsRouteWithChildren,
   InsightBuddyRoute: InsightBuddyRoute,
   ReportsRoute: ReportsRouteWithChildren,
   SettingsRoute: SettingsRoute,

@@ -7,6 +7,7 @@ import {
   CircleHelp,
   FileText,
   Home,
+  Layers,
   Mail,
   Megaphone,
   MessageSquare,
@@ -99,6 +100,15 @@ const studentInsightItems: Array<MenuItem> = [
     icon: Bot,
     conceptTag: true,
     featureFlag: 'student-analytics',
+  },
+]
+
+const manageItems: Array<MenuItem> = [
+  {
+    title: 'Groups',
+    url: '/groups',
+    icon: Layers,
+    conceptTag: true,
   },
 ]
 
@@ -223,6 +233,7 @@ export function AppSidebar() {
 
   const filteredMainItems = filterItems(mainNavItems)
   const filteredParentsItems = filterItems(parentsCommItems)
+  const filteredManageItems = manageItems
   const filteredStudentItems = studentInsightItems.filter((item) =>
     item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
   )
@@ -262,6 +273,9 @@ export function AppSidebar() {
           {filteredParentsItems.length > 0 && (
             <>
               <SidebarSeparator className="mx-0 mt-3" />
+              <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
+                Communications
+              </SidebarGroupLabel>
               <Popover
                 open={showCoachMark}
                 onOpenChange={(o) => {
@@ -269,9 +283,7 @@ export function AppSidebar() {
                 }}
               >
                 <PopoverTrigger
-                  render={
-                    <SidebarGroupContent className="mt-2 outline-none" />
-                  }
+                  render={<SidebarGroupContent className="outline-none" />}
                 >
                   <SidebarMenuItems
                     items={filteredParentsItems}
@@ -281,7 +293,9 @@ export function AppSidebar() {
                 </PopoverTrigger>
                 <PopoverContent side="right" sideOffset={12}>
                   <PopoverHeader>
-                    <PopoverTitle>New! Parents Gateway posts are here</PopoverTitle>
+                    <PopoverTitle>
+                      New! Parents Gateway posts are here
+                    </PopoverTitle>
                     <PopoverDescription>
                       Send announcements, collect responses, and manage all
                       parent communications in one place.
@@ -296,6 +310,18 @@ export function AppSidebar() {
               </Popover>
             </>
           )}
+          <>
+            <SidebarSeparator className="mx-0 mt-3" />
+            <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
+              Manage
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenuItems
+                items={filteredManageItems}
+                currentPath={location.pathname}
+              />
+            </SidebarGroupContent>
+          </>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
