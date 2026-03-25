@@ -27,14 +27,14 @@ function FormsLayout() {
     <div className="flex flex-col">
       <div className="border-b px-4 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold md:text-2xl">Posts</h1>
-          <Button size="sm" render={<Link to="/create" />}>
+          <h1 className="text-lg font-semibold md:text-2xl">Forms</h1>
+          <Button size="sm" render={<Link to="/forms/new" />}>
             <Plus className="mr-1.5 h-4 w-4" />
             Create
           </Button>
         </div>
         <p className="mt-1 hidden text-sm text-muted-foreground md:block">
-          Send posts to parents via parents gateway, send a view-only post or collect responses.
+          Create custom forms to collect data from parents.
         </p>
       </div>
       <Outlet />

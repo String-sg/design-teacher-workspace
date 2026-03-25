@@ -24,26 +24,20 @@ interface FeatureFlagConfig {
 
 const featureFlagConfigs: Array<FeatureFlagConfig> = [
   {
-    key: 'allears',
-    label: 'AllEars',
-    description:
-      'Enable AllEars standalone form builder (legacy). When disabled, forms use the native TW builder.',
-  },
-  {
-    key: 'announcements',
-    label: 'Announcements',
-    description:
-      'Show or hide the Announcements page in the sidebar navigation',
-  },
-  {
-    key: 'forms',
-    label: 'Forms',
-    description: 'Show or hide the Forms page in the sidebar navigation',
-  },
-  {
     key: 'notifications',
     label: 'Notifications',
     description: 'Enable notification features',
+  },
+  {
+    key: 'posts',
+    label: 'Posts',
+    description:
+      'Show or hide the Posts page in the sidebar navigation',
+  },
+  {
+    key: 'forms',
+    label: 'Posts with Custom Forms',
+    description: 'Show or hide the Custom Forms tab on the Posts page',
   },
   {
     key: 'holistic-reports',

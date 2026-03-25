@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Copy, MoreHorizontal, Search, Trash2, Users } from 'lucide-react'
 
-import type { FormSource, FormStatus } from '@/types/form'
+import type { FormStatus } from '@/types/form'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,7 +30,6 @@ import {
 import { ReadRate } from '@/components/comms/read-rate'
 import { mockForms } from '@/data/mock-forms'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { useFeatureFlag } from '@/hooks/use-feature-flag'
 
 export const Route = createFileRoute('/forms/')({
   component: FormsPage,
@@ -55,27 +54,17 @@ function getStatusBadge(status: FormStatus) {
   return <Badge className={className}>{label}</Badge>
 }
 
-type SourceFilter = 'all' | FormSource
-
 function FormsPage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<FormsFilters>(EMPTY_FORMS_FILTERS)
-  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
-  const formsEnabled = useFeatureFlag('forms')
-  useSetBreadcrumbs([{ label: 'Posts', href: '/announcements' }])
+  useSetBreadcrumbs([{ label: 'Forms', href: '/forms' }])
 
   const filteredForms = useMemo(() => {
     return mockForms
       .filter((form) => {
-        // When forms flag is off, only show announcement-response forms
-        if (!formsEnabled && (form.source ?? 'custom') === 'custom') return false
-
-        // Source quick filter
-        if (sourceFilter !== 'all') {
-          const formSource = form.source ?? 'custom'
-          if (formSource !== sourceFilter) return false
-        }
+        // Only show custom forms on the Forms page
+        if ((form.source ?? 'custom') !== 'custom') return false
 
         if (
           filters.statuses.length > 0 &&
@@ -112,7 +101,7 @@ function FormsPage() {
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       )
-  }, [searchQuery, filters, sourceFilter, formsEnabled])
+  }, [searchQuery, filters])
 
   return (
     <div className="flex flex-col">
@@ -123,56 +112,15 @@ function FormsPage() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search posts..."
+              placeholder="Search forms..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 md:w-[240px]"
               aria-label="Search forms"
             />
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              className="h-9 text-muted-foreground"
-              render={<Link to="/announcements" />}
-            >
-              View-only posts
-            </Button>
-            <Button
-              variant="secondary"
-              className="h-9 bg-muted font-medium"
-              render={<Link to="/forms" />}
-            >
-              Posts with responses
-            </Button>
-          </div>
           <FormsFilterBar filters={filters} onChange={setFilters} />
         </div>
-        {formsEnabled && (
-          <div className="flex items-center gap-1">
-            {(
-              [
-                { value: 'all', label: 'All' },
-                { value: 'custom', label: 'Custom Forms' },
-                { value: 'announcement-response', label: 'Responses' },
-              ] as const
-            ).map(({ value, label }) => (
-              <Button
-                key={value}
-                variant={sourceFilter === value ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setSourceFilter(value)}
-                className={
-                  sourceFilter === value
-                    ? 'bg-muted font-medium'
-                    : 'text-muted-foreground'
-                }
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Forms Table */}
