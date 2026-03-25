@@ -654,7 +654,7 @@ export function StudentTable({
                                 variant={tagVariantMap[tag]}
                                 className={
                                   tag === 'SwAN'
-                                    ? 'border-orange-400 bg-orange-100 text-orange-700 dark:border-orange-500 dark:bg-orange-950 dark:text-orange-300'
+                                    ? 'border-orange-6 bg-orange-2 text-orange-11'
                                     : undefined
                                 }
                               >
