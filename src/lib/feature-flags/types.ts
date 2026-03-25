@@ -1,6 +1,5 @@
 export type FeatureFlagKey =
-  | 'allears'
-  | 'announcements'
+  | 'posts'
   | 'forms'
   | 'notifications'
   | 'holistic-reports'
