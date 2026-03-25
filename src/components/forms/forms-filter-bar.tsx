@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Filter, RotateCcw } from 'lucide-react'
+import { CalendarIcon, Filter, RotateCcw } from 'lucide-react'
+import { format, parse } from 'date-fns'
 import type { FormOwnership, FormStatus } from '@/types/form'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
   PopoverContent,
@@ -147,23 +149,81 @@ export function FormsFilterBar({ filters, onChange }: FormsFilterBarProps) {
           <div className="flex items-center gap-3">
             <span className="w-24 shrink-0 text-sm font-medium">Date</span>
             <div className="flex flex-1 items-center gap-1.5">
-              <input
-                type="date"
-                value={filters.dateFrom}
-                onChange={(e) =>
-                  onChange({ ...filters, dateFrom: e.target.value })
-                }
-                className="h-9 flex-1 rounded-[14px] border border-input bg-background px-3 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring"
-              />
+              <Popover>
+                <PopoverTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'h-9 flex-1 justify-start gap-2 text-sm font-normal',
+                        !filters.dateFrom && 'text-muted-foreground',
+                      )}
+                    />
+                  }
+                >
+                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                  {filters.dateFrom
+                    ? format(
+                        parse(filters.dateFrom, 'yyyy-MM-dd', new Date()),
+                        'dd MMM yyyy',
+                      )
+                    : 'From'}
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      filters.dateFrom
+                        ? parse(filters.dateFrom, 'yyyy-MM-dd', new Date())
+                        : undefined
+                    }
+                    onSelect={(date) =>
+                      onChange({
+                        ...filters,
+                        dateFrom: date ? format(date, 'yyyy-MM-dd') : '',
+                      })
+                    }
+                  />
+                </PopoverContent>
+              </Popover>
               <span className="shrink-0 text-sm text-muted-foreground">–</span>
-              <input
-                type="date"
-                value={filters.dateTo}
-                onChange={(e) =>
-                  onChange({ ...filters, dateTo: e.target.value })
-                }
-                className="h-9 flex-1 rounded-[14px] border border-input bg-background px-3 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring"
-              />
+              <Popover>
+                <PopoverTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'h-9 flex-1 justify-start gap-2 text-sm font-normal',
+                        !filters.dateTo && 'text-muted-foreground',
+                      )}
+                    />
+                  }
+                >
+                  <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                  {filters.dateTo
+                    ? format(
+                        parse(filters.dateTo, 'yyyy-MM-dd', new Date()),
+                        'dd MMM yyyy',
+                      )
+                    : 'To'}
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      filters.dateTo
+                        ? parse(filters.dateTo, 'yyyy-MM-dd', new Date())
+                        : undefined
+                    }
+                    onSelect={(date) =>
+                      onChange({
+                        ...filters,
+                        dateTo: date ? format(date, 'yyyy-MM-dd') : '',
+                      })
+                    }
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </div>
