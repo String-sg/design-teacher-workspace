@@ -330,24 +330,19 @@ export function GlowStudentSupportPage({
           <div className="overflow-y-auto p-5">
 
             {/* Student identity */}
-            <div className="mt-4 flex items-center gap-3">
+            <div className="mt-4 flex items-start gap-3">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-white">
                 {initials}
               </span>
-              <div className="min-w-0">
+              <div className="min-w-0 space-y-1">
                 <p className="truncate text-sm font-semibold">{student.name}</p>
                 <p className="truncate text-xs text-muted-foreground">
                   Class {student.class} · {student.cca}
                 </p>
+                <span className="inline-flex items-center rounded-lg border border-orange-6 bg-orange-2 px-2.5 py-1 text-xs font-medium text-orange-11">
+                  SwAN
+                </span>
               </div>
-            </div>
-
-            {/* SwAN badge */}
-            <div className="mt-3">
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-orange-6 bg-orange-2 px-2.5 py-1 text-xs font-medium text-orange-11">
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-9" />
-                SwAN — SEN Profile
-              </span>
             </div>
 
             {/* Context question */}

@@ -32,7 +32,7 @@ interface InterventionRule {
 export const interventionRules: Array<InterventionRule> = [
   // SEN / SwAN
   {
-    trigger: (s) => s.sen !== null || s.attentionTags.includes('SEN'),
+    trigger: (s) => s.attentionTags.includes('SwAN'),
     buildPackage: (s) => ({
       id: 'sen',
       color: 'purple',
