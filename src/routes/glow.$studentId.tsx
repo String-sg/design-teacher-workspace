@@ -2,6 +2,7 @@ import { createFileRoute, notFound, useNavigate } from '@tanstack/react-router'
 
 import { GlowStudentSupportPage } from '@/components/students/lta-dialog'
 import { getStudentById } from '@/data/mock-students'
+import { useFeatureFlags } from '@/lib/feature-flags'
 
 export const Route = createFileRoute('/glow/$studentId')({
   component: GlowPage,
@@ -15,6 +16,12 @@ export const Route = createFileRoute('/glow/$studentId')({
 function GlowPage() {
   const { student } = Route.useLoaderData()
   const navigate = useNavigate()
+  const { isEnabled } = useFeatureFlags()
+
+  if (!isEnabled('lta-intervention')) {
+    navigate({ to: '/students/$id', params: { id: student.id } })
+    return null
+  }
 
   return (
     <GlowStudentSupportPage

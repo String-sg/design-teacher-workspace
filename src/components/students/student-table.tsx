@@ -652,6 +652,11 @@ export function StudentTable({
                               <Badge
                                 key={tag}
                                 variant={tagVariantMap[tag]}
+                                className={
+                                  tag === 'SwAN'
+                                    ? 'border-orange-6 bg-orange-2 text-orange-11'
+                                    : undefined
+                                }
                               >
                                 {tag}
                               </Badge>

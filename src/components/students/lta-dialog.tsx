@@ -104,7 +104,7 @@ function GlowBotIcon({ size = 28 }: { size?: number }) {
 
   return (
     <span
-      className="flex shrink-0 items-center justify-center rounded-[var(--radius)] bg-[var(--twblue-9)]"
+      className="flex shrink-0 items-center justify-center rounded-lg bg-twblue-9"
       style={{ width: size, height: size }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -182,8 +182,8 @@ const guidanceActions: Array<GuidanceAction> = [
     urgency: {
       label: 'Urgent',
       icon: <PriorityUrgentIcon />,
-      textColor: 'text-red-700',
-      badgeBg: 'bg-red-50 border border-red-200',
+      textColor: 'text-crimson-11',
+      badgeBg: 'bg-crimson-2 border border-crimson-6',
     },
     contacts: ['School Counsellor', 'SEN Officer'],
     resources: [
@@ -198,8 +198,8 @@ const guidanceActions: Array<GuidanceAction> = [
     urgency: {
       label: 'This week',
       icon: <PriorityMediumIcon />,
-      textColor: 'text-orange-700',
-      badgeBg: 'bg-orange-50 border border-orange-200',
+      textColor: 'text-orange-11',
+      badgeBg: 'bg-orange-2 border border-orange-6',
     },
     contacts: ['SEN Officer'],
     resources: [{ label: 'SwAN differentiation guide', href: '#' }],
@@ -211,8 +211,8 @@ const guidanceActions: Array<GuidanceAction> = [
     urgency: {
       label: 'This week',
       icon: <PriorityMediumIcon />,
-      textColor: 'text-orange-700',
-      badgeBg: 'bg-orange-50 border border-orange-200',
+      textColor: 'text-orange-11',
+      badgeBg: 'bg-orange-2 border border-orange-6',
     },
     contacts: ['Year Head', 'School Counsellor', 'SEN Officer'],
     resources: [
@@ -227,8 +227,8 @@ const guidanceActions: Array<GuidanceAction> = [
     urgency: {
       label: 'Monitor',
       icon: <PriorityLowIcon />,
-      textColor: 'text-green-700',
-      badgeBg: 'bg-green-50 border border-green-200',
+      textColor: 'text-lime-11',
+      badgeBg: 'bg-lime-2 border border-lime-6',
     },
     contacts: ['CCA Teacher-in-Charge', 'Form Teacher'],
     resources: [{ label: 'CCA re-engagement guide', href: '#' }],
@@ -298,16 +298,16 @@ export function GlowStudentSupportPage({
 
   return (
     // Fills the full viewport — no fixed/z-index needed since this IS the page
-    <div className="flex h-screen flex-col bg-[var(--background)]">
+    <div className="flex h-screen flex-col bg-background">
       {/* ── Top bar ── */}
       <header className="flex h-14 shrink-0 items-center justify-between px-4">
         <div className="flex items-center gap-2.5">
           <GlowBotIcon size={28} />
-          <span className="text-sm font-semibold text-[var(--foreground)]">
+          <span className="text-sm font-semibold text-foreground">
             Glow
           </span>
-          <span className="text-sm text-[var(--muted-foreground)]">·</span>
-          <span className="text-sm text-[var(--muted-foreground)]">
+          <span className="text-sm text-muted-foreground">·</span>
+          <span className="text-sm text-muted-foreground">
             Student Support
           </span>
         </div>
@@ -319,10 +319,10 @@ export function GlowStudentSupportPage({
       {/* ── 3-column layout — gap creates the NotebookLM-style visible separation ── */}
       <div className="flex flex-1 gap-4 overflow-hidden p-3">
         {/* ── Left panel: Student context ── */}
-        <aside className="flex w-[420px] shrink-0 flex-col overflow-hidden rounded-[var(--radius)] border bg-[var(--card)] shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
+        <aside className="flex w-[420px] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
           {/* Panel header */}
-          <div className="shrink-0 border-b border-[var(--border)] px-5 py-3.5">
-            <h2 className="text-sm font-medium text-[var(--foreground)]">
+          <div className="shrink-0 border-b border-border px-5 py-3.5">
+            <h2 className="text-sm font-medium text-foreground">
               Student context
             </h2>
           </div>
@@ -330,53 +330,48 @@ export function GlowStudentSupportPage({
           <div className="overflow-y-auto p-5">
 
             {/* Student identity */}
-            <div className="mt-4 flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-xs font-bold text-white">
+            <div className="mt-4 flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-bold text-white">
                 {initials}
               </span>
-              <div className="min-w-0">
+              <div className="min-w-0 space-y-1">
                 <p className="truncate text-sm font-semibold">{student.name}</p>
-                <p className="truncate text-xs text-[var(--muted-foreground)]">
+                <p className="truncate text-xs text-muted-foreground">
                   Class {student.class} · {student.cca}
                 </p>
+                <span className="inline-flex items-center rounded-lg border border-orange-6 bg-orange-2 px-2.5 py-1 text-xs font-medium text-orange-11">
+                  SwAN
+                </span>
               </div>
             </div>
 
-            {/* SwAN badge */}
-            <div className="mt-3">
-              <span className="inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-                SwAN — SEN Profile
-              </span>
-            </div>
-
             {/* Context question */}
-            <h2 className="mt-5 text-sm font-semibold leading-snug text-[var(--foreground)]">
+            <h2 className="mt-5 text-sm font-semibold leading-snug text-foreground">
               How to support a SwAN student with multiple concerns?
             </h2>
-            <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">
+            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
               Co-occurring behavioural, social-emotional, and engagement
               challenges require a sequenced, differentiated approach.
             </p>
 
             {/* Divider */}
-            <div className="my-5 border-t border-[var(--border)]" />
+            <div className="my-5 border-t border-border" />
 
             {/* Active triggers */}
-            <p className="text-xs font-medium text-[var(--muted-foreground)]">
+            <p className="text-xs font-medium text-muted-foreground">
               Active Triggers
             </p>
             <div className="mt-2.5 space-y-1.5">
-              <div className="flex items-center gap-2 rounded-[var(--radius)] bg-red-50 px-3 py-2 text-sm font-medium text-red-800">
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+              <div className="flex items-center gap-2 rounded-lg bg-crimson-2 px-3 py-2 text-sm font-medium text-crimson-11">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-crimson-9" />
                 Bullying incident
               </div>
-              <div className="flex items-center gap-2 rounded-[var(--radius)] bg-orange-50 px-3 py-2 text-sm font-medium text-orange-800">
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
+              <div className="flex items-center gap-2 rounded-lg bg-orange-2 px-3 py-2 text-sm font-medium text-orange-11">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-9" />
                 {student.ccaMissed} missed CCA sessions
               </div>
-              <div className="flex items-center gap-2 rounded-[var(--radius)] bg-orange-50 px-3 py-2 text-sm font-medium text-orange-800">
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
+              <div className="flex items-center gap-2 rounded-lg bg-orange-2 px-3 py-2 text-sm font-medium text-orange-11">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-9" />
                 Low mood in class
               </div>
             </div>
@@ -385,10 +380,10 @@ export function GlowStudentSupportPage({
         </aside>
 
         {/* ── Middle panel: AI Chat ── */}
-        <main className="flex flex-1 flex-col overflow-hidden rounded-[var(--radius)] border bg-[var(--card)] shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
+        <main className="flex flex-1 flex-col overflow-hidden rounded-2xl border bg-card shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
           {/* Panel header */}
-          <div className="shrink-0 border-b border-[var(--border)] px-8 py-3.5">
-            <h2 className="text-sm font-medium text-[var(--foreground)]">
+          <div className="shrink-0 border-b border-border px-8 py-3.5">
+            <h2 className="text-sm font-medium text-foreground">
               Chat
             </h2>
           </div>
@@ -403,7 +398,7 @@ export function GlowStudentSupportPage({
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-sm leading-relaxed text-[var(--foreground)]">
+                <p className="text-sm leading-relaxed text-foreground">
                   Three areas have been flagged for {firstName} at the same
                   time — a bullying incident, disengagement from CCA, and
                   observed low mood. Each alone may be manageable; together,
@@ -418,7 +413,7 @@ export function GlowStudentSupportPage({
                     return (
                       <div
                         key={i}
-                        className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-4 transition-colors hover:bg-[var(--muted)]"
+                        className="rounded-xl border border-border bg-background p-4 transition-colors hover:bg-muted"
                       >
                           <div className="min-w-0 flex-1">
                             {/* Urgency badge then title */}
@@ -438,23 +433,23 @@ export function GlowStudentSupportPage({
                               </h4>
                             </div>
 
-                            <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                               {action.description}
                             </p>
 
                             {/* Contact chips */}
                             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
                               <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                                <span className="text-xs font-medium text-muted-foreground">
                                   Contact
                                 </span>
                                 {action.contacts.map((c) => (
                                   <button
                                     key={c}
-                                    className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--foreground)] underline-offset-2 hover:underline"
+                                    className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-foreground underline-offset-2 hover:underline"
                                     onClick={(e) => e.preventDefault()}
                                   >
-                                    <User className="h-3 w-3 shrink-0 text-[var(--muted-foreground)]" />
+                                    <User className="h-3 w-3 shrink-0 text-muted-foreground" />
                                     {c}
                                   </button>
                                 ))}
@@ -463,14 +458,14 @@ export function GlowStudentSupportPage({
 
                             {/* Resources */}
                             <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-                              <span className="text-xs font-medium text-[var(--muted-foreground)]">
+                              <span className="text-xs font-medium text-muted-foreground">
                                 Resources
                               </span>
                               {action.resources.map((r) => (
                                 <a
                                   key={r.label}
                                   href={r.href}
-                                  className="inline-flex items-center gap-0.5 text-xs text-[var(--foreground)] underline-offset-2 hover:underline"
+                                  className="inline-flex items-center gap-0.5 text-xs text-foreground underline-offset-2 hover:underline"
                                   onClick={(e) => e.preventDefault()}
                                 >
                                   {r.label}
@@ -487,8 +482,8 @@ export function GlowStudentSupportPage({
                 </div>
 
                 {/* Sharpen prompt */}
-                <p className="mt-6 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                  <strong className="text-[var(--foreground)]">
+                <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
+                  <strong className="text-foreground">
                     To sharpen this plan:
                   </strong>{' '}
                   it would help to know how long the low mood has been observed,
@@ -504,7 +499,7 @@ export function GlowStudentSupportPage({
               {suggestedQuestions.map((q) => (
                 <button
                   key={q}
-                  className="rounded-[var(--radius-input)] border border-[var(--border)] bg-[var(--background)] px-3.5 py-2 text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--muted)]"
+                  className="rounded-[var(--radius-input)] border border-border bg-background px-3.5 py-2 text-sm text-foreground transition-colors hover:bg-muted"
                   onClick={(e) => e.preventDefault()}
                 >
                   {q}
@@ -514,18 +509,18 @@ export function GlowStudentSupportPage({
           </div>
 
           {/* Chat input — pinned to bottom */}
-          <div className="shrink-0 border-t border-[var(--border)] px-8 py-4">
-            <div className="flex items-center gap-2 rounded-[var(--radius-input)] border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 transition-colors focus-within:border-[var(--ring)] focus-within:ring-2 focus-within:ring-[var(--ring)]/20">
+          <div className="shrink-0 border-t border-border px-8 py-4">
+            <div className="flex items-center gap-2 rounded-[var(--radius-input)] border border-border bg-background px-4 py-2.5 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20">
               <input
                 type="text"
                 placeholder={`Ask a follow-up about ${firstName}…`}
-                className="flex-1 bg-transparent text-sm text-[var(--foreground)] outline-none placeholder:text-[var(--muted-foreground)]"
+                className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 readOnly
               />
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -534,10 +529,10 @@ export function GlowStudentSupportPage({
         </main>
 
         {/* ── Right panel: Resources ── */}
-        <aside className="flex w-[400px] shrink-0 flex-col overflow-hidden rounded-[var(--radius)] border bg-[var(--card)] shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
+        <aside className="flex w-[400px] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
           {/* Panel header */}
-          <div className="shrink-0 border-b border-[var(--border)] px-4 py-3.5">
-            <h2 className="text-sm font-medium text-[var(--foreground)]">
+          <div className="shrink-0 border-b border-border px-4 py-3.5">
+            <h2 className="text-sm font-medium text-foreground">
               Learn more
             </h2>
           </div>
@@ -569,13 +564,13 @@ export function GlowStudentSupportPage({
                     <li key={r.label}>
                       <a
                         href={r.href}
-                        className="group flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-sm text-[var(--foreground)] transition-colors hover:bg-[var(--muted)]"
+                        className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted"
                         onClick={(e) => e.preventDefault()}
                       >
-                        <FileText className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)]" />
+                        <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                         <span className="flex-1 leading-snug">{r.label}</span>
                         {r.external ? (
-                          <ExternalLink className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)]" />
+                          <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                         ) : null}
                       </a>
                     </li>
@@ -588,7 +583,7 @@ export function GlowStudentSupportPage({
                   <li key={item.title}>
                     <a
                       href="#"
-                      className="group flex items-stretch gap-3 rounded-[var(--radius)] p-2 transition-colors hover:bg-[var(--muted)]"
+                      className="group flex items-stretch gap-3 rounded-lg p-2 transition-colors hover:bg-muted"
                       onClick={(e) => e.preventDefault()}
                     >
                       {/* Cover image — stretches to match text height */}
@@ -596,25 +591,25 @@ export function GlowStudentSupportPage({
                         <img
                           src={item.cover}
                           alt=""
-                          className="h-full w-full rounded-[var(--radius)] object-contain"
+                          className="h-full w-full rounded-lg object-contain"
                         />
                       </div>
 
                       <div className="min-w-0 flex-1">
                         {/* Title */}
-                        <p className="text-sm font-medium leading-snug text-[var(--foreground)]">
+                        <p className="text-sm font-medium leading-snug text-foreground">
                           {item.title}
                         </p>
 
                         {/* Author + duration — no icon */}
-                        <div className="mt-1 flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]">
+                        <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                           <span>{item.author}</span>
                           <span>·</span>
                           <span>{item.duration}</span>
                         </div>
 
                         {/* Description — 2 lines, visible on hover */}
-                        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[var(--muted-foreground)] opacity-0 transition-opacity group-hover:opacity-100">
+                        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
                           {item.description}
                         </p>
                       </div>
@@ -635,10 +630,10 @@ export function GlowStudentSupportPage({
 function MetaField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold text-[var(--muted-foreground)]">
+      <p className="text-[10px] font-semibold text-muted-foreground">
         {label}
       </p>
-      <p className="mt-1 text-sm text-[var(--foreground)]">{value}</p>
+      <p className="mt-1 text-sm text-foreground">{value}</p>
     </div>
   )
 }
