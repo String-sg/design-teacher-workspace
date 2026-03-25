@@ -1,11 +1,4 @@
-import {
-  Briefcase,
-  CalendarCheck,
-  CircleDollarSign,
-  ClipboardCheck,
-  Gift,
-  Wrench,
-} from 'lucide-react'
+import { Briefcase, CircleDollarSign, Gift } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export type AppColor = 'pink' | 'blue' | 'orange' | 'green' | 'purple'
@@ -31,7 +24,7 @@ export interface AppCategory {
 export const featuredApp: App = {
   id: 'featured-students',
   name: 'Students',
-  description: 'Key data to understand your students holistically.',
+  description: 'Key student information from multiple systems in one holistic view.',
   icon: '/logos/Student-logo.svg',
   color: 'purple',
   href: '/students',
@@ -72,14 +65,6 @@ export const appCategories: Array<AppCategory> = [
         href: '/sls',
         iconPadding: 'none',
       },
-      {
-        id: 'announcements',
-        name: 'Announcement',
-        description: 'Connecting parents and schools seamlessly',
-        icon: '/logos/parentsgateway.webp',
-        color: 'purple',
-        href: '/announcements',
-      },
     ],
   },
   {
@@ -90,24 +75,15 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'all-ears',
         name: 'All Ears',
-        description: 'Listen, support, empower',
+        description: 'Personalised surveys for students, staff, and parents',
         icon: '/logos/ae-logo.png',
         color: 'pink',
         href: '/all-ears',
       },
       {
-        id: 'formsg',
-        name: 'FormSG',
-        description: 'Build government forms in minutes',
-        icon: '/logos/formsg.png',
-        color: 'blue',
-        href: '/formsg',
-        iconPadding: 'md',
-      },
-      {
         id: 'sdt-data-tool',
         name: 'Students',
-        description: 'Key data to understand your students holistically',
+        description: 'Key student information from multiple systems in one holistic view',
         icon: '/logos/Student-logo.svg',
         color: 'blue',
         href: '/students',
@@ -116,19 +92,11 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'seconnect',
         name: 'SEConnect',
-        description: 'Connecting students and educators',
+        description: 'Data-driven insights for students\' social-emotional growth',
         icon: '/logos/seconnect-mysei.png',
         color: 'blue',
         href: '/seconnect',
         iconPadding: 'none',
-      },
-      {
-        id: 'student-termly-checkin',
-        name: 'Student Termly Check-in',
-        description: 'Regular student well-being and progress check-ins',
-        icon: ClipboardCheck,
-        color: 'green',
-        href: '/student-termly-checkin',
       },
     ],
   },
@@ -140,7 +108,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'heytalia',
         name: 'HeyTalia',
-        description: 'Smart parent communication assistant',
+        description: 'AI assistant for clear, parent-friendly school communications',
         icon: '/logos/heytalia-icon.png',
         color: 'purple',
         href: '/heytalia',
@@ -164,7 +132,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'markly',
         name: 'Mark.ly',
-        description: 'Reimagining marking with AI',
+        description: 'AI-driven rubric-based marking for Humanities and Languages',
         icon: '/logos/Markly.svg',
         color: 'blue',
         href: '/markly',
@@ -173,7 +141,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'appraiser',
         name: 'Appraiser',
-        description: 'AI-powered student testimonials in minutes',
+        description: 'AI-generated draft student testimonials in minutes',
         icon: '/logos/appraiser-logo.svg',
         color: 'blue',
         href: '/appraiser',
@@ -194,25 +162,9 @@ export const appCategories: Array<AppCategory> = [
         href: '/workpal',
       },
       {
-        id: 'resource-booking',
-        name: 'Resource Booking',
-        description: 'Book facilities and resources with ease',
-        icon: CalendarCheck,
-        color: 'green',
-        href: '/resource-booking',
-      },
-      {
-        id: 'fault-reporting',
-        name: 'Fault Reporting',
-        description: 'Report and track facility issues',
-        icon: Wrench,
-        color: 'orange',
-        href: '/fault-reporting',
-      },
-      {
         id: 'allocate',
         name: 'Allocate',
-        description: 'Ensuring fair school placement',
+        description: 'Mixed form class allocation based on learner profiles',
         icon: '/logos/allocate-logo.svg',
         color: 'blue',
         href: '/allocate',
@@ -220,7 +172,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'sdis',
         name: 'SDIS',
-        description: 'Holistic student development tracking',
+        description: 'Centralised registration and scheduling for student programmes',
         icon: '/logos/sdis-logo.png',
         color: 'pink',
         href: '/sdis',
@@ -268,7 +220,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'glow',
         name: 'Glow',
-        description: 'On-the-go professional learning',
+        description: 'Bite-sized daily learning in just 5 minutes',
         icon: '/logos/glow-logo.svg',
         color: 'blue',
         href: '/glow',
