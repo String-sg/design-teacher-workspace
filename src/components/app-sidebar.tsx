@@ -9,7 +9,6 @@ import {
   Home,
   Layers,
   Mail,
-  Megaphone,
   MessageSquare,
   ScrollText,
   Settings,
@@ -67,13 +66,6 @@ interface MenuItem {
 
 const mainNavItems: Array<MenuItem> = [
   {
-    title: 'Announcements',
-    url: '/announcements',
-    icon: Megaphone,
-    badge: 3,
-    featureFlag: 'announcements',
-  },
-  {
     title: 'Home',
     url: '/',
     icon: Home,
@@ -117,8 +109,7 @@ const parentsCommItems: Array<MenuItem> = [
     title: 'Posts',
     url: '/announcements',
     icon: Mail,
-    featureFlag: 'parents-gateway',
-    alsoActiveFor: ['/forms'],
+    featureFlag: 'posts',
   },
   {
     title: 'Reports',
@@ -188,7 +179,7 @@ export function AppSidebar() {
   const { isLoggedIn } = useAuth()
   const [feedbackOpen, setFeedbackOpen] = React.useState(false)
   const [showCoachMark, setShowCoachMark] = React.useState(false)
-  const announcementsEnabled = useFeatureFlag('announcements')
+  const postsEnabled = useFeatureFlag('posts')
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
   const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
   const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
@@ -225,7 +216,7 @@ export function AppSidebar() {
   const filterItems = (items: Array<MenuItem>) =>
     items.filter((item) => {
       if (!item.featureFlag) return true
-      if (item.featureFlag === 'announcements') return announcementsEnabled
+      if (item.featureFlag === 'posts') return postsEnabled
       if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
       if (item.featureFlag === 'parents-gateway') return parentsGatewayEnabled
       return true
@@ -283,7 +274,7 @@ export function AppSidebar() {
                 }}
               >
                 <PopoverTrigger
-                  render={<SidebarGroupContent className="outline-none" />}
+                  render={<SidebarGroupContent className="mt-2 focus:outline-none" />}
                 >
                   <SidebarMenuItems
                     items={filteredParentsItems}

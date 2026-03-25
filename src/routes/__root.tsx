@@ -112,7 +112,7 @@ function RootComponent() {
   const [queryClient] = React.useState(() => new QueryClient())
   const matches = useRouterState({ select: (s) => s.matches })
   const isGuestRoute = matches.some(
-    (m) => m.routeId === '/_guest' || m.routeId === '/_allears',
+    (m) => m.routeId === '/_guest',
   )
   const isGlowRoute = matches.some((m) =>
     (m as { pathname: string }).pathname?.startsWith('/glow/'),
@@ -123,9 +123,11 @@ function RootComponent() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <ErrorBoundary>
-              <Outlet />
-            </ErrorBoundary>
+            <FeatureFlagProvider>
+              <ErrorBoundary>
+                <Outlet />
+              </ErrorBoundary>
+            </FeatureFlagProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>

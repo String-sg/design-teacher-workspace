@@ -300,26 +300,27 @@ export function GlowStudentSupportPage({
     // Fills the full viewport — no fixed/z-index needed since this IS the page
     <div className="flex h-screen flex-col bg-background">
       {/* ── Top bar ── */}
-      <header className="flex h-14 shrink-0 items-center justify-between px-4">
+      <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2.5">
           <GlowBotIcon size={28} />
-          <span className="text-sm font-semibold text-foreground">
-            Glow
-          </span>
-          <span className="text-sm text-muted-foreground">·</span>
-          <span className="text-sm text-muted-foreground">
-            Student Support
+          <span className="text-sm font-medium text-slate-700">
+            Glow · Student Support
           </span>
         </div>
-        <Button variant="ghost" size="icon-sm" onClick={onClose}>
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full"
+          onClick={onClose}
+        >
           <X className="h-4 w-4" />
         </Button>
-      </header>
+      </div>
 
       {/* ── 3-column layout — gap creates the NotebookLM-style visible separation ── */}
-      <div className="flex flex-1 gap-4 overflow-hidden p-3">
+      <div className="flex flex-1 flex-col gap-4 overflow-hidden p-3 lg:flex-row">
         {/* ── Left panel: Student context ── */}
-        <aside className="flex w-[420px] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
+        <aside className="flex w-full shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)] lg:w-[420px]">
           {/* Panel header */}
           <div className="shrink-0 border-b border-border px-5 py-3.5">
             <h2 className="text-sm font-medium text-foreground">
@@ -327,7 +328,7 @@ export function GlowStudentSupportPage({
             </h2>
           </div>
 
-          <div className="overflow-y-auto p-5">
+          <div className="max-h-[40vh] overflow-y-auto p-5 lg:max-h-none">
 
             {/* Student identity */}
             <div className="mt-4 flex items-start gap-3">
@@ -382,14 +383,14 @@ export function GlowStudentSupportPage({
         {/* ── Middle panel: AI Chat ── */}
         <main className="flex flex-1 flex-col overflow-hidden rounded-2xl border bg-card shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
           {/* Panel header */}
-          <div className="shrink-0 border-b border-border px-8 py-3.5">
+          <div className="shrink-0 border-b border-border px-4 py-3.5 lg:px-8">
             <h2 className="text-sm font-medium text-foreground">
               Chat
             </h2>
           </div>
 
           {/* Scrollable messages area */}
-          <div className="flex-1 overflow-y-auto px-8 py-7">
+          <div className="flex-1 overflow-y-auto px-4 py-7 lg:px-8">
             {/* AI response */}
             <div className="flex gap-3">
               {/* Glow avatar */}
@@ -495,7 +496,7 @@ export function GlowStudentSupportPage({
             </div>
 
             {/* Suggested follow-up questions */}
-            <div className="mt-6 flex flex-wrap gap-2 pl-10">
+            <div className="mt-6 flex flex-wrap gap-2 pl-0 lg:pl-10">
               {suggestedQuestions.map((q) => (
                 <button
                   key={q}
@@ -509,7 +510,7 @@ export function GlowStudentSupportPage({
           </div>
 
           {/* Chat input — pinned to bottom */}
-          <div className="shrink-0 border-t border-border px-8 py-4">
+          <div className="shrink-0 border-t border-border px-4 py-4 lg:px-8">
             <div className="flex items-center gap-2 rounded-[var(--radius-input)] border border-border bg-background px-4 py-2.5 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20">
               <input
                 type="text"
@@ -529,7 +530,7 @@ export function GlowStudentSupportPage({
         </main>
 
         {/* ── Right panel: Resources ── */}
-        <aside className="flex w-[400px] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)]">
+        <aside className="hidden w-[400px] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)] lg:flex">
           {/* Panel header */}
           <div className="shrink-0 border-b border-border px-4 py-3.5">
             <h2 className="text-sm font-medium text-foreground">

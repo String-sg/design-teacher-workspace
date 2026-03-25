@@ -1,3 +1,5 @@
+import { useAuth } from '@/lib/auth'
+
 interface GreetingProps {
   userName?: string
 }
@@ -15,10 +17,11 @@ function getGreeting(): string {
 
 export function Greeting({ userName = 'Mr. Tan' }: GreetingProps) {
   const greeting = getGreeting()
+  const { isLoggedIn } = useAuth()
 
   return (
     <h1 className="py-0 text-center text-2xl font-semibold text-foreground">
-      {greeting}, {userName}
+      {greeting}{isLoggedIn ? `, ${userName}` : ''}
     </h1>
   )
 }

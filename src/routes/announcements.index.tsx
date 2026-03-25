@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   AlertTriangle,
   Copy,
@@ -10,16 +10,18 @@ import {
   Users,
 } from 'lucide-react'
 import type { PGStatus } from '@/types/pg-announcement'
+import type { FormStatus } from '@/types/form'
 import type { AnnouncementFilters } from '@/components/comms/announcement-filter-bar'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { mockPGAnnouncements } from '@/data/mock-pg-announcements'
+import { mockForms } from '@/data/mock-forms'
 import { StatusBadge } from '@/components/comms/status-badge'
 import { ReadRate } from '@/components/comms/read-rate'
 import {
   EMPTY_ANNOUNCEMENT_FILTERS,
   AnnouncementFilterBar,
 } from '@/components/comms/announcement-filter-bar'
-import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -37,6 +39,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { useFeatureFlag } from '@/hooks/use-feature-flag'
 
 export const Route = createFileRoute('/announcements/')({
   component: ParentsGatewayPage,
@@ -72,11 +77,58 @@ function getRelevantDate(
   return createdAt
 }
 
+function SegmentedTab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      className={cn(
+        'whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all',
+        active
+          ? 'bg-background text-foreground shadow-sm'
+          : 'text-muted-foreground hover:text-foreground',
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  )
+}
+
+function getFormStatusBadge(status: FormStatus) {
+  const config = {
+    active: {
+      label: 'Open',
+      className: 'bg-green-100 text-green-700 hover:bg-green-100',
+    },
+    draft: {
+      label: 'Draft',
+      className: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
+    },
+    closed: {
+      label: 'Closed',
+      className: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
+    },
+  }
+  const { label, className } = config[status]
+  return <Badge className={className}>{label}</Badge>
+}
+
+type PostTab = 'view-only' | 'with-responses' | 'custom-forms'
+
 function ParentsGatewayPage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [tab, setTab] = useState<PostTab>('view-only')
   const [filters, setFilters] = useState<AnnouncementFilters>(
     EMPTY_ANNOUNCEMENT_FILTERS,
   )
+  const formsEnabled = useFeatureFlag('forms')
 
   useSetBreadcrumbs([{ label: 'Posts', href: '/announcements' }])
   const navigate = useNavigate()
@@ -84,6 +136,12 @@ function ParentsGatewayPage() {
   const filtered = useMemo(() => {
     return mockPGAnnouncements
       .filter((a) => {
+        // Tab filter
+        const hasResponse =
+          a.responseType === 'acknowledge' || a.responseType === 'yes-no'
+        if (tab === 'view-only' && hasResponse) return false
+        if (tab === 'with-responses' && !hasResponse) return false
+
         // Response type filter
         if (filters.responseTypes.length > 0) {
           const effectiveType = a.responseType ?? 'view-only'
@@ -136,46 +194,176 @@ function ParentsGatewayPage() {
           ''
         return new Date(dateB).getTime() - new Date(dateA).getTime()
       })
-  }, [searchQuery, filters])
+  }, [searchQuery, filters, tab])
+
+  const filteredForms = useMemo(() => {
+    return mockForms
+      .filter((form) => {
+        if ((form.source ?? 'custom') !== 'custom') return false
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase()
+          return (
+            form.title.toLowerCase().includes(q) ||
+            form.description.toLowerCase().includes(q)
+          )
+        }
+        return true
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
+  }, [searchQuery])
+
+  const tabs: Array<{ value: PostTab; label: string; hidden?: boolean }> = [
+    { value: 'view-only', label: 'Posts' },
+    { value: 'with-responses', label: 'Posts with responses' },
+    { value: 'custom-forms', label: 'Custom forms', hidden: !formsEnabled },
+  ]
+  const visibleTabs = tabs.filter((t) => !t.hidden)
 
   return (
     <div className="flex flex-col">
-      {/* Tab buttons, Search & Filter */}
+      {/* Segmented tabs, Search & Filter */}
       <div className="mt-4 space-y-4">
-        <div className="flex flex-col gap-4 px-6 pb-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative flex-1 md:flex-none">
+        <div className="flex items-center justify-between gap-4 px-6 pb-0">
+          <div className="flex shrink-0 rounded-full bg-muted p-1 gap-1">
+            {visibleTabs.map((t) => (
+              <SegmentedTab
+                key={t.value}
+                active={tab === t.value}
+                onClick={() => setTab(t.value)}
+              >
+                {t.label}
+              </SegmentedTab>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search posts..."
+                placeholder={tab === 'custom-forms' ? 'Search forms...' : 'Search posts...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 md:w-[240px]"
-                aria-label="Search announcements"
+                className="w-[240px] pl-9"
+                aria-label={tab === 'custom-forms' ? 'Search forms' : 'Search announcements'}
               />
-            </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="secondary"
-                className="h-9 bg-muted font-medium"
-                render={<Link to="/announcements" />}
-              >
-                View-only posts
-              </Button>
-              <Button
-                variant="ghost"
-                className="h-9 text-muted-foreground"
-                render={<Link to="/forms" />}
-              >
-                Posts with responses
-              </Button>
             </div>
             <AnnouncementFilterBar filters={filters} onChange={setFilters} />
           </div>
         </div>
 
         {/* Table */}
+        {tab === 'custom-forms' ? (
+          <div className="max-w-full overflow-x-auto bg-white">
+            {filteredForms.length === 0 ? (
+              <EmptyState
+                title="No forms found"
+                description="Try adjusting your search, or create a new form."
+              />
+            ) : (
+              <Table tableClassName="table-fixed w-full">
+                <TableHeader className="border-b bg-white">
+                  <TableRow className="border-0 hover:bg-transparent">
+                    <TableHead className="w-[500px] pl-6">Title</TableHead>
+                    <TableHead className="w-[110px]">Date</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
+                    <TableHead className="w-[90px]">Owner</TableHead>
+                    <TableHead className="w-[150px]">Read / Response</TableHead>
+                    <TableHead className="w-[48px] pr-2" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredForms.map((form) => {
+                    const isShared = form.ownership === 'shared'
+                    return (
+                      <TableRow
+                        key={form.id}
+                        className="cursor-pointer"
+                        onClick={() =>
+                          navigate({
+                            to: '/forms/$id',
+                            params: { id: form.id },
+                          })
+                        }
+                      >
+                        <TableCell className="overflow-hidden whitespace-normal pl-6">
+                          <div className="min-w-0">
+                            <span className="truncate font-medium">
+                              {form.title}
+                            </span>
+                            <div className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
+                              {form.description}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(form.createdAt).toLocaleDateString('en-SG', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </TableCell>
+                        <TableCell>{getFormStatusBadge(form.status)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            {isShared ? (
+                              <>
+                                <Users className="h-3.5 w-3.5 shrink-0" />
+                                <span>Shared</span>
+                              </>
+                            ) : (
+                              <span>Mine</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="pr-6">
+                          {form.status === 'draft' ? (
+                            <span className="text-sm text-muted-foreground">—</span>
+                          ) : (
+                            <ReadRate
+                              readCount={form.completedCount}
+                              totalCount={form.recipientCount}
+                            />
+                          )}
+                        </TableCell>
+                        <TableCell
+                          className="w-[48px] pr-2 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                aria-label="More actions"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Copy className="mr-2 h-4 w-4" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        ) : (
         <div className="max-w-full overflow-x-auto bg-white">
           {filtered.length === 0 ? (
             <EmptyState
@@ -358,6 +546,7 @@ function ParentsGatewayPage() {
             </Table>
           )}
         </div>
+        )}
       </div>
     </div>
   )

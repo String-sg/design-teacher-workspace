@@ -13,7 +13,7 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
   if (student.id !== '3') return null
 
   return (
-    <div className="rounded-xl border border-twblue-6 bg-twblue-2 px-5 py-4">
+    <div className="rounded-3xl border border-twblue-6 bg-twblue-2 px-5 py-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-twblue-11">

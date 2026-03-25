@@ -66,16 +66,16 @@ interface CreateOption {
 
 const CREATE_OPTIONS: CreateOption[] = [
   {
-    title: 'Announcement',
+    title: 'Post',
     description:
-      'Send an announcement to parents. They can read it on Parents Gateway.',
+      'Send a post to parents. They can read it on Parents Gateway.',
     to: '/announcements/new',
     mockup: <AnnouncementMockup />,
   },
   {
-    title: 'Announcement with Response',
+    title: 'Post with Response',
     description:
-      'Send an announcement and collect responses from parents — acknowledge or yes/no.',
+      'Send a post and collect responses from parents — acknowledge or yes/no.',
     to: '/announcements/new',
     search: { responseType: 'acknowledge' },
     mockup: <ResponseMockup />,
