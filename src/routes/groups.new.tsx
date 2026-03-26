@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ChevronDown,
   ChevronRight,
-  FileUp,
   Search,
   X,
 } from 'lucide-react'
@@ -565,14 +564,7 @@ function GroupsNew() {
               </div>
             </section>
 
-            {/* Import hint */}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <FileUp className="size-3.5 shrink-0" />
-              <span>
-                Import from Excel or CSV —{' '}
-                <span className="font-medium">coming soon</span>
-              </span>
-            </div>
+
           </div>
 
           {/* ── Right: selected students review panel ──────────────────────── */}
