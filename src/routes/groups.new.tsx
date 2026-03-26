@@ -10,6 +10,8 @@ import {
 } from 'lucide-react'
 
 import type { StudentGroup } from '@/types/student-group'
+import { toast } from 'sonner'
+
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { MOCK_GROUPS } from '@/data/mock-groups'
 import {
@@ -50,13 +52,13 @@ type PickerGroup = {
 // ─── Build student registry ───────────────────────────────────────────────────
 
 const ALL_STUDENTS: Array<PickerStudent> = CLASS_GROUPS.flatMap((group) =>
-  (group.memberDetails ?? []).map((d) => ({
-    id: `${group.label}::${d.index}::${d.name}`,
+  (group.memberDetails ?? []).map((d, i) => ({
+    id: `${group.label}::${i}::${d.name}`,
     name: d.name,
     class: group.label,
     level: Number(group.label.match(/^(\d+)/)?.[1] ?? 0),
-    nric: d.nric ?? '',
-    indexNumber: d.index ?? 0,
+    nric: d.badge ?? '',
+    indexNumber: i + 1,
   })),
 )
 
@@ -310,6 +312,7 @@ function GroupsNew() {
       updatedAt: new Date().toISOString(),
     }
     MOCK_GROUPS.push(newGroup)
+    toast.success('Group created')
     navigate({ to: '/groups/$groupId', params: { groupId: newGroup.id } })
   }
 
@@ -529,13 +532,9 @@ function GroupsNew() {
                                           toggleStudent(student.id)
                                         }
                                       />
-                                      {/* Index — #01 format matching entity selector */}
+                                      {/* Index — running number within group */}
                                       <span className="w-6 shrink-0 text-right text-[10px] tabular-nums text-slate-400">
-                                        #
-                                        {String(student.indexNumber).padStart(
-                                          2,
-                                          '0',
-                                        )}
+                                        #{student.indexNumber}
                                       </span>
                                       {/* Name + class pill for non-class tabs */}
                                       <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate">

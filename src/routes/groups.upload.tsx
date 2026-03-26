@@ -10,6 +10,8 @@ import {
   X,
 } from 'lucide-react'
 
+import { toast } from 'sonner'
+
 import { MOCK_GROUPS } from '@/data/mock-groups'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { Button } from '@/components/ui/button'
@@ -265,7 +267,7 @@ function Step2({
         </p>
       </div>
 
-      <div className="flex flex-1 gap-6 overflow-hidden px-8">
+      <div className="flex flex-1 gap-6 overflow-hidden px-8 pb-6">
         {/* Left — table */}
         <div className="flex flex-1 flex-col overflow-hidden rounded-xl border bg-white">
           <div className="overflow-y-auto">
@@ -465,6 +467,7 @@ function GroupsUpload() {
       })),
     }
     MOCK_GROUPS.push(newGroup as unknown as (typeof MOCK_GROUPS)[number])
+    toast.success('Group created')
     navigate({ to: '/groups' })
   }
 

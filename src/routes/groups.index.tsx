@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   Copy,
@@ -211,6 +212,100 @@ function TypeFilterPopover({ value, onChange }: TypeFilterPopoverProps) {
   )
 }
 
+// ─── Ownership filter popover (My Groups tab) ──────────────────────────────────
+
+const OWNERSHIP_OPTIONS = [
+  { value: 'mine' as const, label: 'Created by me' },
+  { value: 'shared' as const, label: 'Shared with me' },
+]
+
+function OwnershipFilterPopover({
+  value,
+  onChange,
+}: {
+  value: Set<'mine' | 'shared'>
+  onChange: (v: Set<'mine' | 'shared'>) => void
+}) {
+  function toggle(opt: 'mine' | 'shared') {
+    const next = new Set(value)
+    if (next.has(opt)) next.delete(opt)
+    else next.add(opt)
+    onChange(next)
+  }
+
+  return (
+    <Popover>
+      <PopoverTrigger
+        render={
+          <Button variant="outline" size="sm" className="gap-2">
+            <Filter className="h-4 w-4" />
+            Filter
+            {value.size > 0 && (
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+                {value.size}
+              </span>
+            )}
+          </Button>
+        }
+      />
+      <PopoverContent align="start" className="w-44 p-2">
+        <p className="mb-1.5 px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          Owner
+        </p>
+        {OWNERSHIP_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => toggle(opt.value)}
+            className={cn(
+              'flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors',
+              value.has(opt.value)
+                ? 'bg-primary/10 font-medium text-primary'
+                : 'hover:bg-muted',
+            )}
+          >
+            <span
+              className={cn(
+                'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
+                value.has(opt.value)
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-input',
+              )}
+            >
+              {value.has(opt.value) && (
+                <svg
+                  viewBox="0 0 10 10"
+                  className="h-2.5 w-2.5"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M1.5 5L4 7.5L8.5 2.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </span>
+            {opt.label}
+          </button>
+        ))}
+        {value.size > 0 && (
+          <button
+            type="button"
+            onClick={() => onChange(new Set())}
+            className="mt-1.5 w-full rounded px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Clear filter
+          </button>
+        )}
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 // ─── Classes pill list ─────────────────────────────────────────────────────────
 
 function ClassPills({
@@ -249,7 +344,9 @@ function GroupsIndex() {
   const [tab, setTab] = useState<GroupTab>('my-groups')
   const [groups, setGroups] = useState<Array<StudentGroup>>(MOCK_GROUPS)
   const [mySearch, setMySearch] = useState('')
-  const [chipFilter, setChipFilter] = useState<'all' | 'mine' | 'shared'>('all')
+  const [ownershipFilter, setOwnershipFilter] = useState<
+    Set<'mine' | 'shared'>
+  >(new Set())
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [assignedSearch, setAssignedSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState<
@@ -265,15 +362,15 @@ function GroupsIndex() {
       _source: 'shared' as const,
     }))
     const combined =
-      chipFilter === 'mine'
+      ownershipFilter.size === 1 && ownershipFilter.has('mine')
         ? mine
-        : chipFilter === 'shared'
+        : ownershipFilter.size === 1 && ownershipFilter.has('shared')
           ? shared
           : [...mine, ...shared]
     if (!mySearch) return combined
     const q = mySearch.toLowerCase()
     return combined.filter((g) => g.name.toLowerCase().includes(q))
-  }, [groups, mySearch, chipFilter])
+  }, [groups, mySearch, ownershipFilter])
 
   const filteredAssignedGroups = useMemo(
     () =>
@@ -356,36 +453,17 @@ function GroupsIndex() {
                 className="w-[240px] pl-9"
               />
             </div>
+            {tab === 'my-groups' && (
+              <OwnershipFilterPopover
+                value={ownershipFilter}
+                onChange={setOwnershipFilter}
+              />
+            )}
             {tab === 'assigned' && (
               <TypeFilterPopover value={typeFilter} onChange={setTypeFilter} />
             )}
           </div>
         </div>
-
-        {/* Sub-filter chips — My Groups only */}
-        {tab === 'my-groups' && (
-          <div className="flex items-center gap-1 px-6">
-            {(
-              [
-                { value: 'all', label: 'All' },
-                { value: 'mine', label: 'Created by me' },
-                { value: 'shared', label: 'Shared with me' },
-              ] as const
-            ).map((chip) => (
-              <Button
-                key={chip.value}
-                variant={chipFilter === chip.value ? 'secondary' : 'ghost'}
-                size="sm"
-                className={
-                  chipFilter === chip.value ? '' : 'text-muted-foreground'
-                }
-                onClick={() => setChipFilter(chip.value)}
-              >
-                {chip.label}
-              </Button>
-            ))}
-          </div>
-        )}
 
         {/* ── My Groups table ─────────────────────────────────────────────── */}
         {tab === 'my-groups' && (
@@ -394,17 +472,17 @@ function GroupsIndex() {
               <div className="flex flex-col items-center py-16">
                 <EmptyState
                   title={
-                    mySearch || chipFilter !== 'all'
+                    mySearch || ownershipFilter.size > 0
                       ? 'No groups found'
                       : 'No groups yet'
                   }
                   description={
-                    mySearch || chipFilter !== 'all'
+                    mySearch || ownershipFilter.size > 0
                       ? 'Try adjusting your search or filter.'
                       : 'Create a group to reuse student lists across announcements, forms, and reports.'
                   }
                 />
-                {!mySearch && chipFilter === 'all' && (
+                {!mySearch && ownershipFilter.size === 0 && (
                   <Button
                     size="sm"
                     className="mt-4"
@@ -544,6 +622,7 @@ function GroupsIndex() {
                                       }
                                       MOCK_GROUPS.push(copy)
                                       setGroups([...MOCK_GROUPS])
+                                      toast.success('Copy created')
                                     }
                                   }}
                                 >
@@ -604,6 +683,7 @@ function GroupsIndex() {
                                     }
                                     MOCK_GROUPS.push(copy)
                                     setGroups([...MOCK_GROUPS])
+                                    toast.success('Copy created')
                                   }}
                                 >
                                   <Copy className="mr-2 h-4 w-4" />
@@ -611,37 +691,7 @@ function GroupsIndex() {
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
-                          ) : (
-                            // Shared viewer: Make a copy only
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                              title="Make a copy"
-                              onClick={() => {
-                                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                const { _source, ...groupData } = group
-                                const copy = {
-                                  ...groupData,
-                                  id: `cg-${Date.now()}`,
-                                  name: `${group.name} (copy)`,
-                                  createdBy: {
-                                    name: 'Mrs Tan Mei Lin',
-                                    email: CURRENT_USER_EMAIL,
-                                  },
-                                  sharedWith: [],
-                                  createdAt: new Date().toISOString(),
-                                  updatedAt: new Date().toISOString(),
-                                  lastUsedAt: undefined,
-                                }
-                                MOCK_GROUPS.push(copy)
-                                setGroups([...MOCK_GROUPS])
-                              }}
-                            >
-                              <Copy className="h-4 w-4" />
-                              <span className="sr-only">Make a copy</span>
-                            </Button>
-                          )}
+                          ) : null}
                         </TableCell>
                       </TableRow>
                     )
@@ -687,7 +737,6 @@ function GroupsIndex() {
                       <TableHead className="w-24">Members</TableHead>
                       <TableHead className="w-[160px]">Classes</TableHead>
                       <TableHead className="w-28">Type</TableHead>
-                      <TableHead className="w-28">Last synced</TableHead>
                       <TableHead className="w-[48px] pr-2" />
                     </TableRow>
                   </TableHeader>
@@ -721,9 +770,6 @@ function GroupsIndex() {
                           <Badge variant="outline" className="py-0 text-xs">
                             {getStructuredTypeLabel(group.structuredType)}
                           </Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {formatRelativeDate(group.syncedAt)}
                         </TableCell>
                         <TableCell
                           className="w-[48px] pr-2"

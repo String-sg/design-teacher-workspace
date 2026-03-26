@@ -4,6 +4,7 @@ export interface GroupMember {
   class: string
   nric?: string
   indexNumber?: number
+  cca?: string
 }
 
 export interface GroupSharedWith {

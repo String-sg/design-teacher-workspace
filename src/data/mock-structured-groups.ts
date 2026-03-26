@@ -27,14 +27,14 @@ const bandung = mockStudents.filter(
 
 const SYNC_DATE = '2026-03-20T08:00:00.000Z'
 
-// Class: 3 Aspiration
+// Class: 3A
 const aspirationStudents = bandung
-  .filter((s) => s.class === '3 Aspiration')
+  .filter((s) => s.class === '3A')
   .sort((a, b) => a.indexNumber - b.indexNumber)
 
-// Class: 3 Creativity
+// Class: 3B
 const creativityStudents = bandung
-  .filter((s) => s.class === '3 Creativity')
+  .filter((s) => s.class === '3B')
   .sort((a, b) => a.indexNumber - b.indexNumber)
 
 // CCA member names
@@ -75,7 +75,7 @@ function ccaMemberClass(name: string): string {
 
 // Level: Secondary 3 (all Sec 3 students assigned to this teacher's level)
 const sec3Students = bandung
-  .filter((s) => s.class.startsWith('3 '))
+  .filter((s) => ['3A', '3B', '3C', '3D'].includes(s.class))
   .sort(
     (a, b) => a.class.localeCompare(b.class) || a.indexNumber - b.indexNumber,
   )
@@ -102,10 +102,10 @@ function teachingMemberClass(name: string): string {
 
 export const TEACHER_STRUCTURED_GROUPS: Array<StructuredGroup> = [
   {
-    id: 'structured:class:3-aspiration',
+    id: 'structured:class:3a',
     kind: 'structured',
     structuredType: 'class',
-    name: '3 Aspiration',
+    name: '3A',
     syncedAt: SYNC_DATE,
     members: aspirationStudents.map((s) => ({
       id: s.id,
@@ -113,13 +113,14 @@ export const TEACHER_STRUCTURED_GROUPS: Array<StructuredGroup> = [
       class: s.class,
       nric: s.nric,
       indexNumber: s.indexNumber,
+      cca: s.cca ?? undefined,
     })),
   },
   {
-    id: 'structured:class:3-creativity',
+    id: 'structured:class:3b',
     kind: 'structured',
     structuredType: 'class',
-    name: '3 Creativity',
+    name: '3B',
     syncedAt: SYNC_DATE,
     members: creativityStudents.map((s) => ({
       id: s.id,
@@ -127,6 +128,7 @@ export const TEACHER_STRUCTURED_GROUPS: Array<StructuredGroup> = [
       class: s.class,
       nric: s.nric,
       indexNumber: s.indexNumber,
+      cca: s.cca ?? undefined,
     })),
   },
   {

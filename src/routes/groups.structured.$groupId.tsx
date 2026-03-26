@@ -63,15 +63,6 @@ function StructuredGroupDetailPage() {
     safePage * PAGE_SIZE,
   )
 
-  function formatSyncDate(iso: string) {
-    const d = new Date(iso)
-    return d.toLocaleDateString('en-SG', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    })
-  }
-
   return (
     <div className="flex flex-col">
       {/* ── Back link ────────────────────────────────────────────────────────── */}
@@ -212,10 +203,7 @@ function StructuredGroupDetailPage() {
           <Info className="size-4 text-muted-foreground" />
           <AlertDescription>
             This group is managed in School Cockpit. To change group membership
-            or details, contact your school administrator.{' '}
-            <span className="text-xs text-muted-foreground">
-              Last synced: {formatSyncDate(group.syncedAt)}
-            </span>
+            or details, contact your school administrator.
           </AlertDescription>
         </Alert>
       </div>
