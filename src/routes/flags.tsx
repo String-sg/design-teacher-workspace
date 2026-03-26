@@ -56,6 +56,12 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
     description:
       'Show the LTA (long-term absenteeism) tag in the student list and the intervention banner and guidance dialog on the student profile',
   },
+  {
+    key: 'student-groups',
+    label: 'Student Groups',
+    description:
+      'Show the Groups page in the sidebar for organising students into reusable groups',
+  },
 ]
 
 function FeatureFlagsPage() {

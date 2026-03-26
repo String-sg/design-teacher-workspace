@@ -28,6 +28,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
   Sheet,
   SheetContent,
   SheetHeader,
@@ -566,34 +574,26 @@ function GroupDetailPage() {
         ) : (
           <>
             <div className="rounded-lg border overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/40">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground w-12">
-                      #
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
-                      Name
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
-                      Class
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
-                      NRIC
-                    </th>
-                    <th className="px-4 py-3 w-12" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-12">#</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Class</TableHead>
+                    <TableHead>NRIC</TableHead>
+                    <TableHead className="w-12" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {pagedMembers.map((member, i) => (
-                    <tr
+                    <TableRow
                       key={member.id}
-                      className="group/row hover:bg-muted/30 transition-colors"
+                      className="group/row"
                     >
-                      <td className="px-4 py-3 text-muted-foreground text-xs">
+                      <TableCell className="text-muted-foreground text-xs">
                         {(page - 1) * PAGE_SIZE + i + 1}
-                      </td>
-                      <td className="px-4 py-3 font-medium">
+                      </TableCell>
+                      <TableCell className="font-medium">
                         <Link
                           to="/students/$id"
                           params={{ id: member.id }}
@@ -601,16 +601,16 @@ function GroupDetailPage() {
                         >
                           {member.name}
                         </Link>
-                      </td>
-                      <td className="px-4 py-3">
+                      </TableCell>
+                      <TableCell>
                         <Badge variant="outline" className="text-xs">
                           {member.class}
                         </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground text-xs font-mono">
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs font-mono">
                         {member.nric ?? '—'}
-                      </td>
-                      <td className="px-4 py-3">
+                      </TableCell>
+                      <TableCell>
                         {canEdit && (
                           <Button
                             variant="ghost"
@@ -627,11 +627,11 @@ function GroupDetailPage() {
                             <UserMinus className="size-3.5" />
                           </Button>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
 
             {/* Pagination */}

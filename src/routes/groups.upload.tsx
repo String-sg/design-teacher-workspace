@@ -12,6 +12,7 @@ import {
 
 import { toast } from 'sonner'
 
+import type { StudentGroup } from '@/types/student-group'
 import { MOCK_GROUPS } from '@/data/mock-groups'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { Button } from '@/components/ui/button'
@@ -77,7 +78,7 @@ const VALIDATION_ISSUES = [
 
 function StepIndicator({ current, total }: { current: number; total: number }) {
   return (
-    <p className="text-sm text-slate-500">
+    <p className="text-sm text-muted-foreground">
       Step {current} of {total}
     </p>
   )
@@ -237,8 +238,6 @@ function Step1({ onFileAccepted }: { onFileAccepted: (file: File) => void }) {
 
 // ─── Step 2 ────────────────────────────────────────────────────────────────────
 
-const hasIssues = VALIDATION_ISSUES.length > 0
-
 function Step2({
   fileName,
   groupName,
@@ -253,6 +252,7 @@ function Step2({
   onSubmit: () => void
 }) {
   const validCount = MOCK_PARSED_ROWS.filter((r) => r.valid).length
+  const hasIssues = VALIDATION_ISSUES.length > 0
   const issueRows = new Set(VALIDATION_ISSUES.flatMap((iss) => iss.rows))
 
   return (
@@ -410,51 +410,38 @@ function Step2({
   )
 }
 
-// ─── Processing toast ───────────────────────────────────────────────────────────
-
-function ProcessingToast() {
-  return (
-    <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2">
-      <div className="flex items-center gap-3 rounded-full bg-slate-900 px-5 py-3 text-sm text-white shadow-lg">
-        <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-        Processing file…
-      </div>
-    </div>
-  )
-}
-
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 function GroupsUpload() {
   useSetBreadcrumbs([
-    { label: 'Groups', href: '/groups' },
+    { label: 'Student Groups', href: '/groups' },
     { label: 'Upload template', href: '/groups/upload' },
   ])
 
   const navigate = useNavigate()
   const [step, setStep] = useState<1 | 2>(1)
-  const [processing, setProcessing] = useState(false)
   const [fileName, setFileName] = useState('')
   const [groupName, setGroupName] = useState('')
 
   function handleFileAccepted(file: File) {
     setFileName(file.name)
-    setProcessing(true)
+    const toastId = toast.loading('Processing file…')
     setTimeout(() => {
-      setProcessing(false)
+      toast.dismiss(toastId)
       setStep(2)
     }, 1800)
   }
 
   function handleSubmit() {
     const validRows = MOCK_PARSED_ROWS.filter((r) => r.valid)
-    const newGroup = {
+    const newGroup: StudentGroup = {
       id: `cg-upload-${Date.now()}`,
-      kind: 'regular' as const,
-      source: 'created' as const,
+      kind: 'regular',
       name: groupName.trim(),
       description: `Imported from ${fileName}`,
-      createdBy: { name: 'Mrs Tan', email: 'tanml@school.edu.sg' },
+      visibility: 'private',
+      staffInCharge: [],
+      createdBy: { name: 'Mrs Tan Mei Lin', email: 'tanml@school.edu.sg' },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       sharedWith: [],
@@ -466,7 +453,7 @@ function GroupsUpload() {
         indexNumber: i + 1,
       })),
     }
-    MOCK_GROUPS.push(newGroup as unknown as (typeof MOCK_GROUPS)[number])
+    MOCK_GROUPS.push(newGroup)
     toast.success('Group created')
     navigate({ to: '/groups' })
   }
@@ -499,7 +486,6 @@ function GroupsUpload() {
         />
       )}
 
-      {processing && <ProcessingToast />}
     </div>
   )
 }

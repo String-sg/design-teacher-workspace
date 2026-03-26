@@ -27,18 +27,21 @@ import {
 
 export const Route = createFileRoute('/groups/structured/$groupId')({
   component: StructuredGroupDetailPage,
+  loader: ({ params }) => {
+    const group = getStructuredGroupById(params.groupId)
+    if (!group) throw notFound()
+    return { group }
+  },
 })
 
 const PAGE_SIZE = 10
 
 function StructuredGroupDetailPage() {
+  const { group } = Route.useLoaderData()
   const { groupId } = Route.useParams()
-  const group = getStructuredGroupById(groupId)
-
-  if (!group) throw notFound()
 
   useSetBreadcrumbs([
-    { label: 'Groups', href: '/groups' },
+    { label: 'Student Groups', href: '/groups' },
     { label: group.name, href: `/groups/structured/${groupId}` },
   ])
 

@@ -101,6 +101,7 @@ const manageItems: Array<MenuItem> = [
     url: '/groups',
     icon: Layers,
     conceptTag: true,
+    featureFlag: 'student-groups',
   },
 ]
 
@@ -183,6 +184,7 @@ export function AppSidebar() {
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
   const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
   const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
+  const studentGroupsEnabled = useFeatureFlag('student-groups')
 
   React.useEffect(() => {
     if (localStorage.getItem(COACHMARK_KEY)) return
@@ -219,12 +221,13 @@ export function AppSidebar() {
       if (item.featureFlag === 'posts') return postsEnabled
       if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
       if (item.featureFlag === 'parents-gateway') return parentsGatewayEnabled
+      if (item.featureFlag === 'student-groups') return studentGroupsEnabled
       return true
     })
 
   const filteredMainItems = filterItems(mainNavItems)
   const filteredParentsItems = filterItems(parentsCommItems)
-  const filteredManageItems = manageItems
+  const filteredManageItems = filterItems(manageItems)
   const filteredStudentItems = studentInsightItems.filter((item) =>
     item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
   )
@@ -303,18 +306,20 @@ export function AppSidebar() {
               </Popover>
             </>
           )}
-          <>
-            <SidebarSeparator className="mx-0 mt-3" />
-            <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
-              Manage
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenuItems
-                items={filteredManageItems}
-                currentPath={location.pathname}
-              />
-            </SidebarGroupContent>
-          </>
+          {filteredManageItems.length > 0 && (
+            <>
+              <SidebarSeparator className="mx-0 mt-3" />
+              <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
+                Manage
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenuItems
+                  items={filteredManageItems}
+                  currentPath={location.pathname}
+                />
+              </SidebarGroupContent>
+            </>
+          )}
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>

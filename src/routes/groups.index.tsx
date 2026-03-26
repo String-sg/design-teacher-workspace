@@ -309,7 +309,7 @@ function ClassPills({
 type GroupTab = 'my-groups' | 'assigned'
 
 function GroupsIndex() {
-  useSetBreadcrumbs([{ label: 'Groups', href: '/groups' }])
+  useSetBreadcrumbs([{ label: 'Student Groups', href: '/groups' }])
   const navigate = useNavigate()
 
   const [tab, setTab] = useState<GroupTab>('my-groups')
@@ -637,8 +637,7 @@ function GroupsIndex() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => {
-                                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                    const { _source, ...groupData } = group
+                                    const { _source: _, ...groupData } = group
                                     const copy = {
                                       ...groupData,
                                       id: `cg-${Date.now()}`,

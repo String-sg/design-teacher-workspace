@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Upload, Users, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -54,18 +54,18 @@ const OPTIONS = [
 ]
 
 function GroupsCreate() {
+  const navigate = useNavigate()
+
   return (
-    <div className="flex min-h-[calc(100vh-57px)] flex-col bg-slate-50">
+    <div className="flex min-h-[calc(100vh-57px)] flex-col bg-muted/30">
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 py-4">
-        <span className="text-sm font-medium text-slate-700">New group</span>
+        <span className="text-sm font-medium text-foreground">New group</span>
         <Button
           variant="outline"
           size="icon"
           className="rounded-full"
-          onClick={() => {
-            window.location.href = '/groups'
-          }}
+          onClick={() => navigate({ to: '/groups' })}
         >
           <X className="h-4 w-4" />
         </Button>
@@ -75,10 +75,10 @@ function GroupsCreate() {
       <div className="flex flex-1 items-start justify-center px-6 pt-12 sm:items-center sm:pt-0">
         <div className="w-full max-w-2xl">
           <div className="mb-8 text-center">
-            <h1 className="text-xl font-semibold text-slate-900 sm:text-2xl">
+            <h1 className="text-xl font-semibold sm:text-2xl">
               How would you like to add students?
             </h1>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-muted-foreground">
               Choose a method to get started.
             </p>
           </div>
@@ -88,19 +88,17 @@ function GroupsCreate() {
               <button
                 key={opt.key}
                 type="button"
-                onClick={() => {
-                  window.location.href = opt.href
-                }}
+                onClick={() => navigate({ to: opt.href })}
                 className="group flex flex-col overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left transition-all duration-150 ease-out hover:border-primary/40 hover:shadow-sm active:scale-[0.98]"
               >
                 <div className="border-b border-slate-100 bg-slate-50">
                   {opt.mockup}
                 </div>
                 <div className="p-4">
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="text-sm font-semibold">
                     {opt.title}
                   </p>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     {opt.description}
                   </p>
                 </div>

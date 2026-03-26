@@ -9,6 +9,7 @@ import {
   Users,
   X,
 } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
@@ -220,7 +221,7 @@ function ResultRow({
   onToggle,
   isExpanded = false,
   onToggleExpand,
-  selectedIndividualNames: _selectedIndividualNames = new Set(),
+  selectedIndividualNames = new Set<string>(),
   excludedMemberNames = new Set(),
   onMemberToggle,
 }: ResultRowProps) {
@@ -617,13 +618,13 @@ export function EntitySelector({
       : renderItems(scope.items)
 
     const createLink = scope.createHref && (
-      <a
-        href={scope.createHref}
+      <Link
+        to={scope.createHref}
         className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-slate-50"
       >
         <Plus className="h-4 w-4" />
         {scope.createLabel ?? 'Create'}
-      </a>
+      </Link>
     )
 
     if (!scope.sections && scope.items.length === 0 && !scope.createHref) {

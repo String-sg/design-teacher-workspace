@@ -288,6 +288,7 @@ function GroupsNew() {
     if (!canSave) return
     const newGroup: StudentGroup = {
       id: `cg-${Date.now()}`,
+      kind: 'regular',
       name: groupName.trim(),
       description: groupDescription.trim() || undefined,
       members: selectedStudents.map((s) => ({
@@ -313,7 +314,7 @@ function GroupsNew() {
     activeTab === 'level' || activeTab === 'cca' || activeTab === 'teaching'
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-muted/30">
       {/* ── Sticky header (mirrors announcements.new.tsx) ────────────────────── */}
       <div className="sticky top-0 z-10 bg-white">
         <div className="flex items-center gap-3 border-b px-6 py-3">
