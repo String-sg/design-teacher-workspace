@@ -103,6 +103,17 @@ function StructuredGroupDetailPage() {
 
       <Separator />
 
+      {/* ── Info callout ─────────────────────────────────────────────────────── */}
+      <div className="px-6 pt-5 pb-0">
+        <Alert className="border-blue-200 bg-blue-50/60 text-blue-900">
+          <Info className="h-4 w-4 text-blue-500" />
+          <AlertDescription className="text-blue-800">
+            These groups are managed in School Cockpit. Changes to membership
+            and student details must be made by your school administrator.
+          </AlertDescription>
+        </Alert>
+      </div>
+
       {/* ── Members table ────────────────────────────────────────────────────── */}
       <div className="px-6 pt-5 pb-4">
         <div className="flex items-center justify-between mb-3">
@@ -196,17 +207,6 @@ function StructuredGroupDetailPage() {
           </div>
         </div>
       )}
-
-      {/* ── Info callout ─────────────────────────────────────────────────────── */}
-      <div className="px-6 pb-8 pt-4">
-        <Alert className="bg-muted/50 border-muted-foreground/20">
-          <Info className="size-4 text-muted-foreground" />
-          <AlertDescription>
-            This group is managed in School Cockpit. To change group membership
-            or details, contact your school administrator.
-          </AlertDescription>
-        </Alert>
-      </div>
     </div>
   )
 }

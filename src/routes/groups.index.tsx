@@ -8,6 +8,7 @@ import {
   Info,
   MoreHorizontal,
   Plus,
+  RotateCcw,
   Search,
   Share2,
   Trash2,
@@ -154,59 +155,44 @@ function TypeFilterPopover({ value, onChange }: TypeFilterPopoverProps) {
           </Button>
         }
       />
-      <PopoverContent align="start" className="w-44 p-2">
-        <p className="mb-1.5 px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Group type
-        </p>
-        {STRUCTURED_FILTER_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => toggle(opt.value)}
-            className={cn(
-              'flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors',
-              value.has(opt.value)
-                ? 'bg-primary/10 font-medium text-primary'
-                : 'hover:bg-muted',
-            )}
-          >
-            <span
-              className={cn(
-                'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
-                value.has(opt.value)
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-input',
-              )}
-            >
-              {value.has(opt.value) && (
-                <svg
-                  viewBox="0 0 10 10"
-                  className="h-2.5 w-2.5"
-                  fill="currentColor"
+      <PopoverContent align="start" className="w-[360px] p-0">
+        <div className="px-5 pb-3 pt-4">
+          <h3 className="text-sm font-semibold">Show records</h3>
+        </div>
+        <div className="px-5 pb-4">
+          <div className="flex items-center gap-3">
+            <span className="w-16 shrink-0 text-sm font-medium">Type</span>
+            <div className="flex flex-1 flex-wrap gap-1.5">
+              {STRUCTURED_FILTER_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => toggle(opt.value)}
+                  className={cn(
+                    'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
+                    value.has(opt.value)
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-card text-foreground hover:border-primary hover:text-primary',
+                  )}
                 >
-                  <path
-                    d="M1.5 5L4 7.5L8.5 2.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </span>
-            {opt.label}
-          </button>
-        ))}
-        {value.size > 0 && (
-          <button
-            type="button"
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-end border-t px-5 py-3">
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => onChange(new Set())}
-            className="mt-1.5 w-full rounded px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+            disabled={value.size === 0}
+            className="gap-2 text-sm font-medium"
           >
-            Clear filter
-          </button>
-        )}
+            <RotateCcw className="h-4 w-4" />
+            Reset
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   )
@@ -248,59 +234,44 @@ function OwnershipFilterPopover({
           </Button>
         }
       />
-      <PopoverContent align="start" className="w-44 p-2">
-        <p className="mb-1.5 px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Owner
-        </p>
-        {OWNERSHIP_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => toggle(opt.value)}
-            className={cn(
-              'flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors',
-              value.has(opt.value)
-                ? 'bg-primary/10 font-medium text-primary'
-                : 'hover:bg-muted',
-            )}
-          >
-            <span
-              className={cn(
-                'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
-                value.has(opt.value)
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-input',
-              )}
-            >
-              {value.has(opt.value) && (
-                <svg
-                  viewBox="0 0 10 10"
-                  className="h-2.5 w-2.5"
-                  fill="currentColor"
+      <PopoverContent align="start" className="w-[320px] p-0">
+        <div className="px-5 pb-3 pt-4">
+          <h3 className="text-sm font-semibold">Show records</h3>
+        </div>
+        <div className="px-5 pb-4">
+          <div className="flex items-center gap-3">
+            <span className="w-16 shrink-0 text-sm font-medium">Owner</span>
+            <div className="flex flex-1 flex-wrap gap-1.5">
+              {OWNERSHIP_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => toggle(opt.value)}
+                  className={cn(
+                    'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
+                    value.has(opt.value)
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-card text-foreground hover:border-primary hover:text-primary',
+                  )}
                 >
-                  <path
-                    d="M1.5 5L4 7.5L8.5 2.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-            </span>
-            {opt.label}
-          </button>
-        ))}
-        {value.size > 0 && (
-          <button
-            type="button"
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-end border-t px-5 py-3">
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => onChange(new Set())}
-            className="mt-1.5 w-full rounded px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+            disabled={value.size === 0}
+            className="gap-2 text-sm font-medium"
           >
-            Clear filter
-          </button>
-        )}
+            <RotateCcw className="h-4 w-4" />
+            Reset
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   )

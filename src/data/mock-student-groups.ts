@@ -34,18 +34,17 @@ function fakeNric(name: string): string {
 }
 
 const ALL_CLASS_LABELS = [
-  '1 Diligence',
-  '1 Integrity',
-  '1 Loyalty',
-  '2 Courage',
-  '2 Excellence',
-  '2 Harmony',
-  '3 Aspiration',
-  '3 Brilliance',
-  '3 Creativity',
-  '4 Dedication',
-  '4 Endeavour',
-  '4 Fellowship',
+  '1A',
+  '1B',
+  '1C',
+  '2C',
+  '2D',
+  '3A',
+  '3B',
+  '3C',
+  '3D',
+  '4A',
+  '4B',
 ]
 
 function fakeClass(name: string): string {

@@ -1,12 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import {
-  ArrowLeft,
-  ChevronDown,
-  ChevronRight,
-  Search,
-  X,
-} from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronRight, Search, X } from 'lucide-react'
 
 import type { StudentGroup } from '@/types/student-group'
 import { toast } from 'sonner'
@@ -563,8 +557,6 @@ function GroupsNew() {
                 )}
               </div>
             </section>
-
-
           </div>
 
           {/* ── Right: selected students review panel ──────────────────────── */}

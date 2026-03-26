@@ -59,15 +59,7 @@ const CHOIR_NAMES = [
 ]
 
 // Derive a fake class label for CCA members (spread across levels)
-const CCA_CLASSES = [
-  '1 Diligence',
-  '1 Integrity',
-  '2 Courage',
-  '2 Excellence',
-  '3 Aspiration',
-  '3 Creativity',
-  '4 Dedication',
-]
+const CCA_CLASSES = ['1A', '1B', '2C', '2D', '3A', '3B', '4A']
 
 function ccaMemberClass(name: string): string {
   return CCA_CLASSES[nameHash(name) % CCA_CLASSES.length]
@@ -92,7 +84,7 @@ const englishRemedialNames = [
   'Isabel Tan Xin Yi',
 ]
 
-const TEACHING_CLASSES = ['3 Aspiration', '3 Creativity']
+const TEACHING_CLASSES = ['3A', '3B']
 
 function teachingMemberClass(name: string): string {
   return TEACHING_CLASSES[nameHash(name) % TEACHING_CLASSES.length]
