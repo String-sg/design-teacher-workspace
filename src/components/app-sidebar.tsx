@@ -46,6 +46,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { FeedbackDialog } from '@/components/feedback-dialog'
 import { cn } from '@/lib/utils'
@@ -58,7 +59,7 @@ interface MenuItem {
   icon: LucideIcon
   badge?: number
   featureFlag?: FeatureFlagKey
-  conceptTag?: boolean
+  stage?: string
   transparent?: boolean
   alsoActiveFor?: string[]
 }
@@ -76,20 +77,19 @@ const studentInsightItems: Array<MenuItem> = [
     title: 'Analytics',
     url: '/student-analytics',
     icon: BarChart3,
-    conceptTag: true,
+    stage: 'Experiment',
     featureFlag: 'student-analytics',
   },
   {
     title: 'Profiles',
     url: '/students',
     icon: Users,
-    conceptTag: true,
   },
   {
     title: 'Insight Buddy',
     url: '/insight-buddy',
     icon: Bot,
-    conceptTag: true,
+    stage: 'Experiment',
     featureFlag: 'student-analytics',
   },
 ]
@@ -99,12 +99,14 @@ const parentsCommItems: Array<MenuItem> = [
     title: 'Posts',
     url: '/announcements',
     icon: Mail,
+    stage: 'Release 2',
     featureFlag: 'posts',
   },
   {
     title: 'Reports',
     url: '/reports',
     icon: FileText,
+    stage: 'Experiment',
     featureFlag: 'holistic-reports',
   },
 ]
@@ -144,10 +146,17 @@ function SidebarMenuItems({
           >
             <item.icon className="size-4" />
             <span>{item.title}</span>
-            {item.conceptTag && (
-              <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-900 group-data-[collapsible=icon]:hidden">
-                Concept
-              </span>
+            {item.stage && (
+              <Badge
+                variant="outline"
+                className={
+                  item.stage === 'Experiment'
+                    ? 'border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-700 dark:bg-purple-950 dark:text-purple-300 group-data-[collapsible=icon]:hidden'
+                    : 'group-data-[collapsible=icon]:hidden'
+                }
+              >
+                {item.stage}
+              </Badge>
             )}
           </SidebarMenuButton>
           {item.badge && (

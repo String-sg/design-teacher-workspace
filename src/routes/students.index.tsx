@@ -286,12 +286,7 @@ function StudentsPage() {
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
         <div className="px-6">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold">Profiles</h1>
-            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
-              Concept illustration
-            </span>
-          </div>
+          <h1 className="text-2xl font-semibold">Profiles</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Key data to understand your students holistically
           </p>
