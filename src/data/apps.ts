@@ -24,7 +24,8 @@ export interface AppCategory {
 export const featuredApp: App = {
   id: 'featured-students',
   name: 'Students',
-  description: 'Key student information from multiple systems in one holistic view.',
+  description:
+    'Key student information from multiple systems in one holistic view.',
   icon: '/logos/Student-logo.svg',
   color: 'purple',
   href: '/students',
@@ -83,7 +84,8 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'sdt-data-tool',
         name: 'Students',
-        description: 'Key student information from multiple systems in one holistic view',
+        description:
+          'Key student information from multiple systems in one holistic view',
         icon: '/logos/Student-logo.svg',
         color: 'blue',
         href: '/students',
@@ -99,7 +101,8 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'heytalia',
         name: 'HeyTalia',
-        description: 'AI assistant for clear, parent-friendly school communications',
+        description:
+          'AI assistant for clear, parent-friendly school communications',
         icon: '/logos/heytalia-icon.png',
         color: 'purple',
         href: '/heytalia',
@@ -123,7 +126,8 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'markly',
         name: 'Mark.ly',
-        description: 'AI-driven rubric-based marking for Humanities and Languages',
+        description:
+          'AI-driven rubric-based marking for Humanities and Languages',
         icon: '/logos/Markly.svg',
         color: 'blue',
         href: '/markly',

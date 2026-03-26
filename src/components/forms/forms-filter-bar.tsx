@@ -123,9 +123,7 @@ export function FormsFilterBar({ filters, onChange }: FormsFilterBarProps) {
 
           {/* Ownership */}
           <div className="flex items-center gap-3">
-            <span className="w-24 shrink-0 text-sm font-medium">
-              Ownership
-            </span>
+            <span className="w-24 shrink-0 text-sm font-medium">Ownership</span>
             <div className="flex flex-1 flex-wrap gap-1.5">
               {OWNERSHIP_OPTIONS.map((opt) => (
                 <button

@@ -26,7 +26,12 @@ interface CheckboxCardProps {
   onChange: () => void
 }
 
-function CheckboxCard({ label, description, checked, onChange }: CheckboxCardProps) {
+function CheckboxCard({
+  label,
+  description,
+  checked,
+  onChange,
+}: CheckboxCardProps) {
   return (
     <button
       type="button"
@@ -46,7 +51,9 @@ function CheckboxCard({ label, description, checked, onChange }: CheckboxCardPro
       <span className="flex flex-col gap-1">
         <span className="text-base leading-none text-[#1c2024]">{label}</span>
         {description && (
-          <span className="text-sm leading-none text-[#60646c]">{description}</span>
+          <span className="text-sm leading-none text-[#60646c]">
+            {description}
+          </span>
         )}
       </span>
     </button>
@@ -58,10 +65,12 @@ export function ExportCsvModal({
   onOpenChange,
   onExport,
 }: ExportCsvModalProps) {
-  const [senFormats, setSenFormats] = useState<Set<SenFormat>>(new Set(['sen-high']))
+  const [senFormats, setSenFormats] = useState<Set<SenFormat>>(
+    new Set(['sen-high']),
+  )
 
   function toggleFormat(format: SenFormat) {
-    setSenFormats(prev => {
+    setSenFormats((prev) => {
       const next = new Set(prev)
       if (next.has(format)) {
         next.delete(format)

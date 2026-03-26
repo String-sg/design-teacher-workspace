@@ -54,15 +54,14 @@ function fakeClass(name: string): string {
 
 function memberDetail(
   name: string,
-  fallbackIndex: number,
+  _fallbackIndex: number,
   fallbackClass?: string,
 ) {
   const real = studentByName.get(name)
   return {
     name,
-    nric: real?.nric ?? fakeNric(name),
-    index: real?.index ?? fallbackIndex,
-    class: real?.class ?? fallbackClass ?? fakeClass(name),
+    sublabel: real?.class ?? fallbackClass ?? fakeClass(name),
+    badge: real?.nric ?? fakeNric(name),
   }
 }
 
@@ -106,7 +105,11 @@ function deriveClassGroups(): Array<EntityItem> {
       type: 'group' as const,
       count: members.length,
       memberNames: members.map((m) => m.name),
-      memberDetails: members,
+      memberDetails: members.map((m) => ({
+        name: m.name,
+        sublabel: m.class,
+        badge: m.nric,
+      })),
       groupType: 'class' as const,
     }))
 }
@@ -456,9 +459,8 @@ function groupToEntityItem(g: (typeof MOCK_GROUPS)[number]): EntityItem {
     memberNames: g.members.map((m) => m.name),
     memberDetails: g.members.map((m) => ({
       name: m.name,
-      nric: m.nric,
-      index: m.indexNumber,
-      class: m.class,
+      sublabel: m.class,
+      badge: m.nric,
     })),
   }
 }
@@ -530,7 +532,7 @@ export function getStudentScopes(): Array<EntityScope> {
     { id: 'teaching-groups', label: 'Teaching Group', items: TEACHING_GROUPS },
     {
       id: 'my-groups',
-      label: 'Custom Group',
+      label: 'My Groups',
       items: MOCK_GROUPS.map(groupToEntityItem),
       createHref: '/groups/new',
       createLabel: 'Create custom group',

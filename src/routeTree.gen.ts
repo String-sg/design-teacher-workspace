@@ -30,7 +30,9 @@ import { Route as DsIndexRouteImport } from './routes/ds.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
+import { Route as GroupsUploadRouteImport } from './routes/groups.upload'
 import { Route as GroupsNewRouteImport } from './routes/groups.new'
+import { Route as GroupsCreateRouteImport } from './routes/groups.create'
 import { Route as GroupsGroupIdRouteImport } from './routes/groups.$groupId'
 import { Route as GlowStudentIdRouteImport } from './routes/glow.$studentId'
 import { Route as FormsNewRouteImport } from './routes/forms.new'
@@ -150,9 +152,19 @@ const ReportsIdRoute = ReportsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ReportsRoute,
 } as any)
+const GroupsUploadRoute = GroupsUploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => GroupsRoute,
+} as any)
 const GroupsNewRoute = GroupsNewRouteImport.update({
   id: '/new',
   path: '/new',
+  getParentRoute: () => GroupsRoute,
+} as any)
+const GroupsCreateRoute = GroupsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
   getParentRoute: () => GroupsRoute,
 } as any)
 const GroupsGroupIdRoute = GroupsGroupIdRouteImport.update({
@@ -251,7 +263,9 @@ export interface FileRoutesByFullPath {
   '/forms/new': typeof FormsNewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
   '/groups/$groupId': typeof GroupsGroupIdRoute
+  '/groups/create': typeof GroupsCreateRoute
   '/groups/new': typeof GroupsNewRoute
+  '/groups/upload': typeof GroupsUploadRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
@@ -282,7 +296,9 @@ export interface FileRoutesByTo {
   '/forms/new': typeof FormsNewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
   '/groups/$groupId': typeof GroupsGroupIdRoute
+  '/groups/create': typeof GroupsCreateRoute
   '/groups/new': typeof GroupsNewRoute
+  '/groups/upload': typeof GroupsUploadRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
@@ -321,7 +337,9 @@ export interface FileRoutesById {
   '/forms/new': typeof FormsNewRoute
   '/glow/$studentId': typeof GlowStudentIdRoute
   '/groups/$groupId': typeof GroupsGroupIdRoute
+  '/groups/create': typeof GroupsCreateRoute
   '/groups/new': typeof GroupsNewRoute
+  '/groups/upload': typeof GroupsUploadRoute
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
@@ -360,7 +378,9 @@ export interface FileRouteTypes {
     | '/forms/new'
     | '/glow/$studentId'
     | '/groups/$groupId'
+    | '/groups/create'
     | '/groups/new'
+    | '/groups/upload'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
@@ -391,7 +411,9 @@ export interface FileRouteTypes {
     | '/forms/new'
     | '/glow/$studentId'
     | '/groups/$groupId'
+    | '/groups/create'
     | '/groups/new'
+    | '/groups/upload'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements'
@@ -429,7 +451,9 @@ export interface FileRouteTypes {
     | '/forms/new'
     | '/glow/$studentId'
     | '/groups/$groupId'
+    | '/groups/create'
     | '/groups/new'
+    | '/groups/upload'
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
@@ -608,11 +632,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsIdRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/groups/upload': {
+      id: '/groups/upload'
+      path: '/upload'
+      fullPath: '/groups/upload'
+      preLoaderRoute: typeof GroupsUploadRouteImport
+      parentRoute: typeof GroupsRoute
+    }
     '/groups/new': {
       id: '/groups/new'
       path: '/new'
       fullPath: '/groups/new'
       preLoaderRoute: typeof GroupsNewRouteImport
+      parentRoute: typeof GroupsRoute
+    }
+    '/groups/create': {
+      id: '/groups/create'
+      path: '/create'
+      fullPath: '/groups/create'
+      preLoaderRoute: typeof GroupsCreateRouteImport
       parentRoute: typeof GroupsRoute
     }
     '/groups/$groupId': {
@@ -780,14 +818,18 @@ const FormsRouteWithChildren = FormsRoute._addFileChildren(FormsRouteChildren)
 
 interface GroupsRouteChildren {
   GroupsGroupIdRoute: typeof GroupsGroupIdRoute
+  GroupsCreateRoute: typeof GroupsCreateRoute
   GroupsNewRoute: typeof GroupsNewRoute
+  GroupsUploadRoute: typeof GroupsUploadRoute
   GroupsIndexRoute: typeof GroupsIndexRoute
   GroupsStructuredGroupIdRoute: typeof GroupsStructuredGroupIdRoute
 }
 
 const GroupsRouteChildren: GroupsRouteChildren = {
   GroupsGroupIdRoute: GroupsGroupIdRoute,
+  GroupsCreateRoute: GroupsCreateRoute,
   GroupsNewRoute: GroupsNewRoute,
+  GroupsUploadRoute: GroupsUploadRoute,
   GroupsIndexRoute: GroupsIndexRoute,
   GroupsStructuredGroupIdRoute: GroupsStructuredGroupIdRoute,
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   Copy,
   Edit2,
@@ -26,9 +26,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,6 +87,32 @@ function formatRelativeDate(dateStr: string): string {
   return `${Math.floor(diffDays / 365)}y ago`
 }
 
+// ─── SegmentedTab (matches Posts page) ────────────────────────────────────────
+
+function SegmentedTab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      className={cn(
+        'whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all',
+        active
+          ? 'bg-background text-foreground shadow-sm'
+          : 'text-muted-foreground hover:text-foreground',
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  )
+}
+
 // ─── Type filter popover (Assigned Groups tab) ─────────────────────────────────
 
 const STRUCTURED_FILTER_OPTIONS: Array<{
@@ -119,7 +143,7 @@ function TypeFilterPopover({ value, onChange }: TypeFilterPopoverProps) {
       <PopoverTrigger
         render={
           <Button variant="outline" size="sm" className="gap-2">
-            <Filter className="size-4" />
+            <Filter className="h-4 w-4" />
             Filter
             {value.size > 0 && (
               <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
@@ -147,7 +171,7 @@ function TypeFilterPopover({ value, onChange }: TypeFilterPopoverProps) {
           >
             <span
               className={cn(
-                'flex size-4 shrink-0 items-center justify-center rounded border',
+                'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
                 value.has(opt.value)
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-input',
@@ -156,7 +180,7 @@ function TypeFilterPopover({ value, onChange }: TypeFilterPopoverProps) {
               {value.has(opt.value) && (
                 <svg
                   viewBox="0 0 10 10"
-                  className="size-2.5"
+                  className="h-2.5 w-2.5"
                   fill="currentColor"
                 >
                   <path
@@ -216,9 +240,13 @@ function ClassPills({
 
 // ─── Main component ────────────────────────────────────────────────────────────
 
+type GroupTab = 'my-groups' | 'assigned'
+
 function GroupsIndex() {
   useSetBreadcrumbs([{ label: 'Groups', href: '/groups' }])
+  const navigate = useNavigate()
 
+  const [tab, setTab] = useState<GroupTab>('my-groups')
   const [groups, setGroups] = useState<Array<StudentGroup>>(MOCK_GROUPS)
   const [mySearch, setMySearch] = useState('')
   const [chipFilter, setChipFilter] = useState<'all' | 'mine' | 'shared'>('all')
@@ -273,52 +301,70 @@ function GroupsIndex() {
 
   return (
     <div className="flex flex-col">
-      {/* ── Page header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between px-6 pt-6 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold">Groups</h1>
-            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
-              Concept illustration
-            </span>
+      {/* ── Page header (matches forms.tsx pattern) ───────────────────────── */}
+      <div className="border-b px-4 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold md:text-2xl">Groups</h1>
+              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
+                Concept
+              </span>
+            </div>
+            <p className="mt-1 hidden text-sm text-muted-foreground md:block">
+              Organise students into reusable groups for announcements, forms,
+              and reports.
+            </p>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Organise students into reusable groups for announcements, forms, and
-            reports.
-          </p>
+          {tab === 'my-groups' && (
+            <Button size="sm" render={<Link to="/groups/create" />}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              New group
+            </Button>
+          )}
         </div>
-        <Button render={<Link to="/groups/new" />} className="gap-2 shrink-0">
-          <Plus className="size-4" />
-          New Group
-        </Button>
       </div>
 
-      {/* ── Tabs ────────────────────────────────────────────────────────────── */}
-      <Tabs defaultValue="my-groups" className="flex flex-col flex-1">
-        <div className="px-6">
-          <TabsList variant="line">
-            <TabsTrigger value="my-groups">My Groups</TabsTrigger>
-            <TabsTrigger value="assigned">Assigned Groups</TabsTrigger>
-          </TabsList>
-        </div>
-        <Separator />
-
-        {/* ── My Groups tab ───────────────────────────────────────────────── */}
-        <TabsContent value="my-groups">
-          <div className="flex items-center gap-3 px-6 py-4">
-            <div className="relative w-[240px]">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      {/* ── Toolbar: segmented tabs + search + filter (matches Posts) ─────── */}
+      <div className="mt-4 space-y-4">
+        <div className="flex items-center justify-between gap-4 px-6 pb-0">
+          <div className="flex shrink-0 rounded-full bg-muted p-1 gap-1">
+            <SegmentedTab
+              active={tab === 'my-groups'}
+              onClick={() => setTab('my-groups')}
+            >
+              My Groups
+            </SegmentedTab>
+            <SegmentedTab
+              active={tab === 'assigned'}
+              onClick={() => setTab('assigned')}
+            >
+              Assigned Groups
+            </SegmentedTab>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search groups…"
-                value={mySearch}
-                onChange={(e) => setMySearch(e.target.value)}
-                className="pl-9"
+                value={tab === 'my-groups' ? mySearch : assignedSearch}
+                onChange={(e) =>
+                  tab === 'my-groups'
+                    ? setMySearch(e.target.value)
+                    : setAssignedSearch(e.target.value)
+                }
+                className="w-[240px] pl-9"
               />
             </div>
+            {tab === 'assigned' && (
+              <TypeFilterPopover value={typeFilter} onChange={setTypeFilter} />
+            )}
           </div>
+        </div>
 
-          {/* Filter chips */}
-          <div className="flex items-center gap-2 px-6 pb-4">
+        {/* Sub-filter chips — My Groups only */}
+        {tab === 'my-groups' && (
+          <div className="flex items-center gap-1 px-6">
             {(
               [
                 { value: 'all', label: 'All' },
@@ -326,48 +372,50 @@ function GroupsIndex() {
                 { value: 'shared', label: 'Shared with me' },
               ] as const
             ).map((chip) => (
-              <button
+              <Button
                 key={chip.value}
-                type="button"
+                variant={chipFilter === chip.value ? 'secondary' : 'ghost'}
+                size="sm"
+                className={
+                  chipFilter === chip.value ? '' : 'text-muted-foreground'
+                }
                 onClick={() => setChipFilter(chip.value)}
-                className={cn(
-                  'rounded-md border px-2.5 py-1 text-xs font-medium transition-colors',
-                  chipFilter === chip.value
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-input bg-background text-muted-foreground hover:bg-muted',
-                )}
               >
                 {chip.label}
-              </button>
+              </Button>
             ))}
           </div>
+        )}
 
-          {filteredCombinedGroups.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 px-6">
-              <EmptyState
-                title={
-                  mySearch || chipFilter !== 'all'
-                    ? 'No groups match your search'
-                    : 'No groups yet'
-                }
-                description={
-                  mySearch || chipFilter !== 'all'
-                    ? 'Try a different name or filter.'
-                    : 'Create a group to reuse student lists across announcements, forms, and reports.'
-                }
-              />
-              {!mySearch && chipFilter === 'all' && (
-                <Button
-                  className="mt-4 gap-2"
-                  render={<Link to="/groups/new" />}
-                >
-                  <Plus className="size-4" />
-                  Create your first group
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="max-w-full overflow-x-auto">
+        {/* ── My Groups table ─────────────────────────────────────────────── */}
+        {tab === 'my-groups' && (
+          <div className="max-w-full overflow-x-auto bg-white">
+            {filteredCombinedGroups.length === 0 ? (
+              <div className="flex flex-col items-center py-16">
+                <EmptyState
+                  title={
+                    mySearch || chipFilter !== 'all'
+                      ? 'No groups found'
+                      : 'No groups yet'
+                  }
+                  description={
+                    mySearch || chipFilter !== 'all'
+                      ? 'Try adjusting your search or filter.'
+                      : 'Create a group to reuse student lists across announcements, forms, and reports.'
+                  }
+                />
+                {!mySearch && chipFilter === 'all' && (
+                  <Button
+                    size="sm"
+                    className="mt-4"
+                    render={<Link to="/groups/create" />}
+                  >
+                    <Plus className="mr-1.5 h-4 w-4" />
+                    Create your first group
+                  </Button>
+                )}
+              </div>
+            ) : (
               <Table tableClassName="table-fixed w-full">
                 <TableHeader className="border-b bg-white">
                   <TableRow className="border-0 hover:bg-transparent">
@@ -376,7 +424,7 @@ function GroupsIndex() {
                     <TableHead className="w-[160px]">Classes</TableHead>
                     <TableHead className="w-32">Last updated</TableHead>
                     <TableHead className="w-36">Created by</TableHead>
-                    <TableHead className="pr-6 w-12" />
+                    <TableHead className="w-[48px] pr-2" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -388,37 +436,46 @@ function GroupsIndex() {
                         )?.role
                       : undefined
                     return (
-                      <TableRow key={group.id}>
-                        <TableCell className="pl-6">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Link
-                              to="/groups/$groupId"
-                              params={{ groupId: group.id }}
-                              className="font-medium hover:underline truncate"
-                            >
-                              {group.name}
-                            </Link>
-                            {isShared && (
-                              <Badge
-                                variant="outline"
-                                className="text-xs py-0 text-muted-foreground shrink-0"
-                              >
-                                {sharedRole === 'editor' ? 'Editor' : 'Viewer'}
-                              </Badge>
-                            )}
-                            {!isShared && group.visibility === 'school' && (
-                              <Badge
-                                variant="outline"
-                                className="text-xs py-0 shrink-0"
-                              >
-                                School-wide
-                              </Badge>
-                            )}
+                      <TableRow
+                        key={group.id}
+                        className="cursor-pointer"
+                        onClick={() =>
+                          navigate({
+                            to: '/groups/$groupId',
+                            params: { groupId: group.id },
+                          })
+                        }
+                      >
+                        <TableCell className="overflow-hidden whitespace-normal pl-6">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="truncate font-medium">
+                                {group.name}
+                              </span>
+                              {isShared && (
+                                <Badge
+                                  variant="outline"
+                                  className="shrink-0 py-0 text-xs text-muted-foreground"
+                                >
+                                  {sharedRole === 'editor'
+                                    ? 'Editor'
+                                    : 'Viewer'}
+                                </Badge>
+                              )}
+                              {!isShared && group.visibility === 'school' && (
+                                <Badge
+                                  variant="outline"
+                                  className="shrink-0 py-0 text-xs"
+                                >
+                                  School-wide
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                            <Users className="size-3.5 shrink-0" />
+                            <Users className="h-3.5 w-3.5 shrink-0" />
                             {group.members.length}
                           </div>
                         </TableCell>
@@ -428,16 +485,25 @@ function GroupsIndex() {
                         <TableCell className="text-sm text-muted-foreground">
                           {formatRelativeDate(group.updatedAt)}
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground truncate">
+                        <TableCell className="text-sm text-muted-foreground">
                           {group.createdBy.name}
                         </TableCell>
-                        <TableCell className="pr-6">
+                        <TableCell
+                          className="w-[48px] pr-2 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           {!isShared ? (
                             // Owner: full dropdown
                             <DropdownMenu>
-                              <DropdownMenuTrigger className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted transition-colors">
-                                <MoreHorizontal className="size-4" />
-                                <span className="sr-only">Actions</span>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                  aria-label="More actions"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
@@ -448,7 +514,7 @@ function GroupsIndex() {
                                     />
                                   }
                                 >
-                                  <Edit2 className="size-3.5" />
+                                  <Edit2 className="mr-2 h-4 w-4" />
                                   Edit group
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
@@ -459,7 +525,7 @@ function GroupsIndex() {
                                     />
                                   }
                                 >
-                                  <Share2 className="size-3.5" />
+                                  <Share2 className="mr-2 h-4 w-4" />
                                   Share group
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
@@ -481,7 +547,7 @@ function GroupsIndex() {
                                     }
                                   }}
                                 >
-                                  <Copy className="size-3.5" />
+                                  <Copy className="mr-2 h-4 w-4" />
                                   Make a copy
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
@@ -489,7 +555,7 @@ function GroupsIndex() {
                                   className="text-destructive focus:text-destructive"
                                   onClick={() => setDeleteId(group.id)}
                                 >
-                                  <Trash2 className="size-3.5" />
+                                  <Trash2 className="mr-2 h-4 w-4" />
                                   Delete group
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -497,9 +563,15 @@ function GroupsIndex() {
                           ) : sharedRole === 'editor' ? (
                             // Shared editor: Edit + Make a copy
                             <DropdownMenu>
-                              <DropdownMenuTrigger className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted transition-colors">
-                                <MoreHorizontal className="size-4" />
-                                <span className="sr-only">Actions</span>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                  aria-label="More actions"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
@@ -510,7 +582,7 @@ function GroupsIndex() {
                                     />
                                   }
                                 >
-                                  <Edit2 className="size-3.5" />
+                                  <Edit2 className="mr-2 h-4 w-4" />
                                   Edit group
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
@@ -534,17 +606,18 @@ function GroupsIndex() {
                                     setGroups([...MOCK_GROUPS])
                                   }}
                                 >
-                                  <Copy className="size-3.5" />
+                                  <Copy className="mr-2 h-4 w-4" />
                                   Make a copy
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           ) : (
-                            // Shared viewer: copy icon only
-                            <button
-                              type="button"
+                            // Shared viewer: Make a copy only
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
                               title="Make a copy"
-                              className="flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted transition-colors"
                               onClick={() => {
                                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                 const { _source, ...groupData } = group
@@ -565,9 +638,9 @@ function GroupsIndex() {
                                 setGroups([...MOCK_GROUPS])
                               }}
                             >
-                              <Copy className="size-4" />
+                              <Copy className="h-4 w-4" />
                               <span className="sr-only">Make a copy</span>
-                            </button>
+                            </Button>
                           )}
                         </TableCell>
                       </TableRow>
@@ -575,114 +648,96 @@ function GroupsIndex() {
                   })}
                 </TableBody>
               </Table>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* ── Assigned Groups tab ─────────────────────────────────────────── */}
-        <TabsContent value="assigned">
-          <div className="px-6 pt-4 pb-3">
-            <Alert className="bg-blue-50/60 border-blue-200 text-blue-900">
-              <Info className="size-4 text-blue-500" />
-              <AlertDescription className="text-blue-800">
-                These groups are managed in School Cockpit. Changes to
-                membership must be made by your school administrator.
-              </AlertDescription>
-            </Alert>
+            )}
           </div>
+        )}
 
-          <div className="flex items-center gap-3 px-6 pb-4">
-            <div className="relative w-[240px]">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search groups…"
-                value={assignedSearch}
-                onChange={(e) => setAssignedSearch(e.target.value)}
-                className="pl-9"
-              />
+        {/* ── Assigned Groups table ────────────────────────────────────────── */}
+        {tab === 'assigned' && (
+          <>
+            <div className="px-6">
+              <Alert className="border-blue-200 bg-blue-50/60 text-blue-900">
+                <Info className="h-4 w-4 text-blue-500" />
+                <AlertDescription className="text-blue-800">
+                  These groups are managed in School Cockpit. Changes to
+                  membership must be made by your school administrator.
+                </AlertDescription>
+              </Alert>
             </div>
-            <TypeFilterPopover value={typeFilter} onChange={setTypeFilter} />
-          </div>
 
-          {filteredAssignedGroups.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 px-6">
-              <EmptyState
-                title={
-                  assignedSearch || typeFilter.size > 0
-                    ? 'No groups match your search'
-                    : 'No groups assigned'
-                }
-                description={
-                  assignedSearch || typeFilter.size > 0
-                    ? 'Try adjusting your search or filters.'
-                    : 'Your school administrator assigns groups in School Cockpit.'
-                }
-              />
-            </div>
-          ) : (
-            <div className="max-w-full overflow-x-auto">
-              <Table tableClassName="table-fixed w-full">
-                <TableHeader className="border-b bg-white">
-                  <TableRow className="border-0 hover:bg-transparent">
-                    <TableHead className="pl-6">Name</TableHead>
-                    <TableHead className="w-24">Members</TableHead>
-                    <TableHead className="w-[160px]">Classes</TableHead>
-                    <TableHead className="w-28">Type</TableHead>
-                    <TableHead className="w-28">Last synced</TableHead>
-                    <TableHead className="pr-6 w-24" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAssignedGroups.map((group) => (
-                    <TableRow key={group.id}>
-                      <TableCell className="pl-6">
-                        <Link
-                          to="/groups/structured/$groupId"
-                          params={{ groupId: group.id }}
-                          className="font-medium hover:underline truncate block"
-                        >
-                          {group.name}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <Users className="size-3.5 shrink-0" />
-                          {group.members.length}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <ClassPills members={group.members} />
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs py-0">
-                          {getStructuredTypeLabel(group.structuredType)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {formatRelativeDate(group.syncedAt)}
-                      </TableCell>
-                      <TableCell className="pr-6">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          render={
-                            <Link
-                              to="/groups/structured/$groupId"
-                              params={{ groupId: group.id }}
-                            />
-                          }
-                        >
-                          View
-                        </Button>
-                      </TableCell>
+            <div className="max-w-full overflow-x-auto bg-white">
+              {filteredAssignedGroups.length === 0 ? (
+                <EmptyState
+                  title={
+                    assignedSearch || typeFilter.size > 0
+                      ? 'No groups found'
+                      : 'No groups assigned'
+                  }
+                  description={
+                    assignedSearch || typeFilter.size > 0
+                      ? 'Try adjusting your search or filters.'
+                      : 'Your school administrator assigns groups in School Cockpit.'
+                  }
+                />
+              ) : (
+                <Table tableClassName="table-fixed w-full">
+                  <TableHeader className="border-b bg-white">
+                    <TableRow className="border-0 hover:bg-transparent">
+                      <TableHead className="pl-6">Name</TableHead>
+                      <TableHead className="w-24">Members</TableHead>
+                      <TableHead className="w-[160px]">Classes</TableHead>
+                      <TableHead className="w-28">Type</TableHead>
+                      <TableHead className="w-28">Last synced</TableHead>
+                      <TableHead className="w-[48px] pr-2" />
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAssignedGroups.map((group) => (
+                      <TableRow
+                        key={group.id}
+                        className="cursor-pointer"
+                        onClick={() =>
+                          navigate({
+                            to: '/groups/structured/$groupId',
+                            params: { groupId: group.id },
+                          })
+                        }
+                      >
+                        <TableCell className="overflow-hidden whitespace-normal pl-6">
+                          <span className="truncate font-medium">
+                            {group.name}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Users className="h-3.5 w-3.5 shrink-0" />
+                            {group.members.length}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <ClassPills members={group.members} />
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="py-0 text-xs">
+                            {getStructuredTypeLabel(group.structuredType)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {formatRelativeDate(group.syncedAt)}
+                        </TableCell>
+                        <TableCell
+                          className="w-[48px] pr-2"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </div>
-          )}
-        </TabsContent>
-      </Tabs>
+          </>
+        )}
+      </div>
 
       {/* ── Delete confirmation ──────────────────────────────────────────────── */}
       <AlertDialog

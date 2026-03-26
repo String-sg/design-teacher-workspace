@@ -139,7 +139,6 @@ export function ClassSelector({
           </div>
         )}
 
-
         {/* Search input */}
         <div className="p-2">
           <div className="relative">

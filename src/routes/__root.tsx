@@ -52,8 +52,7 @@ export const Route = createRootRoute({
       },
       {
         property: 'og:image',
-        content:
-          'https://teacherworkspace-alpha.vercel.app/og-image.png',
+        content: 'https://teacherworkspace-alpha.vercel.app/og-image.png',
       },
       {
         property: 'og:type',
@@ -74,8 +73,7 @@ export const Route = createRootRoute({
       },
       {
         name: 'twitter:image',
-        content:
-          'https://teacherworkspace-alpha.vercel.app/og-image.png',
+        content: 'https://teacherworkspace-alpha.vercel.app/og-image.png',
       },
     ],
     links: [
@@ -111,9 +109,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const [queryClient] = React.useState(() => new QueryClient())
   const matches = useRouterState({ select: (s) => s.matches })
-  const isGuestRoute = matches.some(
-    (m) => m.routeId === '/_guest',
-  )
+  const isGuestRoute = matches.some((m) => m.routeId === '/_guest')
   const isGlowRoute = matches.some((m) =>
     (m as { pathname: string }).pathname?.startsWith('/glow/'),
   )

@@ -31,8 +31,7 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
   {
     key: 'posts',
     label: 'Posts',
-    description:
-      'Show or hide the Posts page in the sidebar navigation',
+    description: 'Show or hide the Posts page in the sidebar navigation',
   },
   {
     key: 'forms',
