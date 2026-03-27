@@ -18,6 +18,7 @@ import {
 } from '@/lib/feature-flags'
 
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -567,9 +568,12 @@ function InsightBuddyPage() {
         <div className="flex h-14 items-center gap-2 border-b px-4">
           <Sparkles className="size-4 text-primary" />
           <span className="font-semibold">Insight Buddy</span>
-          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
-            Concept illustration
-          </span>
+          <Badge
+            variant="outline"
+            className="border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-700 dark:bg-purple-950 dark:text-purple-300"
+          >
+            Experiment
+          </Badge>
         </div>
 
         {/* Messages / Empty state */}
