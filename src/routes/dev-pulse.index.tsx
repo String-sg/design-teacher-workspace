@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   CircleHelp,
@@ -115,55 +115,76 @@ function DevPulseDashboard() {
     )
   }
 
-  const authors = [...new Set(data.prs.map((pr) => pr.author))]
-  const filteredPRs = data.prs.filter((pr) => {
-    if (filter !== 'all' && pr.state !== filter) return false
-    if (authorFilter !== 'all' && pr.author !== authorFilter) return false
-    return true
-  })
-
-  // Insights data
-  const qualityDistribution = [
-    {
-      name: 'Excellent (80+)',
-      value: Object.values(analyses).filter((a) => a.qualityScore >= 80).length,
-      color: '#22c55e',
-    },
-    {
-      name: 'Good (50-79)',
-      value: Object.values(analyses).filter(
-        (a) => a.qualityScore >= 50 && a.qualityScore < 80,
-      ).length,
-      color: '#eab308',
-    },
-    {
-      name: 'Needs Work (<50)',
-      value: Object.values(analyses).filter((a) => a.qualityScore < 50).length,
-      color: '#ef4444',
-    },
-  ].filter((d) => d.value > 0)
-
-  const contributorStats = authors.map((author) => {
-    const authorPRs = data.prs.filter((pr) => pr.author === author)
-    return {
-      author,
-      count: authorPRs.length,
-      additions: authorPRs.reduce((s, pr) => s + pr.additions, 0),
-    }
-  }).sort((a, b) => b.count - a.count)
-
-  const allHighlights = Object.values(analyses).flatMap(
-    (a) => a.keyHighlights,
+  const authors = useMemo(
+    () => [...new Set(data.prs.map((pr) => pr.author))],
+    [data.prs],
   )
-  const topRiskFlags = Object.values(analyses)
-    .flatMap((a) => a.riskFlags)
-    .reduce(
-      (acc, flag) => {
-        acc[flag] = (acc[flag] ?? 0) + 1
-        return acc
-      },
-      {} as Record<string, number>,
-    )
+
+  const filteredPRs = useMemo(() => {
+    return data.prs.filter((pr) => {
+      if (filter !== 'all' && pr.state !== filter) return false
+      if (authorFilter !== 'all' && pr.author !== authorFilter) return false
+      return true
+    })
+  }, [data.prs, filter, authorFilter])
+
+  const analysisValues = useMemo(() => Object.values(analyses), [analyses])
+
+  const qualityDistribution = useMemo(
+    () =>
+      [
+        {
+          name: 'Excellent (80+)',
+          value: analysisValues.filter((a) => a.qualityScore >= 80).length,
+          color: '#22c55e',
+        },
+        {
+          name: 'Good (50-79)',
+          value: analysisValues.filter(
+            (a) => a.qualityScore >= 50 && a.qualityScore < 80,
+          ).length,
+          color: '#eab308',
+        },
+        {
+          name: 'Needs Work (<50)',
+          value: analysisValues.filter((a) => a.qualityScore < 50).length,
+          color: '#ef4444',
+        },
+      ].filter((d) => d.value > 0),
+    [analysisValues],
+  )
+
+  const contributorStats = useMemo(() => {
+    return authors
+      .map((author) => {
+        const authorPRs = data.prs.filter((pr) => pr.author === author)
+        return {
+          author,
+          count: authorPRs.length,
+          additions: authorPRs.reduce((s, pr) => s + pr.additions, 0),
+        }
+      })
+      .sort((a, b) => b.count - a.count)
+  }, [authors, data.prs])
+
+  const allHighlights = useMemo(
+    () => analysisValues.flatMap((a) => a.keyHighlights),
+    [analysisValues],
+  )
+
+  const topRiskFlags = useMemo(
+    () =>
+      analysisValues
+        .flatMap((a) => a.riskFlags)
+        .reduce(
+          (acc, flag) => {
+            acc[flag] = (acc[flag] ?? 0) + 1
+            return acc
+          },
+          {} as Record<string, number>,
+        ),
+    [analysisValues],
+  )
 
   return (
     <div className="flex flex-col p-6">

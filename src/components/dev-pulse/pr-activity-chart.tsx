@@ -1,3 +1,4 @@
+import * as React from 'react'
 import {
   Area,
   AreaChart,
@@ -76,7 +77,7 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export function PRActivityChart({ prs, days = 14 }: PRActivityChartProps) {
-  const data = aggregateByDay(prs, days)
+  const data = React.useMemo(() => aggregateByDay(prs, days), [prs, days])
 
   return (
     <ResponsiveContainer width="100%" height={260}>

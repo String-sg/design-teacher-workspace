@@ -1,3 +1,4 @@
+import * as React from 'react'
 import {
   Bar,
   BarChart,
@@ -69,7 +70,7 @@ export function FileImpactChart({
   prs,
   limit = 10,
 }: FileImpactChartProps) {
-  const data = aggregateFileImpact(prs, limit)
+  const data = React.useMemo(() => aggregateFileImpact(prs, limit), [prs, limit])
 
   if (data.length === 0) {
     return (
