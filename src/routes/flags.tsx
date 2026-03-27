@@ -71,6 +71,13 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
       'Show the Groups page in the sidebar for organising students into reusable groups',
     stage: 'Experiment',
   },
+  {
+    key: 'dev-pulse',
+    label: 'Dev Pulse',
+    description:
+      'PR activity dashboard with AI-powered analysis — monitor design contributions, code quality, and business impact',
+    stage: 'Experiment',
+  },
 ]
 
 function FeatureFlagsPage() {

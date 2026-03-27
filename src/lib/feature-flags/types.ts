@@ -7,6 +7,7 @@ export type FeatureFlagKey =
   | 'student-analytics'
   | 'lta-intervention'
   | 'student-groups'
+  | 'dev-pulse'
 
 export type FeatureFlags = {
   [K in FeatureFlagKey]: boolean

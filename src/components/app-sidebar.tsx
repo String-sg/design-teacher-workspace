@@ -6,6 +6,7 @@ import {
   Bot,
   CircleHelp,
   FileText,
+  GitPullRequestArrow,
   Home,
   Layers,
   Mail,
@@ -105,6 +106,16 @@ const manageItems: Array<MenuItem> = [
   },
 ]
 
+const developerItems: Array<MenuItem> = [
+  {
+    title: 'Dev Pulse',
+    url: '/dev-pulse',
+    icon: GitPullRequestArrow,
+    stage: 'Experiment',
+    featureFlag: 'dev-pulse',
+  },
+]
+
 const parentsCommItems: Array<MenuItem> = [
   {
     title: 'Posts',
@@ -194,6 +205,7 @@ export function AppSidebar() {
   const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
   const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
   const studentGroupsEnabled = useFeatureFlag('student-groups')
+  const devPulseEnabled = useFeatureFlag('dev-pulse')
 
   React.useEffect(() => {
     if (localStorage.getItem(COACHMARK_KEY)) return
@@ -239,6 +251,9 @@ export function AppSidebar() {
   const filteredManageItems = filterItems(manageItems)
   const filteredStudentItems = studentInsightItems.filter((item) =>
     item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
+  )
+  const filteredDeveloperItems = developerItems.filter((item) =>
+    item.featureFlag === 'dev-pulse' ? devPulseEnabled : true,
   )
 
   return (
@@ -324,6 +339,20 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenuItems
                   items={filteredManageItems}
+                  currentPath={location.pathname}
+                />
+              </SidebarGroupContent>
+            </>
+          )}
+          {filteredDeveloperItems.length > 0 && (
+            <>
+              <SidebarSeparator className="mx-0 mt-3" />
+              <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
+                Developer
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenuItems
+                  items={filteredDeveloperItems}
                   currentPath={location.pathname}
                 />
               </SidebarGroupContent>

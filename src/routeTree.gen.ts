@@ -18,6 +18,7 @@ import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as FormsRouteImport } from './routes/forms'
 import { Route as FlagsRouteImport } from './routes/flags'
 import { Route as DsRouteImport } from './routes/ds'
+import { Route as DevPulseRouteImport } from './routes/dev-pulse'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as GuestRouteImport } from './routes/_guest'
 import { Route as SplatRouteImport } from './routes/$'
@@ -27,6 +28,7 @@ import { Route as ReportsIndexRouteImport } from './routes/reports.index'
 import { Route as GroupsIndexRouteImport } from './routes/groups.index'
 import { Route as FormsIndexRouteImport } from './routes/forms.index'
 import { Route as DsIndexRouteImport } from './routes/ds.index'
+import { Route as DevPulseIndexRouteImport } from './routes/dev-pulse.index'
 import { Route as AnnouncementsIndexRouteImport } from './routes/announcements.index'
 import { Route as StudentsIdRouteImport } from './routes/students.$id'
 import { Route as ReportsIdRouteImport } from './routes/reports.$id'
@@ -93,6 +95,11 @@ const DsRoute = DsRouteImport.update({
   path: '/ds',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DevPulseRoute = DevPulseRouteImport.update({
+  id: '/dev-pulse',
+  path: '/dev-pulse',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnnouncementsRoute = AnnouncementsRouteImport.update({
   id: '/announcements',
   path: '/announcements',
@@ -136,6 +143,11 @@ const DsIndexRoute = DsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DsRoute,
+} as any)
+const DevPulseIndexRoute = DevPulseIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DevPulseRoute,
 } as any)
 const AnnouncementsIndexRoute = AnnouncementsIndexRouteImport.update({
   id: '/',
@@ -242,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/announcements': typeof AnnouncementsRouteWithChildren
+  '/dev-pulse': typeof DevPulseRouteWithChildren
   '/ds': typeof DsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
@@ -269,6 +282,7 @@ export interface FileRoutesByFullPath {
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/dev-pulse/': typeof DevPulseIndexRoute
   '/ds/': typeof DsIndexRoute
   '/forms/': typeof FormsIndexRoute
   '/groups/': typeof GroupsIndexRoute
@@ -302,6 +316,7 @@ export interface FileRoutesByTo {
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements': typeof AnnouncementsIndexRoute
+  '/dev-pulse': typeof DevPulseIndexRoute
   '/ds': typeof DsIndexRoute
   '/forms': typeof FormsIndexRoute
   '/groups': typeof GroupsIndexRoute
@@ -316,6 +331,7 @@ export interface FileRoutesById {
   '/$': typeof SplatRoute
   '/_guest': typeof GuestRouteWithChildren
   '/announcements': typeof AnnouncementsRouteWithChildren
+  '/dev-pulse': typeof DevPulseRouteWithChildren
   '/ds': typeof DsRouteWithChildren
   '/flags': typeof FlagsRoute
   '/forms': typeof FormsRouteWithChildren
@@ -343,6 +359,7 @@ export interface FileRoutesById {
   '/reports/$id': typeof ReportsIdRoute
   '/students/$id': typeof StudentsIdRoute
   '/announcements/': typeof AnnouncementsIndexRoute
+  '/dev-pulse/': typeof DevPulseIndexRoute
   '/ds/': typeof DsIndexRoute
   '/forms/': typeof FormsIndexRoute
   '/groups/': typeof GroupsIndexRoute
@@ -357,6 +374,7 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/announcements'
+    | '/dev-pulse'
     | '/ds'
     | '/flags'
     | '/forms'
@@ -384,6 +402,7 @@ export interface FileRouteTypes {
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
+    | '/dev-pulse/'
     | '/ds/'
     | '/forms/'
     | '/groups/'
@@ -417,6 +436,7 @@ export interface FileRouteTypes {
     | '/reports/$id'
     | '/students/$id'
     | '/announcements'
+    | '/dev-pulse'
     | '/ds'
     | '/forms'
     | '/groups'
@@ -430,6 +450,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/_guest'
     | '/announcements'
+    | '/dev-pulse'
     | '/ds'
     | '/flags'
     | '/forms'
@@ -457,6 +478,7 @@ export interface FileRouteTypes {
     | '/reports/$id'
     | '/students/$id'
     | '/announcements/'
+    | '/dev-pulse/'
     | '/ds/'
     | '/forms/'
     | '/groups/'
@@ -471,6 +493,7 @@ export interface RootRouteChildren {
   SplatRoute: typeof SplatRoute
   GuestRoute: typeof GuestRouteWithChildren
   AnnouncementsRoute: typeof AnnouncementsRouteWithChildren
+  DevPulseRoute: typeof DevPulseRouteWithChildren
   DsRoute: typeof DsRouteWithChildren
   FlagsRoute: typeof FlagsRoute
   FormsRoute: typeof FormsRouteWithChildren
@@ -548,6 +571,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dev-pulse': {
+      id: '/dev-pulse'
+      path: '/dev-pulse'
+      fullPath: '/dev-pulse'
+      preLoaderRoute: typeof DevPulseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/announcements': {
       id: '/announcements'
       path: '/announcements'
@@ -610,6 +640,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/ds/'
       preLoaderRoute: typeof DsIndexRouteImport
       parentRoute: typeof DsRoute
+    }
+    '/dev-pulse/': {
+      id: '/dev-pulse/'
+      path: '/'
+      fullPath: '/dev-pulse/'
+      preLoaderRoute: typeof DevPulseIndexRouteImport
+      parentRoute: typeof DevPulseRoute
     }
     '/announcements/': {
       id: '/announcements/'
@@ -786,6 +823,18 @@ const AnnouncementsRouteWithChildren = AnnouncementsRoute._addFileChildren(
   AnnouncementsRouteChildren,
 )
 
+interface DevPulseRouteChildren {
+  DevPulseIndexRoute: typeof DevPulseIndexRoute
+}
+
+const DevPulseRouteChildren: DevPulseRouteChildren = {
+  DevPulseIndexRoute: DevPulseIndexRoute,
+}
+
+const DevPulseRouteWithChildren = DevPulseRoute._addFileChildren(
+  DevPulseRouteChildren,
+)
+
 interface DsRouteChildren {
   DsFlowComponentsRoute: typeof DsFlowComponentsRoute
   DsFlowTokensRoute: typeof DsFlowTokensRoute
@@ -869,6 +918,7 @@ const rootRouteChildren: RootRouteChildren = {
   SplatRoute: SplatRoute,
   GuestRoute: GuestRouteWithChildren,
   AnnouncementsRoute: AnnouncementsRouteWithChildren,
+  DevPulseRoute: DevPulseRouteWithChildren,
   DsRoute: DsRouteWithChildren,
   FlagsRoute: FlagsRoute,
   FormsRoute: FormsRouteWithChildren,

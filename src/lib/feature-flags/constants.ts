@@ -11,4 +11,5 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   'student-analytics': false,
   'lta-intervention': false,
   'student-groups': false,
+  'dev-pulse': false,
 }
