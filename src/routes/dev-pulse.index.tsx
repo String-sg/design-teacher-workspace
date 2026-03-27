@@ -104,29 +104,20 @@ function DevPulseDashboard() {
     loadData()
   }, [])
 
-  if (loading || !data) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="size-6 animate-spin text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Loading PR data...</p>
-        </div>
-      </div>
-    )
-  }
+  const prs = data?.prs ?? []
 
   const authors = useMemo(
-    () => [...new Set(data.prs.map((pr) => pr.author))],
-    [data.prs],
+    () => [...new Set(prs.map((pr) => pr.author))],
+    [prs],
   )
 
   const filteredPRs = useMemo(() => {
-    return data.prs.filter((pr) => {
+    return prs.filter((pr) => {
       if (filter !== 'all' && pr.state !== filter) return false
       if (authorFilter !== 'all' && pr.author !== authorFilter) return false
       return true
     })
-  }, [data.prs, filter, authorFilter])
+  }, [prs, filter, authorFilter])
 
   const analysisValues = useMemo(() => Object.values(analyses), [analyses])
 
@@ -157,7 +148,7 @@ function DevPulseDashboard() {
   const contributorStats = useMemo(() => {
     return authors
       .map((author) => {
-        const authorPRs = data.prs.filter((pr) => pr.author === author)
+        const authorPRs = prs.filter((pr) => pr.author === author)
         return {
           author,
           count: authorPRs.length,
@@ -165,7 +156,7 @@ function DevPulseDashboard() {
         }
       })
       .sort((a, b) => b.count - a.count)
-  }, [authors, data.prs])
+  }, [authors, prs])
 
   const allHighlights = useMemo(
     () => analysisValues.flatMap((a) => a.keyHighlights),
@@ -185,6 +176,17 @@ function DevPulseDashboard() {
         ),
     [analysisValues],
   )
+
+  if (loading || !data) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Loading PR data...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col p-6">
