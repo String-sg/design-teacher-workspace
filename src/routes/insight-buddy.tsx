@@ -41,6 +41,7 @@ import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/insight-buddy')({
   beforeLoad: () => {
+    if (typeof window === 'undefined') return
     const stored = localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY)
     const flags = stored
       ? { ...DEFAULT_FEATURE_FLAGS, ...JSON.parse(stored) }
@@ -358,13 +359,13 @@ function PerformancePerSubjectChart() {
           <Bar
             dataKey="thisTerm"
             name="thisTerm"
-            fill="#3b82f6"
+            fill="#228be6"
             radius={[4, 4, 0, 0]}
           />
           <Bar
             dataKey="lastTerm"
             name="lastTerm"
-            fill="#bfdbfe"
+            fill="#12b886"
             radius={[4, 4, 0, 0]}
           />
         </BarChart>

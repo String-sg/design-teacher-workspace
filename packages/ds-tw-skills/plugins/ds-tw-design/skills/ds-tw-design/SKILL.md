@@ -6,7 +6,7 @@ description: >
   Produces production-grade pages that match the existing app aesthetic.
   Part of the ds-tw skill group (see also /ds-tw:install).
   Use: /ds-tw:design <page description>
-argument-hint: "<page description>"
+argument-hint: '<page description>'
 ---
 
 # Create a Flow DS Page
@@ -32,13 +32,17 @@ with a free-text input (no predefined options — just let the user type).
 ## Step 1: Understand the Context
 
 ### App context
+
 This is a **teacher workspace** app for K-12 schools. The audience is teachers, school admins, and staff. Pages should feel:
+
 - **Professional but warm** — not corporate-cold, not childish
 - **Information-dense but scannable** — teachers are busy, surface key info fast
 - **Consistent** — match the existing pages in the app
 
 ### Detect existing patterns
+
 Before creating the page, scan the project for existing pages to match conventions:
+
 1. Check `src/pages/` or `src/routes/` for existing page files
 2. Read 1-2 existing pages to understand the layout pattern (max-width, padding, header style)
 3. Note which components and patterns are already in use
@@ -47,7 +51,7 @@ Before creating the page, scan the project for existing pages to match conventio
 
 ## Step 2: Design Thinking
 
-Before writing any code, think through the design intentionally. Each page should feel *designed*, not assembled from a template.
+Before writing any code, think through the design intentionally. Each page should feel _designed_, not assembled from a template.
 
 ### 2a. Purpose & Structure
 
@@ -67,6 +71,7 @@ Don't default to the same layout every time. Consider what fits the content:
 - **Detail pages** (viewing one item): hero section + tabbed content
 
 Use **intentional spatial composition**:
+
 - Generous negative space where content needs breathing room
 - Tighter spacing in dense data areas (tables, forms)
 - Consider 2-column and 3-column layouts, not just single-column
@@ -75,6 +80,7 @@ Use **intentional spatial composition**:
 ### 2c. Typography & Visual Hierarchy
 
 Use typography to create clear hierarchy, not just size differences:
+
 - **Page titles**: `text-2xl font-semibold tracking-tight` — confident, not shouty
 - **Section titles**: `text-base font-medium` or `text-lg font-semibold`
 - **Body text**: `text-sm` is the default; `text-xs` for metadata and captions
@@ -84,6 +90,7 @@ Use typography to create clear hierarchy, not just size differences:
 ### 2d. Motion & Micro-interactions
 
 Add subtle interactions where they add clarity, not decoration:
+
 - Hover states on interactive rows and cards
 - Focus rings on form inputs (Flow DS handles this via tokens)
 - Transition on state changes (e.g., a field appearing when a type is selected)
@@ -93,6 +100,7 @@ Add subtle interactions where they add clarity, not decoration:
 ### 2e. Empty States & Edge Cases
 
 Design for the empty case first — it's often the first thing users see:
+
 - Use a centered message with an icon and a call-to-action
 - Make the empty state guide the user toward the primary action
 - Consider filtered-no-results as a separate state from truly-empty
@@ -120,9 +128,11 @@ Design for the empty case first — it's often the first thing users see:
 ## Step 3: Implement
 
 ### File location
+
 Create the page at `src/pages/<page-name>.tsx` (kebab-case filename).
 
 ### Import pattern
+
 Use a single consolidated import from `@flow/core`:
 
 ```tsx
@@ -130,26 +140,39 @@ import {
   Button,
   Input,
   Badge,
-  Card, CardHeader, CardTitle, CardDescription, CardContent,
-  Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
   Separator,
   // ... only what you need
-} from "@flow/core"
+} from '@flow/core'
 ```
 
 ### Component conventions
 
 #### Page wrapper
+
 ```tsx
 <div className="min-h-screen bg-background">
-  <div className="mx-auto max-w-6xl px-6 py-8">
-    {/* page content */}
-  </div>
+  <div className="mx-auto max-w-6xl px-6 py-8">{/* page content */}</div>
 </div>
 ```
 
 #### Page header
+
 ```tsx
 <div className="flex items-center justify-between">
   <div>
@@ -165,6 +188,7 @@ import {
 ```
 
 #### Stats cards (optional)
+
 ```tsx
 <div className="grid grid-cols-3 gap-4">
   <Card>
@@ -183,6 +207,7 @@ import {
 ```
 
 #### Filter bar
+
 ```tsx
 <div className="mt-6 flex items-center gap-3">
   <div className="relative flex-1">
@@ -201,6 +226,7 @@ import {
 ```
 
 #### Data table
+
 ```tsx
 <Card className="mt-4">
   <Table>
@@ -210,7 +236,7 @@ import {
       </TableRow>
     </TableHeader>
     <TableBody>
-      {items.map(item => (
+      {items.map((item) => (
         <TableRow key={item.id}>
           <TableCell>{item.value}</TableCell>
         </TableRow>
@@ -221,25 +247,29 @@ import {
 ```
 
 ### Button variant mapping (Flow DS)
-| Intent | Variant |
-|---|---|
-| Primary action | `default` (or omit — it's the default) |
-| Secondary action | `outline` |
-| Subtle/tertiary | `ghost` |
-| Danger/delete | `critical` |
-| Neutral | `neutral` |
-| Text link style | `link` |
+
+| Intent           | Variant                                |
+| ---------------- | -------------------------------------- |
+| Primary action   | `default` (or omit — it's the default) |
+| Secondary action | `outline`                              |
+| Subtle/tertiary  | `ghost`                                |
+| Danger/delete    | `critical`                             |
+| Neutral          | `neutral`                              |
+| Text link style  | `link`                                 |
 
 ### Badge variant mapping (Flow DS)
-| Intent | Variant |
-|---|---|
-| Active/positive | `default` |
-| Neutral/draft | `secondary` |
-| Error/critical | `critical` |
-| Outline/inactive | `outline` |
+
+| Intent           | Variant     |
+| ---------------- | ----------- |
+| Active/positive  | `default`   |
+| Neutral/draft    | `secondary` |
+| Error/critical   | `critical`  |
+| Outline/inactive | `outline`   |
 
 ### Mock data
+
 Create realistic mock data that fits the teacher workspace context:
+
 - Use realistic names (Ms. Johnson, Mr. Patel, Dr. Williams)
 - Use school-relevant labels (Year 6, Term 2, Homeroom 3B)
 - Use Australian date format (`en-AU`) for date formatting
@@ -260,6 +290,7 @@ After creating the page file:
 ## Step 5: Iterate
 
 After the initial implementation, the user may want refinements. Common requests:
+
 - "Add a detail view / sheet / dialog"
 - "Add dark mode toggle"
 - "Make it responsive"

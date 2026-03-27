@@ -142,7 +142,7 @@ interface AnnouncementPreviewProps {
   recipients: Array<SelectedEntity>
   responseType: ResponseType
   dueDate?: string
-  questions?: FormQuestion[]
+  questions?: Array<FormQuestion>
   editingQuestionId?: string | null
 }
 
@@ -635,7 +635,7 @@ function NewAnnouncementPage() {
   const [dueDate, setDueDate] = useState('')
   const [reminderType, setReminderType] = useState<ReminderType>('none')
   const [reminderDate, setReminderDate] = useState('')
-  const [questions, setQuestions] = useState<FormQuestion[]>([])
+  const [questions, setQuestions] = useState<Array<FormQuestion>>([])
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(
     null,
   )
