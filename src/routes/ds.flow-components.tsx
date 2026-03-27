@@ -256,9 +256,7 @@ function ButtonSection({ theme = 'tw' }: { theme?: string }) {
           )}
           <Button variant="critical">Critical</Button>
           <Button variant="outline">Outline</Button>
-          {theme === 'flow' && (
-            <Button variant="neutral">Neutral</Button>
-          )}
+          {theme === 'flow' && <Button variant="neutral">Neutral</Button>}
           <Button variant="ghost">Ghost</Button>
           <Button variant="link">Link</Button>
         </ShowcaseRow>

@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Check, ChevronDown, Search, User, Users, X } from 'lucide-react'
+import {
+  Check,
+  ChevronDown,
+  Minus,
+  Plus,
+  Search,
+  User,
+  Users,
+  X,
+} from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
@@ -21,6 +31,7 @@ export type GroupType =
 export interface MemberDetail {
   name: string
   sublabel?: string // e.g. "3A · tanml@school.edu.sg" for staff
+  badge?: string // right-aligned label (e.g. NRIC for students)
 }
 
 export interface EntityItem {
@@ -42,12 +53,21 @@ export interface SelectedEntity {
   count: number
   groupType?: GroupType
   memberNames?: Array<string>
+  excludedMemberNames?: Array<string>
+}
+
+export interface ScopeSection {
+  label: string
+  items: Array<EntityItem>
 }
 
 export interface EntityScope {
   id: string
   label: string
   items: Array<EntityItem>
+  sections?: Array<ScopeSection>
+  createHref?: string
+  createLabel?: string
 }
 
 export interface SearchResults {
@@ -191,6 +211,8 @@ interface ResultRowProps {
   isExpanded?: boolean
   onToggleExpand?: () => void
   selectedIndividualNames?: Set<string>
+  excludedMemberNames?: Set<string>
+  onMemberToggle?: (name: string) => void
 }
 
 function ResultRow({
@@ -199,7 +221,9 @@ function ResultRow({
   onToggle,
   isExpanded = false,
   onToggleExpand,
-  selectedIndividualNames = new Set(),
+  selectedIndividualNames = new Set<string>(),
+  excludedMemberNames = new Set(),
+  onMemberToggle,
 }: ResultRowProps) {
   const hasMembers =
     item.type === 'group' &&
@@ -223,13 +247,24 @@ function ResultRow({
           aria-pressed={isSelected}
           className="flex flex-1 items-center gap-3 px-3 py-2 text-left text-sm"
         >
-          {item.type === 'group' ? (
-            <Users className="h-4 w-4 shrink-0 text-slate-400" />
-          ) : (
-            <User className="h-4 w-4 shrink-0 text-slate-400" />
-          )}
+          {/* Checkbox */}
+          <span
+            className={cn(
+              'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded border-2 transition-colors',
+              isSelected
+                ? 'border-primary bg-primary text-white'
+                : 'border-slate-300 bg-white',
+            )}
+          >
+            {isSelected && excludedMemberNames.size === 0 && (
+              <Check className="h-3 w-3" />
+            )}
+            {isSelected && excludedMemberNames.size > 0 && (
+              <Minus className="h-3 w-3" />
+            )}
+          </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-medium">{item.label}</p>
+            <p className="truncate font-semibold">{item.label}</p>
             {item.sublabel && (
               <p className="truncate text-xs text-muted-foreground">
                 {item.sublabel}
@@ -238,16 +273,17 @@ function ResultRow({
           </div>
           {item.type === 'group' && item.count !== undefined && (
             <span className="shrink-0 text-xs text-muted-foreground">
-              {item.count} {getCountUnit(item.groupType, item.count)}
+              {item.count - excludedMemberNames.size}{' '}
+              {getCountUnit(
+                item.groupType,
+                item.count - excludedMemberNames.size,
+              )}
             </span>
           )}
           {item.badge && (
             <span className="shrink-0 font-mono text-xs text-muted-foreground">
               {item.badge}
             </span>
-          )}
-          {isSelected && (
-            <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
           )}
         </button>
 
@@ -278,57 +314,78 @@ function ResultRow({
         <div className="border-b border-slate-100 bg-slate-50/60 px-4 pb-3 pt-2.5">
           {/* Header: member count */}
           {(() => {
-            const shown = item.memberDetails?.length ?? item.memberNames!.length
+            const total = item.memberDetails?.length ?? item.memberNames!.length
+            const included = total - excludedMemberNames.size
             return (
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                {shown}{' '}
-                {item.count !== undefined && item.count > shown
-                  ? `of ${item.count} `
-                  : ''}
-                {getCountUnit(item.groupType, shown)}
+                {isSelected
+                  ? `${included} of ${total} included`
+                  : `${total} ${getCountUnit(item.groupType, total)}`}
               </p>
             )
           })()}
 
           {/* Scrollable numbered list */}
-          <ol
+          <div
             className="max-h-[200px] overflow-y-auto"
             style={{ scrollbarWidth: 'thin' }}
           >
             {(
-              item.memberDetails ?? item.memberNames!.map((name) => ({ name }))
+              item.memberDetails ??
+              item.memberNames!.map((name): MemberDetail => ({ name }))
             ).map((detail, index) => {
-              const isAlsoSelected = selectedIndividualNames.has(detail.name)
+              const isMemberIncluded =
+                isSelected && !excludedMemberNames.has(detail.name)
               return (
-                <li
+                <button
                   key={detail.name}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => isSelected && onMemberToggle?.(detail.name)}
                   className={cn(
-                    'flex items-start gap-2.5 rounded px-1.5 py-1 text-xs',
-                    isAlsoSelected
-                      ? 'font-medium text-twblue-9'
-                      : 'text-slate-700',
+                    'flex w-full items-center gap-2 rounded px-1.5 py-1 text-xs',
+                    isSelected
+                      ? 'cursor-pointer hover:bg-slate-100'
+                      : 'cursor-default',
                   )}
                 >
-                  <span className="w-5 shrink-0 pt-px text-right text-[10px] tabular-nums text-slate-400">
-                    {index + 1}
+                  <span className="w-5 shrink-0 text-right text-[10px] tabular-nums text-slate-400">
+                    #{index + 1}
                   </span>
-                  {isAlsoSelected ? (
-                    <Check className="mt-px h-2.5 w-2.5 shrink-0 text-twblue-9" />
-                  ) : (
-                    <span className="h-2.5 w-2.5 shrink-0" />
-                  )}
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate">{detail.name}</span>
+                  <span
+                    className={cn(
+                      'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded border-2 transition-colors',
+                      isMemberIncluded
+                        ? 'border-primary bg-primary text-white'
+                        : 'border-slate-300 bg-white',
+                    )}
+                  >
+                    {isMemberIncluded && <Check className="h-3 w-3" />}
+                  </span>
+                  <span className="min-w-0 flex-1 text-left">
+                    <span
+                      className={cn(
+                        'font-medium',
+                        isMemberIncluded ? 'text-slate-700' : 'text-slate-400',
+                      )}
+                    >
+                      {detail.name}
+                    </span>
                     {detail.sublabel && (
-                      <span className="block truncate text-[10px] font-normal text-muted-foreground">
+                      <span className="ml-1 text-[10px] font-normal text-muted-foreground">
                         {detail.sublabel}
                       </span>
                     )}
                   </span>
-                </li>
+                  {detail.badge && (
+                    <span className="shrink-0 font-mono text-[10px] text-slate-400">
+                      {detail.badge}
+                    </span>
+                  )}
+                </button>
               )
             })}
-          </ol>
+          </div>
 
           {/* Note when roster is incomplete (data not available in preview) */}
           {(() => {
@@ -411,6 +468,9 @@ export function EntitySelector({
   const [query, setQuery] = useState('')
   const [activeScope, setActiveScope] = useState(scopes?.[0]?.id ?? '')
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null)
+  const [groupExclusions, setGroupExclusions] = useState<
+    Map<string, Set<string>>
+  >(new Map())
 
   const wrapperRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -459,6 +519,12 @@ export function EntitySelector({
     const isSelected = value.some((e) => e.id === item.id)
     if (isSelected) {
       onChange(value.filter((e) => e.id !== item.id))
+      // Clear any member exclusions for this group
+      if (groupExclusions.has(item.id)) {
+        const next = new Map(groupExclusions)
+        next.delete(item.id)
+        setGroupExclusions(next)
+      }
     } else if (multiSelect) {
       onChange([...value, toSelectedEntity(item)])
     } else {
@@ -468,8 +534,35 @@ export function EntitySelector({
     }
   }
 
+  function handleMemberToggle(groupId: string, memberName: string) {
+    const currentExcl = groupExclusions.get(groupId) ?? new Set<string>()
+    const newExcl = new Set(currentExcl)
+    if (newExcl.has(memberName)) newExcl.delete(memberName)
+    else newExcl.add(memberName)
+    const next = new Map(groupExclusions)
+    if (newExcl.size === 0) next.delete(groupId)
+    else next.set(groupId, newExcl)
+    setGroupExclusions(next)
+    // Propagate exclusions to parent value
+    const updatedValue = value.map((e) =>
+      e.id === groupId
+        ? {
+            ...e,
+            excludedMemberNames: newExcl.size > 0 ? [...newExcl] : undefined,
+          }
+        : e,
+    )
+    onChange(updatedValue)
+  }
+
   function handleRemove(entity: SelectedEntity) {
     onChange(value.filter((e) => e.id !== entity.id))
+    // Clear exclusions if removed
+    if (groupExclusions.has(entity.id)) {
+      const next = new Map(groupExclusions)
+      next.delete(entity.id)
+      setGroupExclusions(next)
+    }
   }
 
   function closePanel() {
@@ -494,28 +587,58 @@ export function EntitySelector({
 
   function renderBrowseTab() {
     const scope = scopes?.find((s) => s.id === activeScope)
-    if (!scope || scope.items.length === 0) {
+    if (!scope) return null
+
+    const renderItems = (items: Array<EntityItem>) =>
+      items.map((item) => (
+        <ResultRow
+          key={item.id}
+          item={item}
+          isSelected={value.some((e) => e.id === item.id)}
+          onToggle={() => handleToggle(item)}
+          isExpanded={expandedGroupId === item.id}
+          onToggleExpand={() =>
+            setExpandedGroupId((prev) => (prev === item.id ? null : item.id))
+          }
+          selectedIndividualNames={selectedIndividualNames}
+          excludedMemberNames={groupExclusions.get(item.id)}
+          onMemberToggle={(name) => handleMemberToggle(item.id, name)}
+        />
+      ))
+
+    const content = scope.sections
+      ? scope.sections.map((section) => (
+          <div key={section.label}>
+            <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {section.label}
+            </div>
+            {renderItems(section.items)}
+          </div>
+        ))
+      : renderItems(scope.items)
+
+    const createLink = scope.createHref && (
+      <Link
+        to={scope.createHref}
+        className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-slate-50"
+      >
+        <Plus className="h-4 w-4" />
+        {scope.createLabel ?? 'Create'}
+      </Link>
+    )
+
+    if (!scope.sections && scope.items.length === 0 && !scope.createHref) {
       return (
         <p className="py-8 text-center text-sm text-muted-foreground">
           {emptyTabText}
         </p>
       )
     }
+
     return (
       <>
-        {scope.items.map((item) => (
-          <ResultRow
-            key={item.id}
-            item={item}
-            isSelected={value.some((e) => e.id === item.id)}
-            onToggle={() => handleToggle(item)}
-            isExpanded={expandedGroupId === item.id}
-            onToggleExpand={() =>
-              setExpandedGroupId((prev) => (prev === item.id ? null : item.id))
-            }
-            selectedIndividualNames={selectedIndividualNames}
-          />
-        ))}
+        {content}
+        {createLink}
       </>
     )
   }
@@ -547,6 +670,8 @@ export function EntitySelector({
                   )
                 }
                 selectedIndividualNames={selectedIndividualNames}
+                excludedMemberNames={groupExclusions.get(item.id)}
+                onMemberToggle={(name) => handleMemberToggle(item.id, name)}
               />
             ))}
           </>
@@ -570,6 +695,8 @@ export function EntitySelector({
                   )
                 }
                 selectedIndividualNames={selectedIndividualNames}
+                excludedMemberNames={groupExclusions.get(item.id)}
+                onMemberToggle={(name) => handleMemberToggle(item.id, name)}
               />
             ))}
           </>

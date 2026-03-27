@@ -1759,7 +1759,9 @@ export function MonitoringAcademicAnalytics() {
             <table className="w-full table-fixed text-sm">
               <thead>
                 <tr className="border-b bg-muted/40">
-                  {(['Profile', 'Name', 'Class', 'Score', 'Grade'] as const).map((label, i) => (
+                  {(
+                    ['Profile', 'Name', 'Class', 'Score', 'Grade'] as const
+                  ).map((label, i) => (
                     <th
                       key={label}
                       className={cn(
@@ -1812,15 +1814,11 @@ export function MonitoringAcademicAnalytics() {
                     <td className="w-[300px] p-4 align-middle font-medium">
                       {c.name}
                     </td>
-                    <td className="w-[140px] p-4 align-middle">
-                      {c.class}
-                    </td>
+                    <td className="w-[140px] p-4 align-middle">{c.class}</td>
                     <td className="w-[140px] p-4 align-middle tabular-nums">
                       {c.score}
                     </td>
-                    <td className="w-[140px] p-4 align-middle">
-                      {c.grade}
-                    </td>
+                    <td className="w-[140px] p-4 align-middle">{c.grade}</td>
                   </tr>
                 ))}
                 {pagedCandidates.length === 0 && (

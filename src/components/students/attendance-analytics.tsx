@@ -695,7 +695,11 @@ function AttSortableHeader({
       <Popover open={open} onOpenChange={setOpen}>
         {truncate ? (
           <TooltipUI>
-            <TooltipTrigger render={<span style={{ display: 'inline-flex', width: '100%' }} />}>
+            <TooltipTrigger
+              render={
+                <span style={{ display: 'inline-flex', width: '100%' }} />
+              }
+            >
               {triggerButton}
             </TooltipTrigger>
             <TooltipContent side="top">{label}</TooltipContent>
@@ -1248,10 +1252,7 @@ function AttendanceStudentsTable({
           </thead>
           <tbody className="divide-y">
             {paged.map((s) => (
-              <tr
-                key={s.id}
-                className="transition-colors hover:bg-muted/50"
-              >
+              <tr key={s.id} className="transition-colors hover:bg-muted/50">
                 <td className="w-[96px] p-4 align-middle">
                   {(() => {
                     const realId = studentIdByName.get(s.name)
@@ -1284,9 +1285,7 @@ function AttendanceStudentsTable({
                 <td className="w-[192px] p-4 align-middle font-medium">
                   {s.name}
                 </td>
-                <td className="min-w-[140px] p-4 align-middle">
-                  {s.class}
-                </td>
+                <td className="min-w-[140px] p-4 align-middle">{s.class}</td>
                 <td className="min-w-[140px] p-4 align-middle tabular-nums">
                   {s.late +
                     s.nonVRAbsences +

@@ -17,7 +17,11 @@ export const FORM_RESPONSES: Record<string, FormRecipient[]> = {
       responseStatus: 'responded',
       respondedAt: '2026-03-08T09:16:00',
       formResponse: 'yes',
-      questionAnswers: ['Yes, can attend', '9:00 AM – 10:00 AM', 'Please arrange near the library.'],
+      questionAnswers: [
+        'Yes, can attend',
+        '9:00 AM – 10:00 AM',
+        'Please arrange near the library.',
+      ],
     },
     {
       studentId: 's002',
@@ -33,7 +37,11 @@ export const FORM_RESPONSES: Record<string, FormRecipient[]> = {
       responseStatus: 'responded',
       respondedAt: '2026-03-08T10:31:00',
       formResponse: 'no',
-      questionAnswers: ['No, unable to attend', '', 'Please schedule via email instead.'],
+      questionAnswers: [
+        'No, unable to attend',
+        '',
+        'Please schedule via email instead.',
+      ],
     },
     {
       studentId: 's003',
@@ -65,7 +73,11 @@ export const FORM_RESPONSES: Record<string, FormRecipient[]> = {
       responseStatus: 'responded',
       respondedAt: '2026-03-09T08:02:00',
       formResponse: 'yes',
-      questionAnswers: ['Yes, can attend', '2:00 PM – 3:00 PM', 'Prefer to discuss math results.'],
+      questionAnswers: [
+        'Yes, can attend',
+        '2:00 PM – 3:00 PM',
+        'Prefer to discuss math results.',
+      ],
     },
     {
       studentId: 's005',

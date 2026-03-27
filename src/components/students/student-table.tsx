@@ -646,21 +646,22 @@ export function StudentTable({
                             {student.attentionTags
                               .filter(
                                 (tag) =>
-                                  tag !== 'LTA' || isEnabled('lta-intervention'),
+                                  tag !== 'LTA' ||
+                                  isEnabled('lta-intervention'),
                               )
                               .map((tag) => (
-                              <Badge
-                                key={tag}
-                                variant={tagVariantMap[tag]}
-                                className={
-                                  tag === 'SwAN'
-                                    ? 'border-orange-6 bg-orange-2 text-orange-11'
-                                    : undefined
-                                }
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
+                                <Badge
+                                  key={tag}
+                                  variant={tagVariantMap[tag]}
+                                  className={
+                                    tag === 'SwAN'
+                                      ? 'border-orange-6 bg-orange-2 text-orange-11'
+                                      : undefined
+                                  }
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
                           </div>
                         ) : (
                           <span className="text-muted-foreground">-</span>

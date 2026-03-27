@@ -78,13 +78,20 @@ function getResponseStatus(r: PGRecipient, responseType: ResponseType): string {
 }
 
 /** Timestamp to show in the "Timestamp" column */
-function getTimestamp(r: PGRecipient, responseType: ResponseType): string | undefined {
+function getTimestamp(
+  r: PGRecipient,
+  responseType: ResponseType,
+): string | undefined {
   if (responseType === 'acknowledge') return r.respondedAt ?? r.acknowledgedAt
   if (responseType === 'yes-no') return r.respondedAt
   return r.readAt
 }
 
-function exportCSV(rows: Array<PGRecipient>, title: string, responseType: ResponseType) {
+function exportCSV(
+  rows: Array<PGRecipient>,
+  title: string,
+  responseType: ResponseType,
+) {
   const headers = [
     'Student',
     'Index No.',
@@ -106,11 +113,19 @@ function exportCSV(rows: Array<PGRecipient>, title: string, responseType: Respon
     r.classLabel,
     r.pgStatus === 'onboarded' ? 'Onboarded' : 'Not Onboarded',
     responseType === 'acknowledge'
-      ? r.respondedAt ? 'Acknowledged' : 'Pending'
+      ? r.respondedAt
+        ? 'Acknowledged'
+        : 'Pending'
       : responseType === 'yes-no'
-        ? r.formResponse ? r.formResponse.charAt(0).toUpperCase() + r.formResponse.slice(1) : 'No Response'
-        : r.readStatus === 'read' ? 'Read' : 'Unread',
-    getTimestamp(r, responseType) ? formatTimestamp(getTimestamp(r, responseType)!) : '',
+        ? r.formResponse
+          ? r.formResponse.charAt(0).toUpperCase() + r.formResponse.slice(1)
+          : 'No Response'
+        : r.readStatus === 'read'
+          ? 'Read'
+          : 'Unread',
+    getTimestamp(r, responseType)
+      ? formatTimestamp(getTimestamp(r, responseType)!)
+      : '',
     r.parentName,
     r.parentRelationship ?? '',
     r.parentContact ?? '',
@@ -146,7 +161,9 @@ export function RecipientReadTable({
   const [search, setSearch] = useState('')
   const [classFilter, setClassFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [pgFilter, setPgFilter] = useState<'all' | 'onboarded' | 'not_onboarded'>('all')
+  const [pgFilter, setPgFilter] = useState<
+    'all' | 'onboarded' | 'not_onboarded'
+  >('all')
 
   const [visibleCols, setVisibleCols] = useState<Set<ColumnKey>>(
     new Set(['indexNo', 'readAt', 'readBy', 'pgStatus']),
@@ -155,10 +172,23 @@ export function RecipientReadTable({
   // Dynamic status filter options
   const statusOptions: Array<[string, string]> =
     responseType === 'acknowledge'
-      ? [['all', 'All'], ['acknowledged', 'Acknowledged'], ['pending', 'Pending']]
+      ? [
+          ['all', 'All'],
+          ['acknowledged', 'Acknowledged'],
+          ['pending', 'Pending'],
+        ]
       : responseType === 'yes-no'
-        ? [['all', 'All'], ['yes', 'Yes'], ['no', 'No'], ['pending', 'No Response']]
-        : [['all', 'All'], ['read', 'Read'], ['unread', 'Unread']]
+        ? [
+            ['all', 'All'],
+            ['yes', 'Yes'],
+            ['no', 'No'],
+            ['pending', 'No Response'],
+          ]
+        : [
+            ['all', 'All'],
+            ['read', 'Read'],
+            ['unread', 'Unread'],
+          ]
 
   // Derived column header labels for the table
   const statusColLabel =
@@ -445,15 +475,24 @@ export function RecipientReadTable({
           {classFilter !== 'all' && (
             <span className="inline-flex items-center gap-1 rounded-full bg-twblue-2 px-2.5 py-0.5 text-xs font-medium text-twblue-9">
               Class {classFilter}
-              <button type="button" onClick={() => setClassFilter('all')} className="ml-0.5 hover:text-twblue-12">
+              <button
+                type="button"
+                onClick={() => setClassFilter('all')}
+                className="ml-0.5 hover:text-twblue-12"
+              >
                 <X className="h-3 w-3" />
               </button>
             </span>
           )}
           {statusFilter !== 'all' && (
             <span className="inline-flex items-center gap-1 rounded-full bg-twblue-2 px-2.5 py-0.5 text-xs font-medium text-twblue-9">
-              {statusOptions.find(([v]) => v === statusFilter)?.[1] ?? statusFilter}
-              <button type="button" onClick={() => setStatusFilter('all')} className="ml-0.5 hover:text-twblue-12">
+              {statusOptions.find(([v]) => v === statusFilter)?.[1] ??
+                statusFilter}
+              <button
+                type="button"
+                onClick={() => setStatusFilter('all')}
+                className="ml-0.5 hover:text-twblue-12"
+              >
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -461,7 +500,11 @@ export function RecipientReadTable({
           {pgFilter !== 'all' && (
             <span className="inline-flex items-center gap-1 rounded-full bg-twblue-2 px-2.5 py-0.5 text-xs font-medium text-twblue-9">
               {pgFilter === 'onboarded' ? 'Onboarded' : 'Not Onboarded'}
-              <button type="button" onClick={() => setPgFilter('all')} className="ml-0.5 hover:text-twblue-12">
+              <button
+                type="button"
+                onClick={() => setPgFilter('all')}
+                className="ml-0.5 hover:text-twblue-12"
+              >
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -482,14 +525,18 @@ export function RecipientReadTable({
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead>Student</TableHead>
-              {show('indexNo') && <TableHead className="w-20">Index No.</TableHead>}
+              {show('indexNo') && (
+                <TableHead className="w-20">Index No.</TableHead>
+              )}
               <TableHead className="w-16">Class</TableHead>
               <TableHead>{statusColLabel}</TableHead>
               {show('readAt') && <TableHead>{timestampColLabel}</TableHead>}
               {visibleQuestions.map((q) => (
                 <TableHead key={q.id}>
                   <div className="w-[160px]">
-                    <span className="line-clamp-2 text-xs leading-snug">{q.text}</span>
+                    <span className="line-clamp-2 text-xs leading-snug">
+                      {q.text}
+                    </span>
                   </div>
                 </TableHead>
               ))}
@@ -503,7 +550,12 @@ export function RecipientReadTable({
                 <TableCell
                   colSpan={
                     4 +
-                    [show('indexNo'), show('readAt'), show('readBy'), show('pgStatus')].filter(Boolean).length +
+                    [
+                      show('indexNo'),
+                      show('readAt'),
+                      show('readBy'),
+                      show('pgStatus'),
+                    ].filter(Boolean).length +
                     visibleQuestions.length
                   }
                   className="h-24 text-center text-muted-foreground"
@@ -518,11 +570,17 @@ export function RecipientReadTable({
 
                 return (
                   <TableRow key={r.studentId}>
-                    <TableCell className="font-medium">{r.studentName}</TableCell>
+                    <TableCell className="font-medium">
+                      {r.studentName}
+                    </TableCell>
                     {show('indexNo') && (
-                      <TableCell className="text-muted-foreground">{r.indexNo ?? '—'}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {r.indexNo ?? '—'}
+                      </TableCell>
                     )}
-                    <TableCell className="text-muted-foreground">{r.classLabel}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {r.classLabel}
+                    </TableCell>
 
                     {/* Status cell — adapts to responseType */}
                     <TableCell>
@@ -579,7 +637,9 @@ export function RecipientReadTable({
                         !q.showAfter ||
                         q.showAfter === 'both' ||
                         q.showAfter === r.formResponse
-                      const answer = applies ? (r.questionAnswers?.[q.id] ?? null) : null
+                      const answer = applies
+                        ? (r.questionAnswers?.[q.id] ?? null)
+                        : null
                       return (
                         <TableCell key={q.id} className="text-sm">
                           <div className="w-[160px] whitespace-normal break-words">
@@ -595,13 +655,21 @@ export function RecipientReadTable({
                     {show('readBy') && (
                       <TableCell className="text-sm">
                         <div className="flex flex-col gap-0.5">
-                          <span className={status !== 'pending' && status !== 'unread' ? 'font-medium text-foreground' : 'text-muted-foreground'}>
+                          <span
+                            className={
+                              status !== 'pending' && status !== 'unread'
+                                ? 'font-medium text-foreground'
+                                : 'text-muted-foreground'
+                            }
+                          >
                             {r.parentRelationship
                               ? `${r.parentRelationship} · ${r.parentName}`
                               : r.parentName}
                           </span>
                           {r.parentContact && (
-                            <span className="text-xs text-muted-foreground">{r.parentContact}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {r.parentContact}
+                            </span>
                           )}
                         </div>
                       </TableCell>
@@ -616,7 +684,9 @@ export function RecipientReadTable({
                               : 'bg-slate-100 text-slate-500',
                           )}
                         >
-                          {r.pgStatus === 'onboarded' ? 'Onboarded' : 'Not Onboarded'}
+                          {r.pgStatus === 'onboarded'
+                            ? 'Onboarded'
+                            : 'Not Onboarded'}
                         </span>
                       </TableCell>
                     )}

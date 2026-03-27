@@ -1,5 +1,12 @@
 import { useState } from 'react'
-import { Clock, Download, MoreHorizontal, Search, Upload, X } from 'lucide-react'
+import {
+  Clock,
+  Download,
+  MoreHorizontal,
+  Search,
+  Upload,
+  X,
+} from 'lucide-react'
 
 import { MultiFilterPopover } from './multi-filter-popover'
 import { ColumnVisibilityPopover } from './column-visibility-popover'

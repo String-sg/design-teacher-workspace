@@ -64,6 +64,13 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
       'Show Student Analytics and Insight Buddy in the sidebar — attendance cohort analytics, academic analytics, export CSV, and AI-powered student insights',
     stage: 'Experiment',
   },
+  {
+    key: 'student-groups',
+    label: 'Student Groups',
+    description:
+      'Show the Groups page in the sidebar for organising students into reusable groups',
+    stage: 'Experiment',
+  },
 ]
 
 function FeatureFlagsPage() {

@@ -94,18 +94,6 @@ function formatFileSize(bytes: number): string {
 // ---------------------------------------------------------------------------
 // Response type card mockups
 // ---------------------------------------------------------------------------
-function ViewOnlyMockup() {
-  return (
-    <div className="flex flex-col gap-2 p-3">
-      <div className="h-2 w-2/3 rounded-full bg-slate-300" />
-      <div className="h-1.5 w-full rounded-full bg-slate-200" />
-      <div className="h-1.5 w-5/6 rounded-full bg-slate-200" />
-      <div className="h-1.5 w-4/6 rounded-full bg-slate-200" />
-      <div className="h-1.5 w-full rounded-full bg-slate-200" />
-    </div>
-  )
-}
-
 function AcknowledgeMockup() {
   return (
     <div className="flex flex-col gap-2 p-3">
@@ -608,12 +596,15 @@ function NewAnnouncementPage() {
     : undefined
 
   useSetBreadcrumbs([
-    { label: 'Announcements', href: '/announcements' },
+    { label: 'Posts', href: '/announcements' },
     {
-      label: isEditing ? 'Edit Announcement' : 'New Announcement',
+      label: isEditing ? 'Edit Post' : 'New Post',
       href: '/announcements/new',
     },
   ])
+
+  const showResponseSection =
+    initialResponseType === 'acknowledge' || initialResponseType === 'yes-no'
 
   const navigate = useNavigate()
 
@@ -963,7 +954,7 @@ function NewAnnouncementPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="flex-1 text-base font-semibold">
-            {isEditing ? 'Edit Announcement' : 'New Announcement'}
+            {isEditing ? 'Edit Post' : 'New Post'}
           </h1>
 
           {/* Autosave status — replaces Save Draft button */}
@@ -1019,7 +1010,7 @@ function NewAnnouncementPage() {
                 ) : (
                   <>
                     <Send className="mr-2 h-3.5 w-3.5" />
-                    Post Announcement
+                    Post
                   </>
                 )}
               </Button>
@@ -1129,8 +1120,8 @@ function NewAnnouncementPage() {
                     Students <span className="text-destructive">*</span>
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Parents of the selected students will receive this
-                    announcement via Parents Gateway.
+                    Parents of the selected students will receive this post via
+                    Parents Gateway.
                   </p>
                   <StudentRecipientSelector
                     value={recipients}
@@ -1143,7 +1134,7 @@ function NewAnnouncementPage() {
                   <Label>Staff in charge</Label>
                   <p className="text-xs text-muted-foreground">
                     These staff will be able to view read status, and delete the
-                    announcement.
+                    post.
                   </p>
                   <StaffSelector
                     value={staffInCharge}
@@ -1374,95 +1365,91 @@ function NewAnnouncementPage() {
             </section>
 
             {/* RESPONSE TYPE */}
-            <section className="rounded-xl border bg-white p-6">
-              <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                Response Type
-              </h2>
-              <p className="mb-5 text-xs text-muted-foreground">
-                Choose how parents respond to this announcement.
-              </p>
-              <div className="grid grid-cols-3 gap-4">
-                {(
-                  [
-                    {
-                      value: 'view-only' as ResponseType,
-                      label: 'View Only',
-                      hint: 'Parents can read the announcement.',
-                      mockup: <ViewOnlyMockup />,
-                    },
-                    {
-                      value: 'acknowledge' as ResponseType,
-                      label: 'Acknowledge',
-                      hint: 'Parents tap a button to acknowledge.',
-                      mockup: <AcknowledgeMockup />,
-                    },
-                    {
-                      value: 'yes-no' as ResponseType,
-                      label: 'Yes or No',
-                      hint: 'Parents tap Yes or No. Supports follow-up questions.',
-                      mockup: <YesNoMockup />,
-                    },
-                  ] as const
-                ).map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => handleResponseTypeChange(opt.value)}
-                    className={cn(
-                      'flex flex-col gap-3 rounded-xl border-2 p-4 text-left transition-all',
-                      responseType === opt.value
-                        ? 'border-primary bg-primary/[0.04] ring-1 ring-primary/20'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
-                    )}
-                  >
-                    <div
+            {showResponseSection && (
+              <section className="rounded-xl border bg-white p-6">
+                <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Response Type
+                </h2>
+                <p className="mb-5 text-xs text-muted-foreground">
+                  Choose how parents respond to this post.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  {(
+                    [
+                      {
+                        value: 'acknowledge' as ResponseType,
+                        label: 'Acknowledge',
+                        hint: 'Parents tap a button to acknowledge.',
+                        mockup: <AcknowledgeMockup />,
+                      },
+                      {
+                        value: 'yes-no' as ResponseType,
+                        label: 'Yes or No',
+                        hint: 'Parents tap Yes or No. Supports follow-up questions.',
+                        mockup: <YesNoMockup />,
+                      },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => handleResponseTypeChange(opt.value)}
                       className={cn(
-                        'flex h-[100px] w-full items-center justify-center overflow-hidden rounded-lg border',
+                        'flex flex-col gap-3 rounded-xl border-2 p-4 text-left transition-all',
                         responseType === opt.value
-                          ? 'border-primary/15 bg-white'
-                          : 'border-slate-100 bg-slate-50/50',
+                          ? 'border-primary bg-primary/[0.04] ring-1 ring-primary/20'
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50',
                       )}
                     >
-                      <div className="w-full">{opt.mockup}</div>
-                    </div>
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">
-                          {opt.label}
-                        </p>
-                        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                          {opt.hint}
-                        </p>
+                      <div
+                        className={cn(
+                          'flex h-[100px] w-full items-center justify-center overflow-hidden rounded-lg border',
+                          responseType === opt.value
+                            ? 'border-primary/15 bg-white'
+                            : 'border-slate-100 bg-slate-50/50',
+                        )}
+                      >
+                        <div className="w-full">{opt.mockup}</div>
                       </div>
-                      {responseType === opt.value && (
-                        <div className="mt-0.5 shrink-0 rounded-full bg-primary p-0.5 text-white">
-                          <Check className="h-3 w-3" />
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">
+                            {opt.label}
+                          </p>
+                          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                            {opt.hint}
+                          </p>
                         </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
+                        {responseType === opt.value && (
+                          <div className="mt-0.5 shrink-0 rounded-full bg-primary p-0.5 text-white">
+                            <Check className="h-3 w-3" />
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
 
-              {/* Attach a Form — distinct action, not a response type */}
-              <Link
-                to="/forms/new"
-                className="mt-4 flex items-center gap-3 rounded-lg border border-dashed border-slate-300 px-4 py-3 transition-colors hover:border-slate-400 hover:bg-slate-50"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                  <FileText className="h-4 w-4 text-slate-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">
-                    Attach a Form
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Create a custom form in the Forms section.
-                  </p>
-                </div>
-                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              </Link>
-            </section>
+                {/* Attach a Form — distinct action, not a response type */}
+                <Link
+                  to="/forms/new"
+                  className="mt-4 flex items-center gap-3 rounded-lg border border-dashed border-slate-300 px-4 py-3 transition-colors hover:border-slate-400 hover:bg-slate-50"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                    <FileText className="h-4 w-4 text-slate-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">
+                      Attach a Form
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Create a custom form in the Forms section.
+                    </p>
+                  </div>
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                </Link>
+              </section>
+            )}
 
             {/* CUSTOM QUESTIONS — yes/no only */}
             {responseType === 'yes-no' && (

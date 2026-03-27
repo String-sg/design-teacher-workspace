@@ -10,4 +10,5 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   'parents-gateway': true,
   'student-analytics': false,
   'lta-intervention': false,
+  'student-groups': false,
 }

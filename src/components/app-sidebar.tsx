@@ -7,6 +7,7 @@ import {
   CircleHelp,
   FileText,
   Home,
+  Layers,
   Mail,
   MessageSquare,
   ScrollText,
@@ -91,6 +92,16 @@ const studentInsightItems: Array<MenuItem> = [
     icon: Bot,
     stage: 'Experiment',
     featureFlag: 'student-analytics',
+  },
+]
+
+const manageItems: Array<MenuItem> = [
+  {
+    title: 'Groups',
+    url: '/groups',
+    icon: Layers,
+    conceptTag: true,
+    featureFlag: 'student-groups',
   },
 ]
 
@@ -182,6 +193,7 @@ export function AppSidebar() {
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
   const parentsGatewayEnabled = useFeatureFlag('parents-gateway')
   const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
+  const studentGroupsEnabled = useFeatureFlag('student-groups')
 
   React.useEffect(() => {
     if (localStorage.getItem(COACHMARK_KEY)) return
@@ -218,11 +230,13 @@ export function AppSidebar() {
       if (item.featureFlag === 'posts') return postsEnabled
       if (item.featureFlag === 'holistic-reports') return holisticReportsEnabled
       if (item.featureFlag === 'parents-gateway') return parentsGatewayEnabled
+      if (item.featureFlag === 'student-groups') return studentGroupsEnabled
       return true
     })
 
   const filteredMainItems = filterItems(mainNavItems)
   const filteredParentsItems = filterItems(parentsCommItems)
+  const filteredManageItems = filterItems(manageItems)
   const filteredStudentItems = studentInsightItems.filter((item) =>
     item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
   )
@@ -262,6 +276,9 @@ export function AppSidebar() {
           {filteredParentsItems.length > 0 && (
             <>
               <SidebarSeparator className="mx-0 mt-3" />
+              <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
+                Communications
+              </SidebarGroupLabel>
               <Popover
                 open={showCoachMark}
                 onOpenChange={(o) => {
@@ -269,7 +286,9 @@ export function AppSidebar() {
                 }}
               >
                 <PopoverTrigger
-                  render={<SidebarGroupContent className="mt-2 focus:outline-none" />}
+                  render={
+                    <SidebarGroupContent className="mt-2 focus:outline-none" />
+                  }
                 >
                   <SidebarMenuItems
                     items={filteredParentsItems}
@@ -279,7 +298,9 @@ export function AppSidebar() {
                 </PopoverTrigger>
                 <PopoverContent side="right" sideOffset={12}>
                   <PopoverHeader>
-                    <PopoverTitle>New! Parents Gateway posts are here</PopoverTitle>
+                    <PopoverTitle>
+                      New! Parents Gateway posts are here
+                    </PopoverTitle>
                     <PopoverDescription>
                       Send announcements, collect responses, and manage all
                       parent communications in one place.
@@ -292,6 +313,20 @@ export function AppSidebar() {
                   </div>
                 </PopoverContent>
               </Popover>
+            </>
+          )}
+          {filteredManageItems.length > 0 && (
+            <>
+              <SidebarSeparator className="mx-0 mt-3" />
+              <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
+                Manage
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenuItems
+                  items={filteredManageItems}
+                  currentPath={location.pathname}
+                />
+              </SidebarGroupContent>
             </>
           )}
         </SidebarGroup>

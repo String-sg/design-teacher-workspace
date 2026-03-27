@@ -38,7 +38,12 @@ interface FormResponseTableProps {
   questions: FormQuestion[]
 }
 
-type BaseColumnKey = 'indexNo' | 'respondedAt' | 'readBy' | 'pgStatus' | 'formResponse'
+type BaseColumnKey =
+  | 'indexNo'
+  | 'respondedAt'
+  | 'readBy'
+  | 'pgStatus'
+  | 'formResponse'
 type ColumnKey = BaseColumnKey | `q${number}`
 
 // ---------------------------------------------------------------------------
@@ -366,8 +371,7 @@ export function FormResponseTable({
             </p>
             {(Object.keys(baseColumnLabels) as BaseColumnKey[])
               .filter(
-                (col) =>
-                  col !== 'formResponse' || responseType === 'yes-no',
+                (col) => col !== 'formResponse' || responseType === 'yes-no',
               )
               .map((col) => (
                 <button
@@ -419,7 +423,9 @@ export function FormResponseTable({
           variant="outline"
           size="sm"
           className="gap-1.5"
-          onClick={() => exportCSV(filtered, formTitle, responseType, questions)}
+          onClick={() =>
+            exportCSV(filtered, formTitle, responseType, questions)
+          }
         >
           <Download className="h-3.5 w-3.5" />
           Export
@@ -530,9 +536,7 @@ export function FormResponseTable({
             ) : (
               filtered.map((r) => (
                 <TableRow key={r.studentId}>
-                  <TableCell className="font-medium">
-                    {r.studentName}
-                  </TableCell>
+                  <TableCell className="font-medium">{r.studentName}</TableCell>
                   {show('indexNo') && (
                     <TableCell className="text-muted-foreground">
                       {r.indexNo ?? '—'}

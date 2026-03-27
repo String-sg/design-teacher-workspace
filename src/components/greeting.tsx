@@ -21,7 +21,8 @@ export function Greeting({ userName = 'Mr. Tan' }: GreetingProps) {
 
   return (
     <h1 className="py-0 text-center text-2xl font-semibold text-foreground">
-      {greeting}{isLoggedIn ? `, ${userName}` : ''}
+      {greeting}
+      {isLoggedIn ? `, ${userName}` : ''}
     </h1>
   )
 }

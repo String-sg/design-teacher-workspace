@@ -67,8 +67,7 @@ interface CreateOption {
 const CREATE_OPTIONS: CreateOption[] = [
   {
     title: 'Post',
-    description:
-      'Send a post to parents. They can read it on Parents Gateway.',
+    description: 'Send a post to parents. They can read it on Parents Gateway.',
     to: '/announcements/new',
     mockup: <AnnouncementMockup />,
   },
@@ -165,7 +164,9 @@ function CreatePage() {
             </p>
           </div>
 
-          <div className={`grid grid-cols-1 gap-4 ${formsEnabled ? 'sm:grid-cols-3' : 'mx-auto max-w-2xl sm:grid-cols-2'}`}>
+          <div
+            className={`grid grid-cols-1 gap-4 ${formsEnabled ? 'sm:grid-cols-3' : 'mx-auto max-w-2xl sm:grid-cols-2'}`}
+          >
             {options.map((option) => (
               <CreateCard key={option.title} option={option} />
             ))}
