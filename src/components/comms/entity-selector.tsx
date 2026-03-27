@@ -236,7 +236,7 @@ function ResultRow({
       <div
         className={cn(
           'flex w-full transition-colors',
-          isSelected ? 'bg-twblue-1' : 'hover:bg-slate-50',
+          isSelected ? 'bg-twblue-1' : 'hover:bg-slate-100',
         )}
       >
         {/* Selection toggle — takes all available space */}
@@ -273,7 +273,9 @@ function ResultRow({
           </div>
           {item.type === 'group' && item.count !== undefined && (
             <span className="shrink-0 text-xs text-muted-foreground">
-              {item.count - excludedMemberNames.size}{' '}
+              {isSelected && excludedMemberNames.size > 0
+                ? `${item.count - excludedMemberNames.size}/${item.count}`
+                : item.count - excludedMemberNames.size}{' '}
               {getCountUnit(
                 item.groupType,
                 item.count - excludedMemberNames.size,
@@ -315,12 +317,9 @@ function ResultRow({
           {/* Header: member count */}
           {(() => {
             const total = item.memberDetails?.length ?? item.memberNames!.length
-            const included = total - excludedMemberNames.size
             return (
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                {isSelected
-                  ? `${included} of ${total} included`
-                  : `${total} ${getCountUnit(item.groupType, total)}`}
+                {`${total} ${getCountUnit(item.groupType, total)}`}
               </p>
             )
           })()}
@@ -345,13 +344,10 @@ function ResultRow({
                   className={cn(
                     'flex w-full items-center gap-2 rounded px-1.5 py-1 text-xs',
                     isSelected
-                      ? 'cursor-pointer hover:bg-slate-100'
+                      ? 'cursor-pointer hover:bg-blue-50'
                       : 'cursor-default',
                   )}
                 >
-                  <span className="w-5 shrink-0 text-right text-[10px] tabular-nums text-slate-400">
-                    #{index + 1}
-                  </span>
                   <span
                     className={cn(
                       'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded border-2 transition-colors',
@@ -362,6 +358,9 @@ function ResultRow({
                   >
                     {isMemberIncluded && <Check className="h-3 w-3" />}
                   </span>
+                  <span className="w-5 shrink-0 text-right text-[10px] tabular-nums text-slate-400">
+                    #{index + 1}
+                  </span>
                   <span className="min-w-0 flex-1 text-left">
                     <span
                       className={cn(
@@ -371,7 +370,7 @@ function ResultRow({
                     >
                       {detail.name}
                     </span>
-                    {detail.sublabel && (
+                    {detail.sublabel && detail.sublabel !== item.label && (
                       <span className="ml-1 text-[10px] font-normal text-muted-foreground">
                         {detail.sublabel}
                       </span>

@@ -10,8 +10,8 @@
     {
       "name": "Preview",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "preview"],
-      "port": 4173
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
     }
   ]
 }
