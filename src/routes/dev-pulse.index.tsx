@@ -200,30 +200,40 @@ function DevPulseDashboard() {
                   </Button>
                 }
               />
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Skills Powering Dev Pulse</SheetTitle>
+              <SheetContent className="sm:max-w-md">
+                <SheetHeader className="border-b pb-4">
+                  <SheetTitle>How Dev Pulse Works</SheetTitle>
                   <SheetDescription>
-                    Dev Pulse combines multiple analysis techniques to give you a
-                    holistic view of PR activity and quality.
+                    Multiple analysis techniques combine for a holistic view of
+                    PR activity and code quality.
                   </SheetDescription>
                 </SheetHeader>
-                <div className="mt-6 space-y-4">
-                  {SKILLS_USED.map((skill) => (
-                    <div key={skill.name} className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">
-                          {skill.name}
-                        </span>
-                        <Badge variant="outline" className="text-[11px]">
-                          {skill.role}
-                        </Badge>
+                <div className="flex-1 overflow-y-auto px-6 py-5">
+                  <div className="space-y-5">
+                    {SKILLS_USED.map((skill) => (
+                      <div
+                        key={skill.name}
+                        className="flex gap-3"
+                      >
+                        <div className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
+                          <Sparkles className="size-3.5 text-muted-foreground" />
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-sm font-medium leading-none">
+                              {skill.name}
+                            </span>
+                            <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                              {skill.role}
+                            </span>
+                          </div>
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            {skill.description}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {skill.description}
-                      </p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
