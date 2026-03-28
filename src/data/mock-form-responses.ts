@@ -1,7 +1,7 @@
 import type { FormRecipient } from '@/types/form'
 
 // Maps form.id → FormRecipient[]
-export const FORM_RESPONSES: Record<string, FormRecipient[]> = {
+export const FORM_RESPONSES: Record<string, Array<FormRecipient>> = {
   'form-1': [
     {
       studentId: 's001',
@@ -134,6 +134,6 @@ export const FORM_RESPONSES: Record<string, FormRecipient[]> = {
   ],
 }
 
-export function getFormRecipients(formId: string): FormRecipient[] {
+export function getFormRecipients(formId: string): Array<FormRecipient> {
   return FORM_RESPONSES[formId] ?? []
 }

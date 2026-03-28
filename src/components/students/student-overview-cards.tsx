@@ -45,13 +45,7 @@ export function StudentOverviewCards({ student }: StudentOverviewCardsProps) {
                 {student.overallPercentage}%
               </span>
               <span className="text-muted-foreground text-sm whitespace-nowrap">
-                Overall score
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-semibold">32</span>
-              <span className="text-muted-foreground text-sm whitespace-nowrap">
-                Class rank
+                Overall %
               </span>
             </div>
           </div>

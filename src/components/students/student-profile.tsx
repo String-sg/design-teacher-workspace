@@ -12,6 +12,7 @@ import {
   Info,
   Languages,
   PanelRight,
+  Phone,
   Plus,
   User,
   X,
@@ -263,9 +264,11 @@ function ReportRow({ report }: { report: HolisticReport }) {
 
 function formatTermList(terms: Array<string>): string {
   if (terms.length === 0) return 'None'
-  if (terms.length === 1) return terms[0]
-  const nums = terms.map((t) => t.replace('Term ', ''))
-  return `Term ${nums.slice(0, -1).join(', ')} and ${nums[nums.length - 1]}`
+  const sorted = [...terms].sort(
+    (a, b) =>
+      parseInt(b.replace('Term ', '')) - parseInt(a.replace('Term ', '')),
+  )
+  return sorted.join(', ')
 }
 
 export function StudentProfile({
@@ -275,6 +278,7 @@ export function StudentProfile({
   const [wizardOpen, setWizardOpen] = useState(false)
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [academicAnalyticsOpen, setAcademicAnalyticsOpen] = useState(false)
+  const [primaryContactOpen, setPrimaryContactOpen] = useState(false)
   const { isEnabled } = useFeatureFlags()
 
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
@@ -305,13 +309,100 @@ export function StudentProfile({
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <User className="h-8 w-8 text-muted-foreground" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-semibold">{student.name}</h1>
             <p className="text-muted-foreground">
               Class {student.class} · {student.cca}
             </p>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 text-sm"
+            onClick={() => setPrimaryContactOpen(true)}
+          >
+            <Phone className="h-3.5 w-3.5" />
+            Primary contact
+          </Button>
         </div>
+
+        <Sheet open={primaryContactOpen} onOpenChange={setPrimaryContactOpen}>
+          <SheetContent
+            showOverlay={false}
+            showCloseButton={false}
+            className="sm:max-w-xs"
+          >
+            <SheetHeader className="border-b pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border">
+                  <Phone className="h-3.5 w-3.5" />
+                </div>
+                <SheetTitle className="flex-1">Primary contact</SheetTitle>
+                <SheetClose
+                  render={
+                    <button className="text-muted-foreground transition-colors hover:text-foreground" />
+                  }
+                >
+                  <X className="h-5 w-5" />
+                </SheetClose>
+              </div>
+            </SheetHeader>
+            <div className="space-y-5 p-6">
+              <div>
+                <p className="mb-2 text-sm font-medium">Primary contact</p>
+                <div className="rounded-lg bg-muted px-4 py-3">
+                  <ul className="space-y-1 text-sm">
+                    <li className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                      Mother
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-sm font-medium">Remarks</p>
+                <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                  <div>
+                    <p className="font-medium mb-1.5">Name</p>
+                    <ul className="space-y-1">
+                      <li className="flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                        Ai Mee Tiam
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="font-medium mb-1.5">Mobile</p>
+                    <ul className="space-y-1">
+                      <li className="flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                        +65 9123 4567
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="font-medium mb-1.5">Home</p>
+                    <ul className="space-y-1">
+                      <li className="flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                        6769 0000
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="font-medium mb-1.5">Email</p>
+                    <ul className="space-y-1">
+                      <li className="flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                        ai_mee_tiam@gmail.com
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
 
         {/* Intervention Banner — only surfaces for students with support needs */}
         {isEnabled('lta-intervention') && (
@@ -406,39 +497,17 @@ export function StudentProfile({
                 </div>
               }
             />
-            <Field
-              label="Conduct grade"
-              value={student.conduct}
-              tooltip="Current term conduct grade"
-            />
-          </dl>
-
-          <div className="mt-6 space-y-4 border-t pt-4">
-            <RemarksField
-              label="Teacher's remarks"
-              value={student.teacherObservations}
-            />
-            <RemarksField label="Next steps" value={student.nextSteps} />
-          </div>
-        </Section>
-
-        {/* Wellbeing Section */}
-        <Section
-          id="wellbeing"
-          title="Wellbeing"
-          icon={<Heart className="h-5 w-5" />}
-          iconClassName="bg-pink-100 text-pink-600"
-        >
-          <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <FieldWithDetails
-              label="Counselling"
+              label="Counselling cases"
               value={student.counsellingSessions}
               tooltip="Number of counselling sessions this year"
-              sideSheetTitle="Counselling"
+              sideSheetTitle="Counselling cases"
               sideSheetContent={
                 <div className="space-y-5">
                   <div>
-                    <p className="mb-2 text-sm font-medium">Counselling</p>
+                    <p className="mb-2 text-sm font-medium">
+                      Counselling cases
+                    </p>
                     <div className="rounded-lg bg-muted px-4 py-3">
                       <ul className="space-y-1 text-sm">
                         <li className="flex items-center gap-2">
@@ -483,10 +552,30 @@ export function StudentProfile({
               }
             />
             <Field label="SEN" value={student.sen || '-'} />
+            <Field label="Conduct grade" value={student.conduct} />
+          </dl>
+
+          <div className="mt-6 space-y-4 border-t pt-4">
+            <RemarksField
+              label="Teacher's remarks"
+              value={student.teacherObservations}
+            />
+            <RemarksField label="Next steps" value={student.nextSteps} />
+          </div>
+        </Section>
+
+        {/* Wellbeing Section */}
+        <Section
+          id="wellbeing"
+          title="Wellbeing"
+          icon={<Heart className="h-5 w-5" />}
+          iconClassName="bg-pink-100 text-pink-600"
+        >
+          <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <FieldWithDetails
               label="Social links"
               value={student.socialLinks}
-              tooltip="Number of positive peer connections"
+              tooltip="Number of social connections"
               sideSheetTitle="Social links"
               sideSheetContent={
                 <div className="space-y-5">
@@ -496,7 +585,7 @@ export function StudentProfile({
                       <ul className="space-y-1 text-sm">
                         <li className="flex items-center gap-2">
                           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                          {student.socialLinks} peer connection(s)
+                          {student.socialLinks}
                         </li>
                       </ul>
                     </div>
@@ -640,19 +729,6 @@ export function StudentProfile({
               }
             />
           </dl>
-
-          <div className="mt-6 space-y-4 border-t pt-4">
-            <RemarksField
-              label="SEN Officer's remarks"
-              value={null}
-              tooltip="Special Educational Needs officer notes"
-            />
-            <RemarksField
-              label="Counsellor's remarks"
-              value={null}
-              tooltip="School counsellor notes"
-            />
-          </div>
         </Section>
 
         {/* Academic Section */}
@@ -702,9 +778,11 @@ export function StudentProfile({
                 </div>
               }
             />
-            <Field label="Class rank" value="8 / 35" />
-            <Field label="Class percentile" value="77th" />
-            <Field label="No. of subjects" value="6" />
+
+            <Field
+              label="No. of subjects"
+              value={gradeCounts !== null ? gradeCounts.total : '-'}
+            />
             {gradeCounts !== null && (
               <>
                 <Field

@@ -62,7 +62,7 @@ interface MenuItem {
   featureFlag?: FeatureFlagKey
   stage?: string
   transparent?: boolean
-  alsoActiveFor?: string[]
+  alsoActiveFor?: Array<string>
 }
 
 const mainNavItems: Array<MenuItem> = [

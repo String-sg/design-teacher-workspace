@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { CATEGORICAL_6 } from '@/lib/chart-colors'
 import {
   Bar,
   BarChart,
@@ -121,11 +122,11 @@ const G3_COUNT = 4
 const TOTAL_SUBJECTS = G2_COUNT + G3_COUNT
 
 const BAR_COLORS = {
-  term1WA: '#228be6',
-  term2WA: '#6366f1',
-  term3WA: '#12b886',
-  endOfYear: '#0891b2',
-  overall: '#a7aab5',
+  term1WA: '#4d79e0', // cobalt blue — matches attendance chart
+  term2WA: '#228be6', // blue
+  term3WA: '#74c0fc', // light blue
+  endOfYear: '#fac53e', // yellow
+  overall: '#fd7e14', // orange
 }
 
 const LEGEND_ITEMS = [

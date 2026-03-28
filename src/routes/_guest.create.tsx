@@ -1,12 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { X } from 'lucide-react'
 
+import type { FeatureFlags } from '@/lib/feature-flags/types'
 import { Button } from '@/components/ui/button'
 import {
   DEFAULT_FEATURE_FLAGS,
   FEATURE_FLAGS_STORAGE_KEY,
 } from '@/lib/feature-flags/constants'
-import type { FeatureFlags } from '@/lib/feature-flags/types'
 
 export const Route = createFileRoute('/_guest/create')({
   component: CreatePage,
@@ -64,7 +64,7 @@ interface CreateOption {
   mockup: React.ReactNode
 }
 
-const CREATE_OPTIONS: CreateOption[] = [
+const CREATE_OPTIONS: Array<CreateOption> = [
   {
     title: 'Post',
     description: 'Send a post to parents. They can read it on Parents Gateway.',

@@ -1,5 +1,14 @@
-import { useState } from "react"
-import { Plus, Search, MoreHorizontal, FileText, Users, TrendingUp, ArrowUpDown, ClipboardList } from "lucide-react"
+import { useState } from 'react'
+import {
+  Plus,
+  Search,
+  MoreHorizontal,
+  FileText,
+  Users,
+  TrendingUp,
+  ArrowUpDown,
+  ClipboardList,
+} from 'lucide-react'
 import {
   Button,
   Input,
@@ -16,12 +25,12 @@ import {
   SelectTrigger,
   SelectValue,
   Separator,
-} from "@flow/core"
+} from '@flow/core'
 
 interface Form {
   id: string
   title: string
-  status: "active" | "draft" | "closed"
+  status: 'active' | 'draft' | 'closed'
   responses: number
   createdAt: string
   assignedTo: string
@@ -29,74 +38,83 @@ interface Form {
 
 const forms: Form[] = [
   {
-    id: "1",
-    title: "Parent Consent — Year 6 Camp",
-    status: "active",
+    id: '1',
+    title: 'Parent Consent — Year 6 Camp',
+    status: 'active',
     responses: 47,
-    createdAt: "2026-03-15",
-    assignedTo: "Ms. Johnson",
+    createdAt: '2026-03-15',
+    assignedTo: 'Ms. Johnson',
   },
   {
-    id: "2",
-    title: "Student Wellbeing Check-in",
-    status: "active",
+    id: '2',
+    title: 'Student Wellbeing Check-in',
+    status: 'active',
     responses: 132,
-    createdAt: "2026-03-10",
-    assignedTo: "Mr. Patel",
+    createdAt: '2026-03-10',
+    assignedTo: 'Mr. Patel',
   },
   {
-    id: "3",
-    title: "End of Term Feedback",
-    status: "draft",
+    id: '3',
+    title: 'End of Term Feedback',
+    status: 'draft',
     responses: 0,
-    createdAt: "2026-03-20",
-    assignedTo: "Ms. Chen",
+    createdAt: '2026-03-20',
+    assignedTo: 'Ms. Chen',
   },
   {
-    id: "4",
-    title: "Uniform Order Form",
-    status: "closed",
+    id: '4',
+    title: 'Uniform Order Form',
+    status: 'closed',
     responses: 215,
-    createdAt: "2026-02-01",
-    assignedTo: "Admin Office",
+    createdAt: '2026-02-01',
+    assignedTo: 'Admin Office',
   },
   {
-    id: "5",
-    title: "Excursion Permission — Science Museum",
-    status: "active",
+    id: '5',
+    title: 'Excursion Permission — Science Museum',
+    status: 'active',
     responses: 28,
-    createdAt: "2026-03-18",
-    assignedTo: "Dr. Williams",
+    createdAt: '2026-03-18',
+    assignedTo: 'Dr. Williams',
   },
   {
-    id: "6",
-    title: "After School Activities Registration",
-    status: "draft",
+    id: '6',
+    title: 'After School Activities Registration',
+    status: 'draft',
     responses: 0,
-    createdAt: "2026-03-22",
-    assignedTo: "Ms. Thompson",
+    createdAt: '2026-03-22',
+    assignedTo: 'Ms. Thompson',
   },
 ]
 
-const statusVariant: Record<Form["status"], "default" | "secondary" | "outline"> = {
-  active: "default",
-  draft: "secondary",
-  closed: "outline",
+const statusVariant: Record<
+  Form['status'],
+  'default' | 'secondary' | 'outline'
+> = {
+  active: 'default',
+  draft: 'secondary',
+  closed: 'outline',
 }
 
-export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void }) {
-  const [search, setSearch] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
+export default function FormsPage({
+  onCreateForm,
+}: {
+  onCreateForm?: () => void
+}) {
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const filtered = forms.filter((form) => {
-    const matchesSearch = form.title.toLowerCase().includes(search.toLowerCase())
-    const matchesStatus = statusFilter === "all" || form.status === statusFilter
+    const matchesSearch = form.title
+      .toLowerCase()
+      .includes(search.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || form.status === statusFilter
     return matchesSearch && matchesStatus
   })
 
   const stats = {
     total: forms.length,
-    active: forms.filter((f) => f.status === "active").length,
+    active: forms.filter((f) => f.status === 'active').length,
     totalResponses: forms.reduce((sum, f) => sum + f.responses, 0),
   }
 
@@ -124,7 +142,9 @@ export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void 
               <FileText className="size-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-semibold tabular-nums">{stats.total}</p>
+              <p className="text-2xl font-semibold tabular-nums">
+                {stats.total}
+              </p>
               <p className="text-xs text-muted-foreground">Total forms</p>
             </div>
           </div>
@@ -133,7 +153,9 @@ export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void 
               <TrendingUp className="size-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-semibold tabular-nums">{stats.active}</p>
+              <p className="text-2xl font-semibold tabular-nums">
+                {stats.active}
+              </p>
               <p className="text-xs text-muted-foreground">Active now</p>
             </div>
           </div>
@@ -142,7 +164,9 @@ export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void 
               <Users className="size-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-semibold tabular-nums">{stats.totalResponses}</p>
+              <p className="text-2xl font-semibold tabular-nums">
+                {stats.totalResponses}
+              </p>
               <p className="text-xs text-muted-foreground">Total responses</p>
             </div>
           </div>
@@ -200,7 +224,10 @@ export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void 
                 >
                   <TableCell className="font-medium">{form.title}</TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant[form.status]} className="capitalize">
+                    <Badge
+                      variant={statusVariant[form.status]}
+                      className="capitalize"
+                    >
                       {form.status}
                     </Badge>
                   </TableCell>
@@ -211,10 +238,10 @@ export default function FormsPage({ onCreateForm }: { onCreateForm?: () => void 
                     {form.assignedTo}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {new Date(form.createdAt).toLocaleDateString("en-AU", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
+                    {new Date(form.createdAt).toLocaleDateString('en-AU', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
                     })}
                   </TableCell>
                   <TableCell>

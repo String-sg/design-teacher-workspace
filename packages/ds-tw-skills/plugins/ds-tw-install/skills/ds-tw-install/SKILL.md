@@ -7,7 +7,7 @@ description: >
   In full mode, also migrates existing Shadcn UI component imports to @flow/core equivalents.
   Works with Next.js, Vite, TanStack Start, or any Tailwind CSS v4 project.
   Use: /ds-tw:install [full|tokens-only]
-argument-hint: "[full|tokens-only]"
+argument-hint: '[full|tokens-only]'
 ---
 
 # Apply Flow Design System
@@ -22,12 +22,14 @@ If no argument is provided, use the `AskUserQuestion` tool to ask:
 
 Question: "Which mode would you like?"
 Options:
+
 - "Full — @flow/core components + @flow/design-tokens + @radix-ui/colors + fonts. Migrates Shadcn imports to @flow/core."
 - "Tokens only — @flow/design-tokens + @radix-ui/colors only. Token bridge without component library."
 
 Wait for the user's response before continuing.
 
 Modes:
+
 - **`full`**: Install `@flow/core` (components) + `@flow/design-tokens` + `@radix-ui/colors` + fonts, then migrate Shadcn component imports to `@flow/core`
 - **`tokens-only`**: Install `@flow/design-tokens` + `@radix-ui/colors` only (no component library, no migration)
 
@@ -36,7 +38,9 @@ Modes:
 ## Step 1: Detect Project Setup
 
 ### Package Manager
+
 Check which lockfile exists in the project root (or workspace root for monorepos):
+
 - `bun.lock` or `bun.lockb` → use `bun add`
 - `pnpm-lock.yaml` → use `pnpm add`
 - `yarn.lock` → use `yarn add`
@@ -45,7 +49,9 @@ Check which lockfile exists in the project root (or workspace root for monorepos
 **Monorepo awareness**: If `package.json` has a `"workspaces"` field, or the project is inside a directory like `apps/` or `packages/`, the lockfile may be at the workspace root. Run install commands from the **app directory** (not the workspace root) so dependencies land in the correct `package.json`.
 
 ### Framework
+
 Read `package.json` dependencies to detect:
+
 - `next` → Next.js (App Router or Pages)
 - `@tanstack/react-start` → TanStack Start
 - `vite` (without a framework) → Vite + React/Vue
@@ -53,19 +59,21 @@ Read `package.json` dependencies to detect:
 - `astro` → Astro
 
 ### CSS Entry Point
+
 Find the project's main CSS file based on framework:
 
-| Framework | Typical CSS entry |
-|-----------|------------------|
-| Next.js (App Router) | `app/globals.css` |
-| Next.js (Pages) | `styles/globals.css` |
-| Vite / TanStack Start | `src/styles.css` or `src/index.css` |
-| Remix | `app/tailwind.css` or `app/root.css` |
-| Astro | `src/styles/global.css` |
+| Framework             | Typical CSS entry                    |
+| --------------------- | ------------------------------------ |
+| Next.js (App Router)  | `app/globals.css`                    |
+| Next.js (Pages)       | `styles/globals.css`                 |
+| Vite / TanStack Start | `src/styles.css` or `src/index.css`  |
+| Remix                 | `app/tailwind.css` or `app/root.css` |
+| Astro                 | `src/styles/global.css`              |
 
 If none found, search for any CSS file that contains `@import 'tailwindcss'` or `@tailwind base`.
 
 ### Existing Setup
+
 - **Shadcn present?** Check for `components.json` or `src/components/ui/` directory
 - **Tailwind version?** If CSS contains `@import "tailwindcss"` → v4. If `tailwind.config.*` exists → v3.
 
@@ -90,18 +98,22 @@ The `@flow` packages are hosted on a private GitLab npm registry.
 ## Step 3: Install Dependencies
 
 ### Full mode
+
 ```bash
 # Replace with detected package manager
 bun add @flow/core@^0.1.17 @flow/design-tokens@^0.1.7 @radix-ui/colors@^3.0.0 @fontsource/inter tw-animate-css
 ```
 
 ### Tokens-only mode
+
 ```bash
 bun add @flow/design-tokens@^0.1.7 @radix-ui/colors@^3.0.0 tw-animate-css
 ```
 
 ### Peer dependency: Shadcn CSS
+
 If the project uses Shadcn UI, ensure `shadcn` is in devDependencies (needed for `shadcn/tailwind.css`):
+
 ```bash
 bun add -d shadcn
 ```
@@ -118,12 +130,14 @@ Use the `AskUserQuestion` tool to ask:
 
 Question: "Which brand color would you like?"
 Options:
+
 - "TWBlue (#0064FF) — Custom blue scale, works well with most apps (Recommended)"
 - "Flow DS default (indigo #272962) — The canonical Flow DS look"
 - "Radix violet — Built-in Radix violet scale"
 - "Radix crimson — Built-in Radix crimson scale"
 
 Then adapt the template based on the answer:
+
 - **TWBlue** (default): Use the template as-is — no changes needed.
 - **Flow DS default**: Remove the custom TWBlue scale (`:root` hex values in Section 2 and `.dark` block), and remove the brand override mappings (Section 5). Flow DS will use its built-in indigo.
 - **Radix scale**: Replace `var(--twblue-N)` references with `var(--<scale>-N)` throughout. Remove the TWBlue hex declarations. Add the chosen scale's CSS imports if not already present.
@@ -165,38 +179,42 @@ Find all files that import from `@/components/ui/*` (or the project's Shadcn com
 ### Variant & Size Mapping
 
 #### Button
-| Shadcn variant | Flow DS variant |
-|---|---|
-| `default` | `default` |
-| `destructive` | `critical` |
-| `outline` | `outline` |
-| `secondary` | `neutral` |
-| `ghost` | `ghost` |
-| `link` | `link` |
 
-| Shadcn size | Flow DS size |
-|---|---|
-| `default` | `default` |
-| `sm` | `sm` |
-| `lg` | `lg` |
-| `icon` | `icon` |
-| `icon-xs` | `icon` (no xs equivalent) |
-| `icon-sm` | `icon` |
-| `icon-lg` | `icon` |
-| `xs` | `sm` (closest match) |
+| Shadcn variant | Flow DS variant |
+| -------------- | --------------- |
+| `default`      | `default`       |
+| `destructive`  | `critical`      |
+| `outline`      | `outline`       |
+| `secondary`    | `neutral`       |
+| `ghost`        | `ghost`         |
+| `link`         | `link`          |
+
+| Shadcn size | Flow DS size              |
+| ----------- | ------------------------- |
+| `default`   | `default`                 |
+| `sm`        | `sm`                      |
+| `lg`        | `lg`                      |
+| `icon`      | `icon`                    |
+| `icon-xs`   | `icon` (no xs equivalent) |
+| `icon-sm`   | `icon`                    |
+| `icon-lg`   | `icon`                    |
+| `xs`        | `sm` (closest match)      |
 
 #### Badge
+
 | Shadcn variant | Flow DS variant |
-|---|---|
-| `default` | `default` |
-| `secondary` | `secondary` |
-| `destructive` | `critical` |
-| `outline` | `outline` |
+| -------------- | --------------- |
+| `default`      | `default`       |
+| `secondary`    | `secondary`     |
+| `destructive`  | `critical`      |
+| `outline`      | `outline`       |
 
 Flow DS also has `verified` (with checkmark icon) — no Shadcn equivalent.
 
 #### Other Components
+
 These have the same API and can be migrated by changing the import path only:
+
 - `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`
 - `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`
 - `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectItem`
@@ -209,17 +227,19 @@ These have the same API and can be migrated by changing the import path only:
 ### Consolidate imports
 
 Instead of separate imports per component file:
+
 ```tsx
 // Before — multiple Shadcn imports
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 ```
 
 Use a single `@flow/core` import:
+
 ```tsx
 // After — single Flow DS import
-import { Button, Input, Card, CardHeader, CardTitle } from "@flow/core"
+import { Button, Input, Card, CardHeader, CardTitle } from '@flow/core'
 ```
 
 ### After migration
@@ -251,16 +271,21 @@ For the full component catalog with import examples, see `${CLAUDE_SKILL_DIR}/re
 ## Troubleshooting
 
 ### "Cannot find module '@flow/core'"
+
 The `.npmrc` is missing or doesn't have the `@flow:registry` line. Re-run Step 2.
 
 ### Flow components look unstyled
+
 Missing `@flow/core/tailwind.no-reset.css` (or `tailwind.css`) import. Check that it's imported AFTER `@import 'tailwindcss'` in the CSS entry file.
 
 ### Brand colors don't match expected
+
 CSS custom properties resolve at computed-value time. The `.flow-theme` class re-declares ALL derived tokens (button fills, borders, foregrounds) because overriding `--color-brand-*` alone won't cascade to children that inherited the already-resolved value from `:root`. Make sure `.flow-theme` includes the full transitive token block.
 
 ### Dark mode colors look wrong
+
 Ensure the `.dark` block re-maps ALL Radix scales to their dark variants (`--slate-1: var(--slate-dark-1)`, etc.) AND re-declares the Flow DS semantic mappings. Both layers must be present.
 
 ### Monorepo: packages not found after install
+
 In workspaces, `node_modules/@flow/core` may be hoisted to the workspace root. This is fine — bundlers resolve it correctly. If not, try installing from the workspace root instead.

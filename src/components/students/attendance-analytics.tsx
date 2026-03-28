@@ -109,7 +109,7 @@ const MONTHLY_DATA: Array<MonthlyEntry> = [
     absentValidPrivate: 1,
     absentValidOfficial: 1,
     absentMC: 1,
-    pendingReason: 2,
+    pendingReason: null,
   },
   {
     month: 'Feb',
@@ -118,7 +118,7 @@ const MONTHLY_DATA: Array<MonthlyEntry> = [
     absentValidPrivate: 1,
     absentValidOfficial: 1,
     absentMC: 1,
-    pendingReason: 1,
+    pendingReason: null,
   },
   {
     month: 'Mar',
@@ -127,7 +127,7 @@ const MONTHLY_DATA: Array<MonthlyEntry> = [
     absentValidPrivate: null,
     absentValidOfficial: 1,
     absentMC: null,
-    pendingReason: 1,
+    pendingReason: null,
   },
   {
     month: 'Apr',
@@ -136,7 +136,7 @@ const MONTHLY_DATA: Array<MonthlyEntry> = [
     absentValidPrivate: 2,
     absentValidOfficial: 1,
     absentMC: 1,
-    pendingReason: 2,
+    pendingReason: null,
   },
   {
     month: 'May',
@@ -145,7 +145,7 @@ const MONTHLY_DATA: Array<MonthlyEntry> = [
     absentValidPrivate: 3,
     absentValidOfficial: 1,
     absentMC: 1,
-    pendingReason: 2,
+    pendingReason: null,
   },
   {
     month: 'Jun',
@@ -154,7 +154,7 @@ const MONTHLY_DATA: Array<MonthlyEntry> = [
     absentValidPrivate: 2,
     absentValidOfficial: 2,
     absentMC: 1,
-    pendingReason: 1,
+    pendingReason: null,
   },
   {
     month: 'Jul',
@@ -163,7 +163,7 @@ const MONTHLY_DATA: Array<MonthlyEntry> = [
     absentValidPrivate: 1,
     absentValidOfficial: 1,
     absentMC: null,
-    pendingReason: 1,
+    pendingReason: null,
   },
   {
     month: 'Aug',
@@ -172,7 +172,7 @@ const MONTHLY_DATA: Array<MonthlyEntry> = [
     absentValidPrivate: 2,
     absentValidOfficial: 1,
     absentMC: 1,
-    pendingReason: 1,
+    pendingReason: null,
   },
   {
     month: 'Sep',
@@ -181,7 +181,7 @@ const MONTHLY_DATA: Array<MonthlyEntry> = [
     absentValidPrivate: 2,
     absentValidOfficial: 1,
     absentMC: 1,
-    pendingReason: 2,
+    pendingReason: null,
   },
   {
     month: 'Oct',
@@ -195,51 +195,371 @@ const MONTHLY_DATA: Array<MonthlyEntry> = [
 ]
 
 const ABSENCE_DETAILS = [
+  // Oct
   {
-    date: 'Tuesday, 6 January 2026',
-    type: 'Absent without valid reason',
-    typeColor: '#fa5252',
+    date: '20 Oct 2026',
+    type: 'Pending reason',
+    typeColor: '#e03131',
     subReason: '—',
-    remarks: 'Follow-up required',
+    remarks: 'Parent informed',
   },
   {
-    date: 'Wednesday, 7 January 2026',
+    date: '19 Oct 2026',
     type: 'Absent without valid reason',
-    typeColor: '#fa5252',
+    typeColor: '#f76707',
     subReason: '—',
-    remarks: 'Follow-up required',
+    remarks: 'Skipped school',
   },
   {
-    date: 'Sunday, 11 January 2026',
+    date: '16 Oct 2026',
     type: 'Late',
-    typeColor: '#fd7e14',
+    typeColor: null,
     subReason: '—',
     remarks: 'Noted',
   },
   {
-    date: 'Monday, 19 January 2026',
+    date: '15 Oct 2026',
     type: 'Absent without valid reason',
-    typeColor: '#fa5252',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '14 Oct 2026',
+    type: 'MC',
+    typeColor: null,
+    subReason: '—',
+    remarks: '—',
+  },
+  {
+    date: '13 Oct 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Bus delay',
+  },
+  {
+    date: '08 Oct 2026',
+    type: 'Absent without valid reason',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '07 Oct 2026',
+    type: 'Pending reason',
+    typeColor: '#e03131',
+    subReason: '—',
+    remarks: '—',
+  },
+  {
+    date: '06 Oct 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Noted',
+  },
+  {
+    date: '01 Oct 2026',
+    type: 'Absent (valid reason)',
+    typeColor: null,
+    subReason: 'Family event',
+    remarks: 'Parent letter',
+  },
+  // Sep
+  {
+    date: '30 Sep 2026',
+    type: 'Pending reason',
+    typeColor: '#e03131',
+    subReason: '—',
+    remarks: 'Parent not reachable',
+  },
+  {
+    date: '25 Sep 2026',
+    type: 'Absent without valid reason',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '24 Sep 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Traffic',
+  },
+  {
+    date: '22 Sep 2026',
+    type: 'MC',
+    typeColor: null,
+    subReason: '—',
+    remarks: '—',
+  },
+  {
+    date: '17 Sep 2026',
+    type: 'Absent (valid reason)',
+    typeColor: null,
+    subReason: 'CCA competition',
+    remarks: 'Teacher approved',
+  },
+  {
+    date: '11 Sep 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Noted',
+  },
+  // Aug
+  {
+    date: '28 Aug 2026',
+    type: 'Absent without valid reason',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '26 Aug 2026',
+    type: 'Pending reason',
+    typeColor: '#e03131',
+    subReason: '—',
+    remarks: '—',
+  },
+  {
+    date: '21 Aug 2026',
+    type: 'MC',
+    typeColor: null,
+    subReason: '—',
+    remarks: '—',
+  },
+  {
+    date: '14 Aug 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Bus delay',
+  },
+  {
+    date: '05 Aug 2026',
+    type: 'Absent (valid reason)',
+    typeColor: null,
+    subReason: 'Medical appointment',
+    remarks: 'Parent letter',
+  },
+  // Jul
+  {
+    date: '29 Jul 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Noted',
+  },
+  {
+    date: '23 Jul 2026',
+    type: 'Absent without valid reason',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '16 Jul 2026',
+    type: 'MC',
+    typeColor: null,
+    subReason: '—',
+    remarks: '—',
+  },
+  // Jun
+  {
+    date: '25 Jun 2026',
+    type: 'Pending reason',
+    typeColor: '#e03131',
     subReason: '—',
     remarks: 'Parent informed',
   },
+  {
+    date: '23 Jun 2026',
+    type: 'Absent without valid reason',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '18 Jun 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Noted',
+  },
+  {
+    date: '11 Jun 2026',
+    type: 'Absent (valid reason)',
+    typeColor: null,
+    subReason: 'Family event',
+    remarks: 'Parent letter',
+  },
+  {
+    date: '04 Jun 2026',
+    type: 'MC',
+    typeColor: null,
+    subReason: '—',
+    remarks: '—',
+  },
+  // May
+  {
+    date: '27 May 2026',
+    type: 'Absent without valid reason',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '20 May 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Traffic',
+  },
+  {
+    date: '13 May 2026',
+    type: 'MC',
+    typeColor: null,
+    subReason: '—',
+    remarks: '—',
+  },
+  {
+    date: '06 May 2026',
+    type: 'Pending reason',
+    typeColor: '#e03131',
+    subReason: '—',
+    remarks: '—',
+  },
+  // Apr
+  {
+    date: '29 Apr 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Noted',
+  },
+  {
+    date: '23 Apr 2026',
+    type: 'Absent without valid reason',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '22 Apr 2026',
+    type: 'MC',
+    typeColor: null,
+    subReason: '—',
+    remarks: '—',
+  },
+  {
+    date: '15 Apr 2026',
+    type: 'Absent (valid reason)',
+    typeColor: null,
+    subReason: 'Sports day',
+    remarks: 'Teacher approved',
+  },
+  {
+    date: '08 Apr 2026',
+    type: 'Pending reason',
+    typeColor: '#e03131',
+    subReason: '—',
+    remarks: 'Parent informed',
+  },
+  // Mar
+  {
+    date: '25 Mar 2026',
+    type: 'Absent without valid reason',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '18 Mar 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Bus delay',
+  },
+  // Feb
+  {
+    date: '25 Feb 2026',
+    type: 'Pending reason',
+    typeColor: '#e03131',
+    subReason: '—',
+    remarks: '—',
+  },
+  {
+    date: '18 Feb 2026',
+    type: 'Absent without valid reason',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '11 Feb 2026',
+    type: 'MC',
+    typeColor: null,
+    subReason: '—',
+    remarks: '—',
+  },
+  {
+    date: '04 Feb 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Noted',
+  },
+  // Jan
+  {
+    date: '28 Jan 2026',
+    type: 'Late',
+    typeColor: null,
+    subReason: '—',
+    remarks: 'Traffic',
+  },
+  {
+    date: '21 Jan 2026',
+    type: 'Absent without valid reason',
+    typeColor: '#f76707',
+    subReason: '—',
+    remarks: 'Skipped school',
+  },
+  {
+    date: '14 Jan 2026',
+    type: 'MC',
+    typeColor: null,
+    subReason: '—',
+    remarks: '—',
+  },
+  {
+    date: '07 Jan 2026',
+    type: 'Absent (valid reason)',
+    typeColor: null,
+    subReason: 'Medical appointment',
+    remarks: 'Parent letter',
+  },
 ]
 
+const DETAILS_PAGE_SIZE = 5
+
 const BAR_CATEGORIES = [
-  { key: 'latecoming', label: 'Late', color: '#228be6' }, // blue
-  { key: 'absentNoValid', label: 'Non-VR absences', color: '#a7aab5' }, // gray
-  { key: 'pendingReason', label: 'Pending reason', color: '#6366f1' }, // indigo
-  { key: 'absentMC', label: 'MC', color: '#0891b2' }, // cyan
+  { key: 'pendingReason', label: 'Pending reason', color: '#fa5252' }, // red — top
+  { key: 'absentNoValid', label: 'Non-VR absences', color: '#fd7e14' }, // orange
+  { key: 'latecoming', label: 'Late', color: '#fac53e' }, // yellow — matches reports
+  { key: 'absentMC', label: 'MC', color: '#74c0fc' }, // blue-3 (lightest)
   {
     key: 'absentValidPrivate',
     label: 'Valid reason (private)',
-    color: '#7c3aed',
-  }, // violet
+    color: '#228be6',
+  }, // blue — matches reports
   {
     key: 'absentValidOfficial',
     label: 'Valid reason (official)',
-    color: '#12b886',
-  }, // teal
+    color: '#4d79e0',
+  }, // cobalt blue H=222° — shifted from sky-blue to contrast against slate-12
 ]
 
 const CHART_COMMON_PROPS = {
@@ -258,6 +578,18 @@ function AbsenceBarChart({
   onSegmentClick?: (month: string, categoryKey: string, count: number) => void
 }) {
   const reversedCategories = [...BAR_CATEGORIES].reverse()
+
+  // For each month, determine which category key sits at the top of the stack
+  const topKeyByMonth: Record<string, string> = {}
+  for (const entry of data) {
+    for (const cat of BAR_CATEGORIES) {
+      if ((Number(entry[cat.key as keyof MonthlyEntry]) || 0) > 0) {
+        topKeyByMonth[entry.month] = cat.key
+        break
+      }
+    }
+  }
+
   return (
     <BarChart {...CHART_COMMON_PROPS} data={data} barSize={barSize}>
       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e9ecef" />
@@ -283,6 +615,19 @@ function AbsenceBarChart({
           dataKey={cat.key}
           fill={cat.color}
           stackId="a"
+          shape={(shapeProps: any) => {
+            const { x, y, width, height, fill } = shapeProps
+            const h = Number(height)
+            const w = Number(width)
+            if (h <= 0 || w <= 0) return <g />
+            const isTop = topKeyByMonth[shapeProps.month as string] === cat.key
+            if (!isTop) {
+              return <rect x={x} y={y} width={w} height={h} fill={fill} />
+            }
+            const r = Math.min(4, w / 2, h / 2)
+            const d = `M${Number(x) + r},${y} H${Number(x) + w - r} Q${Number(x) + w},${y} ${Number(x) + w},${Number(y) + r} V${Number(y) + h} H${x} V${Number(y) + r} Q${x},${y} ${Number(x) + r},${y} Z`
+            return <path d={d} fill={fill} />
+          }}
           cursor={onSegmentClick ? 'pointer' : undefined}
           onClick={
             onSegmentClick
@@ -296,34 +641,29 @@ function AbsenceBarChart({
         >
           <LabelList
             dataKey={cat.key}
-            content={({
-              x,
-              y,
-              width,
-              height,
-              index,
-            }: {
+            content={(props: {
               x?: number
               y?: number
               width?: number
               height?: number
-              index?: number
+              value?: number | null
             }) => {
-              if (index === undefined) return null
-              const entry = data[index]
-              const value = Number(entry[cat.key as keyof MonthlyEntry]) || 0
-              if (value <= 0) return null
+              const { x, y, width, height, value } = props
+              const numVal = Number(value) || 0
+              if (numVal <= 0) return null
+              const cx = Number(x) + Number(width) / 2
+              const cy = Number(y) + Number(height) / 2
               return (
                 <text
-                  x={Number(x) + Number(width) / 2}
-                  y={Number(y) + Number(height) / 2}
+                  x={cx}
+                  y={cy}
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fontSize={10}
-                  fontWeight={600}
-                  fill="#fff"
+                  fontWeight={500}
+                  fill="var(--slate-12)"
                 >
-                  {value}
+                  {numVal}
                 </text>
               )
             }}
@@ -1441,7 +1781,7 @@ export function AttendanceLevelAnalytics() {
           {/* Current Attendance card */}
           <div className="rounded-lg border bg-white p-4">
             <p className="mb-4 text-sm font-semibold text-foreground">
-              Current Attendance
+              Current attendance
             </p>
             <div className="flex items-center gap-6">
               <AttendanceRing
@@ -1485,7 +1825,7 @@ export function AttendanceLevelAnalytics() {
           <div className="rounded-lg border bg-white p-4 [&_svg:focus]:outline-none [&_svg]:outline-none">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-semibold text-foreground">
-                Absences / Late-coming by Month
+                Absences / Late-coming by month
               </p>
               <button
                 onClick={() => setChartExpanded(true)}
@@ -1536,7 +1876,7 @@ export function AttendanceLevelAnalytics() {
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-foreground">
-                Absences / Late-coming by Month
+                Absences / Late-coming by month
               </h3>
               <button
                 onClick={() => setChartExpanded(false)}
@@ -1550,7 +1890,7 @@ export function AttendanceLevelAnalytics() {
               <ResponsiveContainer width="100%" height="100%">
                 <AbsenceBarChart
                   data={monthlyData}
-                  barSize={16}
+                  barSize={36}
                   onSegmentClick={(month, categoryKey, count) => {
                     setChartExpanded(false)
                     setSelectedSegment({ month, categoryKey, count })
@@ -1568,8 +1908,31 @@ export function AttendanceLevelAnalytics() {
 
 // ─── Individual Student Attendance Analytics ──────────────────────────────────
 
+const DETAILS_TYPE_OPTIONS = [...new Set(ABSENCE_DETAILS.map((r) => r.type))]
+
 export function AttendanceAnalytics() {
   const [chartExpanded, setChartExpanded] = useState(false)
+  const [detailsPage, setDetailsPage] = useState(1)
+  const [detailsFilterMonth, setDetailsFilterMonth] = useState('all')
+  const [detailsFilterType, setDetailsFilterType] = useState('all')
+
+  const filteredDetails = ABSENCE_DETAILS.filter((r) => {
+    const month = r.date.split(' ')[1]
+    if (detailsFilterMonth !== 'all' && month !== detailsFilterMonth)
+      return false
+    if (detailsFilterType !== 'all' && r.type !== detailsFilterType)
+      return false
+    return true
+  })
+
+  const detailsTotalPages = Math.max(
+    1,
+    Math.ceil(filteredDetails.length / DETAILS_PAGE_SIZE),
+  )
+  const pagedDetails = filteredDetails.slice(
+    (detailsPage - 1) * DETAILS_PAGE_SIZE,
+    detailsPage * DETAILS_PAGE_SIZE,
+  )
 
   return (
     <div className="mt-6 space-y-8 border-t pt-6">
@@ -1665,7 +2028,7 @@ export function AttendanceAnalytics() {
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">
-            Absences / Late-coming by Month
+            Absences / Late-coming by month
           </h3>
           <button
             onClick={() => setChartExpanded(true)}
@@ -1703,7 +2066,7 @@ export function AttendanceAnalytics() {
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-foreground">
-                Absences / Late-coming by Month
+                Absences / Late-coming by month
               </h3>
               <button
                 onClick={() => setChartExpanded(false)}
@@ -1715,7 +2078,7 @@ export function AttendanceAnalytics() {
             </div>
             <div className="min-h-0 flex-1">
               <ResponsiveContainer width="100%" height="100%">
-                <AbsenceBarChart barSize={16} />
+                <AbsenceBarChart barSize={36} />
               </ResponsiveContainer>
             </div>
             <AbsenceLegend />
@@ -1723,11 +2086,69 @@ export function AttendanceAnalytics() {
         </>
       )}
 
-      {/* 4. Absences / Late-coming Details */}
+      {/* 4. Absences / Late-coming details */}
       <div>
-        <h3 className="mb-4 text-sm font-semibold text-foreground">
-          Absences / Late-coming Details
-        </h3>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground">
+            Absences / Late-coming details
+          </h3>
+          <div className="flex items-center gap-2">
+            {/* Month filter */}
+            <Select
+              value={detailsFilterMonth}
+              onValueChange={(v) => {
+                setDetailsFilterMonth(v)
+                setDetailsPage(1)
+              }}
+            >
+              <SelectTrigger
+                size="sm"
+                className="h-8 w-auto gap-1.5 rounded-[14px] border border-border bg-white px-3 text-sm hover:bg-muted"
+              >
+                <SelectValue>
+                  {detailsFilterMonth === 'all'
+                    ? 'Current year'
+                    : detailsFilterMonth}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Current year</SelectItem>
+                {MONTH_OPTIONS.map((m) => (
+                  <SelectItem key={m} value={m}>
+                    {m}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* Type filter */}
+            <Select
+              value={detailsFilterType}
+              onValueChange={(v) => {
+                setDetailsFilterType(v)
+                setDetailsPage(1)
+              }}
+            >
+              <SelectTrigger
+                size="sm"
+                className="h-8 w-auto gap-1.5 rounded-[14px] border border-border bg-white px-3 text-sm hover:bg-muted"
+              >
+                <SelectValue>
+                  {detailsFilterType === 'all'
+                    ? 'All types'
+                    : detailsFilterType}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="min-w-max">
+                <SelectItem value="all">All types</SelectItem>
+                {DETAILS_TYPE_OPTIONS.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         <div className="overflow-hidden rounded-lg border">
           <table className="w-full text-sm">
             <thead>
@@ -1747,15 +2168,12 @@ export function AttendanceAnalytics() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {ABSENCE_DETAILS.map((row, i) => (
+              {pagedDetails.map((row, i) => (
                 <tr key={i} className="bg-white">
                   <td className="px-4 py-3 text-sm text-foreground">
                     {row.date}
                   </td>
-                  <td
-                    className="px-4 py-3 text-sm font-medium"
-                    style={{ color: row.typeColor }}
-                  >
+                  <td className="px-4 py-3 text-sm font-medium text-[var(--slate-12)]">
                     {row.type}
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground">
@@ -1768,6 +2186,66 @@ export function AttendanceAnalytics() {
               ))}
             </tbody>
           </table>
+        </div>
+        {/* Pagination */}
+        <div className="mt-3 flex items-center justify-between text-sm">
+          <span className="text-xs text-muted-foreground">
+            {filteredDetails.length === 0
+              ? '0 records'
+              : `${(detailsPage - 1) * DETAILS_PAGE_SIZE + 1}–${Math.min(detailsPage * DETAILS_PAGE_SIZE, filteredDetails.length)} of ${filteredDetails.length} records`}
+          </span>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              disabled={detailsPage === 1}
+              onClick={() => setDetailsPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
+            {Array.from({ length: detailsTotalPages }, (_, i) => i + 1)
+              .filter(
+                (p) =>
+                  p === 1 ||
+                  p === detailsTotalPages ||
+                  Math.abs(p - detailsPage) <= 1,
+              )
+              .reduce<Array<number | '…'>>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1]) > 1) acc.push('…')
+                acc.push(p)
+                return acc
+              }, [])
+              .map((p, i) =>
+                p === '…' ? (
+                  <span
+                    key={`ellipsis-${i}`}
+                    className="px-1 text-muted-foreground"
+                  >
+                    …
+                  </span>
+                ) : (
+                  <Button
+                    key={p}
+                    variant={p === detailsPage ? 'default' : 'outline'}
+                    size="icon"
+                    className="h-7 w-7 text-xs"
+                    onClick={() => setDetailsPage(p)}
+                  >
+                    {p}
+                  </Button>
+                ),
+              )}
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              disabled={detailsPage === detailsTotalPages}
+              onClick={() => setDetailsPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
