@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '~/shared/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -6,17 +6,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '~/shared/components/ui/table';
 
 interface StudentTableSkeletonProps {
-  rows?: number
-  columns?: number
+  rows?: number;
+  columns?: number;
 }
 
-export function StudentTableSkeleton({
-  rows = 10,
-  columns = 8,
-}: StudentTableSkeletonProps) {
+export function StudentTableSkeleton({ rows = 10, columns = 8 }: StudentTableSkeletonProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Table>
@@ -70,5 +67,5 @@ export function StudentTableSkeleton({
         </div>
       </div>
     </div>
-  )
+  );
 }

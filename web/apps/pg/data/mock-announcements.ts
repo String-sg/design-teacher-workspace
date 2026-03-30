@@ -1,20 +1,20 @@
-import type { Announcement } from '@/types/announcement'
+import type { Announcement } from '~/apps/pg/types/announcement';
 
 // Helper to create dates relative to now
-const now = new Date()
+const now = new Date();
 const today = (hours: number, minutes: number) => {
-  const d = new Date(now)
-  d.setHours(hours, minutes, 0, 0)
-  return d
-}
+  const d = new Date(now);
+  d.setHours(hours, minutes, 0, 0);
+  return d;
+};
 const daysAgo = (days: number) => {
-  const d = new Date(now)
-  d.setDate(d.getDate() - days)
-  d.setHours(9, 0, 0, 0)
-  return d
-}
+  const d = new Date(now);
+  d.setDate(d.getDate() - days);
+  d.setHours(9, 0, 0, 0);
+  return d;
+};
 
-export const mockAnnouncements: Array<Announcement> = [
+export const mockAnnouncements: Announcement[] = [
   {
     id: '1',
     title: 'Lee Kuan Yew Award for All-Round Excellence (Secondary)',
@@ -255,8 +255,7 @@ Remember: Seeking help is a sign of strength. Take care of yourself so you can t
   {
     id: '9',
     title: 'Annual Staff Retreat - Save the Date',
-    description:
-      'Mark your calendars for the annual staff retreat happening in June 2026.',
+    description: 'Mark your calendars for the annual staff retreat happening in June 2026.',
     content: `Mark your calendars for the annual staff retreat happening in June 2026.
 
 Event Details:
@@ -274,12 +273,12 @@ More details will be shared in April. Start thinking about your retreat buddy!`,
     createdAt: daysAgo(35),
     isRead: true,
   },
-]
+];
 
 export function getUnreadCount(): number {
-  return mockAnnouncements.filter((a) => !a.isRead).length
+  return mockAnnouncements.filter((a) => !a.isRead).length;
 }
 
 export function getAnnouncementById(id: string): Announcement | undefined {
-  return mockAnnouncements.find((a) => a.id === id)
+  return mockAnnouncements.find((a) => a.id === id);
 }

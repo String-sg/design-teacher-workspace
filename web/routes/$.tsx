@@ -1,11 +1,11 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { Construction } from 'lucide-react'
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { Construction } from 'lucide-react';
 
-import { Button } from '@/components/ui/button'
+import { Button } from '~/shared/components/ui/button';
 
 export const Route = createFileRoute('/$')({
   component: ComingSoonPage,
-})
+});
 
 function ComingSoonPage() {
   return (
@@ -15,12 +15,9 @@ function ComingSoonPage() {
           <Construction className="size-10 text-muted-foreground" />
         </div>
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold text-foreground">
-            Coming Soon
-          </h1>
+          <h1 className="text-2xl font-semibold text-foreground">Coming Soon</h1>
           <p className="max-w-md text-muted-foreground">
-            This feature is currently under development. Check back later for
-            updates.
+            This feature is currently under development. Check back later for updates.
           </p>
         </div>
         <Button variant="outline" render={<Link to="/" />}>
@@ -28,5 +25,5 @@ function ComingSoonPage() {
         </Button>
       </div>
     </main>
-  )
+  );
 }

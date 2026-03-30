@@ -1,5 +1,4 @@
-import { useRef, useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import {
   AlertCircle,
   ArrowLeft,
@@ -8,16 +7,16 @@ import {
   FileSpreadsheet,
   Upload,
   X,
-} from 'lucide-react'
+} from 'lucide-react';
+import { useRef, useState } from 'react';
+import { toast } from 'sonner';
 
-import { toast } from 'sonner'
-
-import type { StudentGroup } from '@/types/student-group'
-import { MOCK_GROUPS } from '@/data/mock-groups'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { MOCK_GROUPS } from '~/apps/pg/data/mock-groups';
+import type { StudentGroup } from '~/apps/pg/types/student-group';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Button } from '~/shared/components/ui/button';
+import { Input } from '~/shared/components/ui/input';
+import { Label } from '~/shared/components/ui/label';
 import {
   Table,
   TableBody,
@@ -25,12 +24,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { cn } from '@/lib/utils'
+} from '~/shared/components/ui/table';
+import { cn } from '~/shared/lib/utils';
 
 export const Route = createFileRoute('/groups/upload')({
   component: GroupsUpload,
-})
+});
 
 // ─── Mock data ─────────────────────────────────────────────────────────────────
 
@@ -57,7 +56,7 @@ const MOCK_PARSED_ROWS = [
   },
   { row: 9, name: 'Siti Norzahra', class: '3 Aspiration', valid: true },
   { row: 10, name: 'Marcus Teo Jian Hao', class: '2 Courage', valid: true },
-]
+];
 
 const VALIDATION_ISSUES = [
   {
@@ -72,7 +71,7 @@ const VALIDATION_ISSUES = [
     description: 'Remove repeated student entries.',
     rows: [8],
   },
-]
+];
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
@@ -81,34 +80,30 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
     <p className="text-sm text-muted-foreground">
       Step {current} of {total}
     </p>
-  )
+  );
 }
 
-function DropZone({
-  onFileAccepted,
-}: {
-  onFileAccepted: (file: File) => void
-}) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [isDragging, setIsDragging] = useState(false)
+function DropZone({ onFileAccepted }: { onFileAccepted: (file: File) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   function handleDrop(e: React.DragEvent) {
-    e.preventDefault()
-    setIsDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file) onFileAccepted(file)
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) onFileAccepted(file);
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) onFileAccepted(file)
+    const file = e.target.files?.[0];
+    if (file) onFileAccepted(file);
   }
 
   return (
     <div
       onDragOver={(e) => {
-        e.preventDefault()
-        setIsDragging(true)
+        e.preventDefault();
+        setIsDragging(true);
       }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
@@ -136,13 +131,9 @@ function DropZone({
       <div className="text-center">
         <p className="text-sm font-medium text-slate-700">
           Drop your file here or{' '}
-          <span className="text-primary underline underline-offset-2">
-            browse
-          </span>
+          <span className="text-primary underline underline-offset-2">browse</span>
         </p>
-        <p className="mt-1 text-xs text-slate-500">
-          Supported file types: .csv, .xls, .xlsx
-        </p>
+        <p className="mt-1 text-xs text-slate-500">Supported file types: .csv, .xls, .xlsx</p>
       </div>
       <input
         ref={inputRef}
@@ -152,7 +143,7 @@ function DropZone({
         onChange={handleChange}
       />
     </div>
-  )
+  );
 }
 
 // ─── Step 1 ────────────────────────────────────────────────────────────────────
@@ -160,11 +151,9 @@ function DropZone({
 function Step1({ onFileAccepted }: { onFileAccepted: (file: File) => void }) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="px-8 pb-6 pt-8">
+      <div className="px-8 pt-8 pb-6">
         <StepIndicator current={1} total={2} />
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">
-          Upload a student list
-        </h1>
+        <h1 className="mt-1 text-2xl font-bold text-slate-900">Upload a student list</h1>
         <p className="mt-1 text-sm text-slate-500">
           Import students from a spreadsheet to create your group.
         </p>
@@ -175,14 +164,12 @@ function Step1({ onFileAccepted }: { onFileAccepted: (file: File) => void }) {
         <div className="flex w-[380px] shrink-0 flex-col gap-4">
           {/* Prepare card */}
           <div className="rounded-xl border bg-white p-5">
-            <p className="mb-3 font-semibold text-slate-900">
-              Prepare your file
-            </p>
+            <p className="mb-3 font-semibold text-slate-900">Prepare your file</p>
             <ul className="space-y-2.5">
               {[
                 <>
                   Download the{' '}
-                  <span className="font-medium text-primary underline underline-offset-2 cursor-pointer">
+                  <span className="cursor-pointer font-medium text-primary underline underline-offset-2">
                     student list template
                   </span>{' '}
                   and fill it in
@@ -202,9 +189,7 @@ function Step1({ onFileAccepted }: { onFileAccepted: (file: File) => void }) {
 
           {/* Format guide */}
           <div className="rounded-xl border bg-white p-5">
-            <p className="mb-3 font-semibold text-slate-900">
-              Required columns
-            </p>
+            <p className="mb-3 font-semibold text-slate-900">Required columns</p>
             <ul className="space-y-3">
               {[
                 {
@@ -233,7 +218,7 @@ function Step1({ onFileAccepted }: { onFileAccepted: (file: File) => void }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // ─── Step 2 ────────────────────────────────────────────────────────────────────
@@ -245,24 +230,22 @@ function Step2({
   onBack,
   onSubmit,
 }: {
-  fileName: string
-  groupName: string
-  onGroupNameChange: (v: string) => void
-  onBack: () => void
-  onSubmit: () => void
+  fileName: string;
+  groupName: string;
+  onGroupNameChange: (v: string) => void;
+  onBack: () => void;
+  onSubmit: () => void;
 }) {
-  const validCount = MOCK_PARSED_ROWS.filter((r) => r.valid).length
-  const hasIssues = VALIDATION_ISSUES.length > 0
-  const issueRows = new Set(VALIDATION_ISSUES.flatMap((iss) => iss.rows))
+  const validCount = MOCK_PARSED_ROWS.filter((r) => r.valid).length;
+  const hasIssues = VALIDATION_ISSUES.length > 0;
+  const issueRows = new Set(VALIDATION_ISSUES.flatMap((iss) => iss.rows));
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="px-8 pb-4 pt-8">
+      <div className="px-8 pt-8 pb-4">
         <StepIndicator current={2} total={2} />
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">
-          Review student list
-        </h1>
-        <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-slate-400">
+        <h1 className="mt-1 text-2xl font-bold text-slate-900">Review student list</h1>
+        <p className="mt-0.5 text-xs font-medium tracking-wide text-slate-400 uppercase">
           {MOCK_PARSED_ROWS.length} records · {fileName}
         </p>
       </div>
@@ -274,32 +257,21 @@ function Step2({
             <Table>
               <TableHeader className="sticky top-0 bg-white">
                 <TableRow>
-                  <TableHead className="w-12 pl-4 text-right text-xs text-slate-400">
-                    #
-                  </TableHead>
+                  <TableHead className="w-12 pl-4 text-right text-xs text-slate-400">#</TableHead>
                   <TableHead className="text-xs">Name</TableHead>
                   <TableHead className="text-xs">Class</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {MOCK_PARSED_ROWS.map((r) => (
-                  <TableRow
-                    key={r.row}
-                    className={cn(issueRows.has(r.row) && 'bg-red-50/50')}
-                  >
-                    <TableCell className="pl-4 text-right text-xs tabular-nums text-slate-400">
+                  <TableRow key={r.row} className={cn(issueRows.has(r.row) && 'bg-red-50/50')}>
+                    <TableCell className="pl-4 text-right text-xs text-slate-400 tabular-nums">
                       {r.row}
                     </TableCell>
                     <TableCell className="text-sm">
-                      <span
-                        className={cn(issueRows.has(r.row) && 'text-red-600')}
-                      >
-                        {r.name}
-                      </span>
+                      <span className={cn(issueRows.has(r.row) && 'text-red-600')}>{r.name}</span>
                     </TableCell>
-                    <TableCell className="text-sm text-slate-600">
-                      {r.class}
-                    </TableCell>
+                    <TableCell className="text-sm text-slate-600">{r.class}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -316,31 +288,19 @@ function Step2({
                   {VALIDATION_ISSUES.length} issue
                   {VALIDATION_ISSUES.length !== 1 ? 's' : ''} found
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={onBack}
-                >
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={onBack}>
                   <Upload className="h-3.5 w-3.5" />
                   Upload again
                 </Button>
               </div>
               <ul className="space-y-3">
                 {VALIDATION_ISSUES.map((iss) => (
-                  <li
-                    key={iss.id}
-                    className="rounded-lg border border-red-100 bg-red-50/50 p-3"
-                  >
+                  <li key={iss.id} className="rounded-lg border border-red-100 bg-red-50/50 p-3">
                     <div className="flex items-start gap-2">
                       <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-900">
-                          {iss.title}
-                        </p>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          {iss.description}
-                        </p>
+                        <p className="text-sm font-semibold text-slate-900">{iss.title}</p>
+                        <p className="mt-0.5 text-xs text-slate-500">{iss.description}</p>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {iss.rows.map((row) => (
                             <span
@@ -357,8 +317,8 @@ function Step2({
                 ))}
               </ul>
               <p className="mt-4 text-xs text-slate-500">
-                {validCount} of {MOCK_PARSED_ROWS.length} students will be
-                added. Rows with issues will be skipped.
+                {validCount} of {MOCK_PARSED_ROWS.length} students will be added. Rows with issues
+                will be skipped.
               </p>
             </div>
           ) : (
@@ -368,9 +328,7 @@ function Step2({
                   <CheckCircle2 className="h-6 w-6 text-emerald-600" />
                 </div>
                 <p className="font-semibold text-slate-900">No issues found</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  Your file is good to go!
-                </p>
+                <p className="mt-1 text-sm text-slate-500">Your file is good to go!</p>
               </div>
             </div>
           )}
@@ -397,17 +355,13 @@ function Step2({
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        <Button
-          onClick={onSubmit}
-          disabled={!groupName.trim()}
-          className="gap-2"
-        >
+        <Button onClick={onSubmit} disabled={!groupName.trim()} className="gap-2">
           Create group
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
@@ -416,24 +370,24 @@ function GroupsUpload() {
   useSetBreadcrumbs([
     { label: 'Student Groups', href: '/groups' },
     { label: 'Upload template', href: '/groups/upload' },
-  ])
+  ]);
 
-  const navigate = useNavigate()
-  const [step, setStep] = useState<1 | 2>(1)
-  const [fileName, setFileName] = useState('')
-  const [groupName, setGroupName] = useState('')
+  const navigate = useNavigate();
+  const [step, setStep] = useState<1 | 2>(1);
+  const [fileName, setFileName] = useState('');
+  const [groupName, setGroupName] = useState('');
 
   function handleFileAccepted(file: File) {
-    setFileName(file.name)
-    const toastId = toast.loading('Processing file…')
+    setFileName(file.name);
+    const toastId = toast.loading('Processing file…');
     setTimeout(() => {
-      toast.dismiss(toastId)
-      setStep(2)
-    }, 1800)
+      toast.dismiss(toastId);
+      setStep(2);
+    }, 1800);
   }
 
   function handleSubmit() {
-    const validRows = MOCK_PARSED_ROWS.filter((r) => r.valid)
+    const validRows = MOCK_PARSED_ROWS.filter((r) => r.valid);
     const newGroup: StudentGroup = {
       id: `cg-upload-${Date.now()}`,
       kind: 'regular',
@@ -452,10 +406,10 @@ function GroupsUpload() {
         nric: '',
         indexNumber: i + 1,
       })),
-    }
-    MOCK_GROUPS.push(newGroup)
-    toast.success('Group created')
-    navigate({ to: '/groups' })
+    };
+    MOCK_GROUPS.push(newGroup);
+    toast.success('Group created');
+    navigate({ to: '/groups' });
   }
 
   return (
@@ -485,7 +439,6 @@ function GroupsUpload() {
           onSubmit={handleSubmit}
         />
       )}
-
     </div>
-  )
+  );
 }

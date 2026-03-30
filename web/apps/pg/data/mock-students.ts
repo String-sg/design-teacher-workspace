@@ -1,7 +1,7 @@
-import type { SchoolLevel } from '@/types/report'
-import type { AttentionTag, ClassOption, Student } from '@/types/student'
+import type { SchoolLevel } from '~/apps/pg/types/report';
+import type { AttentionTag, ClassOption, Student } from '~/apps/pg/types/student';
 
-export const mockStudents: Array<Student> = [
+export const mockStudents: Student[] = [
   {
     id: '1',
     name: 'Chen Jun Kai',
@@ -162,9 +162,7 @@ export const mockStudents: Array<Student> = [
     learningSupport: null,
     postSecEligibility: '404 ITE, 105 Poly',
     offences: 1,
-    offenceDetails: [
-      { type: 'Bullying (verbal)', count: 1, latestDate: '3 Mar 2026' },
-    ],
+    offenceDetails: [{ type: 'Bullying (verbal)', count: 1, latestDate: '3 Mar 2026' }],
     absences: 15,
     lateComing: 5,
     ccaMissed: 3,
@@ -2401,8 +2399,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 45,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Strong analytical skills. Can improve on time management.',
+    teacherObservations: 'Strong analytical skills. Can improve on time management.',
     nextSteps: 'Explore poly options',
   },
   {
@@ -2961,8 +2958,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 44,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Quiet but attentive. Needs encouragement to participate.',
+    teacherObservations: 'Quiet but attentive. Needs encouragement to participate.',
     nextSteps: 'Build confidence in classroom',
   },
   {
@@ -3306,8 +3302,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 44,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Engaged when topic interests her. Needs broader motivation.',
+    teacherObservations: 'Engaged when topic interests her. Needs broader motivation.',
     nextSteps: 'Academic counselling recommended',
   },
   {
@@ -3350,8 +3345,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 43,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Inconsistent effort. Responds well to individual attention.',
+    teacherObservations: 'Inconsistent effort. Responds well to individual attention.',
     nextSteps: 'Monitor behaviour and attendance',
   },
   {
@@ -3480,8 +3474,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 43,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Potential not yet fully realised. Respond well to encouragement.',
+    teacherObservations: 'Potential not yet fully realised. Respond well to encouragement.',
     nextSteps: 'Mentoring programme recommended',
   },
   {
@@ -3524,8 +3517,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 43,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Tries hard. Needs additional support in core subjects.',
+    teacherObservations: 'Tries hard. Needs additional support in core subjects.',
     nextSteps: 'Arrange remedial classes',
   },
   {
@@ -3568,8 +3560,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 42,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Needs closer supervision. Responds to structured support.',
+    teacherObservations: 'Needs closer supervision. Responds to structured support.',
     nextSteps: 'Behaviour intervention plan',
   },
   {
@@ -3612,8 +3603,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 42,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Quiet but tries hard. Home situation requires monitoring.',
+    teacherObservations: 'Quiet but tries hard. Home situation requires monitoring.',
     nextSteps: 'Welfare support and bursary application',
   },
   {
@@ -3656,8 +3646,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 42,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Friendly disposition. Academic performance needs improvement.',
+    teacherObservations: 'Friendly disposition. Academic performance needs improvement.',
     nextSteps: 'Subject-specific support needed',
   },
   {
@@ -3743,8 +3732,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 41,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Erratic performance. Benefits from structured routine.',
+    teacherObservations: 'Erratic performance. Benefits from structured routine.',
     nextSteps: 'Study skills workshop',
   },
   {
@@ -3787,8 +3775,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 41,
     totalSchoolDays: 47,
-    teacherObservations:
-      'LSM support in place. Progressing slowly but steadily.',
+    teacherObservations: 'LSM support in place. Progressing slowly but steadily.',
     nextSteps: 'Continue LSM and monitor progress',
   },
   {
@@ -3831,8 +3818,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 40,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Attendance issue affecting performance. Engaged when present.',
+    teacherObservations: 'Attendance issue affecting performance. Engaged when present.',
     nextSteps: 'Attendance intervention and parent engagement',
   },
   {
@@ -3875,8 +3861,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 40,
     totalSchoolDays: 47,
-    teacherObservations:
-      'At-risk student. Low mood flagged last term. Ongoing support.',
+    teacherObservations: 'At-risk student. Low mood flagged last term. Ongoing support.',
     nextSteps: 'Continue counselling and SSO referral',
   },
   {
@@ -3919,8 +3904,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Promoted',
     daysPresent: 40,
     totalSchoolDays: 47,
-    teacherObservations:
-      'LSM support ongoing. Struggles with reading comprehension.',
+    teacherObservations: 'LSM support ongoing. Struggles with reading comprehension.',
     nextSteps: 'Literacy support programme',
   },
   {
@@ -4092,8 +4076,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 38,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Financial hardship impacting attendance. Mood issues flagged.',
+    teacherObservations: 'Financial hardship impacting attendance. Mood issues flagged.',
     nextSteps: 'Holistic welfare and academic support plan',
   },
   {
@@ -4480,8 +4463,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 35,
     totalSchoolDays: 47,
-    teacherObservations:
-      'LSM support insufficient. Further intervention needed.',
+    teacherObservations: 'LSM support insufficient. Further intervention needed.',
     nextSteps: 'Alternative pathways discussion',
   },
   {
@@ -4610,8 +4592,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 34,
     totalSchoolDays: 47,
-    teacherObservations:
-      'High-priority welfare case. Mood flagged for 2 terms.',
+    teacherObservations: 'High-priority welfare case. Mood flagged for 2 terms.',
     nextSteps: 'Urgent MSF and counselling escalation',
   },
   {
@@ -4654,8 +4635,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 33,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Very low engagement. Requires urgent academic intervention.',
+    teacherObservations: 'Very low engagement. Requires urgent academic intervention.',
     nextSteps: 'Alternative education pathway review',
   },
   {
@@ -4741,8 +4721,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 33,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Priority wellbeing case. Active SSO and counselling support.',
+    teacherObservations: 'Priority wellbeing case. Active SSO and counselling support.',
     nextSteps: 'Sustained multi-party monitoring',
   },
   {
@@ -4828,8 +4807,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 32,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Complex home situation. Needs compassionate and consistent support.',
+    teacherObservations: 'Complex home situation. Needs compassionate and consistent support.',
     nextSteps: 'Ongoing MSF coordination',
   },
   {
@@ -4872,8 +4850,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 31,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Chronically disengaged. Requires urgent alternative pathway planning.',
+    teacherObservations: 'Chronically disengaged. Requires urgent alternative pathway planning.',
     nextSteps: 'ITE early transition review',
   },
   {
@@ -4959,8 +4936,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 30,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Significant learning gaps. Needs targeted remediation.',
+    teacherObservations: 'Significant learning gaps. Needs targeted remediation.',
     nextSteps: 'Alternative pathway assessment',
   },
   {
@@ -5003,8 +4979,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 30,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Priority case. Multiple risk flags across all domains.',
+    teacherObservations: 'Priority case. Multiple risk flags across all domains.',
     nextSteps: 'Full case conference with HOD and external agencies',
   },
   {
@@ -5177,8 +5152,7 @@ export const mockStudents: Array<Student> = [
     promotionStatus: 'Retained',
     daysPresent: 27,
     totalSchoolDays: 47,
-    teacherObservations:
-      'Severe disengagement. Full support network activated.',
+    teacherObservations: 'Severe disengagement. Full support network activated.',
     nextSteps: 'VP-level intervention and ITE transition',
   },
   {
@@ -5225,9 +5199,9 @@ export const mockStudents: Array<Student> = [
       'Ungraded result. Persistent low mood and absenteeism. Priority welfare case.',
     nextSteps: 'Immediate SSO intervention and pathway review',
   },
-]
+];
 
-export const classOptions: Array<ClassOption> = [
+export const classOptions: ClassOption[] = [
   { value: 'all', label: 'All Classes' },
   { value: '3A', label: 'Secondary 3A' },
   { value: '3B', label: 'Secondary 3B' },
@@ -5238,14 +5212,14 @@ export const classOptions: Array<ClassOption> = [
   { value: 'P4-B', label: 'Primary 4B' },
   { value: 'P5-A', label: 'Primary 5A' },
   { value: 'P6-B', label: 'Primary 6B' },
-]
+];
 
 export interface ClassGroup {
-  level: string
-  classes: Array<{ value: string; label: string }>
+  level: string;
+  classes: { value: string; label: string }[];
 }
 
-export const groupedClassOptions: Array<ClassGroup> = [
+export const groupedClassOptions: ClassGroup[] = [
   {
     level: 'Secondary 5',
     classes: [
@@ -5313,48 +5287,41 @@ export const groupedClassOptions: Array<ClassGroup> = [
     level: 'Primary 1',
     classes: [{ value: 'P1-A', label: 'P1-A' }],
   },
-]
+];
 
 export interface DashboardMetrics {
-  absenteeismRate: number
-  lateComing: number
-  tier2_3Students: number
+  absenteeismRate: number;
+  lateComing: number;
+  tier2_3Students: number;
 }
 
-export function getMetrics(students: Array<Student>): DashboardMetrics {
-  const totalStudents = students.length
+export function getMetrics(students: Student[]): DashboardMetrics {
+  const totalStudents = students.length;
 
-  const studentsWithAbsenteeism = students.filter(
-    (s) => s.overallPercentage < 50,
-  ).length
+  const studentsWithAbsenteeism = students.filter((s) => s.overallPercentage < 50).length;
 
   const absenteeismRate =
-    totalStudents > 0
-      ? Math.round((studentsWithAbsenteeism / totalStudents) * 100)
-      : 0
+    totalStudents > 0 ? Math.round((studentsWithAbsenteeism / totalStudents) * 100) : 0;
 
   const lateComing = students.filter((s) =>
     s.attentionTags.some((tag) => ['LSM', 'LSP'].includes(tag)),
-  ).length
+  ).length;
 
   const tier2_3Students = students.filter(
     (s) =>
       s.attentionTags.some((tag) => ['FAS', 'SEN'].includes(tag)) ||
       s.conduct === 'Poor' ||
       s.overallPercentage < 40,
-  ).length
+  ).length;
 
   return {
     absenteeismRate,
     lateComing,
     tier2_3Students,
-  }
+  };
 }
 
-export const tagColors: Record<
-  AttentionTag,
-  'default' | 'secondary' | 'outline'
-> = {
+export const tagColors: Record<AttentionTag, 'default' | 'secondary' | 'outline'> = {
   FAS: 'secondary',
   GEP: 'secondary',
   LSM: 'secondary',
@@ -5362,12 +5329,12 @@ export const tagColors: Record<
   SEN: 'secondary',
   LTA: 'secondary',
   SwAN: 'outline',
-}
+};
 
 export function getStudentById(id: string): Student | undefined {
-  return mockStudents.find((student) => student.id === id)
+  return mockStudents.find((student) => student.id === id);
 }
 
 export function getSchoolLevel(studentClass: string): SchoolLevel {
-  return studentClass.startsWith('P') ? 'primary' : 'secondary'
+  return studentClass.startsWith('P') ? 'primary' : 'secondary';
 }

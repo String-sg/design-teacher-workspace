@@ -1,6 +1,4 @@
-import { useMemo, useState } from 'react'
-import { toast } from 'sonner'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import {
   Copy,
   Edit2,
@@ -13,34 +11,21 @@ import {
   Share2,
   Trash2,
   Users,
-} from 'lucide-react'
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
+import { EmptyState } from '~/apps/pg/components/empty-state';
+import { MOCK_GROUPS, MOCK_SHARED_GROUPS } from '~/apps/pg/data/mock-groups';
+import { TEACHER_STRUCTURED_GROUPS } from '~/apps/pg/data/mock-structured-groups';
 import type {
   GroupTypeFilterOption,
-  StudentGroup,
   StructuredGroup,
-} from '@/types/student-group'
-import { getStructuredTypeLabel } from '@/types/student-group'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { MOCK_GROUPS, MOCK_SHARED_GROUPS } from '@/data/mock-groups'
-import { TEACHER_STRUCTURED_GROUPS } from '@/data/mock-structured-groups'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+  StudentGroup,
+} from '~/apps/pg/types/student-group';
+import { getStructuredTypeLabel } from '~/apps/pg/types/student-group';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Alert, AlertDescription } from '~/shared/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,7 +35,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '~/shared/components/ui/alert-dialog';
+import { Badge } from '~/shared/components/ui/badge';
+import { Button } from '~/shared/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '~/shared/components/ui/dropdown-menu';
+import { Input } from '~/shared/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '~/shared/components/ui/popover';
 import {
   Table,
   TableBody,
@@ -58,35 +54,33 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { EmptyState } from '@/components/empty-state'
+} from '~/shared/components/ui/table';
+import { cn } from '~/shared/lib/utils';
 
 export const Route = createFileRoute('/groups/')({
   component: GroupsIndex,
-})
+});
 
-const CURRENT_USER_EMAIL = 'tanml@school.edu.sg'
+const CURRENT_USER_EMAIL = 'tanml@school.edu.sg';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getUniqueClasses(members: StudentGroup['members']): string[] {
-  const seen = new Set<string>()
-  for (const m of members) seen.add(m.class)
-  return [...seen].sort()
+  const seen = new Set<string>();
+  for (const m of members) seen.add(m.class);
+  return [...seen].sort();
 }
 
 function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffDays = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-  )
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Yesterday'
-  if (diffDays < 7) return `${diffDays}d ago`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`
-  return `${Math.floor(diffDays / 365)}y ago`
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+  return `${Math.floor(diffDays / 365)}y ago`;
 }
 
 // ─── SegmentedTab (matches Posts page) ────────────────────────────────────────
@@ -96,14 +90,14 @@ function SegmentedTab({
   onClick,
   children,
 }: {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
 }) {
   return (
     <button
       className={cn(
-        'whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all',
+        'rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all',
         active
           ? 'bg-background text-foreground shadow-sm'
           : 'text-muted-foreground hover:text-foreground',
@@ -112,32 +106,32 @@ function SegmentedTab({
     >
       {children}
     </button>
-  )
+  );
 }
 
 // ─── Type filter popover (Assigned Groups tab) ─────────────────────────────────
 
-const STRUCTURED_FILTER_OPTIONS: Array<{
-  value: Exclude<GroupTypeFilterOption, 'regular'>
-  label: string
-}> = [
+const STRUCTURED_FILTER_OPTIONS: {
+  value: Exclude<GroupTypeFilterOption, 'regular'>;
+  label: string;
+}[] = [
   { value: 'class', label: 'Class' },
   { value: 'level', label: 'Level' },
   { value: 'cca', label: 'CCA' },
   { value: 'teaching', label: 'Teaching Group' },
-]
+];
 
 interface TypeFilterPopoverProps {
-  value: Set<Exclude<GroupTypeFilterOption, 'regular'>>
-  onChange: (v: Set<Exclude<GroupTypeFilterOption, 'regular'>>) => void
+  value: Set<Exclude<GroupTypeFilterOption, 'regular'>>;
+  onChange: (v: Set<Exclude<GroupTypeFilterOption, 'regular'>>) => void;
 }
 
 function TypeFilterPopover({ value, onChange }: TypeFilterPopoverProps) {
   function toggle(opt: Exclude<GroupTypeFilterOption, 'regular'>) {
-    const next = new Set(value)
-    if (next.has(opt)) next.delete(opt)
-    else next.add(opt)
-    onChange(next)
+    const next = new Set(value);
+    if (next.has(opt)) next.delete(opt);
+    else next.add(opt);
+    onChange(next);
   }
 
   return (
@@ -156,7 +150,7 @@ function TypeFilterPopover({ value, onChange }: TypeFilterPopoverProps) {
         }
       />
       <PopoverContent align="start" className="w-[360px] p-0">
-        <div className="px-5 pb-3 pt-4">
+        <div className="px-5 pt-4 pb-3">
           <h3 className="text-sm font-semibold">Show records</h3>
         </div>
         <div className="px-5 pb-4">
@@ -195,7 +189,7 @@ function TypeFilterPopover({ value, onChange }: TypeFilterPopoverProps) {
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 // ─── Ownership filter popover (My Groups tab) ──────────────────────────────────
@@ -203,20 +197,20 @@ function TypeFilterPopover({ value, onChange }: TypeFilterPopoverProps) {
 const OWNERSHIP_OPTIONS = [
   { value: 'mine' as const, label: 'Created by me' },
   { value: 'shared' as const, label: 'Shared with me' },
-]
+];
 
 function OwnershipFilterPopover({
   value,
   onChange,
 }: {
-  value: Set<'mine' | 'shared'>
-  onChange: (v: Set<'mine' | 'shared'>) => void
+  value: Set<'mine' | 'shared'>;
+  onChange: (v: Set<'mine' | 'shared'>) => void;
 }) {
   function toggle(opt: 'mine' | 'shared') {
-    const next = new Set(value)
-    if (next.has(opt)) next.delete(opt)
-    else next.add(opt)
-    onChange(next)
+    const next = new Set(value);
+    if (next.has(opt)) next.delete(opt);
+    else next.add(opt);
+    onChange(next);
   }
 
   return (
@@ -235,7 +229,7 @@ function OwnershipFilterPopover({
         }
       />
       <PopoverContent align="start" className="w-[320px] p-0">
-        <div className="px-5 pb-3 pt-4">
+        <div className="px-5 pt-4 pb-3">
           <h3 className="text-sm font-semibold">Show records</h3>
         </div>
         <div className="px-5 pb-4">
@@ -274,7 +268,7 @@ function OwnershipFilterPopover({
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 // ─── Classes pill list ─────────────────────────────────────────────────────────
@@ -282,11 +276,11 @@ function OwnershipFilterPopover({
 function ClassPills({
   members,
 }: {
-  members: StudentGroup['members'] | StructuredGroup['members']
+  members: StudentGroup['members'] | StructuredGroup['members'];
 }) {
-  const classes = getUniqueClasses(members as StudentGroup['members'])
-  const visible = classes.slice(0, 3)
-  const hidden = classes.length - 3
+  const classes = getUniqueClasses(members as StudentGroup['members']);
+  const visible = classes.slice(0, 3);
+  const hidden = classes.length - 3;
   return (
     <div className="flex flex-wrap items-center gap-1">
       {visible.map((cls) => (
@@ -297,75 +291,69 @@ function ClassPills({
           {cls}
         </span>
       ))}
-      {hidden > 0 && (
-        <span className="text-xs text-muted-foreground">+{hidden}</span>
-      )}
+      {hidden > 0 && <span className="text-xs text-muted-foreground">+{hidden}</span>}
     </div>
-  )
+  );
 }
 
 // ─── Main component ────────────────────────────────────────────────────────────
 
-type GroupTab = 'my-groups' | 'assigned'
+type GroupTab = 'my-groups' | 'assigned';
 
 function GroupsIndex() {
-  useSetBreadcrumbs([{ label: 'Student Groups', href: '/groups' }])
-  const navigate = useNavigate()
+  useSetBreadcrumbs([{ label: 'Student Groups', href: '/groups' }]);
+  const navigate = useNavigate();
 
-  const [tab, setTab] = useState<GroupTab>('my-groups')
-  const [groups, setGroups] = useState<Array<StudentGroup>>(MOCK_GROUPS)
-  const [mySearch, setMySearch] = useState('')
-  const [ownershipFilter, setOwnershipFilter] = useState<
-    Set<'mine' | 'shared'>
-  >(new Set())
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [assignedSearch, setAssignedSearch] = useState('')
-  const [typeFilter, setTypeFilter] = useState<
-    Set<Exclude<GroupTypeFilterOption, 'regular'>>
-  >(new Set())
+  const [tab, setTab] = useState<GroupTab>('my-groups');
+  const [groups, setGroups] = useState<StudentGroup[]>(MOCK_GROUPS);
+  const [mySearch, setMySearch] = useState('');
+  const [ownershipFilter, setOwnershipFilter] = useState<Set<'mine' | 'shared'>>(new Set());
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [assignedSearch, setAssignedSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState<Set<Exclude<GroupTypeFilterOption, 'regular'>>>(
+    new Set(),
+  );
 
   const filteredCombinedGroups = useMemo(() => {
     const mine = groups
       .filter((g) => g.createdBy.email === CURRENT_USER_EMAIL)
-      .map((g) => ({ ...g, _source: 'mine' as const }))
+      .map((g) => ({ ...g, _source: 'mine' as const }));
     const shared = MOCK_SHARED_GROUPS.map((g) => ({
       ...g,
       _source: 'shared' as const,
-    }))
+    }));
     const combined =
       ownershipFilter.size === 1 && ownershipFilter.has('mine')
         ? mine
         : ownershipFilter.size === 1 && ownershipFilter.has('shared')
           ? shared
-          : [...mine, ...shared]
-    if (!mySearch) return combined
-    const q = mySearch.toLowerCase()
-    return combined.filter((g) => g.name.toLowerCase().includes(q))
-  }, [groups, mySearch, ownershipFilter])
+          : [...mine, ...shared];
+    if (!mySearch) return combined;
+    const q = mySearch.toLowerCase();
+    return combined.filter((g) => g.name.toLowerCase().includes(q));
+  }, [groups, mySearch, ownershipFilter]);
 
   const filteredAssignedGroups = useMemo(
     () =>
       TEACHER_STRUCTURED_GROUPS.filter((g) => {
         const matchesSearch =
-          !assignedSearch ||
-          g.name.toLowerCase().includes(assignedSearch.toLowerCase())
-        const matchesType =
-          typeFilter.size === 0 || typeFilter.has(g.structuredType)
-        return matchesSearch && matchesType
+          !assignedSearch || g.name.toLowerCase().includes(assignedSearch.toLowerCase());
+        const matchesType = typeFilter.size === 0 || typeFilter.has(g.structuredType);
+        return matchesSearch && matchesType;
       }),
     [assignedSearch, typeFilter],
-  )
+  );
 
   function confirmDelete() {
     if (deleteId) {
-      setGroups((prev) => prev.filter((g) => g.id !== deleteId))
-      const idx = MOCK_GROUPS.findIndex((g) => g.id === deleteId)
-      if (idx !== -1) MOCK_GROUPS.splice(idx, 1)
-      setDeleteId(null)
+      setGroups((prev) => prev.filter((g) => g.id !== deleteId));
+      const idx = MOCK_GROUPS.findIndex((g) => g.id === deleteId);
+      if (idx !== -1) MOCK_GROUPS.splice(idx, 1);
+      setDeleteId(null);
     }
   }
 
-  const deleteGroup = groups.find((g) => g.id === deleteId)
+  const deleteGroup = groups.find((g) => g.id === deleteId);
 
   return (
     <div className="flex flex-col">
@@ -380,8 +368,7 @@ function GroupsIndex() {
               </span>
             </div>
             <p className="mt-1 hidden text-sm text-muted-foreground md:block">
-              Organise students into reusable groups for announcements, forms,
-              and reports.
+              Organise students into reusable groups for announcements, forms, and reports.
             </p>
           </div>
           {tab === 'my-groups' && (
@@ -396,23 +383,17 @@ function GroupsIndex() {
       {/* ── Toolbar: segmented tabs + search + filter (matches Posts) ─────── */}
       <div className="mt-4 space-y-4">
         <div className="flex items-center justify-between gap-4 px-6 pb-0">
-          <div className="flex shrink-0 rounded-full bg-muted p-1 gap-1">
-            <SegmentedTab
-              active={tab === 'my-groups'}
-              onClick={() => setTab('my-groups')}
-            >
+          <div className="flex shrink-0 gap-1 rounded-full bg-muted p-1">
+            <SegmentedTab active={tab === 'my-groups'} onClick={() => setTab('my-groups')}>
               My Groups
             </SegmentedTab>
-            <SegmentedTab
-              active={tab === 'assigned'}
-              onClick={() => setTab('assigned')}
-            >
+            <SegmentedTab active={tab === 'assigned'} onClick={() => setTab('assigned')}>
               Assigned Groups
             </SegmentedTab>
           </div>
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search groups…"
                 value={tab === 'my-groups' ? mySearch : assignedSearch}
@@ -425,10 +406,7 @@ function GroupsIndex() {
               />
             </div>
             {tab === 'my-groups' && (
-              <OwnershipFilterPopover
-                value={ownershipFilter}
-                onChange={setOwnershipFilter}
-              />
+              <OwnershipFilterPopover value={ownershipFilter} onChange={setOwnershipFilter} />
             )}
             {tab === 'assigned' && (
               <TypeFilterPopover value={typeFilter} onChange={setTypeFilter} />
@@ -442,11 +420,7 @@ function GroupsIndex() {
             {filteredCombinedGroups.length === 0 ? (
               <div className="flex flex-col items-center py-16">
                 <EmptyState
-                  title={
-                    mySearch || ownershipFilter.size > 0
-                      ? 'No groups found'
-                      : 'No groups yet'
-                  }
+                  title={mySearch || ownershipFilter.size > 0 ? 'No groups found' : 'No groups yet'}
                   description={
                     mySearch || ownershipFilter.size > 0
                       ? 'Try adjusting your search or filter.'
@@ -454,11 +428,7 @@ function GroupsIndex() {
                   }
                 />
                 {!mySearch && ownershipFilter.size === 0 && (
-                  <Button
-                    size="sm"
-                    className="mt-4"
-                    render={<Link to="/groups/create" />}
-                  >
+                  <Button size="sm" className="mt-4" render={<Link to="/groups/create" />}>
                     <Plus className="mr-1.5 h-4 w-4" />
                     Create your first group
                   </Button>
@@ -478,12 +448,10 @@ function GroupsIndex() {
                 </TableHeader>
                 <TableBody>
                   {filteredCombinedGroups.map((group) => {
-                    const isShared = group._source === 'shared'
+                    const isShared = group._source === 'shared';
                     const sharedRole = isShared
-                      ? group.sharedWith.find(
-                          (s) => s.email === CURRENT_USER_EMAIL,
-                        )?.role
-                      : undefined
+                      ? group.sharedWith.find((s) => s.email === CURRENT_USER_EMAIL)?.role
+                      : undefined;
                     return (
                       <TableRow
                         key={group.id}
@@ -495,27 +463,20 @@ function GroupsIndex() {
                           })
                         }
                       >
-                        <TableCell className="overflow-hidden whitespace-normal pl-6">
+                        <TableCell className="overflow-hidden pl-6 whitespace-normal">
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <span className="truncate font-medium">
-                                {group.name}
-                              </span>
+                              <span className="truncate font-medium">{group.name}</span>
                               {isShared && (
                                 <Badge
                                   variant="outline"
                                   className="shrink-0 py-0 text-xs text-muted-foreground"
                                 >
-                                  {sharedRole === 'editor'
-                                    ? 'Editor'
-                                    : 'Viewer'}
+                                  {sharedRole === 'editor' ? 'Editor' : 'Viewer'}
                                 </Badge>
                               )}
                               {!isShared && group.visibility === 'school' && (
-                                <Badge
-                                  variant="outline"
-                                  className="shrink-0 py-0 text-xs"
-                                >
+                                <Badge variant="outline" className="shrink-0 py-0 text-xs">
                                   School-wide
                                 </Badge>
                               )}
@@ -557,10 +518,7 @@ function GroupsIndex() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
                                   render={
-                                    <Link
-                                      to="/groups/$groupId"
-                                      params={{ groupId: group.id }}
-                                    />
+                                    <Link to="/groups/$groupId" params={{ groupId: group.id }} />
                                   }
                                 >
                                   <Edit2 className="mr-2 h-4 w-4" />
@@ -568,10 +526,7 @@ function GroupsIndex() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   render={
-                                    <Link
-                                      to="/groups/$groupId"
-                                      params={{ groupId: group.id }}
-                                    />
+                                    <Link to="/groups/$groupId" params={{ groupId: group.id }} />
                                   }
                                 >
                                   <Share2 className="mr-2 h-4 w-4" />
@@ -579,9 +534,7 @@ function GroupsIndex() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => {
-                                    const src = MOCK_GROUPS.find(
-                                      (g) => g.id === group.id,
-                                    )
+                                    const src = MOCK_GROUPS.find((g) => g.id === group.id);
                                     if (src) {
                                       const copy = {
                                         ...src,
@@ -590,10 +543,10 @@ function GroupsIndex() {
                                         createdAt: new Date().toISOString(),
                                         updatedAt: new Date().toISOString(),
                                         lastUsedAt: undefined,
-                                      }
-                                      MOCK_GROUPS.push(copy)
-                                      setGroups([...MOCK_GROUPS])
-                                      toast.success('Copy created')
+                                      };
+                                      MOCK_GROUPS.push(copy);
+                                      setGroups([...MOCK_GROUPS]);
+                                      toast.success('Copy created');
                                     }
                                   }}
                                 >
@@ -626,10 +579,7 @@ function GroupsIndex() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
                                   render={
-                                    <Link
-                                      to="/groups/$groupId"
-                                      params={{ groupId: group.id }}
-                                    />
+                                    <Link to="/groups/$groupId" params={{ groupId: group.id }} />
                                   }
                                 >
                                   <Edit2 className="mr-2 h-4 w-4" />
@@ -637,7 +587,7 @@ function GroupsIndex() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => {
-                                    const { _source: _, ...groupData } = group
+                                    const { _source: _, ...groupData } = group;
                                     const copy = {
                                       ...groupData,
                                       id: `cg-${Date.now()}`,
@@ -650,10 +600,10 @@ function GroupsIndex() {
                                       createdAt: new Date().toISOString(),
                                       updatedAt: new Date().toISOString(),
                                       lastUsedAt: undefined,
-                                    }
-                                    MOCK_GROUPS.push(copy)
-                                    setGroups([...MOCK_GROUPS])
-                                    toast.success('Copy created')
+                                    };
+                                    MOCK_GROUPS.push(copy);
+                                    setGroups([...MOCK_GROUPS]);
+                                    toast.success('Copy created');
                                   }}
                                 >
                                   <Copy className="mr-2 h-4 w-4" />
@@ -664,7 +614,7 @@ function GroupsIndex() {
                           ) : null}
                         </TableCell>
                       </TableRow>
-                    )
+                    );
                   })}
                 </TableBody>
               </Table>
@@ -679,8 +629,8 @@ function GroupsIndex() {
               <Alert className="border-blue-200 bg-blue-50/60 text-blue-900">
                 <Info className="h-4 w-4 text-blue-500" />
                 <AlertDescription className="text-blue-800">
-                  These groups are managed in School Cockpit. Changes to
-                  membership must be made by your school administrator.
+                  These groups are managed in School Cockpit. Changes to membership must be made by
+                  your school administrator.
                 </AlertDescription>
               </Alert>
             </div>
@@ -689,9 +639,7 @@ function GroupsIndex() {
               {filteredAssignedGroups.length === 0 ? (
                 <EmptyState
                   title={
-                    assignedSearch || typeFilter.size > 0
-                      ? 'No groups found'
-                      : 'No groups assigned'
+                    assignedSearch || typeFilter.size > 0 ? 'No groups found' : 'No groups assigned'
                   }
                   description={
                     assignedSearch || typeFilter.size > 0
@@ -722,10 +670,8 @@ function GroupsIndex() {
                           })
                         }
                       >
-                        <TableCell className="overflow-hidden whitespace-normal pl-6">
-                          <span className="truncate font-medium">
-                            {group.name}
-                          </span>
+                        <TableCell className="overflow-hidden pl-6 whitespace-normal">
+                          <span className="truncate font-medium">{group.name}</span>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -741,10 +687,7 @@ function GroupsIndex() {
                             {getStructuredTypeLabel(group.structuredType)}
                           </Badge>
                         </TableCell>
-                        <TableCell
-                          className="w-[48px] pr-2"
-                          onClick={(e) => e.stopPropagation()}
-                        />
+                        <TableCell className="w-[48px] pr-2" onClick={(e) => e.stopPropagation()} />
                       </TableRow>
                     ))}
                   </TableBody>
@@ -756,24 +699,20 @@ function GroupsIndex() {
       </div>
 
       {/* ── Delete confirmation ──────────────────────────────────────────────── */}
-      <AlertDialog
-        open={!!deleteId}
-        onOpenChange={(open) => !open && setDeleteId(null)}
-      >
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete group?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete{' '}
-              <strong>{deleteGroup?.name}</strong>? This action cannot be
-              undone.
+              Are you sure you want to delete <strong>{deleteGroup?.name}</strong>? This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
             >
               Delete
             </AlertDialogAction>
@@ -781,5 +720,5 @@ function GroupsIndex() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

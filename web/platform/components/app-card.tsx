@@ -1,8 +1,8 @@
-import { Link } from '@tanstack/react-router'
-import type { LucideIcon } from 'lucide-react'
+import { Link } from '@tanstack/react-router';
+import type { LucideIcon } from 'lucide-react';
 
-import type { AppColor } from '@/data/apps'
-import { cn } from '@/lib/utils'
+import type { AppColor } from '~/apps/pg/data/apps';
+import { cn } from '~/shared/lib/utils';
 
 const iconHoverColorVariants: Record<AppColor, string> = {
   pink: 'group-hover:text-pink-500',
@@ -10,12 +10,12 @@ const iconHoverColorVariants: Record<AppColor, string> = {
   orange: 'group-hover:text-orange-500',
   green: 'group-hover:text-green-500',
   purple: 'group-hover:text-purple-500',
-}
+};
 
 interface AppIconProps {
-  icon: LucideIcon | string
-  color: AppColor
-  className?: string
+  icon: LucideIcon | string;
+  color: AppColor;
+  className?: string;
 }
 
 export function AppIcon({ icon, color, className }: AppIconProps) {
@@ -30,10 +30,10 @@ export function AppIcon({ icon, color, className }: AppIconProps) {
         <img src={icon} alt="" className="h-full w-full object-contain" />
         <div className="pointer-events-none absolute inset-0 bg-[#0064ff] mix-blend-color transition-opacity duration-200 will-change-[opacity] group-hover:opacity-0" />
       </div>
-    )
+    );
   }
 
-  const Icon = icon
+  const Icon = icon;
   return (
     <div
       className={cn(
@@ -48,17 +48,17 @@ export function AppIcon({ icon, color, className }: AppIconProps) {
         )}
       />
     </div>
-  )
+  );
 }
 
 interface AppCardProps {
-  name: string
-  description: string
-  icon: LucideIcon | string
-  color: AppColor
-  href: string
-  onClick?: () => void
-  className?: string
+  name: string;
+  description: string;
+  icon: LucideIcon | string;
+  color: AppColor;
+  href: string;
+  onClick?: () => void;
+  className?: string;
 }
 
 export function AppCard({
@@ -71,58 +71,51 @@ export function AppCard({
   className,
 }: AppCardProps) {
   const cardClassName = cn(
-    'group flex min-w-0 flex-col gap-4 rounded-[14px] border bg-background p-4 transition-colors hover:bg-muted/50 text-left',
+    'group flex min-w-0 flex-col gap-4 rounded-[14px] border bg-background p-4 text-left transition-colors hover:bg-muted/50',
     className,
-  )
+  );
 
   const content = (
     <>
       <AppIcon icon={icon} color={color} />
       <div className="flex flex-col gap-2">
         <h3 className="font-semibold text-foreground">{name}</h3>
-        <p className="line-clamp-3 text-sm text-muted-foreground">
-          {description}
-        </p>
+        <p className="line-clamp-3 text-sm text-muted-foreground">{description}</p>
       </div>
     </>
-  )
+  );
 
   if (onClick) {
     return (
       <button type="button" onClick={onClick} className={cardClassName}>
         {content}
       </button>
-    )
+    );
   }
 
   if (href.startsWith('http')) {
     return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cardClassName}
-      >
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cardClassName}>
         {content}
       </a>
-    )
+    );
   }
 
   return (
     <Link to={href} className={cardClassName}>
       {content}
     </Link>
-  )
+  );
 }
 
 interface FeaturedAppCardProps {
-  name: string
-  description: string
-  icon: LucideIcon | string
-  color: AppColor
-  href: string
-  badge?: string
-  className?: string
+  name: string;
+  description: string;
+  icon: LucideIcon | string;
+  color: AppColor;
+  href: string;
+  badge?: string;
+  className?: string;
 }
 
 export function FeaturedAppCard({
@@ -137,7 +130,7 @@ export function FeaturedAppCard({
   const featuredClassName = cn(
     'group flex h-[132px] items-center gap-4 rounded-[14px] border border-[#C8C8C8] bg-white p-4 transition-colors hover:bg-muted/50',
     className,
-  )
+  );
 
   const featuredContent = (
     <>
@@ -154,24 +147,19 @@ export function FeaturedAppCard({
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
     </>
-  )
+  );
 
   if (href.startsWith('http')) {
     return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={featuredClassName}
-      >
+      <a href={href} target="_blank" rel="noopener noreferrer" className={featuredClassName}>
         {featuredContent}
       </a>
-    )
+    );
   }
 
   return (
     <Link to={href} className={featuredClassName}>
       {featuredContent}
     </Link>
-  )
+  );
 }

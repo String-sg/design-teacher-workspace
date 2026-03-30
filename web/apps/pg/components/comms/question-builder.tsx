@@ -1,18 +1,19 @@
-import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2, X } from 'lucide-react'
-import type { FormQuestion, QuestionType, ResponseType } from '@/types/form'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2, X } from 'lucide-react';
 
-const MAX_QUESTIONS = 5
-const MAX_OPTIONS = 6
-const MIN_OPTIONS = 2
+import type { FormQuestion, QuestionType, ResponseType } from '~/apps/pg/types/form';
+import { Button } from '~/shared/components/ui/button';
+import { Input } from '~/shared/components/ui/input';
+import { cn } from '~/shared/lib/utils';
+
+const MAX_QUESTIONS = 5;
+const MAX_OPTIONS = 6;
+const MIN_OPTIONS = 2;
 
 interface QuestionBuilderProps {
-  questions: FormQuestion[]
-  onChange: (questions: FormQuestion[]) => void
-  responseType?: ResponseType
-  onEditQuestion?: (id: string | null) => void
+  questions: FormQuestion[];
+  onChange: (questions: FormQuestion[]) => void;
+  responseType?: ResponseType;
+  onEditQuestion?: (id: string | null) => void;
 }
 
 export function QuestionBuilder({
@@ -21,84 +22,78 @@ export function QuestionBuilder({
   responseType,
   onEditQuestion,
 }: QuestionBuilderProps) {
-  const isYesNo = responseType === 'yes-no'
+  const isYesNo = responseType === 'yes-no';
 
   function addQuestion() {
-    if (questions.length >= MAX_QUESTIONS) return
+    if (questions.length >= MAX_QUESTIONS) return;
     const newQ: FormQuestion = {
       id: crypto.randomUUID(),
       text: '',
       type: 'free-text',
       options: ['', ''],
       showAfter: 'both',
-    }
-    onChange([...questions, newQ])
+    };
+    onChange([...questions, newQ]);
   }
 
   function updateQuestion(id: string, patch: Partial<FormQuestion>) {
-    onChange(questions.map((q) => (q.id === id ? { ...q, ...patch } : q)))
+    onChange(questions.map((q) => (q.id === id ? { ...q, ...patch } : q)));
   }
 
   function deleteQuestion(id: string) {
-    onChange(questions.filter((q) => q.id !== id))
+    onChange(questions.filter((q) => q.id !== id));
   }
 
   function moveUp(index: number) {
-    if (index === 0) return
-    const next = [...questions]
-    ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
-    onChange(next)
+    if (index === 0) return;
+    const next = [...questions];
+    [next[index - 1], next[index]] = [next[index], next[index - 1]];
+    onChange(next);
   }
 
   function moveDown(index: number) {
-    if (index === questions.length - 1) return
-    const next = [...questions]
-    ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
-    onChange(next)
+    if (index === questions.length - 1) return;
+    const next = [...questions];
+    [next[index], next[index + 1]] = [next[index + 1], next[index]];
+    onChange(next);
   }
 
   function addOption(questionId: string) {
-    const q = questions.find((q) => q.id === questionId)
-    if (!q || (q.options ?? []).length >= MAX_OPTIONS) return
-    updateQuestion(questionId, { options: [...(q.options ?? []), ''] })
+    const q = questions.find((q) => q.id === questionId);
+    if (!q || (q.options ?? []).length >= MAX_OPTIONS) return;
+    updateQuestion(questionId, { options: [...(q.options ?? []), ''] });
   }
 
   function updateOption(questionId: string, optIndex: number, value: string) {
-    const q = questions.find((q) => q.id === questionId)
-    if (!q) return
-    const opts = [...(q.options ?? [])]
-    opts[optIndex] = value
-    updateQuestion(questionId, { options: opts })
+    const q = questions.find((q) => q.id === questionId);
+    if (!q) return;
+    const opts = [...(q.options ?? [])];
+    opts[optIndex] = value;
+    updateQuestion(questionId, { options: opts });
   }
 
   function removeOption(questionId: string, optIndex: number) {
-    const q = questions.find((q) => q.id === questionId)
-    if (!q || (q.options ?? []).length <= MIN_OPTIONS) return
-    const opts = (q.options ?? []).filter((_, i) => i !== optIndex)
-    updateQuestion(questionId, { options: opts })
+    const q = questions.find((q) => q.id === questionId);
+    if (!q || (q.options ?? []).length <= MIN_OPTIONS) return;
+    const opts = (q.options ?? []).filter((_, i) => i !== optIndex);
+    updateQuestion(questionId, { options: opts });
   }
 
-  const atMax = questions.length >= MAX_QUESTIONS
+  const atMax = questions.length >= MAX_QUESTIONS;
 
   return (
     <section className="rounded-xl border bg-white p-6">
       <div className="mb-4 flex items-start justify-between">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
             Questions
           </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Custom questions (optional). You may add up to {MAX_QUESTIONS}{' '}
-            questions.
+            Custom questions (optional). You may add up to {MAX_QUESTIONS} questions.
           </p>
         </div>
         {!atMax && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="shrink-0 gap-1.5"
-            onClick={addQuestion}
-          >
+          <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={addQuestion}>
             <Plus className="h-3.5 w-3.5" />
             Add a Question
           </Button>
@@ -106,17 +101,12 @@ export function QuestionBuilder({
       </div>
 
       {questions.length === 0 && (
-        <p className="text-sm italic text-muted-foreground/60">
-          No questions added yet.
-        </p>
+        <p className="text-sm text-muted-foreground/60 italic">No questions added yet.</p>
       )}
 
       <div className="space-y-3">
         {questions.map((q, i) => (
-          <div
-            key={q.id}
-            className="rounded-lg border border-slate-200 bg-slate-50 p-3"
-          >
+          <div key={q.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
             {/* Question header row */}
             <div className="flex items-start gap-2">
               <GripVertical className="mt-2 h-4 w-4 shrink-0 text-slate-300" />
@@ -131,7 +121,7 @@ export function QuestionBuilder({
                 placeholder="Enter your question"
                 className="h-8 flex-1 text-sm"
               />
-              <div className="flex shrink-0 items-center gap-0.5 mt-0.5">
+              <div className="mt-0.5 flex shrink-0 items-center gap-0.5">
                 <button
                   type="button"
                   onClick={() => moveUp(i)}
@@ -172,9 +162,7 @@ export function QuestionBuilder({
                     updateQuestion(q.id, {
                       type: t,
                       options:
-                        t === 'mcq' && (!q.options || q.options.length < 2)
-                          ? ['', '']
-                          : q.options,
+                        t === 'mcq' && (!q.options || q.options.length < 2) ? ['', ''] : q.options,
                     })
                   }
                   className={cn(
@@ -193,7 +181,7 @@ export function QuestionBuilder({
                     )}
                   >
                     {(q.type === t || (!q.type && t === 'free-text')) && (
-                      <div className="h-full w-full rounded-full bg-white scale-[0.4]" />
+                      <div className="h-full w-full scale-[0.4] rounded-full bg-white" />
                     )}
                   </div>
                   {t === 'free-text' ? 'Open-ended' : 'MCQ'}
@@ -241,9 +229,7 @@ export function QuestionBuilder({
             {/* Show after (yes-no forms only) */}
             {isYesNo && (
               <div className="mt-2.5 ml-10 flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  Show after response:
-                </span>
+                <span className="text-xs text-muted-foreground">Show after response:</span>
                 {(['yes', 'no', 'both'] as const).map((choice) => (
                   <button
                     key={choice}
@@ -269,5 +255,5 @@ export function QuestionBuilder({
         ))}
       </div>
     </section>
-  )
+  );
 }

@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router';
 import {
   BookOpen,
   Calendar,
@@ -15,44 +14,42 @@ import {
   Plus,
   User,
   X,
-} from 'lucide-react'
+} from 'lucide-react';
+import { useState } from 'react';
 
-import { StudentOverviewCards } from './student-overview-cards'
-import { AcademicAnalytics } from './academic-analytics'
-import { AttendanceAnalytics } from './attendance-analytics'
-import type { Student } from '@/types/student'
-import type { HolisticReport, ReviewStatus, Term } from '@/types/report'
-import { useFeatureFlag } from '@/hooks/use-feature-flag'
-import {
-  TERMS,
-  filterReports,
-  getStudentGradeCounts,
-} from '@/data/mock-reports'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { GenerateHdpWizard } from '@/components/reports/generate-hdp-wizard'
-import { InterventionBanner } from '@/components/students/intervention-banner'
-import { useFeatureFlags } from '@/lib/feature-flags'
+import { GenerateHdpWizard } from '~/apps/pg/components/reports/generate-hdp-wizard';
+import { InterventionBanner } from '~/apps/pg/components/students/intervention-banner';
+import { filterReports, getStudentGradeCounts, TERMS } from '~/apps/pg/data/mock-reports';
+import { useFeatureFlag } from '~/apps/pg/hooks/use-feature-flag';
+import type { HolisticReport, ReviewStatus, Term } from '~/apps/pg/types/report';
+import type { Student } from '~/apps/pg/types/student';
+import { useFeatureFlags } from '~/platform/lib/feature-flags';
+import { Badge } from '~/shared/components/ui/badge';
+import { Button } from '~/shared/components/ui/button';
 import {
   Sheet,
   SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet'
+} from '~/shared/components/ui/sheet';
+import { cn } from '~/shared/lib/utils';
+
+import { AcademicAnalytics } from './academic-analytics';
+import { AttendanceAnalytics } from './attendance-analytics';
+import { StudentOverviewCards } from './student-overview-cards';
 
 interface StudentProfileProps {
-  student: Student
-  headerControls?: React.ReactNode
+  student: Student;
+  headerControls?: React.ReactNode;
 }
 
 interface SectionProps {
-  id: string
-  title: string
-  icon: React.ReactNode
-  iconClassName?: string
-  children: React.ReactNode
+  id: string;
+  title: string;
+  icon: React.ReactNode;
+  iconClassName?: string;
+  children: React.ReactNode;
 }
 
 function Section({ id, title, icon, iconClassName, children }: SectionProps) {
@@ -60,10 +57,7 @@ function Section({ id, title, icon, iconClassName, children }: SectionProps) {
     <section id={id} className="scroll-mt-24 rounded-lg border bg-white p-6">
       <div className="mb-4 flex items-center gap-3">
         <span
-          className={cn(
-            'flex h-10 w-10 items-center justify-center rounded-lg',
-            iconClassName,
-          )}
+          className={cn('flex h-10 w-10 items-center justify-center rounded-lg', iconClassName)}
         >
           {icon}
         </span>
@@ -71,14 +65,14 @@ function Section({ id, title, icon, iconClassName, children }: SectionProps) {
       </div>
       {children}
     </section>
-  )
+  );
 }
 
 interface FieldProps {
-  label: string
-  value: React.ReactNode
-  tooltip?: string
-  className?: string
+  label: string;
+  value: React.ReactNode;
+  tooltip?: string;
+  className?: string;
 }
 
 function Field({ label, value, tooltip, className }: FieldProps) {
@@ -90,13 +84,13 @@ function Field({ label, value, tooltip, className }: FieldProps) {
       </dt>
       <dd className="text-sm font-medium">{value ?? '-'}</dd>
     </div>
-  )
+  );
 }
 
 interface RemarksFieldProps {
-  label: string
-  value: string | null
-  tooltip?: string
+  label: string;
+  value: string | null;
+  tooltip?: string;
 }
 
 function RemarksField({ label, value, tooltip }: RemarksFieldProps) {
@@ -110,16 +104,16 @@ function RemarksField({ label, value, tooltip }: RemarksFieldProps) {
         {value || <span className="font-normal text-muted-foreground">-</span>}
       </dd>
     </div>
-  )
+  );
 }
 
 interface FieldWithDetailsProps {
-  label: string
-  value: React.ReactNode
-  tooltip: string
-  sideSheetTitle: string
-  sideSheetContent: React.ReactNode
-  className?: string
+  label: string;
+  value: React.ReactNode;
+  tooltip: string;
+  sideSheetTitle: string;
+  sideSheetContent: React.ReactNode;
+  className?: string;
 }
 
 function FieldWithDetails({
@@ -130,13 +124,13 @@ function FieldWithDetails({
   sideSheetContent,
   className,
 }: FieldWithDetailsProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       <div
         className={cn(
-          'group relative flex cursor-pointer flex-col gap-1 rounded-xl p-3 -m-3 transition-colors',
+          'group relative -m-3 flex cursor-pointer flex-col gap-1 rounded-xl p-3 transition-colors',
           isOpen ? 'bg-muted' : 'hover:bg-muted',
           className,
         )}
@@ -150,17 +144,17 @@ function FieldWithDetails({
 
         {isOpen ? (
           <button
-            className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1.5 rounded-xl bg-background px-3 py-2 text-sm text-foreground shadow-sm"
+            className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1.5 rounded-xl bg-background px-3 py-2 text-sm text-foreground shadow-sm"
             onClick={(e) => {
-              e.stopPropagation()
-              setIsOpen(false)
+              e.stopPropagation();
+              setIsOpen(false);
             }}
           >
             <X className="h-3.5 w-3.5" />
             Close
           </button>
         ) : (
-          <span className="invisible absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1.5 rounded-xl bg-background px-3 py-2 text-sm text-foreground shadow-sm group-hover:visible">
+          <span className="invisible absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1.5 rounded-xl bg-background px-3 py-2 text-sm text-foreground shadow-sm group-hover:visible">
             <PanelRight className="h-3.5 w-3.5" />
             View
           </span>
@@ -168,11 +162,7 @@ function FieldWithDetails({
       </div>
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent
-          showOverlay={false}
-          showCloseButton={false}
-          className="sm:max-w-xs"
-        >
+        <SheetContent showOverlay={false} showCloseButton={false} className="sm:max-w-xs">
           <SheetHeader className="border-b pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border">
@@ -192,7 +182,7 @@ function FieldWithDetails({
         </SheetContent>
       </Sheet>
     </>
-  )
+  );
 }
 
 // Subject data used to compute Overall % across selected subjects
@@ -203,17 +193,13 @@ const SUBJECT_COMPUTATION = [
   { subject: 'Sci', band: 'G3', percentage: 86 },
   { subject: 'Geog', band: 'G2', percentage: 63 },
   { subject: 'Hist', band: 'G3', percentage: 72 },
-]
+];
 
 const COMPUTED_OVERALL_PERCENTAGE = Math.round(
-  SUBJECT_COMPUTATION.reduce((sum, s) => sum + s.percentage, 0) /
-    SUBJECT_COMPUTATION.length,
-)
+  SUBJECT_COMPUTATION.reduce((sum, s) => sum + s.percentage, 0) / SUBJECT_COMPUTATION.length,
+);
 
-const REVIEW_STATUS_CONFIG: Record<
-  ReviewStatus,
-  { label: string; className: string }
-> = {
+const REVIEW_STATUS_CONFIG: Record<ReviewStatus, { label: string; className: string }> = {
   pending: {
     label: 'Pending',
     className: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
@@ -226,15 +212,15 @@ const REVIEW_STATUS_CONFIG: Record<
     label: 'Approved',
     className: 'bg-green-100 text-green-700 hover:bg-green-100',
   },
-}
+};
 
 function ReportRow({ report }: { report: HolisticReport }) {
-  const { label, className } = REVIEW_STATUS_CONFIG[report.reviewStatus]
+  const { label, className } = REVIEW_STATUS_CONFIG[report.reviewStatus];
   const generatedDate = report.generatedAt.toLocaleDateString('en-SG', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  })
+  });
 
   return (
     <Link
@@ -248,9 +234,7 @@ function ReportRow({ report }: { report: HolisticReport }) {
           <p className="text-sm font-medium">
             {report.term} — {report.academicYear}
           </p>
-          <p className="text-xs text-muted-foreground">
-            Generated {generatedDate}
-          </p>
+          <p className="text-xs text-muted-foreground">Generated {generatedDate}</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -258,31 +242,28 @@ function ReportRow({ report }: { report: HolisticReport }) {
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
       </div>
     </Link>
-  )
+  );
 }
 
-function formatTermList(terms: Array<string>): string {
-  if (terms.length === 0) return 'None'
-  if (terms.length === 1) return terms[0]
-  const nums = terms.map((t) => t.replace('Term ', ''))
-  return `Term ${nums.slice(0, -1).join(', ')} and ${nums[nums.length - 1]}`
+function formatTermList(terms: string[]): string {
+  if (terms.length === 0) return 'None';
+  if (terms.length === 1) return terms[0];
+  const nums = terms.map((t) => t.replace('Term ', ''));
+  return `Term ${nums.slice(0, -1).join(', ')} and ${nums[nums.length - 1]}`;
 }
 
-export function StudentProfile({
-  student,
-  headerControls,
-}: StudentProfileProps) {
-  const [wizardOpen, setWizardOpen] = useState(false)
-  const [analyticsOpen, setAnalyticsOpen] = useState(false)
-  const [academicAnalyticsOpen, setAcademicAnalyticsOpen] = useState(false)
-  const { isEnabled } = useFeatureFlags()
+export function StudentProfile({ student, headerControls }: StudentProfileProps) {
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [academicAnalyticsOpen, setAcademicAnalyticsOpen] = useState(false);
+  const { isEnabled } = useFeatureFlags();
 
-  const holisticReportsEnabled = useFeatureFlag('holistic-reports')
+  const holisticReportsEnabled = useFeatureFlag('holistic-reports');
 
-  const gradeCounts = getStudentGradeCounts(student)
-  const studentReports = filterReports({ studentId: student.id })
-  const existingTerms = new Set(studentReports.map((r) => r.term))
-  const missingTerms = TERMS.filter((t): t is Term => !existingTerms.has(t))
+  const gradeCounts = getStudentGradeCounts(student);
+  const studentReports = filterReports({ studentId: student.id });
+  const existingTerms = new Set(studentReports.map((r) => r.term));
+  const missingTerms = TERMS.filter((t): t is Term => !existingTerms.has(t));
 
   const sections = [
     { id: 'attendance', label: 'Attendance' },
@@ -292,7 +273,7 @@ export function StudentProfile({
     { id: 'family', label: 'Family' },
     { id: 'personal', label: 'Personal' },
     ...(holisticReportsEnabled ? [{ id: 'reports', label: 'Reports' }] : []),
-  ]
+  ];
 
   return (
     <div className="flex gap-8">
@@ -314,9 +295,7 @@ export function StudentProfile({
         </div>
 
         {/* Intervention Banner — only surfaces for students with support needs */}
-        {isEnabled('lta-intervention') && (
-          <InterventionBanner student={student} />
-        )}
+        {isEnabled('lta-intervention') && <InterventionBanner student={student} />}
 
         {/* Overview Cards */}
         <StudentOverviewCards student={student} />
@@ -333,18 +312,13 @@ export function StudentProfile({
               label="Attendance(%)"
               value={
                 student.totalSchoolDays > 0
-                  ? Math.round(
-                      (student.daysPresent / student.totalSchoolDays) * 100,
-                    )
+                  ? Math.round((student.daysPresent / student.totalSchoolDays) * 100)
                   : 0
               }
             />
             <Field label="Late-coming(%)" value={student.lateComing} />
             <Field label="Non-VR absences(%)" value={student.absences} />
-            <Field
-              label="CCA attendance(%)"
-              value={`${100 - student.ccaMissed * 5}`}
-            />
+            <Field label="CCA attendance(%)" value={`${100 - student.ccaMissed * 5}`} />
           </dl>
 
           {analyticsOpen && <AttendanceAnalytics />}
@@ -387,22 +361,21 @@ export function StudentProfile({
                       </ul>
                     </div>
                   </div>
-                  {student.offenceDetails &&
-                    student.offenceDetails.length > 0 && (
-                      <div>
-                        <p className="mb-2 text-sm font-medium">Remarks</p>
-                        <div className="rounded-lg bg-muted px-4 py-3">
-                          <ul className="space-y-1.5 text-sm">
-                            {student.offenceDetails.map((d, i) => (
-                              <li key={i} className="flex items-center gap-2">
-                                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                                {d.type} x {d.count} (latest {d.latestDate})
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                  {student.offenceDetails && student.offenceDetails.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Remarks</p>
+                      <div className="rounded-lg bg-muted px-4 py-3">
+                        <ul className="space-y-1.5 text-sm">
+                          {student.offenceDetails.map((d, i) => (
+                            <li key={i} className="flex items-center gap-2">
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                              {d.type} x {d.count} (latest {d.latestDate})
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    )}
+                    </div>
+                  )}
                 </div>
               }
             />
@@ -414,10 +387,7 @@ export function StudentProfile({
           </dl>
 
           <div className="mt-6 space-y-4 border-t pt-4">
-            <RemarksField
-              label="Teacher's remarks"
-              value={student.teacherObservations}
-            />
+            <RemarksField label="Teacher's remarks" value={student.teacherObservations} />
             <RemarksField label="Next steps" value={student.nextSteps} />
           </div>
         </Section>
@@ -448,37 +418,32 @@ export function StudentProfile({
                       </ul>
                     </div>
                   </div>
-                  {student.counsellingCases &&
-                    student.counsellingCases.length > 0 && (
-                      <div>
-                        <p className="mb-2 text-sm font-medium">Remarks</p>
-                        <div className="rounded-lg bg-muted px-4 py-3">
-                          <ul className="space-y-1.5 text-sm">
-                            {student.counsellingCases.map((c, i) => (
-                              <li key={i} className="flex items-start gap-2">
-                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                                {c.subcases && c.subcases.length > 0 ? (
-                                  <span>
-                                    {c.category}:{' '}
-                                    {c.subcases
-                                      .map(
-                                        (s) =>
-                                          `${s.name} x${s.count} (latest ${s.latestDate})`,
-                                      )
-                                      .join(', ')}
-                                  </span>
-                                ) : (
-                                  <span>
-                                    {c.category} x{c.count} (latest{' '}
-                                    {c.latestDate})
-                                  </span>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                  {student.counsellingCases && student.counsellingCases.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Remarks</p>
+                      <div className="rounded-lg bg-muted px-4 py-3">
+                        <ul className="space-y-1.5 text-sm">
+                          {student.counsellingCases.map((c, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                              {c.subcases && c.subcases.length > 0 ? (
+                                <span>
+                                  {c.category}:{' '}
+                                  {c.subcases
+                                    .map((s) => `${s.name} x${s.count} (latest ${s.latestDate})`)
+                                    .join(', ')}
+                                </span>
+                              ) : (
+                                <span>
+                                  {c.category} x{c.count} (latest {c.latestDate})
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    )}
+                    </div>
+                  )}
                 </div>
               }
             />
@@ -503,9 +468,9 @@ export function StudentProfile({
                   </div>
                   <div>
                     <p className="mb-2 text-sm font-medium">Remarks</p>
-                    <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                    <div className="space-y-4 rounded-lg bg-muted px-4 py-3 text-sm">
                       <div>
-                        <p className="font-medium mb-1.5">Selected by</p>
+                        <p className="mb-1.5 font-medium">Selected by</p>
                         {student.selectedBy && student.selectedBy.length > 0 ? (
                           <ul className="space-y-1.5">
                             {student.selectedBy.map((person, i) => (
@@ -524,9 +489,8 @@ export function StudentProfile({
                         )}
                       </div>
                       <div>
-                        <p className="font-medium mb-1.5">Selected friends</p>
-                        {student.selectedFriends &&
-                        student.selectedFriends.length > 0 ? (
+                        <p className="mb-1.5 font-medium">Selected friends</p>
+                        {student.selectedFriends && student.selectedFriends.length > 0 ? (
                           <ul className="space-y-1.5">
                             {student.selectedFriends.map((person, i) => (
                               <li key={i} className="flex items-start gap-2">
@@ -558,8 +522,7 @@ export function StudentProfile({
                   <div>
                     <p className="mb-1 text-sm font-medium">Risk indicators</p>
                     <p className="mb-2 text-xs text-muted-foreground">
-                      No. of risk indicators flagged in the latest Termly
-                      Check-In Survey (All Ears)
+                      No. of risk indicators flagged in the latest Termly Check-In Survey (All Ears)
                     </p>
                     <div className="rounded-lg bg-muted px-4 py-3">
                       <ul className="space-y-1 text-sm">
@@ -570,32 +533,28 @@ export function StudentProfile({
                       </ul>
                     </div>
                   </div>
-                  {student.riskIndicatorHistory &&
-                    student.riskIndicatorHistory.length > 0 && (
-                      <div>
-                        <p className="mb-2 text-sm font-medium">Remarks</p>
-                        <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
-                          {student.riskIndicatorHistory.map((record, i) => (
-                            <div key={i}>
-                              <p className="font-medium mb-1.5">
-                                {record.year}, {record.term}
-                              </p>
-                              <ul className="space-y-1.5">
-                                {record.indicators.map((indicator, j) => (
-                                  <li
-                                    key={j}
-                                    className="flex items-start gap-2"
-                                  >
-                                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                                    {indicator}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          ))}
-                        </div>
+                  {student.riskIndicatorHistory && student.riskIndicatorHistory.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Remarks</p>
+                      <div className="space-y-4 rounded-lg bg-muted px-4 py-3 text-sm">
+                        {student.riskIndicatorHistory.map((record, i) => (
+                          <div key={i}>
+                            <p className="mb-1.5 font-medium">
+                              {record.year}, {record.term}
+                            </p>
+                            <ul className="space-y-1.5">
+                              {record.indicators.map((indicator, j) => (
+                                <li key={j} className="flex items-start gap-2">
+                                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                  {indicator}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
                       </div>
-                    )}
+                    </div>
+                  )}
                 </div>
               }
             />
@@ -607,12 +566,10 @@ export function StudentProfile({
               sideSheetContent={
                 <div className="space-y-5">
                   <div>
-                    <p className="mb-1 text-sm font-medium">
-                      Low mood flagged 2+ terms
-                    </p>
+                    <p className="mb-1 text-sm font-medium">Low mood flagged 2+ terms</p>
                     <p className="mb-2 text-xs text-muted-foreground">
-                      Flagged in at least 2 terms in the past year, based on
-                      Termly Check-In Survey (All Ears).
+                      Flagged in at least 2 terms in the past year, based on Termly Check-In Survey
+                      (All Ears).
                     </p>
                     <div className="rounded-lg bg-muted px-4 py-3">
                       <ul className="space-y-1 text-sm">
@@ -671,9 +628,7 @@ export function StudentProfile({
               sideSheetContent={
                 <div className="space-y-5">
                   <div>
-                    <p className="mb-2 text-sm font-medium">
-                      Overall % across selected subjects
-                    </p>
+                    <p className="mb-2 text-sm font-medium">Overall % across selected subjects</p>
                     <div className="rounded-lg bg-muted px-4 py-3">
                       <ul className="space-y-1 text-sm">
                         <li className="flex items-center gap-2">
@@ -685,9 +640,9 @@ export function StudentProfile({
                   </div>
                   <div>
                     <p className="mb-2 text-sm font-medium">Remarks</p>
-                    <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                    <div className="space-y-4 rounded-lg bg-muted px-4 py-3 text-sm">
                       <div>
-                        <p className="font-medium mb-1.5">Selected subjects</p>
+                        <p className="mb-1.5 font-medium">Selected subjects</p>
                         <ul className="space-y-1.5">
                           {SUBJECT_COMPUTATION.map((item, i) => (
                             <li key={i} className="flex items-center gap-2">
@@ -707,22 +662,13 @@ export function StudentProfile({
             <Field label="No. of subjects" value="6" />
             {gradeCounts !== null && (
               <>
-                <Field
-                  label="No. of Distinctions"
-                  value={gradeCounts.distinctions}
-                />
+                <Field label="No. of Distinctions" value={gradeCounts.distinctions} />
                 <Field label="No. of Passes" value={gradeCounts.passes} />
               </>
             )}
             <Field label="Approved MTL" value={student.approvedMtl || '-'} />
-            <Field
-              label="Learning support"
-              value={student.learningSupport || '-'}
-            />
-            <Field
-              label="Post-sec eligibility"
-              value={student.postSecEligibility || '-'}
-            />
+            <Field label="Learning support" value={student.learningSupport || '-'} />
+            <Field label="Post-sec eligibility" value={student.postSecEligibility || '-'} />
           </dl>
 
           {academicAnalyticsOpen && <AcademicAnalytics />}
@@ -768,9 +714,9 @@ export function StudentProfile({
                   </div>
                   <div>
                     <p className="mb-2 text-sm font-medium">Remarks</p>
-                    <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                    <div className="space-y-4 rounded-lg bg-muted px-4 py-3 text-sm">
                       <div>
-                        <p className="font-medium mb-1.5">Address</p>
+                        <p className="mb-1.5 font-medium">Address</p>
                         <ul className="space-y-1">
                           <li className="flex items-center gap-2">
                             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
@@ -779,7 +725,7 @@ export function StudentProfile({
                         </ul>
                       </div>
                       <div>
-                        <p className="font-medium mb-1.5">Living arrangement</p>
+                        <p className="mb-1.5 font-medium">Living arrangement</p>
                         <ul className="space-y-1">
                           <li className="flex items-center gap-2">
                             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
@@ -807,10 +753,7 @@ export function StudentProfile({
               }
             />
             <Field label="Custody" value={student.custody || '-'} />
-            <Field
-              label="Commuter status"
-              value={student.commuterStatus || 'Non-commuter'}
-            />
+            <Field label="Commuter status" value={student.commuterStatus || 'Non-commuter'} />
             <Field
               label="After-school arrangement"
               value={student.afterSchoolArrangement || 'No arrangement'}
@@ -835,9 +778,9 @@ export function StudentProfile({
                   </div>
                   <div>
                     <p className="mb-2 text-sm font-medium">Remarks</p>
-                    <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                    <div className="space-y-4 rounded-lg bg-muted px-4 py-3 text-sm">
                       <div>
-                        <p className="font-medium mb-1.5">Name</p>
+                        <p className="mb-1.5 font-medium">Name</p>
                         <ul className="space-y-1">
                           <li className="flex items-center gap-2">
                             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
@@ -846,7 +789,7 @@ export function StudentProfile({
                         </ul>
                       </div>
                       <div>
-                        <p className="font-medium mb-1.5">Mobile</p>
+                        <p className="mb-1.5 font-medium">Mobile</p>
                         <ul className="space-y-1">
                           <li className="flex items-center gap-2">
                             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
@@ -855,7 +798,7 @@ export function StudentProfile({
                         </ul>
                       </div>
                       <div>
-                        <p className="font-medium mb-1.5">Home</p>
+                        <p className="mb-1.5 font-medium">Home</p>
                         <ul className="space-y-1">
                           <li className="flex items-center gap-2">
                             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
@@ -864,7 +807,7 @@ export function StudentProfile({
                         </ul>
                       </div>
                       <div>
-                        <p className="font-medium mb-1.5">Email</p>
+                        <p className="mb-1.5 font-medium">Email</p>
                         <ul className="space-y-1">
                           <li className="flex items-center gap-2">
                             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
@@ -881,9 +824,7 @@ export function StudentProfile({
               label="Siblings"
               value={
                 student.siblingDetails && student.siblingDetails.length > 0
-                  ? student.siblingDetails
-                      .map((s) => `${s.name} (${s.class})`)
-                      .join(', ')
+                  ? student.siblingDetails.map((s) => `${s.name} (${s.class})`).join(', ')
                   : student.siblings > 0
                     ? student.siblings
                     : '-'
@@ -902,28 +843,24 @@ export function StudentProfile({
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
             <Field label="Health alerts" value="1 from Parent, 1 from SHS" />
             <Field label="Citizenship" value={student.citizenship ?? '-'} />
-            <Field
-              label="Language spoken"
-              value={student.languagesSpoken ?? '-'}
-            />
+            <Field label="Language spoken" value={student.languagesSpoken ?? '-'} />
             <Field
               label="Age"
               value={
                 student.birthday
                   ? (() => {
-                      const [day, month, year] = student.birthday.split(' ')
-                      const birthYear = parseInt(year)
-                      const birthMonth = new Date(`${month} 1`).getMonth()
-                      const today = new Date(2026, 2, 4) // 2026-03-04
-                      let age = today.getFullYear() - birthYear
+                      const [day, month, year] = student.birthday.split(' ');
+                      const birthYear = parseInt(year);
+                      const birthMonth = new Date(`${month} 1`).getMonth();
+                      const today = new Date(2026, 2, 4); // 2026-03-04
+                      let age = today.getFullYear() - birthYear;
                       if (
                         today.getMonth() < birthMonth ||
-                        (today.getMonth() === birthMonth &&
-                          today.getDate() < parseInt(day))
+                        (today.getMonth() === birthMonth && today.getDate() < parseInt(day))
                       ) {
-                        age--
+                        age--;
                       }
-                      return `${age} years old (${student.birthday})`
+                      return `${age} years old (${student.birthday})`;
                     })()
                   : '-'
               }
@@ -963,19 +900,13 @@ export function StudentProfile({
 
             {missingTerms.length > 0 && (
               <div className="mt-4 flex items-center gap-2 border-t pt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setWizardOpen(true)}
-                >
+                <Button variant="outline" size="sm" onClick={() => setWizardOpen(true)}>
                   <Plus className="mr-1 h-4 w-4" />
                   Generate HDP
                 </Button>
                 <span className="text-xs text-muted-foreground">
-                  {missingTerms.length === TERMS.length
-                    ? 'All terms'
-                    : missingTerms.join(', ')}{' '}
-                  not yet generated
+                  {missingTerms.length === TERMS.length ? 'All terms' : missingTerms.join(', ')} not
+                  yet generated
                 </span>
               </div>
             )}
@@ -987,10 +918,7 @@ export function StudentProfile({
                   size="sm"
                   className="text-muted-foreground"
                   render={
-                    <Link
-                      to="/reports"
-                      search={{ studentId: student.id, groupBy: 'student' }}
-                    />
+                    <Link to="/reports" search={{ studentId: student.id, groupBy: 'student' }} />
                   }
                 >
                   <Eye className="mr-1 h-4 w-4" />
@@ -1027,5 +955,5 @@ export function StudentProfile({
         onOpenChange={setWizardOpen}
       />
     </div>
-  )
+  );
 }

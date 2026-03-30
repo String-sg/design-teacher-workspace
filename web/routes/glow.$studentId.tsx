@@ -1,34 +1,32 @@
-import { createFileRoute, notFound, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, notFound, useNavigate } from '@tanstack/react-router';
 
-import { GlowStudentSupportPage } from '@/components/students/lta-dialog'
-import { getStudentById } from '@/data/mock-students'
-import { useFeatureFlags } from '@/lib/feature-flags'
+import { GlowStudentSupportPage } from '~/apps/pg/components/students/lta-dialog';
+import { getStudentById } from '~/apps/pg/data/mock-students';
+import { useFeatureFlags } from '~/platform/lib/feature-flags';
 
 export const Route = createFileRoute('/glow/$studentId')({
   component: GlowPage,
   loader: ({ params }) => {
-    const student = getStudentById(params.studentId)
-    if (!student) throw notFound()
-    return { student }
+    const student = getStudentById(params.studentId);
+    if (!student) throw notFound();
+    return { student };
   },
-})
+});
 
 function GlowPage() {
-  const { student } = Route.useLoaderData()
-  const navigate = useNavigate()
-  const { isEnabled } = useFeatureFlags()
+  const { student } = Route.useLoaderData();
+  const navigate = useNavigate();
+  const { isEnabled } = useFeatureFlags();
 
   if (!isEnabled('lta-intervention')) {
-    navigate({ to: '/students/$id', params: { id: student.id } })
-    return null
+    navigate({ to: '/students/$id', params: { id: student.id } });
+    return null;
   }
 
   return (
     <GlowStudentSupportPage
       student={student}
-      onClose={() =>
-        navigate({ to: '/students/$id', params: { id: student.id } })
-      }
+      onClose={() => navigate({ to: '/students/$id', params: { id: student.id } })}
     />
-  )
+  );
 }

@@ -1,10 +1,11 @@
-import { AcademicSection } from './academic-section'
-import { CharacterSection } from './character-section'
-import type { HolisticReport } from '@/types/report'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { HolisticReport } from '~/apps/pg/types/report';
+import { Card, CardContent, CardHeader, CardTitle } from '~/shared/components/ui/card';
+
+import { AcademicSection } from './academic-section';
+import { CharacterSection } from './character-section';
 
 interface ReportDetailProps {
-  report: HolisticReport
+  report: HolisticReport;
 }
 
 export function ReportDetail({ report }: ReportDetailProps) {
@@ -21,17 +22,13 @@ export function ReportDetail({ report }: ReportDetailProps) {
           <CardContent className="flex flex-col gap-4">
             {report.teacherObservations && (
               <div className="flex flex-col gap-1">
-                <span className="text-muted-foreground text-sm">
-                  Observations
-                </span>
+                <span className="text-sm text-muted-foreground">Observations</span>
                 <p>{report.teacherObservations}</p>
               </div>
             )}
             {report.nextSteps && (
               <div className="flex flex-col gap-1">
-                <span className="text-muted-foreground text-sm">
-                  Next Steps
-                </span>
+                <span className="text-sm text-muted-foreground">Next Steps</span>
                 <p>{report.nextSteps}</p>
               </div>
             )}
@@ -39,7 +36,7 @@ export function ReportDetail({ report }: ReportDetailProps) {
         </Card>
       )}
 
-      <div className="text-muted-foreground text-center text-sm">
+      <div className="text-center text-sm text-muted-foreground">
         Report generated on{' '}
         {report.generatedAt.toLocaleDateString('en-SG', {
           day: 'numeric',
@@ -48,5 +45,5 @@ export function ReportDetail({ report }: ReportDetailProps) {
         })}
       </div>
     </div>
-  )
+  );
 }

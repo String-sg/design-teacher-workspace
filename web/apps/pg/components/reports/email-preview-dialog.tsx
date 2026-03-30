@@ -1,20 +1,15 @@
-import { Mail, Send, X } from 'lucide-react'
+import { Mail, Send, X } from 'lucide-react';
 
-import type { HolisticReport } from '@/types/report'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import type { HolisticReport } from '~/apps/pg/types/report';
+import { Button } from '~/shared/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/shared/components/ui/dialog';
 
 interface EmailPreviewDialogProps {
-  report: HolisticReport
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  recipientType: 'parent' | 'student'
-  onSend: () => void
+  report: HolisticReport;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  recipientType: 'parent' | 'student';
+  onSend: () => void;
 }
 
 export function EmailPreviewDialog({
@@ -24,23 +19,20 @@ export function EmailPreviewDialog({
   recipientType,
   onSend,
 }: EmailPreviewDialogProps) {
-  const isParent = recipientType === 'parent'
+  const isParent = recipientType === 'parent';
   const firstName =
-    report.studentName.split(' ').filter((p) => p.length > 0)[0] ??
-    report.studentName
+    report.studentName.split(' ').filter((p) => p.length > 0)[0] ?? report.studentName;
 
-  const fromAddress = 'Bandung School <noreply@bandung.edu.sg>'
+  const fromAddress = 'Bandung School <noreply@bandung.edu.sg>';
   const toAddress = isParent
     ? `Parent/Guardian of ${report.studentName}`
-    : `${report.studentName} <student@bandung.edu.sg>`
+    : `${report.studentName} <student@bandung.edu.sg>`;
   const subject = isParent
     ? `Holistic Development Report - ${report.studentName} (${report.term} ${report.academicYear})`
-    : `Your Holistic Development Report (${report.term} ${report.academicYear})`
-  const greeting = isParent
-    ? `Dear Parent/Guardian of ${firstName},`
-    : `Dear ${firstName},`
+    : `Your Holistic Development Report (${report.term} ${report.academicYear})`;
+  const greeting = isParent ? `Dear Parent/Guardian of ${firstName},` : `Dear ${firstName},`;
 
-  const reportUrl = `/report-view/${report.id}`
+  const reportUrl = `/report-view/${report.id}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -56,11 +48,7 @@ export function EmailPreviewDialog({
               Email Preview
             </DialogTitle>
           </DialogHeader>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)}>
             <X className="size-4" />
           </Button>
         </div>
@@ -68,21 +56,15 @@ export function EmailPreviewDialog({
         {/* Email header fields */}
         <div className="space-y-0 border-b bg-gray-50 px-5 py-3 text-sm">
           <div className="flex gap-2 py-0.5">
-            <span className="w-14 shrink-0 font-medium text-muted-foreground">
-              From
-            </span>
+            <span className="w-14 shrink-0 font-medium text-muted-foreground">From</span>
             <span className="text-foreground">{fromAddress}</span>
           </div>
           <div className="flex gap-2 py-0.5">
-            <span className="w-14 shrink-0 font-medium text-muted-foreground">
-              To
-            </span>
+            <span className="w-14 shrink-0 font-medium text-muted-foreground">To</span>
             <span className="text-foreground">{toAddress}</span>
           </div>
           <div className="flex gap-2 py-0.5">
-            <span className="w-14 shrink-0 font-medium text-muted-foreground">
-              Subject
-            </span>
+            <span className="w-14 shrink-0 font-medium text-muted-foreground">Subject</span>
             <span className="font-medium text-foreground">{subject}</span>
           </div>
         </div>
@@ -93,8 +75,8 @@ export function EmailPreviewDialog({
             <p>{greeting}</p>
 
             <p>
-              The Holistic Development Report for {report.term}{' '}
-              {report.academicYear} is now available for your review.
+              The Holistic Development Report for {report.term} {report.academicYear} is now
+              available for your review.
             </p>
 
             <div className="rounded-lg border bg-gray-50 p-3 text-sm">
@@ -125,15 +107,10 @@ export function EmailPreviewDialog({
               >
                 View Report
               </a>
-              <p className="mt-1.5 text-xs text-muted-foreground">
-                bandung.edu.sg{reportUrl}
-              </p>
+              <p className="mt-1.5 text-xs text-muted-foreground">bandung.edu.sg{reportUrl}</p>
             </div>
 
-            <p>
-              If you have any questions, please contact the form teacher,{' '}
-              {report.formTeacher}.
-            </p>
+            <p>If you have any questions, please contact the form teacher, {report.formTeacher}.</p>
 
             <div className="pt-2">
               <p>Best regards,</p>
@@ -147,15 +124,12 @@ export function EmailPreviewDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            className="bg-[#f26c47] text-white hover:bg-[#e05a37]"
-            onClick={onSend}
-          >
+          <Button className="bg-[#f26c47] text-white hover:bg-[#e05a37]" onClick={onSend}>
             <Send className="mr-2 size-4" />
             Send Email
           </Button>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

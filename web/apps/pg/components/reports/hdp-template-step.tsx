@@ -1,31 +1,26 @@
-import { BarChart3, ClipboardList, Pencil } from 'lucide-react'
-import type { Term } from '@/types/report'
-import { Badge } from '@/components/ui/badge'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select'
-import { cn } from '@/lib/utils'
+import { BarChart3, ClipboardList, Pencil } from 'lucide-react';
 
-export type TemplateId = 'quarterly' | 'comprehensive' | 'custom'
+import type { Term } from '~/apps/pg/types/report';
+import { Badge } from '~/shared/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '~/shared/components/ui/select';
+import { cn } from '~/shared/lib/utils';
+
+export type TemplateId = 'quarterly' | 'comprehensive' | 'custom';
 
 export interface HdpTemplate {
-  id: TemplateId
-  name: string
-  description: string
-  icon: React.ReactNode
-  tags: Array<string>
-  sections: Record<string, boolean>
+  id: TemplateId;
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  tags: string[];
+  sections: Record<string, boolean>;
 }
 
-export const TEMPLATES: Array<HdpTemplate> = [
+export const TEMPLATES: HdpTemplate[] = [
   {
     id: 'quarterly',
     name: 'Quarterly Academic Report',
-    description:
-      'Focus on academic performance with grades, attendance, and overall progress',
+    description: 'Focus on academic performance with grades, attendance, and overall progress',
     icon: <BarChart3 className="size-5 text-blue-600" />,
     tags: ['Academic Performance', 'Attendance', 'Behavior & Discipline'],
     sections: {
@@ -42,8 +37,7 @@ export const TEMPLATES: Array<HdpTemplate> = [
   {
     id: 'comprehensive',
     name: 'Comprehensive Student Report',
-    description:
-      'Full overview including academics, behavior, wellbeing, and family information',
+    description: 'Full overview including academics, behavior, wellbeing, and family information',
     icon: <ClipboardList className="size-5 text-emerald-600" />,
     tags: [
       'Academic Performance',
@@ -80,14 +74,14 @@ export const TEMPLATES: Array<HdpTemplate> = [
       cca: true,
     },
   },
-]
+];
 
 interface HdpTemplateStepProps {
-  selectedTemplate: TemplateId | null
-  onSelectTemplate: (id: TemplateId) => void
-  selectedTerm: Term
-  onSelectTerm: (term: Term) => void
-  availableTerms: Array<Term>
+  selectedTemplate: TemplateId | null;
+  onSelectTemplate: (id: TemplateId) => void;
+  selectedTerm: Term;
+  onSelectTerm: (term: Term) => void;
+  availableTerms: Term[];
 }
 
 export function HdpTemplateStep({
@@ -108,10 +102,7 @@ export function HdpTemplateStep({
 
       <div className="flex items-center gap-3">
         <span className="text-sm font-medium">Term:</span>
-        <Select
-          value={selectedTerm}
-          onValueChange={(val) => onSelectTerm(val as Term)}
-        >
+        <Select value={selectedTerm} onValueChange={(val) => onSelectTerm(val as Term)}>
           <SelectTrigger className="w-[140px]">{selectedTerm}</SelectTrigger>
           <SelectContent>
             {availableTerms.map((term) => (
@@ -132,7 +123,7 @@ export function HdpTemplateStep({
             className={cn(
               'flex items-start gap-4 rounded-xl border p-5 text-left transition-all hover:border-primary/50',
               selectedTemplate === template.id
-                ? 'border-primary ring-2 ring-primary/20 bg-primary/5'
+                ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
                 : 'border-border',
             )}
           >
@@ -141,7 +132,7 @@ export function HdpTemplateStep({
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold">{template.name}</p>
-              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 {template.description}
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -156,5 +147,5 @@ export function HdpTemplateStep({
         ))}
       </div>
     </div>
-  )
+  );
 }

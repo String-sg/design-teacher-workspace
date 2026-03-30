@@ -1,14 +1,13 @@
-import { useCallback, useMemo, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import {
-  ClipboardCheck,
-  Columns3,
-  ListFilter,
-  Search,
-  Send,
-} from 'lucide-react'
-import { toast } from 'sonner'
+import { createFileRoute } from '@tanstack/react-router';
+import { ClipboardCheck, Columns3, ListFilter, Search, Send } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
+import { ReportTable } from '~/apps/pg/components/reports/report-table';
+import { TermSelector } from '~/apps/pg/components/reports/term-selector';
+import { ClassSelector } from '~/apps/pg/components/students/class-selector';
+import { CURRENT_ACADEMIC_YEAR, mockReports } from '~/apps/pg/data/mock-reports';
+import { getSchoolLevel } from '~/apps/pg/data/mock-students';
 import type {
   HolisticReport,
   ParentStatus,
@@ -16,10 +15,8 @@ import type {
   SchoolLevel,
   StudentStatus,
   Term,
-} from '@/types/report'
-import { TermSelector } from '@/components/reports/term-selector'
-import { ReportTable } from '@/components/reports/report-table'
-import { ClassSelector } from '@/components/students/class-selector'
+} from '~/apps/pg/types/report';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,24 +27,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select'
-import { CURRENT_ACADEMIC_YEAR, mockReports } from '@/data/mock-reports'
-import { getSchoolLevel } from '@/data/mock-students'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { Label } from '@/components/ui/label'
+} from '~/shared/components/ui/alert-dialog';
+import { Button } from '~/shared/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,14 +37,18 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '~/shared/components/ui/dropdown-menu';
+import { Input } from '~/shared/components/ui/input';
+import { Label } from '~/shared/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '~/shared/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '~/shared/components/ui/select';
 
-type GroupBy = 'none' | 'student' | 'term'
+type GroupBy = 'none' | 'student' | 'term';
 
 interface ReportsSearchParams {
-  studentId?: string
-  term?: Term
-  groupBy?: GroupBy
+  studentId?: string;
+  term?: Term;
+  groupBy?: GroupBy;
 }
 
 export const Route = createFileRoute('/reports/')({
@@ -73,135 +58,102 @@ export const Route = createFileRoute('/reports/')({
       studentId: search.studentId as string | undefined,
       term: search.term as Term | undefined,
       groupBy: search.groupBy as GroupBy | undefined,
-    }
+    };
   },
-})
+});
 
 function ReportsPage() {
   const {
     studentId: initialStudentId,
     term: initialTerm,
     groupBy: initialGroupBy,
-  } = Route.useSearch()
-  const [schoolLevel, setSchoolLevel] = useState<SchoolLevel>('secondary')
-  const [selectedClass, setSelectedClass] = useState('Secondary 3')
-  const [selectedTerm, setSelectedTerm] = useState<Term | ''>(initialTerm || '')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedReviewStatus, setSelectedReviewStatus] = useState<
-    ReviewStatus | ''
-  >('')
-  const [selectedParentStatus, setSelectedParentStatus] = useState<
-    ParentStatus | ''
-  >('')
-  const [selectedStudentStatus, setSelectedStudentStatus] = useState<
-    StudentStatus | ''
-  >('')
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [groupBy, setGroupBy] = useState<GroupBy>(initialGroupBy || 'student')
-  const [reports, setReports] = useState<Array<HolisticReport>>(
-    () => mockReports,
-  )
+  } = Route.useSearch();
+  const [schoolLevel, setSchoolLevel] = useState<SchoolLevel>('secondary');
+  const [selectedClass, setSelectedClass] = useState('Secondary 3');
+  const [selectedTerm, setSelectedTerm] = useState<Term | ''>(initialTerm || '');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedReviewStatus, setSelectedReviewStatus] = useState<ReviewStatus | ''>('');
+  const [selectedParentStatus, setSelectedParentStatus] = useState<ParentStatus | ''>('');
+  const [selectedStudentStatus, setSelectedStudentStatus] = useState<StudentStatus | ''>('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [groupBy, setGroupBy] = useState<GroupBy>(initialGroupBy || 'student');
+  const [reports, setReports] = useState<HolisticReport[]>(() => mockReports);
 
-  useSetBreadcrumbs([{ label: 'Reports', href: '/reports' }])
+  useSetBreadcrumbs([{ label: 'Reports', href: '/reports' }]);
 
   // Filter by school level first
   const levelFilteredReports = useMemo(() => {
     return reports.filter((report) => {
-      if (report.academicYear !== CURRENT_ACADEMIC_YEAR) return false
-      if (initialStudentId && report.studentId !== initialStudentId)
-        return false
-      if (selectedTerm && report.term !== selectedTerm) return false
-      return getSchoolLevel(report.studentClass) === schoolLevel
-    })
-  }, [reports, initialStudentId, selectedTerm, schoolLevel])
+      if (report.academicYear !== CURRENT_ACADEMIC_YEAR) return false;
+      if (initialStudentId && report.studentId !== initialStudentId) return false;
+      if (selectedTerm && report.term !== selectedTerm) return false;
+      return getSchoolLevel(report.studentClass) === schoolLevel;
+    });
+  }, [reports, initialStudentId, selectedTerm, schoolLevel]);
 
   // Filter by class/level
   const classFilteredReports = useMemo(() => {
     if (selectedClass === 'all') {
-      return levelFilteredReports
+      return levelFilteredReports;
     }
 
-    if (
-      selectedClass.startsWith('Secondary') ||
-      selectedClass.startsWith('Primary')
-    ) {
-      const levelPart = selectedClass.replace(/^(Secondary|Primary)\s*/, '')
+    if (selectedClass.startsWith('Secondary') || selectedClass.startsWith('Primary')) {
+      const levelPart = selectedClass.replace(/^(Secondary|Primary)\s*/, '');
       if (schoolLevel === 'primary') {
-        return levelFilteredReports.filter((r) =>
-          r.studentClass.startsWith(`P${levelPart}`),
-        )
+        return levelFilteredReports.filter((r) => r.studentClass.startsWith(`P${levelPart}`));
       }
-      return levelFilteredReports.filter((r) =>
-        r.studentClass.startsWith(levelPart),
-      )
+      return levelFilteredReports.filter((r) => r.studentClass.startsWith(levelPart));
     }
 
-    return levelFilteredReports.filter((r) => r.studentClass === selectedClass)
-  }, [levelFilteredReports, selectedClass, schoolLevel])
+    return levelFilteredReports.filter((r) => r.studentClass === selectedClass);
+  }, [levelFilteredReports, selectedClass, schoolLevel]);
 
   // Filter by search query
   const searchFilteredReports = useMemo(() => {
     if (!searchQuery) {
-      return classFilteredReports
+      return classFilteredReports;
     }
 
-    const query = searchQuery.toLowerCase()
-    return classFilteredReports.filter((r) =>
-      r.studentName.toLowerCase().includes(query),
-    )
-  }, [classFilteredReports, searchQuery])
+    const query = searchQuery.toLowerCase();
+    return classFilteredReports.filter((r) => r.studentName.toLowerCase().includes(query));
+  }, [classFilteredReports, searchQuery]);
 
   // Filter by status
   const filteredReports = useMemo(() => {
     return searchFilteredReports.filter((r) => {
       if (selectedReviewStatus && r.reviewStatus !== selectedReviewStatus) {
-        return false
+        return false;
       }
       if (selectedParentStatus && r.parentStatus !== selectedParentStatus) {
-        return false
+        return false;
       }
       if (selectedStudentStatus && r.studentStatus !== selectedStudentStatus) {
-        return false
+        return false;
       }
-      return true
-    })
-  }, [
-    searchFilteredReports,
-    selectedReviewStatus,
-    selectedParentStatus,
-    selectedStudentStatus,
-  ])
+      return true;
+    });
+  }, [searchFilteredReports, selectedReviewStatus, selectedParentStatus, selectedStudentStatus]);
 
   // Metrics
   const metrics = useMemo(() => {
-    const totalReports = filteredReports.length
-    const uniqueStudents = new Set(filteredReports.map((r) => r.studentId)).size
-    const pendingReview = filteredReports.filter(
-      (r) => r.reviewStatus === 'pending',
-    ).length
-    const notSentCount = filteredReports.filter(
-      (r) => r.parentStatus === 'not_sent',
-    ).length
+    const totalReports = filteredReports.length;
+    const uniqueStudents = new Set(filteredReports.map((r) => r.studentId)).size;
+    const pendingReview = filteredReports.filter((r) => r.reviewStatus === 'pending').length;
+    const notSentCount = filteredReports.filter((r) => r.parentStatus === 'not_sent').length;
 
-    return { totalReports, uniqueStudents, pendingReview, notSentCount }
-  }, [filteredReports])
+    return { totalReports, uniqueStudents, pendingReview, notSentCount };
+  }, [filteredReports]);
 
   const sendableCount = useMemo(() => {
     if (schoolLevel === 'secondary') {
-      return reports.filter(
-        (r) => selectedIds.has(r.id) && r.studentStatus === 'not_sent',
-      ).length
+      return reports.filter((r) => selectedIds.has(r.id) && r.studentStatus === 'not_sent').length;
     }
-    return reports.filter(
-      (r) => selectedIds.has(r.id) && r.parentStatus === 'not_sent',
-    ).length
-  }, [reports, selectedIds, schoolLevel])
+    return reports.filter((r) => selectedIds.has(r.id) && r.parentStatus === 'not_sent').length;
+  }, [reports, selectedIds, schoolLevel]);
 
   const reviewableCount = useMemo(() => {
-    return reports.filter(
-      (r) => selectedIds.has(r.id) && r.reviewStatus === 'pending',
-    ).length
-  }, [reports, selectedIds])
+    return reports.filter((r) => selectedIds.has(r.id) && r.reviewStatus === 'pending').length;
+  }, [reports, selectedIds]);
 
   const handleSend = () => {
     if (schoolLevel === 'secondary') {
@@ -211,7 +163,7 @@ function ReportsPage() {
             ? { ...report, studentStatus: 'sent' as const }
             : report,
         ),
-      )
+      );
     } else {
       setReports((prev) =>
         prev.map((report) =>
@@ -219,10 +171,10 @@ function ReportsPage() {
             ? { ...report, parentStatus: 'sent' as const }
             : report,
         ),
-      )
+      );
     }
-    setSelectedIds(new Set())
-  }
+    setSelectedIds(new Set());
+  };
 
   const handleRequestReview = () => {
     setReports((prev) =>
@@ -231,9 +183,9 @@ function ReportsPage() {
           ? { ...report, reviewStatus: 'in_review' as const }
           : report,
       ),
-    )
-    setSelectedIds(new Set())
-  }
+    );
+    setSelectedIds(new Set());
+  };
 
   const handleQuickSendStudent = useCallback((id: string) => {
     setReports((prev) =>
@@ -242,20 +194,18 @@ function ReportsPage() {
           ? { ...r, studentStatus: 'sent' as const }
           : r,
       ),
-    )
-    toast.success('Report sent to student')
-  }, [])
+    );
+    toast.success('Report sent to student');
+  }, []);
 
   const handleQuickSendParent = useCallback((id: string) => {
     setReports((prev) =>
       prev.map((r) =>
-        r.id === id && r.parentStatus === 'not_sent'
-          ? { ...r, parentStatus: 'sent' as const }
-          : r,
+        r.id === id && r.parentStatus === 'not_sent' ? { ...r, parentStatus: 'sent' as const } : r,
       ),
-    )
-    toast.success('Report sent to parents')
-  }, [])
+    );
+    toast.success('Report sent to parents');
+  }, []);
 
   const handleBulkSendParentsPg = () => {
     setReports((prev) =>
@@ -264,32 +214,29 @@ function ReportsPage() {
           ? { ...report, parentStatus: 'sent' as const }
           : report,
       ),
-    )
-    setSelectedIds(new Set())
-  }
+    );
+    setSelectedIds(new Set());
+  };
 
   const pgSendableCount = useMemo(() => {
-    return reports.filter(
-      (r) => selectedIds.has(r.id) && r.parentStatus === 'not_sent',
-    ).length
-  }, [reports, selectedIds])
+    return reports.filter((r) => selectedIds.has(r.id) && r.parentStatus === 'not_sent').length;
+  }, [reports, selectedIds]);
 
   const handleLevelChange = (level: SchoolLevel) => {
-    setSchoolLevel(level)
-    setSelectedIds(new Set())
-    setSelectedClass(level === 'primary' ? 'all' : 'Secondary 3')
-    setSelectedStudentStatus('')
-  }
+    setSchoolLevel(level);
+    setSelectedIds(new Set());
+    setSelectedClass(level === 'primary' ? 'all' : 'Secondary 3');
+    setSelectedStudentStatus('');
+  };
 
   const activeFilterCount = [
     selectedTerm,
     selectedReviewStatus,
     selectedParentStatus,
     schoolLevel === 'secondary' ? selectedStudentStatus : '',
-  ].filter(Boolean).length
+  ].filter(Boolean).length;
 
-  const sendLabel =
-    schoolLevel === 'secondary' ? 'Send to Students' : 'Send to Parents'
+  const sendLabel = schoolLevel === 'secondary' ? 'Send to Students' : 'Send to Parents';
 
   return (
     <div className="flex flex-col">
@@ -297,9 +244,7 @@ function ReportsPage() {
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
         <div className="px-6">
-          <h1 className="text-2xl font-semibold">
-            Holistic Development Reports
-          </h1>
+          <h1 className="text-2xl font-semibold">Holistic Development Reports</h1>
           <p className="text-muted-foreground">
             View student progress across academic and character development
           </p>
@@ -323,15 +268,11 @@ function ReportsPage() {
           </div>
           <div className="rounded-lg border bg-card p-4">
             <div className="text-sm text-muted-foreground">Students</div>
-            <div className="text-2xl font-semibold">
-              {metrics.uniqueStudents}
-            </div>
+            <div className="text-2xl font-semibold">{metrics.uniqueStudents}</div>
           </div>
           <div className="rounded-lg border bg-card p-4">
             <div className="text-sm text-muted-foreground">Pending Review</div>
-            <div className="text-2xl font-semibold">
-              {metrics.pendingReview}
-            </div>
+            <div className="text-2xl font-semibold">{metrics.pendingReview}</div>
           </div>
           <div className="rounded-lg border bg-card p-4">
             <div className="text-sm text-muted-foreground">Not Sent</div>
@@ -342,7 +283,7 @@ function ReportsPage() {
         {/* Filters */}
         <div className="flex items-center gap-3 px-6 pb-4">
           <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search name"
@@ -369,19 +310,14 @@ function ReportsPage() {
             <PopoverContent align="start" className="w-80 gap-3">
               <div className="space-y-1">
                 <Label>Term</Label>
-                <TermSelector
-                  value={selectedTerm}
-                  onValueChange={setSelectedTerm}
-                />
+                <TermSelector value={selectedTerm} onValueChange={setSelectedTerm} />
               </div>
               <div className="space-y-1">
                 <Label>Review status</Label>
                 <Select
                   value={selectedReviewStatus || 'all'}
                   onValueChange={(val) =>
-                    setSelectedReviewStatus(
-                      val === 'all' ? '' : (val as ReviewStatus),
-                    )
+                    setSelectedReviewStatus(val === 'all' ? '' : (val as ReviewStatus))
                   }
                 >
                   <SelectTrigger className="w-full">
@@ -406,9 +342,7 @@ function ReportsPage() {
                 <Select
                   value={selectedParentStatus || 'all'}
                   onValueChange={(val) =>
-                    setSelectedParentStatus(
-                      val === 'all' ? '' : (val as ParentStatus),
-                    )
+                    setSelectedParentStatus(val === 'all' ? '' : (val as ParentStatus))
                   }
                 >
                   <SelectTrigger className="w-full">
@@ -436,9 +370,7 @@ function ReportsPage() {
                   <Select
                     value={selectedStudentStatus || 'all'}
                     onValueChange={(val) =>
-                      setSelectedStudentStatus(
-                        val === 'all' ? '' : (val as StudentStatus),
-                      )
+                      setSelectedStudentStatus(val === 'all' ? '' : (val as StudentStatus))
                     }
                   >
                     <SelectTrigger className="w-full">
@@ -458,9 +390,7 @@ function ReportsPage() {
                       <SelectItem value="sent">Sent</SelectItem>
                       <SelectItem value="viewed">Viewed</SelectItem>
                       <SelectItem value="acknowledged">Acknowledged</SelectItem>
-                      <SelectItem value="sent_to_parents">
-                        Sent to Parents
-                      </SelectItem>
+                      <SelectItem value="sent_to_parents">Sent to Parents</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -483,15 +413,9 @@ function ReportsPage() {
                   value={groupBy}
                   onValueChange={(val) => setGroupBy(val as GroupBy)}
                 >
-                  <DropdownMenuRadioItem value="none">
-                    None
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="student">
-                    Student name
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="term">
-                    Term
-                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="student">Student name</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="term">Term</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -541,9 +465,7 @@ function ReportsPage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleSend}>
-                    Send
-                  </AlertDialogAction>
+                  <AlertDialogAction onClick={handleSend}>Send</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -561,15 +483,13 @@ function ReportsPage() {
                   <AlertDialogTitle>Send to Parents via PG</AlertDialogTitle>
                   <AlertDialogDescription>
                     Send {pgSendableCount} report
-                    {pgSendableCount !== 1 ? 's' : ''} to parents via Parents
-                    Gateway? Parents will be notified via PG.
+                    {pgSendableCount !== 1 ? 's' : ''} to parents via Parents Gateway? Parents will
+                    be notified via PG.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleBulkSendParentsPg}>
-                    Send
-                  </AlertDialogAction>
+                  <AlertDialogAction onClick={handleBulkSendParentsPg}>Send</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -587,15 +507,12 @@ function ReportsPage() {
                   <AlertDialogTitle>Request Review</AlertDialogTitle>
                   <AlertDialogDescription>
                     Request review for {reviewableCount} report
-                    {reviewableCount !== 1 ? 's' : ''}? These reports will be
-                    sent for approval.
+                    {reviewableCount !== 1 ? 's' : ''}? These reports will be sent for approval.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleRequestReview}>
-                    Request
-                  </AlertDialogAction>
+                  <AlertDialogAction onClick={handleRequestReview}>Request</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -603,5 +520,5 @@ function ReportsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

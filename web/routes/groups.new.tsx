@@ -1,50 +1,45 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, ChevronDown, ChevronRight, Search, X } from 'lucide-react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { ArrowLeft, ChevronDown, ChevronRight, Search, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
-import type { StudentGroup } from '@/types/student-group'
-import { toast } from 'sonner'
-
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { MOCK_GROUPS } from '@/data/mock-groups'
-import {
-  CLASS_GROUPS,
-  CCA_GROUPS,
-  TEACHING_GROUPS,
-} from '@/data/mock-student-groups'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
-import { cn } from '@/lib/utils'
+import { MOCK_GROUPS } from '~/apps/pg/data/mock-groups';
+import { CCA_GROUPS, CLASS_GROUPS, TEACHING_GROUPS } from '~/apps/pg/data/mock-student-groups';
+import type { StudentGroup } from '~/apps/pg/types/student-group';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Button } from '~/shared/components/ui/button';
+import { Checkbox } from '~/shared/components/ui/checkbox';
+import { Input } from '~/shared/components/ui/input';
+import { Label } from '~/shared/components/ui/label';
+import { Textarea } from '~/shared/components/ui/textarea';
+import { cn } from '~/shared/lib/utils';
 
 export const Route = createFileRoute('/groups/new')({
   component: GroupsNew,
-})
+});
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type BrowseTab = 'class' | 'level' | 'cca' | 'teaching'
+type BrowseTab = 'class' | 'level' | 'cca' | 'teaching';
 
-type PickerStudent = {
-  id: string
-  name: string
-  class: string
-  level: number
-  nric: string
-  indexNumber: number
+interface PickerStudent {
+  id: string;
+  name: string;
+  class: string;
+  level: number;
+  nric: string;
+  indexNumber: number;
 }
 
-type PickerGroup = {
-  id: string
-  label: string
-  students: PickerStudent[]
+interface PickerGroup {
+  id: string;
+  label: string;
+  students: PickerStudent[];
 }
 
 // ─── Build student registry ───────────────────────────────────────────────────
 
-const ALL_STUDENTS: Array<PickerStudent> = CLASS_GROUPS.flatMap((group) =>
+const ALL_STUDENTS: PickerStudent[] = CLASS_GROUPS.flatMap((group) =>
   (group.memberDetails ?? []).map((d, i) => ({
     id: `${group.label}::${i}::${d.name}`,
     name: d.name,
@@ -53,18 +48,18 @@ const ALL_STUDENTS: Array<PickerStudent> = CLASS_GROUPS.flatMap((group) =>
     nric: d.badge ?? '',
     indexNumber: i + 1,
   })),
-)
+);
 
-const studentsByName = new Map(ALL_STUDENTS.map((s) => [s.name, s]))
+const studentsByName = new Map(ALL_STUDENTS.map((s) => [s.name, s]));
 
 function parseClassLabel(label: string): [number, string] {
-  const m = label.match(/^(\d+)\s+(.+)/)
-  return m ? [Number(m[1]), m[2]] : [99, label]
+  const m = label.match(/^(\d+)\s+(.+)/);
+  return m ? [Number(m[1]), m[2]] : [99, label];
 }
 
 // ─── Per-tab group lists ──────────────────────────────────────────────────────
 
-const CLASS_TAB_GROUPS: Array<PickerGroup> = CLASS_GROUPS.map((g) => ({
+const CLASS_TAB_GROUPS: PickerGroup[] = CLASS_GROUPS.map((g) => ({
   id: g.id,
   label: g.label,
   students: (g.memberDetails ?? [])
@@ -72,12 +67,12 @@ const CLASS_TAB_GROUPS: Array<PickerGroup> = CLASS_GROUPS.map((g) => ({
     .filter((s): s is PickerStudent => s !== undefined)
     .sort((a, b) => a.indexNumber - b.indexNumber),
 })).sort((a, b) => {
-  const [al, an] = parseClassLabel(a.label)
-  const [bl, bn] = parseClassLabel(b.label)
-  return al !== bl ? al - bl : an.localeCompare(bn)
-})
+  const [al, an] = parseClassLabel(a.label);
+  const [bl, bn] = parseClassLabel(b.label);
+  return al !== bl ? al - bl : an.localeCompare(bn);
+});
 
-const LEVEL_TAB_GROUPS: Array<PickerGroup> = [1, 2, 3, 4]
+const LEVEL_TAB_GROUPS: PickerGroup[] = [1, 2, 3, 4]
   .map((lvl) => ({
     id: `level-${lvl}`,
     label: `Sec ${lvl}`,
@@ -85,31 +80,31 @@ const LEVEL_TAB_GROUPS: Array<PickerGroup> = [1, 2, 3, 4]
       (a, b) => a.class.localeCompare(b.class) || a.indexNumber - b.indexNumber,
     ),
   }))
-  .filter((g) => g.students.length > 0)
+  .filter((g) => g.students.length > 0);
 
-const CCA_TAB_GROUPS: Array<PickerGroup> = CCA_GROUPS.map((g) => ({
+const CCA_TAB_GROUPS: PickerGroup[] = CCA_GROUPS.map((g) => ({
   id: g.id,
   label: g.label,
   students: (g.memberNames ?? [])
     .map((name) => studentsByName.get(name))
     .filter((s): s is PickerStudent => s !== undefined),
-}))
+}));
 
-const TEACHING_TAB_GROUPS: Array<PickerGroup> = TEACHING_GROUPS.map((g) => ({
+const TEACHING_TAB_GROUPS: PickerGroup[] = TEACHING_GROUPS.map((g) => ({
   id: g.id,
   label: g.label,
   students: (g.memberDetails ?? [])
     .map((d) => studentsByName.get(d.name))
     .filter((s): s is PickerStudent => s !== undefined)
     .sort((a, b) => a.indexNumber - b.indexNumber),
-}))
+}));
 
-const BROWSE_TABS: Array<{ id: BrowseTab; label: string }> = [
+const BROWSE_TABS: { id: BrowseTab; label: string }[] = [
   { id: 'class', label: 'Class' },
   { id: 'level', label: 'Level' },
   { id: 'cca', label: 'CCA' },
   { id: 'teaching', label: 'Teaching Group' },
-]
+];
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -117,69 +112,68 @@ function GroupsNew() {
   useSetBreadcrumbs([
     { label: 'Student Groups', href: '/groups' },
     { label: 'New Group', href: '/groups/new' },
-  ])
+  ]);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // Form state
-  const [groupName, setGroupName] = useState('')
-  const [groupDescription, setGroupDescription] = useState('')
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [groupName, setGroupName] = useState('');
+  const [groupDescription, setGroupDescription] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Picker state
-  const [activeTab, setActiveTab] = useState<BrowseTab>('class')
-  const [search, setSearch] = useState('')
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [activeTab, setActiveTab] = useState<BrowseTab>('class');
+  const [search, setSearch] = useState('');
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   // Undo state
-  const [undoIds, setUndoIds] = useState<string[]>([])
-  const [showUndo, setShowUndo] = useState(false)
-  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [undoIds, setUndoIds] = useState<string[]>([]);
+  const [showUndo, setShowUndo] = useState(false);
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const totalSelected = selectedIds.size
-  const canSave = groupName.trim().length > 0 && totalSelected > 0
+  const totalSelected = selectedIds.size;
+  const canSave = groupName.trim().length > 0 && totalSelected > 0;
 
   // Selected students sorted by class → index
   const selectedStudents = useMemo(
     () =>
       ALL_STUDENTS.filter((s) => selectedIds.has(s.id)).sort(
-        (a, b) =>
-          a.class.localeCompare(b.class) || a.indexNumber - b.indexNumber,
+        (a, b) => a.class.localeCompare(b.class) || a.indexNumber - b.indexNumber,
       ),
     [selectedIds],
-  )
+  );
 
   // Group selected students by class for the review panel
   const selectedByClass = useMemo(() => {
-    const map = new Map<string, PickerStudent[]>()
+    const map = new Map<string, PickerStudent[]>();
     for (const s of selectedStudents) {
-      if (!map.has(s.class)) map.set(s.class, [])
-      map.get(s.class)!.push(s)
+      if (!map.has(s.class)) map.set(s.class, []);
+      map.get(s.class)!.push(s);
     }
-    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b))
-  }, [selectedStudents])
+    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }, [selectedStudents]);
 
   // Current tab groups
-  const tabGroups = useMemo((): Array<PickerGroup> => {
+  const tabGroups = useMemo((): PickerGroup[] => {
     switch (activeTab) {
       case 'class':
-        return CLASS_TAB_GROUPS
+        return CLASS_TAB_GROUPS;
       case 'level':
-        return LEVEL_TAB_GROUPS
+        return LEVEL_TAB_GROUPS;
       case 'cca':
-        return CCA_TAB_GROUPS
+        return CCA_TAB_GROUPS;
       case 'teaching':
-        return TEACHING_TAB_GROUPS
+        return TEACHING_TAB_GROUPS;
     }
-  }, [activeTab])
+  }, [activeTab]);
 
   // Search filter — deduplicate students across groups so the same person
   // never appears more than once in results (relevant for Teaching / CCA tabs
   // where groups overlap heavily).
-  const filteredGroups = useMemo((): Array<PickerGroup> => {
-    if (!search.trim()) return tabGroups
-    const q = search.toLowerCase()
-    const seenIds = new Set<string>()
+  const filteredGroups = useMemo((): PickerGroup[] => {
+    if (!search.trim()) return tabGroups;
+    const q = search.toLowerCase();
+    const seenIds = new Set<string>();
     return tabGroups
       .map((g) => ({
         ...g,
@@ -187,105 +181,105 @@ function GroupsNew() {
           const matches =
             s.name.toLowerCase().includes(q) ||
             s.nric.toLowerCase().includes(q) ||
-            s.class.toLowerCase().includes(q)
-          if (!matches || seenIds.has(s.id)) return false
-          seenIds.add(s.id)
-          return true
+            s.class.toLowerCase().includes(q);
+          if (!matches || seenIds.has(s.id)) return false;
+          seenIds.add(s.id);
+          return true;
         }),
       }))
-      .filter((g) => g.students.length > 0)
-  }, [tabGroups, search])
+      .filter((g) => g.students.length > 0);
+  }, [tabGroups, search]);
 
   // Auto-expand groups when searching
   const effectiveExpandedIds = useMemo(() => {
-    if (search.trim()) return new Set(filteredGroups.map((g) => g.id))
-    return expandedIds
-  }, [search, filteredGroups, expandedIds])
+    if (search.trim()) return new Set(filteredGroups.map((g) => g.id));
+    return expandedIds;
+  }, [search, filteredGroups, expandedIds]);
 
   useEffect(() => {
     return () => {
-      if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
-    }
-  }, [])
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    };
+  }, []);
 
   function triggerUndo(removedIds: string[]) {
-    if (removedIds.length === 0) return
-    setUndoIds(removedIds)
-    setShowUndo(true)
-    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    if (removedIds.length === 0) return;
+    setUndoIds(removedIds);
+    setShowUndo(true);
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
     undoTimerRef.current = setTimeout(() => {
-      setShowUndo(false)
-      setUndoIds([])
-    }, 6000)
+      setShowUndo(false);
+      setUndoIds([]);
+    }, 6000);
   }
 
   function handleUndo() {
-    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
     setSelectedIds((prev) => {
-      const next = new Set(prev)
-      undoIds.forEach((id) => next.add(id))
-      return next
-    })
-    setShowUndo(false)
-    setUndoIds([])
+      const next = new Set(prev);
+      undoIds.forEach((id) => next.add(id));
+      return next;
+    });
+    setShowUndo(false);
+    setUndoIds([]);
   }
 
   function getGroupState(group: PickerGroup): 'all' | 'some' | 'none' {
-    if (group.students.length === 0) return 'none'
-    const n = group.students.filter((s) => selectedIds.has(s.id)).length
-    if (n === 0) return 'none'
-    return n === group.students.length ? 'all' : 'some'
+    if (group.students.length === 0) return 'none';
+    const n = group.students.filter((s) => selectedIds.has(s.id)).length;
+    if (n === 0) return 'none';
+    return n === group.students.length ? 'all' : 'some';
   }
 
   function toggleGroup(group: PickerGroup) {
-    const state = getGroupState(group)
+    const state = getGroupState(group);
     if (state === 'all') {
-      const removed = group.students.map((s) => s.id)
+      const removed = group.students.map((s) => s.id);
       setSelectedIds((prev) => {
-        const next = new Set(prev)
-        removed.forEach((id) => next.delete(id))
-        return next
-      })
-      triggerUndo(removed)
+        const next = new Set(prev);
+        removed.forEach((id) => next.delete(id));
+        return next;
+      });
+      triggerUndo(removed);
     } else {
       setSelectedIds((prev) => {
-        const next = new Set(prev)
-        group.students.forEach((s) => next.add(s.id))
-        return next
-      })
+        const next = new Set(prev);
+        group.students.forEach((s) => next.add(s.id));
+        return next;
+      });
     }
   }
 
   function toggleStudent(id: string) {
-    const wasSelected = selectedIds.has(id)
+    const wasSelected = selectedIds.has(id);
     setSelectedIds((prev) => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
-    if (wasSelected) triggerUndo([id])
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+    if (wasSelected) triggerUndo([id]);
   }
 
   function removeFromPanel(id: string) {
     setSelectedIds((prev) => {
-      const next = new Set(prev)
-      next.delete(id)
-      return next
-    })
-    triggerUndo([id])
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    triggerUndo([id]);
   }
 
   function toggleExpand(groupId: string) {
-    if (search.trim()) return
+    if (search.trim()) return;
     setExpandedIds((prev) => {
-      const next = new Set(prev)
-      next.has(groupId) ? next.delete(groupId) : next.add(groupId)
-      return next
-    })
+      const next = new Set(prev);
+      next.has(groupId) ? next.delete(groupId) : next.add(groupId);
+      return next;
+    });
   }
 
   function handleSave() {
-    if (!canSave) return
+    if (!canSave) return;
     const newGroup: StudentGroup = {
       id: `cg-${Date.now()}`,
       kind: 'regular',
@@ -304,26 +298,20 @@ function GroupsNew() {
       createdBy: { name: 'Mrs Tan Mei Lin', email: 'tanml@school.edu.sg' },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    }
-    MOCK_GROUPS.push(newGroup)
-    toast.success('Group created')
-    navigate({ to: '/groups/$groupId', params: { groupId: newGroup.id } })
+    };
+    MOCK_GROUPS.push(newGroup);
+    toast.success('Group created');
+    navigate({ to: '/groups/$groupId', params: { groupId: newGroup.id } });
   }
 
-  const showClass =
-    activeTab === 'level' || activeTab === 'cca' || activeTab === 'teaching'
+  const showClass = activeTab === 'level' || activeTab === 'cca' || activeTab === 'teaching';
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
       {/* ── Sticky header (mirrors announcements.new.tsx) ────────────────────── */}
       <div className="sticky top-0 z-10 bg-white">
         <div className="flex items-center gap-3 border-b px-6 py-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0"
-            render={<Link to="/groups" />}
-          >
+          <Button variant="ghost" size="icon" className="shrink-0" render={<Link to="/groups" />}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h1 className="flex-1 text-base font-semibold">New Student Group</h1>
@@ -337,13 +325,13 @@ function GroupsNew() {
       </div>
 
       {/* ── Body: two-column grid (mirrors announcements preview layout) ───────── */}
-      <div className="mx-auto w-full px-6 py-8 max-w-5xl">
+      <div className="mx-auto w-full max-w-5xl px-6 py-8">
         <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
           {/* ── Left: form sections ────────────────────────────────────────── */}
           <div className="space-y-6">
             {/* Group details */}
             <section className="rounded-xl border bg-white p-6">
-              <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <h2 className="mb-5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                 Group details
               </h2>
               <div className="space-y-5">
@@ -352,9 +340,7 @@ function GroupsNew() {
                     <Label htmlFor="group-name">
                       Name <span className="text-destructive">*</span>
                     </Label>
-                    <span className="text-xs text-muted-foreground">
-                      {groupName.length}/60
-                    </span>
+                    <span className="text-xs text-muted-foreground">{groupName.length}/60</span>
                   </div>
                   <Input
                     id="group-name"
@@ -368,9 +354,7 @@ function GroupsNew() {
                   <div className="flex items-center justify-between">
                     <Label htmlFor="group-desc">
                       Description{' '}
-                      <span className="font-normal text-muted-foreground">
-                        (optional)
-                      </span>
+                      <span className="font-normal text-muted-foreground">(optional)</span>
                     </Label>
                     <span className="text-xs text-muted-foreground">
                       {groupDescription.length}/200
@@ -380,9 +364,7 @@ function GroupsNew() {
                     id="group-desc"
                     placeholder="e.g. Students selected for the school Drama Festival 2025"
                     value={groupDescription}
-                    onChange={(e) =>
-                      setGroupDescription(e.target.value.slice(0, 200))
-                    }
+                    onChange={(e) => setGroupDescription(e.target.value.slice(0, 200))}
                     maxLength={200}
                     rows={3}
                     className="resize-none"
@@ -392,41 +374,41 @@ function GroupsNew() {
             </section>
 
             {/* Select members */}
-            <section className="rounded-xl border bg-white overflow-hidden">
-              <div className="px-6 py-4 border-b">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <section className="overflow-hidden rounded-xl border bg-white">
+              <div className="border-b px-6 py-4">
+                <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                   Select members
                 </h2>
               </div>
 
               {/* Search */}
-              <div className="px-4 py-3 border-b">
+              <div className="border-b px-4 py-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search by name, NRIC or class…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-8 h-8 text-sm w-full"
+                    className="h-8 w-full pl-8 text-sm"
                   />
                 </div>
               </div>
 
               {/* Tabs */}
-              <div className="flex border-b overflow-x-auto">
+              <div className="flex overflow-x-auto border-b">
                 {BROWSE_TABS.map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
                     onClick={() => {
-                      setActiveTab(tab.id)
-                      setSearch('')
+                      setActiveTab(tab.id);
+                      setSearch('');
                     }}
                     className={cn(
-                      'shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
+                      'shrink-0 border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors',
                       activeTab === tab.id
                         ? 'border-foreground text-foreground'
-                        : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/40',
+                        : 'border-transparent text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground',
                     )}
                   >
                     {tab.label}
@@ -435,18 +417,18 @@ function GroupsNew() {
               </div>
 
               {/* Group + student list */}
-              <div className="max-h-[480px] overflow-y-auto divide-y">
+              <div className="max-h-[480px] divide-y overflow-y-auto">
                 {filteredGroups.length === 0 ? (
                   <p className="py-10 text-center text-sm text-muted-foreground">
                     No students match your search.
                   </p>
                 ) : (
                   filteredGroups.map((group) => {
-                    const state = getGroupState(group)
-                    const isExpanded = effectiveExpandedIds.has(group.id)
+                    const state = getGroupState(group);
+                    const isExpanded = effectiveExpandedIds.has(group.id);
                     const selectedInGroup = group.students.filter((s) =>
                       selectedIds.has(s.id),
-                    ).length
+                    ).length;
 
                     return (
                       <div key={group.id}>
@@ -454,9 +436,7 @@ function GroupsNew() {
                         <div
                           className={cn(
                             'flex items-center gap-3 px-4 py-2.5 transition-colors',
-                            state !== 'none'
-                              ? 'bg-blue-50/50'
-                              : 'hover:bg-muted/30',
+                            state !== 'none' ? 'bg-blue-50/50' : 'hover:bg-muted/30',
                           )}
                         >
                           <Checkbox
@@ -466,16 +446,16 @@ function GroupsNew() {
                           />
                           <button
                             type="button"
-                            className="flex flex-1 items-center gap-2 text-left min-w-0"
+                            className="flex min-w-0 flex-1 items-center gap-2 text-left"
                             onClick={() => toggleExpand(group.id)}
                           >
-                            <span className="flex-1 text-sm font-medium truncate">
+                            <span className="flex-1 truncate text-sm font-medium">
                               {group.label}
                             </span>
-                            <span className="text-xs text-muted-foreground shrink-0">
+                            <span className="shrink-0 text-xs text-muted-foreground">
                               {state === 'some' ? (
                                 <>
-                                  <span className="text-blue-600 font-medium">
+                                  <span className="font-medium text-blue-600">
                                     {selectedInGroup}
                                   </span>
                                   /{group.students.length} students
@@ -483,33 +463,29 @@ function GroupsNew() {
                               ) : (
                                 <>
                                   {group.students.length}{' '}
-                                  {group.students.length === 1
-                                    ? 'student'
-                                    : 'students'}
+                                  {group.students.length === 1 ? 'student' : 'students'}
                                 </>
                               )}
                             </span>
                             {isExpanded ? (
-                              <ChevronDown className="size-4 text-muted-foreground shrink-0" />
+                              <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
                             ) : (
-                              <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+                              <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
                             )}
                           </button>
                         </div>
 
                         {/* Student rows */}
                         {isExpanded && (
-                          <div className="border-b border-slate-100 bg-slate-50/60 px-4 pb-3 pt-2.5">
+                          <div className="border-b border-slate-100 bg-slate-50/60 px-4 pt-2.5 pb-3">
                             {/* Sub-header — mirrors entity-selector "N students" label */}
-                            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                            <p className="mb-2 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
                               {group.students.length}{' '}
-                              {group.students.length === 1
-                                ? 'student'
-                                : 'students'}
+                              {group.students.length === 1 ? 'student' : 'students'}
                             </p>
                             <ol>
                               {group.students.map((student) => {
-                                const isSelected = selectedIds.has(student.id)
+                                const isSelected = selectedIds.has(student.id);
                                 return (
                                   <li key={student.id}>
                                     <label
@@ -522,19 +498,15 @@ function GroupsNew() {
                                     >
                                       <Checkbox
                                         checked={isSelected}
-                                        onCheckedChange={() =>
-                                          toggleStudent(student.id)
-                                        }
+                                        onCheckedChange={() => toggleStudent(student.id)}
                                       />
                                       {/* Index — running number within group */}
-                                      <span className="w-6 shrink-0 text-right text-[10px] tabular-nums text-slate-400">
+                                      <span className="w-6 shrink-0 text-right text-[10px] text-slate-400 tabular-nums">
                                         #{student.indexNumber}
                                       </span>
                                       {/* Name + class pill for non-class tabs */}
                                       <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate">
-                                        <span className="truncate">
-                                          {student.name}
-                                        </span>
+                                        <span className="truncate">{student.name}</span>
                                         {showClass && (
                                           <span className="shrink-0 rounded bg-slate-200 px-1 py-px text-[9px] font-medium text-slate-500">
                                             {student.class}
@@ -547,13 +519,13 @@ function GroupsNew() {
                                       </span>
                                     </label>
                                   </li>
-                                )
+                                );
                               })}
                             </ol>
                           </div>
                         )}
                       </div>
-                    )
+                    );
                   })
                 )}
               </div>
@@ -561,17 +533,15 @@ function GroupsNew() {
           </div>
 
           {/* ── Right: selected students review panel ──────────────────────── */}
-          <div className="sticky top-[57px] rounded-xl border bg-white overflow-hidden">
+          <div className="sticky top-[57px] overflow-hidden rounded-xl border bg-white">
             {/* Panel header */}
-            <div className="px-4 py-3 border-b flex items-center justify-between">
+            <div className="flex items-center justify-between border-b px-4 py-3">
               <div>
                 <p className="text-sm font-semibold">
-                  {totalSelected === 0
-                    ? 'No students selected'
-                    : `${totalSelected} selected`}
+                  {totalSelected === 0 ? 'No students selected' : `${totalSelected} selected`}
                 </p>
                 {totalSelected > 0 && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="mt-0.5 text-xs text-muted-foreground">
                     across {selectedByClass.length} class
                     {selectedByClass.length !== 1 ? 'es' : ''}
                   </p>
@@ -581,11 +551,11 @@ function GroupsNew() {
                 <button
                   type="button"
                   onClick={() => {
-                    const removed = [...selectedIds]
-                    setSelectedIds(new Set())
-                    triggerUndo(removed)
+                    const removed = [...selectedIds];
+                    setSelectedIds(new Set());
+                    triggerUndo(removed);
                   }}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-xs text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Clear all
                 </button>
@@ -594,7 +564,7 @@ function GroupsNew() {
 
             {/* Undo banner */}
             {showUndo && (
-              <div className="px-4 py-2.5 bg-amber-50 border-b flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 border-b bg-amber-50 px-4 py-2.5">
                 <span className="text-xs text-amber-800">
                   {undoIds.length === 1
                     ? '1 student removed'
@@ -622,10 +592,8 @@ function GroupsNew() {
                 <div className="divide-y">
                   {selectedByClass.map(([cls, students]) => (
                     <div key={cls}>
-                      <div className="px-4 py-2 bg-muted/30 flex items-center gap-1.5">
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {cls}
-                        </span>
+                      <div className="flex items-center gap-1.5 bg-muted/30 px-4 py-2">
+                        <span className="text-xs font-medium text-muted-foreground">{cls}</span>
                         <span className="text-xs text-muted-foreground/60">
                           · {students.length}
                         </span>
@@ -633,15 +601,13 @@ function GroupsNew() {
                       {students.map((s) => (
                         <div
                           key={s.id}
-                          className="flex items-center gap-2 px-4 py-1.5 hover:bg-muted/20 group"
+                          className="group flex items-center gap-2 px-4 py-1.5 hover:bg-muted/20"
                         >
-                          <span className="flex-1 text-sm truncate">
-                            {s.name}
-                          </span>
+                          <span className="flex-1 truncate text-sm">{s.name}</span>
                           <button
                             type="button"
                             onClick={() => removeFromPanel(s.id)}
-                            className="shrink-0 size-5 rounded flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted hover:text-foreground transition-all"
+                            className="flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:bg-muted hover:text-foreground"
                             aria-label={`Remove ${s.name}`}
                           >
                             <X className="size-3" />
@@ -655,12 +621,8 @@ function GroupsNew() {
             </div>
 
             {/* Save */}
-            <div className="px-4 py-3 border-t">
-              <Button
-                className="w-full"
-                disabled={!canSave}
-                onClick={handleSave}
-              >
+            <div className="border-t px-4 py-3">
+              <Button className="w-full" disabled={!canSave} onClick={handleSave}>
                 Save Group
               </Button>
             </div>
@@ -668,5 +630,5 @@ function GroupsNew() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,44 +1,36 @@
-import type { ReactNode } from 'react'
-import type {
-  FilterCriterion,
-  FilterField,
-  FilterOperator,
-} from '@/types/student'
+import type { ReactNode } from 'react';
+
+import type { FilterCriterion, FilterField, FilterOperator } from '~/apps/pg/types/student';
 
 /** A filter is "complete" (should be applied) when its value is filled in */
 export function isFilterComplete(filter: FilterCriterion): boolean {
-  const { operator, value } = filter
-  if (operator === 'is_empty' || operator === 'is_not_empty') return true
-  if (Array.isArray(value)) return value.length > 0
-  if (typeof value === 'object' && value !== null) return true // range
-  if (typeof value === 'number') return true
-  return typeof value === 'string' && value.trim() !== ''
+  const { operator, value } = filter;
+  if (operator === 'is_empty' || operator === 'is_not_empty') return true;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'object' && value !== null) return true; // range
+  if (typeof value === 'number') return true;
+  return typeof value === 'string' && value.trim() !== '';
 }
 
-export type FieldType = 'numeric' | 'text' | 'boolean' | 'enum' | 'multiselect'
+export type FieldType = 'numeric' | 'text' | 'boolean' | 'enum' | 'multiselect';
 
-export type FieldGroup =
-  | 'general'
-  | 'academic'
-  | 'behaviour'
-  | 'wellbeing'
-  | 'family'
+export type FieldGroup = 'general' | 'academic' | 'behaviour' | 'wellbeing' | 'family';
 
 export interface OperatorOption {
-  value: FilterOperator
-  label: string
-  icon?: ReactNode
+  value: FilterOperator;
+  label: string;
+  icon?: ReactNode;
 }
 
 export interface FilterFieldOption {
-  field: FilterField
-  label: string
-  type: FieldType
-  group: FieldGroup
-  operators: Array<OperatorOption>
-  defaultOperator: FilterOperator
-  defaultValue: string | number
-  enumValues?: Array<string>
+  field: FilterField;
+  label: string;
+  type: FieldType;
+  group: FieldGroup;
+  operators: OperatorOption[];
+  defaultOperator: FilterOperator;
+  defaultValue: string | number;
+  enumValues?: string[];
 }
 
 export const groupLabels: Record<FieldGroup, string> = {
@@ -47,40 +39,34 @@ export const groupLabels: Record<FieldGroup, string> = {
   behaviour: 'Behaviour and Discipline',
   wellbeing: 'Wellbeing',
   family: 'Family, Housing, Finance',
-}
+};
 
-export const groupOrder: Array<FieldGroup> = [
-  'general',
-  'behaviour',
-  'academic',
-  'wellbeing',
-  'family',
-]
+export const groupOrder: FieldGroup[] = ['general', 'behaviour', 'academic', 'wellbeing', 'family'];
 
-export const textOperators: Array<OperatorOption> = [
+export const textOperators: OperatorOption[] = [
   { value: 'contains', label: 'contains' },
   { value: 'not_contains', label: 'does not contain' },
   { value: 'is', label: 'is' },
   { value: 'is_not', label: 'is not' },
   { value: 'is_empty', label: 'is empty' },
   { value: 'is_not_empty', label: 'is not empty' },
-]
+];
 
 // Note: numericOperators and booleanOperators include icons that need to be
 // rendered with React components, so they are defined in the component file
 // to avoid importing React components in this data file.
 
 export interface FilterFieldConfig {
-  field: FilterField
-  label: string
-  type: FieldType
-  group: FieldGroup
-  defaultOperator: FilterOperator
-  defaultValue: string | number
-  enumValues?: Array<string>
+  field: FilterField;
+  label: string;
+  type: FieldType;
+  group: FieldGroup;
+  defaultOperator: FilterOperator;
+  defaultValue: string | number;
+  enumValues?: string[];
 }
 
-export const filterFieldConfigs: Array<FilterFieldConfig> = [
+export const filterFieldConfigs: FilterFieldConfig[] = [
   // General
   {
     field: 'class',
@@ -329,4 +315,4 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
     defaultOperator: 'is_not_empty',
     defaultValue: '',
   },
-]
+];

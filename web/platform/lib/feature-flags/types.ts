@@ -6,8 +6,6 @@ export type FeatureFlagKey =
   | 'parents-gateway'
   | 'student-analytics'
   | 'lta-intervention'
-  | 'student-groups'
+  | 'student-groups';
 
-export type FeatureFlags = {
-  [K in FeatureFlagKey]: boolean
-}
+export type FeatureFlags = Record<FeatureFlagKey, boolean>;

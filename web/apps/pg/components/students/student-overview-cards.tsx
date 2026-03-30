@@ -1,10 +1,11 @@
-import { Minus, TrendingDown, TrendingUp } from 'lucide-react'
-import type { Student } from '@/types/student'
-import { Card, CardContent } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
+
+import type { Student } from '~/apps/pg/types/student';
+import { Card, CardContent } from '~/shared/components/ui/card';
+import { cn } from '~/shared/lib/utils';
 
 interface StudentOverviewCardsProps {
-  student: Student
+  student: Student;
 }
 
 export function StudentOverviewCards({ student }: StudentOverviewCardsProps) {
@@ -14,7 +15,7 @@ export function StudentOverviewCards({ student }: StudentOverviewCardsProps) {
       <Card size="sm">
         <CardContent className="relative space-y-1">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+            <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Attendance
             </span>
             <div className="flex items-center gap-1 text-red-600">
@@ -23,7 +24,7 @@ export function StudentOverviewCards({ student }: StudentOverviewCardsProps) {
             </div>
           </div>
           <div className="text-3xl font-semibold">60%</div>
-          <span className="text-muted-foreground text-sm">Current term</span>
+          <span className="text-sm text-muted-foreground">Current term</span>
         </CardContent>
       </Card>
 
@@ -31,7 +32,7 @@ export function StudentOverviewCards({ student }: StudentOverviewCardsProps) {
       <Card size="sm">
         <CardContent className="relative space-y-1">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+            <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Academics
             </span>
             <div className="flex items-center gap-1 text-foreground">
@@ -41,18 +42,12 @@ export function StudentOverviewCards({ student }: StudentOverviewCardsProps) {
           </div>
           <div className="flex items-end gap-6">
             <div className="flex flex-col">
-              <span className="text-3xl font-semibold">
-                {student.overallPercentage}%
-              </span>
-              <span className="text-muted-foreground text-sm whitespace-nowrap">
-                Overall score
-              </span>
+              <span className="text-3xl font-semibold">{student.overallPercentage}%</span>
+              <span className="text-sm whitespace-nowrap text-muted-foreground">Overall score</span>
             </div>
             <div className="flex flex-col">
               <span className="text-3xl font-semibold">32</span>
-              <span className="text-muted-foreground text-sm whitespace-nowrap">
-                Class rank
-              </span>
+              <span className="text-sm whitespace-nowrap text-muted-foreground">Class rank</span>
             </div>
           </div>
         </CardContent>
@@ -62,7 +57,7 @@ export function StudentOverviewCards({ student }: StudentOverviewCardsProps) {
       <Card size="sm">
         <CardContent className="relative space-y-1">
           <div className="flex items-start justify-between">
-            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+            <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Wellbeing
             </span>
             <div className="flex items-center gap-1 text-green-600">
@@ -71,11 +66,9 @@ export function StudentOverviewCards({ student }: StudentOverviewCardsProps) {
             </div>
           </div>
           <div className="text-3xl font-semibold">{student.riskIndicators}</div>
-          <span className="text-muted-foreground text-sm">
-            TCI risk indicators
-          </span>
+          <span className="text-sm text-muted-foreground">TCI risk indicators</span>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

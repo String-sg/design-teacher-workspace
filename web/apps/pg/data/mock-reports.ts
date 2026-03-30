@@ -1,4 +1,3 @@
-import { getSchoolLevel, mockStudents } from './mock-students'
 import type {
   AcademicAggregate,
   CCAInfo,
@@ -23,33 +22,26 @@ import type {
   SubjectPerformance,
   Term,
   VIAActivity,
-} from '@/types/report'
-import type { Student } from '@/types/student'
+} from '~/apps/pg/types/report';
+import type { Student } from '~/apps/pg/types/student';
 
-const TERMS: Array<Term> = ['Term 1', 'Term 2', 'Term 3', 'Term 4']
-const CURRENT_ACADEMIC_YEAR = 2025
+import { getSchoolLevel, mockStudents } from './mock-students';
 
-const REVIEW_STATUSES: Array<ReviewStatus> = [
-  'pending',
-  'in_review',
-  'approved',
-]
-const PARENT_STATUSES: Array<ParentStatus> = [
-  'not_sent',
-  'sent',
-  'viewed',
-  'acknowledged',
-]
-const STUDENT_STATUSES: Array<StudentStatus> = [
+const TERMS: Term[] = ['Term 1', 'Term 2', 'Term 3', 'Term 4'];
+const CURRENT_ACADEMIC_YEAR = 2025;
+
+const REVIEW_STATUSES: ReviewStatus[] = ['pending', 'in_review', 'approved'];
+const PARENT_STATUSES: ParentStatus[] = ['not_sent', 'sent', 'viewed', 'acknowledged'];
+const STUDENT_STATUSES: StudentStatus[] = [
   'not_sent',
   'sent',
   'viewed',
   'acknowledged',
   'sent_to_parents',
-]
+];
 
-function getRandomStatus<T>(statuses: Array<T>, seed: number): T {
-  return statuses[seed % statuses.length]
+function getRandomStatus<T>(statuses: T[], seed: number): T {
+  return statuses[seed % statuses.length];
 }
 
 /**
@@ -66,11 +58,11 @@ function generateConsistentStatuses(
   seed: number,
   isSecondary: boolean,
 ): {
-  reviewStatus: ReviewStatus
-  studentStatus: StudentStatus
-  parentStatus: ParentStatus
+  reviewStatus: ReviewStatus;
+  studentStatus: StudentStatus;
+  parentStatus: ParentStatus;
 } {
-  const stage = Math.abs(seed) % 12
+  const stage = Math.abs(seed) % 12;
 
   // Pending review: stages 0–1 (~17%)
   if (stage <= 1) {
@@ -78,7 +70,7 @@ function generateConsistentStatuses(
       reviewStatus: 'pending',
       studentStatus: 'not_sent',
       parentStatus: 'not_sent',
-    }
+    };
   }
 
   // In review: stages 2–3 (~17%)
@@ -87,7 +79,7 @@ function generateConsistentStatuses(
       reviewStatus: 'in_review',
       studentStatus: 'not_sent',
       parentStatus: 'not_sent',
-    }
+    };
   }
 
   // Approved: stages 4–11 (~67%)
@@ -98,27 +90,27 @@ function generateConsistentStatuses(
         reviewStatus: 'approved',
         studentStatus: 'not_sent',
         parentStatus: 'not_sent',
-      }
+      };
     }
     if (stage <= 7) {
       return {
         reviewStatus: 'approved',
         studentStatus: 'not_sent',
         parentStatus: 'sent',
-      }
+      };
     }
     if (stage <= 9) {
       return {
         reviewStatus: 'approved',
         studentStatus: 'not_sent',
         parentStatus: 'viewed',
-      }
+      };
     }
     return {
       reviewStatus: 'approved',
       studentStatus: 'not_sent',
       parentStatus: 'acknowledged',
-    }
+    };
   }
 
   // Secondary: student first → then parent
@@ -127,73 +119,69 @@ function generateConsistentStatuses(
       reviewStatus: 'approved',
       studentStatus: 'not_sent',
       parentStatus: 'not_sent',
-    }
+    };
   }
   if (stage === 5) {
     return {
       reviewStatus: 'approved',
       studentStatus: 'sent',
       parentStatus: 'not_sent',
-    }
+    };
   }
   if (stage === 6) {
     return {
       reviewStatus: 'approved',
       studentStatus: 'viewed',
       parentStatus: 'not_sent',
-    }
+    };
   }
   if (stage === 7) {
     return {
       reviewStatus: 'approved',
       studentStatus: 'acknowledged',
       parentStatus: 'not_sent',
-    }
+    };
   }
   if (stage === 8) {
     return {
       reviewStatus: 'approved',
       studentStatus: 'sent_to_parents',
       parentStatus: 'sent',
-    }
+    };
   }
   if (stage === 9) {
     return {
       reviewStatus: 'approved',
       studentStatus: 'sent_to_parents',
       parentStatus: 'viewed',
-    }
+    };
   }
   // stages 10–11
   return {
     reviewStatus: 'approved',
     studentStatus: 'sent_to_parents',
     parentStatus: 'acknowledged',
-  }
+  };
 }
 
-function seededPick<T>(arr: Array<T>, seed: number): T {
-  return arr[Math.abs(seed) % arr.length]
+function seededPick<T>(arr: T[], seed: number): T {
+  return arr[Math.abs(seed) % arr.length];
 }
 
 // --- Academic data generators ---
 
-const OUTCOME_STATUSES: Array<LearningOutcomeStatus> = [
+const OUTCOME_STATUSES: LearningOutcomeStatus[] = [
   'Accomplished',
   'Competent',
   'Developing',
   'Beginning',
-]
+];
 
-const SUBJECT_OUTCOMES: Record<
-  string,
-  Array<{ name: string; description: string }>
-> = {
+const SUBJECT_OUTCOMES: Record<string, { name: string; description: string }[]> = {
   'English Language': [
     {
       name: 'Speaking',
-      description:
-        'Speak clearly and confidently to express thoughts and ideas.',
+      description: 'Speak clearly and confidently to express thoughts and ideas.',
     },
     {
       name: 'Reading',
@@ -205,8 +193,7 @@ const SUBJECT_OUTCOMES: Record<
     },
     {
       name: 'Listening',
-      description:
-        'Listen attentively and respond appropriately to spoken language.',
+      description: 'Listen attentively and respond appropriately to spoken language.',
     },
   ],
   'Chinese Language': [
@@ -285,38 +272,35 @@ const SUBJECT_OUTCOMES: Record<
       description: 'Displays fair play and teamwork during activities',
     },
   ],
-}
+};
 
-function generateSubjects(
-  student: Student,
-  seed: number,
-): Array<SubjectPerformance> {
-  const subjectNames = Object.keys(SUBJECT_OUTCOMES)
+function generateSubjects(student: Student, seed: number): SubjectPerformance[] {
+  const subjectNames = Object.keys(SUBJECT_OUTCOMES);
   return subjectNames.map((name, i) => {
-    const outcomes = SUBJECT_OUTCOMES[name]
-    const learningOutcomes: Array<LearningOutcome> = outcomes.map((o, j) => {
-      const statusSeed = seed + i * 7 + j * 3 + student.overallPercentage
-      let statusIdx: number
+    const outcomes = SUBJECT_OUTCOMES[name];
+    const learningOutcomes: LearningOutcome[] = outcomes.map((o, j) => {
+      const statusSeed = seed + i * 7 + j * 3 + student.overallPercentage;
+      let statusIdx: number;
       if (student.overallPercentage >= 80) {
-        statusIdx = statusSeed % 2 // Accomplished or Competent
+        statusIdx = statusSeed % 2; // Accomplished or Competent
       } else if (student.overallPercentage >= 60) {
-        statusIdx = statusSeed % 3 // Accomplished, Competent, or Developing
+        statusIdx = statusSeed % 3; // Accomplished, Competent, or Developing
       } else {
-        statusIdx = 1 + (statusSeed % 3) // Competent, Developing, or Beginning
+        statusIdx = 1 + (statusSeed % 3); // Competent, Developing, or Beginning
       }
       return {
         name: o.name,
         description: o.description,
         status: OUTCOME_STATUSES[statusIdx],
-      }
-    })
-    return { name, learningOutcomes }
-  })
+      };
+    });
+    return { name, learningOutcomes };
+  });
 }
 
 // --- Secondary academic data generators ---
 
-const SECONDARY_SUBJECTS: Array<{ name: string; tier: GradingTier }> = [
+const SECONDARY_SUBJECTS: { name: string; tier: GradingTier }[] = [
   { name: 'English Language', tier: 'G3' },
   { name: 'Chinese Language', tier: 'G3' },
   { name: 'Mathematics', tier: 'G3' },
@@ -325,9 +309,9 @@ const SECONDARY_SUBJECTS: Array<{ name: string; tier: GradingTier }> = [
   { name: 'D&T', tier: 'G3' },
   { name: 'FCE', tier: 'G3' },
   { name: 'Humanities', tier: 'G3' },
-]
+];
 
-const GRADING_SYSTEM: Array<GradingTierDefinition> = [
+const GRADING_SYSTEM: GradingTierDefinition[] = [
   {
     tier: 'G3',
     grades: [
@@ -384,15 +368,9 @@ const GRADING_SYSTEM: Array<GradingTierDefinition> = [
       { grade: 'F9', minScore: 0, maxScore: 34 },
     ],
   },
-]
+];
 
-const NAPFA_AWARDS: Array<NapfaAward> = [
-  'Gold',
-  'Silver',
-  'Silver',
-  'Bronze',
-  'Pass',
-]
+const NAPFA_AWARDS: NapfaAward[] = ['Gold', 'Silver', 'Silver', 'Bronze', 'Pass'];
 
 const NAPFA_DESCRIPTIONS: Record<NapfaAward, string> = {
   Gold: 'Outstanding performance across all fitness stations. Demonstrated exceptional strength, flexibility, and endurance during the assessment.',
@@ -401,15 +379,15 @@ const NAPFA_DESCRIPTIONS: Record<NapfaAward, string> = {
   Bronze:
     'Solid fitness level with room for improvement. Performed well in sit-ups and standing broad jump stations.',
   Pass: 'Met minimum fitness requirements across all stations. Encouraged to continue regular physical activity.',
-}
+};
 
 function scoreToGrade(score: number, tier: GradingTier): SecondaryGrade {
-  const tierDef = GRADING_SYSTEM.find((t) => t.tier === tier)
-  if (!tierDef) return 'F9'
+  const tierDef = GRADING_SYSTEM.find((t) => t.tier === tier);
+  if (!tierDef) return 'F9';
   for (const g of tierDef.grades) {
-    if (score >= g.minScore && score <= g.maxScore) return g.grade
+    if (score >= g.minScore && score <= g.maxScore) return g.grade;
   }
-  return 'F9'
+  return 'F9';
 }
 
 function gradeToPoints(grade: SecondaryGrade): number {
@@ -423,42 +401,37 @@ function gradeToPoints(grade: SecondaryGrade): number {
     D7: 7,
     E8: 8,
     F9: 9,
-  }
-  return map[grade]
+  };
+  return map[grade];
 }
 
-function generateSecondarySubjects(
-  student: Student,
-  seed: number,
-): Array<SecondarySubjectPerformance> {
+function generateSecondarySubjects(student: Student, seed: number): SecondarySubjectPerformance[] {
   return SECONDARY_SUBJECTS.map((subj, i) => {
-    const baseSeed = seed + i * 7 + student.overallPercentage
+    const baseSeed = seed + i * 7 + student.overallPercentage;
     const currentScore = Math.max(
       20,
       Math.min(100, student.overallPercentage + ((baseSeed % 30) - 15)),
-    )
-    const currentGrade = scoreToGrade(currentScore, subj.tier)
+    );
+    const currentGrade = scoreToGrade(currentScore, subj.tier);
 
-    const semesterHistory: Array<SemesterResult> = []
+    const semesterHistory: SemesterResult[] = [];
     for (let sem = 1; sem <= 3; sem++) {
       const semScore = Math.max(
         20,
         Math.min(100, currentScore + (((baseSeed + sem * 5) % 20) - 10)),
-      )
-      const delta =
-        sem > 1 ? semScore - semesterHistory[sem - 2].score : undefined
+      );
+      const delta = sem > 1 ? semScore - semesterHistory[sem - 2].score : undefined;
       semesterHistory.push({
         semester: `Semester ${sem}`,
         score: semScore,
         grade: scoreToGrade(semScore, subj.tier),
         delta,
-      })
+      });
     }
 
     const academicYearOverall = Math.round(
-      semesterHistory.reduce((sum, s) => sum + s.score, 0) /
-        semesterHistory.length,
-    )
+      semesterHistory.reduce((sum, s) => sum + s.score, 0) / semesterHistory.length,
+    );
 
     return {
       name: subj.name,
@@ -467,37 +440,31 @@ function generateSecondarySubjects(
       gradingTier: subj.tier,
       semesterHistory,
       academicYearOverall,
-    }
-  })
+    };
+  });
 }
 
-function generateAcademicAggregates(
-  subjects: Array<SecondarySubjectPerformance>,
-): Array<AcademicAggregate> {
+function generateAcademicAggregates(subjects: SecondarySubjectPerformance[]): AcademicAggregate[] {
   const points = subjects.map((s) => ({
     name: s.name,
     points: gradeToPoints(s.currentGrade),
-  }))
+  }));
 
-  const english = points.find((p) => p.name === 'English Language')
-  const math = points.find((p) => p.name === 'Mathematics')
+  const english = points.find((p) => p.name === 'English Language');
+  const math = points.find((p) => p.name === 'Mathematics');
   const others = points
     .filter((p) => p.name !== 'English Language')
-    .sort((a, b) => a.points - b.points)
+    .sort((a, b) => a.points - b.points);
 
-  const engPts = english?.points ?? 9
-  const mathPts = math?.points ?? 9
-  const othersNoMath = others.filter((p) => p.name !== 'Mathematics')
+  const engPts = english?.points ?? 9;
+  const mathPts = math?.points ?? 9;
+  const othersNoMath = others.filter((p) => p.name !== 'Mathematics');
 
-  const l1r5 = engPts + others.slice(0, 5).reduce((s, p) => s + p.points, 0)
-  const l1r4 = engPts + others.slice(0, 4).reduce((s, p) => s + p.points, 0)
-  const l1b4 =
-    engPts + othersNoMath.slice(0, 4).reduce((s, p) => s + p.points, 0)
-  const elr2b2 = engPts + others.slice(0, 2).reduce((s, p) => s + p.points, 0)
-  const elmab3 =
-    engPts +
-    mathPts +
-    othersNoMath.slice(0, 3).reduce((s, p) => s + p.points, 0)
+  const l1r5 = engPts + others.slice(0, 5).reduce((s, p) => s + p.points, 0);
+  const l1r4 = engPts + others.slice(0, 4).reduce((s, p) => s + p.points, 0);
+  const l1b4 = engPts + othersNoMath.slice(0, 4).reduce((s, p) => s + p.points, 0);
+  const elr2b2 = engPts + others.slice(0, 2).reduce((s, p) => s + p.points, 0);
+  const elmab3 = engPts + mathPts + othersNoMath.slice(0, 3).reduce((s, p) => s + p.points, 0);
 
   return [
     { label: 'L1R5', value: l1r5, description: 'English + 5 subjects' },
@@ -517,24 +484,22 @@ function generateAcademicAggregates(
       value: elmab3,
       description: 'Eng + Math + best 3',
     },
-  ]
+  ];
 }
 
 function generateExamOverall(
-  subjects: Array<SecondarySubjectPerformance>,
+  subjects: SecondarySubjectPerformance[],
   termIndex: number,
 ): ExamOverall {
-  const avgScore =
-    subjects.reduce((sum, s) => sum + s.currentScore, 0) / subjects.length
+  const avgScore = subjects.reduce((sum, s) => sum + s.currentScore, 0) / subjects.length;
   const cumulativeAvg =
-    subjects.reduce((sum, s) => sum + s.academicYearOverall, 0) /
-    subjects.length
+    subjects.reduce((sum, s) => sum + s.academicYearOverall, 0) / subjects.length;
   return {
     examPerformance: Math.round(avgScore * 10) / 10,
     semesterLabel: `Semester ${termIndex + 1} Average`,
     academicYearOverall: Math.round(cumulativeAvg * 10) / 10,
     cumulativeLabel: 'Cumulative Percentage',
-  }
+  };
 }
 
 function generateSecondaryAcademic(
@@ -542,7 +507,7 @@ function generateSecondaryAcademic(
   seed: number,
   termIndex: number,
 ): SecondaryAcademicData {
-  const subjects = generateSecondarySubjects(student, seed)
+  const subjects = generateSecondarySubjects(student, seed);
   return {
     overallPercentage: student.overallPercentage,
     learningSupport: student.learningSupport,
@@ -551,18 +516,18 @@ function generateSecondaryAcademic(
     subjects,
     overall: generateExamOverall(subjects, termIndex),
     gradingSystem: GRADING_SYSTEM,
-  }
+  };
 }
 
 // --- Holistic data generators ---
 
-const CORE_VALUE_LEVELS: Array<CoreValueLevel> = [
+const CORE_VALUE_LEVELS: CoreValueLevel[] = [
   'Demonstrates Very Strongly',
   'Demonstrates Strongly',
   'Demonstrates',
   'Regularly Shows',
   'Beginning',
-]
+];
 
 const LEVEL_SHORT_DESCRIPTIONS: Record<CoreValueLevel, string> = {
   'Demonstrates Very Strongly': 'A role model for others',
@@ -570,17 +535,16 @@ const LEVEL_SHORT_DESCRIPTIONS: Record<CoreValueLevel, string> = {
   Demonstrates: 'Regularly shows this value',
   'Regularly Shows': 'Growing in this area',
   Beginning: 'Starting to develop',
-}
+};
 
-const CORE_VALUE_DEFS: Array<{
-  name: string
-  description: string
-  supportPool: Array<string>
-}> = [
+const CORE_VALUE_DEFS: {
+  name: string;
+  description: string;
+  supportPool: string[];
+}[] = [
   {
     name: 'Appreciation',
-    description:
-      'Shows gratitude and values contributions of others to the community',
+    description: 'Shows gratitude and values contributions of others to the community',
     supportPool: [
       'Teacher feedback on gratitude',
       'Peer recognition programme',
@@ -590,11 +554,7 @@ const CORE_VALUE_DEFS: Array<{
   {
     name: 'Collaboration',
     description: 'Works well with others and contributes to group efforts',
-    supportPool: [
-      'Group project assessment',
-      'CCA teamwork evaluation',
-      'Peer feedback survey',
-    ],
+    supportPool: ['Group project assessment', 'CCA teamwork evaluation', 'Peer feedback survey'],
   },
   {
     name: 'Excellence',
@@ -623,16 +583,16 @@ const CORE_VALUE_DEFS: Array<{
       'Self-reflection journal entries',
     ],
   },
-]
+];
 
-function generateCoreValues(student: Student, seed: number): Array<CoreValue> {
+function generateCoreValues(student: Student, seed: number): CoreValue[] {
   return CORE_VALUE_DEFS.map((def, i) => {
-    const scoreSeed = seed + i * 5 + student.overallPercentage
-    const score = Math.max(1, Math.min(5, 3 + (scoreSeed % 3) - 1))
-    const levelIdx = 5 - score
-    const numSupports = 1 + ((seed + i) % 2)
-    const supportBy = def.supportPool.slice(0, numSupports)
-    const level = CORE_VALUE_LEVELS[levelIdx]
+    const scoreSeed = seed + i * 5 + student.overallPercentage;
+    const score = Math.max(1, Math.min(5, 3 + (scoreSeed % 3) - 1));
+    const levelIdx = 5 - score;
+    const numSupports = 1 + ((seed + i) % 2);
+    const supportBy = def.supportPool.slice(0, numSupports);
+    const level = CORE_VALUE_LEVELS[levelIdx];
     return {
       name: def.name,
       description: def.description,
@@ -640,8 +600,8 @@ function generateCoreValues(student: Student, seed: number): Array<CoreValue> {
       level,
       score,
       supportedBy: supportBy,
-    }
-  })
+    };
+  });
 }
 
 const BMI_CATEGORIES = [
@@ -650,14 +610,11 @@ const BMI_CATEGORIES = [
   'Healthy Weight',
   'Overweight',
   'Underweight',
-]
+];
 
-function generatePhysicalFitness(
-  seed: number,
-  isSecondary: boolean = false,
-): PhysicalFitness {
-  const category = seededPick(BMI_CATEGORIES, seed)
-  const percentile = 40 + (seed % 50)
+function generatePhysicalFitness(seed: number, isSecondary = false): PhysicalFitness {
+  const category = seededPick(BMI_CATEGORIES, seed);
+  const percentile = 40 + (seed % 50);
   const descriptions: Record<string, string> = {
     'Healthy Weight':
       'Maintains a healthy body weight appropriate for age and height. Continue with regular physical activity and balanced nutrition.',
@@ -665,21 +622,21 @@ function generatePhysicalFitness(
       'BMI is slightly above the healthy range. Encouraged to participate in more physical activities and maintain a balanced diet.',
     Underweight:
       'BMI is slightly below the healthy range. Encouraged to ensure adequate nutrition and regular meals.',
-  }
+  };
   const base: PhysicalFitness = {
     bmiCategory: category,
     percentile,
     description: descriptions[category],
-  }
+  };
   if (isSecondary) {
-    const award = seededPick(NAPFA_AWARDS, seed + 3)
-    base.napfaAward = award
-    base.napfaDescription = NAPFA_DESCRIPTIONS[award]
+    const award = seededPick(NAPFA_AWARDS, seed + 3);
+    base.napfaAward = award;
+    base.napfaDescription = NAPFA_DESCRIPTIONS[award];
   }
-  return base
+  return base;
 }
 
-const VIA_POOL: Array<Omit<VIAActivity, 'hours'>> = [
+const VIA_POOL: Omit<VIAActivity, 'hours'>[] = [
   {
     category: 'Community Service',
     activityName: 'Clean Plate Campaign',
@@ -708,35 +665,32 @@ const VIA_POOL: Array<Omit<VIAActivity, 'hours'>> = [
     description:
       'Engaged with elderly residents through interactive activities and performances during community visits.',
   },
-]
+];
 
-function generateVIA(seed: number): Array<VIAActivity> {
-  const count = 1 + (seed % 2)
-  const result: Array<VIAActivity> = []
+function generateVIA(seed: number): VIAActivity[] {
+  const count = 1 + (seed % 2);
+  const result: VIAActivity[] = [];
   for (let i = 0; i < count; i++) {
-    const activity = VIA_POOL[(seed + i) % VIA_POOL.length]
+    const activity = VIA_POOL[(seed + i) % VIA_POOL.length];
     result.push({
       ...activity,
       hours: 4 + ((seed + i * 3) % 12),
-    })
+    });
   }
-  return result
+  return result;
 }
 
-const CCA_POOL: Array<{
-  category: string
-  name: string
-  roles: Array<string>
-  recognitionPool: Array<string>
-}> = [
+const CCA_POOL: {
+  category: string;
+  name: string;
+  roles: string[];
+  recognitionPool: string[];
+}[] = [
   {
     category: 'Sports & Games',
     name: 'Basketball',
     roles: ['Member', 'Vice-Captain', 'Captain'],
-    recognitionPool: [
-      'National Inter-School Championship Participant',
-      'Best Sportsmanship Award',
-    ],
+    recognitionPool: ['National Inter-School Championship Participant', 'Best Sportsmanship Award'],
   },
   {
     category: 'Performing Arts',
@@ -751,29 +705,23 @@ const CCA_POOL: Array<{
     category: 'Clubs & Societies',
     name: 'Robotics Club',
     roles: ['Member', 'Technical Lead', 'President'],
-    recognitionPool: [
-      'National Robotics Competition — Silver Award',
-      'Maker Faire Presenter',
-    ],
+    recognitionPool: ['National Robotics Competition — Silver Award', 'Maker Faire Presenter'],
   },
   {
     category: 'Uniformed Groups',
     name: 'Scouts',
     roles: ['Scout', 'Patrol Leader', 'Troop Leader'],
-    recognitionPool: [
-      'Frank Cooper Sands Award — Gold',
-      'Chief Commissioner Award',
-    ],
+    recognitionPool: ['Frank Cooper Sands Award — Gold', 'Chief Commissioner Award'],
   },
-]
+];
 
-function generateCCA(student: Student, seed: number): Array<CCAInfo> {
-  const ccaDef = CCA_POOL[seed % CCA_POOL.length]
-  const roleIdx = seed % ccaDef.roles.length
-  const years = 1 + (seed % 3)
-  const numRecognitions = seed % 2
-  const totalSessions = 30 + (seed % 10)
-  const sessionsAttended = totalSessions - (seed % 5)
+function generateCCA(student: Student, seed: number): CCAInfo[] {
+  const ccaDef = CCA_POOL[seed % CCA_POOL.length];
+  const roleIdx = seed % ccaDef.roles.length;
+  const years = 1 + (seed % 3);
+  const numRecognitions = seed % 2;
+  const totalSessions = 30 + (seed % 10);
+  const sessionsAttended = totalSessions - (seed % 5);
   return [
     {
       category: ccaDef.category,
@@ -784,20 +732,16 @@ function generateCCA(student: Student, seed: number): Array<CCAInfo> {
       sessionsAttended,
       totalSessions,
     },
-  ]
+  ];
 }
 
-function generateHolisticData(
-  student: Student,
-  seed: number,
-  isSecondary: boolean = false,
-): HolisticData {
+function generateHolisticData(student: Student, seed: number, isSecondary = false): HolisticData {
   return {
     coreValues: generateCoreValues(student, seed),
     physicalFitness: generatePhysicalFitness(seed, isSecondary),
     via: generateVIA(seed),
     cca: generateCCA(student, seed),
-  }
+  };
 }
 
 export function generateReportFromStudent(
@@ -805,13 +749,13 @@ export function generateReportFromStudent(
   term: Term,
   academicYear: number,
 ): HolisticReport {
-  const termIndex = TERMS.indexOf(term)
-  const reportId = `${student.id}-${academicYear}-${termIndex + 1}`
+  const termIndex = TERMS.indexOf(term);
+  const reportId = `${student.id}-${academicYear}-${termIndex + 1}`;
 
   // Use a simple hash from student id and term for deterministic random statuses
-  const seed = student.id.charCodeAt(0) + termIndex
-  const schoolLevel = getSchoolLevel(student.class)
-  const isSecondary = schoolLevel === 'secondary'
+  const seed = student.id.charCodeAt(0) + termIndex;
+  const schoolLevel = getSchoolLevel(student.class);
+  const isSecondary = schoolLevel === 'secondary';
 
   return {
     id: reportId,
@@ -846,9 +790,7 @@ export function generateReportFromStudent(
     holistic: generateHolisticData(student, seed, isSecondary),
     teacherObservations: student.teacherObservations,
     nextSteps: student.nextSteps,
-    teacherComments: [student.teacherObservations, student.nextSteps]
-      .filter(Boolean)
-      .join(' '),
+    teacherComments: [student.teacherObservations, student.nextSteps].filter(Boolean).join(' '),
     ...generateConsistentStatuses(
       student.id.charCodeAt(0) + (TERMS.length - 1 - termIndex),
       isSecondary,
@@ -863,103 +805,99 @@ export function generateReportFromStudent(
       totalSchoolDays: student.totalSchoolDays,
       daysLate: student.lateComing,
     },
-  }
+  };
 }
 
-function generateAllReports(): Array<HolisticReport> {
-  const reports: Array<HolisticReport> = []
+function generateAllReports(): HolisticReport[] {
+  const reports: HolisticReport[] = [];
 
   for (const student of mockStudents) {
     // First 5 students only have Terms 1-2 generated, so the wizard can generate 3-4
-    const studentIdx = mockStudents.indexOf(student)
-    const termsToGenerate = studentIdx < 5 ? TERMS.slice(0, 2) : TERMS
+    const studentIdx = mockStudents.indexOf(student);
+    const termsToGenerate = studentIdx < 5 ? TERMS.slice(0, 2) : TERMS;
     for (const term of termsToGenerate) {
-      reports.push(
-        generateReportFromStudent(student, term, CURRENT_ACADEMIC_YEAR),
-      )
+      reports.push(generateReportFromStudent(student, term, CURRENT_ACADEMIC_YEAR));
     }
   }
 
-  return reports
+  return reports;
 }
 
-export const mockReports: Array<HolisticReport> = generateAllReports()
+export const mockReports: HolisticReport[] = generateAllReports();
 
 export function getStudentGradeCounts(
   student: Student,
 ): { distinctions: number; passes: number } | null {
-  if (getSchoolLevel(student.class) !== 'secondary') return null
-  const seed = student.id.charCodeAt(0)
-  const subjects = generateSecondarySubjects(student, seed)
+  if (getSchoolLevel(student.class) !== 'secondary') return null;
+  const seed = student.id.charCodeAt(0);
+  const subjects = generateSecondarySubjects(student, seed);
   const distinctions = subjects.filter(
     (s) => s.currentGrade === 'A1' || s.currentGrade === 'A2',
-  ).length
+  ).length;
   const passes = subjects.filter((s) =>
-    (['B3', 'B4', 'C5', 'C6'] as Array<SecondaryGrade>).includes(
-      s.currentGrade,
-    ),
-  ).length
-  return { distinctions, passes }
+    (['B3', 'B4', 'C5', 'C6'] as SecondaryGrade[]).includes(s.currentGrade),
+  ).length;
+  return { distinctions, passes };
 }
 
 export function addReport(report: HolisticReport): void {
   if (!mockReports.find((r) => r.id === report.id)) {
-    mockReports.push(report)
+    mockReports.push(report);
   }
 }
 
 export function getReportById(id: string): HolisticReport | undefined {
-  return mockReports.find((report) => report.id === id)
+  return mockReports.find((report) => report.id === id);
 }
 
 export function getAdjacentReportIds(id: string): {
-  prevId: string | null
-  nextId: string | null
+  prevId: string | null;
+  nextId: string | null;
 } {
-  const index = mockReports.findIndex((report) => report.id === id)
-  if (index === -1) return { prevId: null, nextId: null }
+  const index = mockReports.findIndex((report) => report.id === id);
+  if (index === -1) return { prevId: null, nextId: null };
   return {
     prevId: index > 0 ? mockReports[index - 1].id : null,
     nextId: index < mockReports.length - 1 ? mockReports[index + 1].id : null,
-  }
+  };
 }
 
 export interface ReportFilters {
-  studentId?: string
-  term?: Term
-  academicYear?: number
+  studentId?: string;
+  term?: Term;
+  academicYear?: number;
 }
 
-export function filterReports(filters: ReportFilters): Array<HolisticReport> {
+export function filterReports(filters: ReportFilters): HolisticReport[] {
   return mockReports.filter((report) => {
     if (filters.studentId && report.studentId !== filters.studentId) {
-      return false
+      return false;
     }
     if (filters.term && report.term !== filters.term) {
-      return false
+      return false;
     }
     if (filters.academicYear && report.academicYear !== filters.academicYear) {
-      return false
+      return false;
     }
-    return true
-  })
+    return true;
+  });
 }
 
-export function getUniqueStudents(): Array<{ id: string; name: string }> {
-  const seen = new Set<string>()
-  const students: Array<{ id: string; name: string }> = []
+export function getUniqueStudents(): { id: string; name: string }[] {
+  const seen = new Set<string>();
+  const students: { id: string; name: string }[] = [];
 
   for (const report of mockReports) {
     if (!seen.has(report.studentId)) {
-      seen.add(report.studentId)
+      seen.add(report.studentId);
       students.push({
         id: report.studentId,
         name: report.studentName,
-      })
+      });
     }
   }
 
-  return students.sort((a, b) => a.name.localeCompare(b.name))
+  return students.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export { TERMS, CURRENT_ACADEMIC_YEAR }
+export { CURRENT_ACADEMIC_YEAR, TERMS };

@@ -1,34 +1,28 @@
-import { useState } from 'react'
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { Clock } from 'lucide-react'
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { Clock } from 'lucide-react';
+import { useState } from 'react';
 
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import {
-  DEFAULT_FEATURE_FLAGS,
-  FEATURE_FLAGS_STORAGE_KEY,
-} from '@/lib/feature-flags'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { MonitoringAcademicAnalytics } from '@/components/students/academic-analytics'
-import { AttendanceLevelAnalytics } from '@/components/students/attendance-analytics'
-import { InsightBuddy } from '@/components/insight-buddy'
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+import { MonitoringAcademicAnalytics } from '~/apps/pg/components/students/academic-analytics';
+import { AttendanceLevelAnalytics } from '~/apps/pg/components/students/attendance-analytics';
+import { InsightBuddy } from '~/platform/components/insight-buddy';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { DEFAULT_FEATURE_FLAGS, FEATURE_FLAGS_STORAGE_KEY } from '~/platform/lib/feature-flags';
+import { Badge } from '~/shared/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/shared/components/ui/tabs';
+import { cn } from '~/shared/lib/utils';
 
-const ANALYTICS_PROMPTS = [
-  'How did Sec 4 (EL-G3) do for Term 1 WA?',
-  'What does this chart mean?',
-]
+const ANALYTICS_PROMPTS = ['How did Sec 4 (EL-G3) do for Term 1 WA?', 'What does this chart mean?'];
 
 export const Route = createFileRoute('/student-analytics')({
   beforeLoad: () => {
-    const stored = localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY)
+    const stored = localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY);
     const flags = stored
       ? { ...DEFAULT_FEATURE_FLAGS, ...JSON.parse(stored) }
-      : DEFAULT_FEATURE_FLAGS
-    if (!flags['student-analytics']) throw redirect({ to: '/' })
+      : DEFAULT_FEATURE_FLAGS;
+    if (!flags['student-analytics']) throw redirect({ to: '/' });
   },
   component: StudentAnalyticsPage,
-})
+});
 
 function ComingSoon({ description }: { description?: string }) {
   return (
@@ -37,21 +31,17 @@ function ComingSoon({ description }: { description?: string }) {
         <Clock className="size-5 text-muted-foreground" />
       </div>
       <p className="mt-4 text-xl font-medium text-foreground">Coming soon</p>
-      {description && (
-        <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-          {description}
-        </p>
-      )}
+      {description && <p className="mt-1 max-w-xs text-sm text-muted-foreground">{description}</p>}
     </div>
-  )
+  );
 }
 
-type AcademicView = 'monitoring' | 'benchmark'
+type AcademicView = 'monitoring' | 'benchmark';
 
 function StudentAnalyticsPage() {
-  useSetBreadcrumbs([{ label: 'Analytics', href: '/student-analytics' }])
+  useSetBreadcrumbs([{ label: 'Analytics', href: '/student-analytics' }]);
 
-  const [academicView, setAcademicView] = useState<AcademicView>('monitoring')
+  const [academicView, setAcademicView] = useState<AcademicView>('monitoring');
 
   return (
     <div className="flex flex-col p-6">
@@ -79,16 +69,10 @@ function StudentAnalyticsPage() {
             >
               Attendance
             </TabsTrigger>
-            <TabsTrigger
-              value="academic"
-              className="after:bg-blue-600! data-active:text-blue-600"
-            >
+            <TabsTrigger value="academic" className="after:bg-blue-600! data-active:text-blue-600">
               Academic
             </TabsTrigger>
-            <TabsTrigger
-              value="wellbeing"
-              className="after:bg-blue-600! data-active:text-blue-600"
-            >
+            <TabsTrigger value="wellbeing" className="after:bg-blue-600! data-active:text-blue-600">
               Wellbeing
             </TabsTrigger>
           </TabsList>
@@ -145,5 +129,5 @@ function StudentAnalyticsPage() {
       {/* Insight Buddy — floating FAB + overlay (does not affect page layout) */}
       <InsightBuddy examplePrompts={ANALYTICS_PROMPTS} floating />
     </div>
-  )
+  );
 }

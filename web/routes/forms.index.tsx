@@ -1,11 +1,27 @@
-import { useMemo, useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Copy, MoreHorizontal, Search, Trash2, Users } from 'lucide-react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Copy, MoreHorizontal, Search, Trash2, Users } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
-import type { FormStatus } from '@/types/form'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { ReadRate } from '~/apps/pg/components/comms/read-rate';
+import { EmptyState } from '~/apps/pg/components/empty-state';
+import {
+  EMPTY_FORMS_FILTERS,
+  FormsFilterBar,
+  type FormsFilters,
+} from '~/apps/pg/components/forms/forms-filter-bar';
+import { mockForms } from '~/apps/pg/data/mock-forms';
+import type { FormStatus } from '~/apps/pg/types/form';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Badge } from '~/shared/components/ui/badge';
+import { Button } from '~/shared/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '~/shared/components/ui/dropdown-menu';
+import { Input } from '~/shared/components/ui/input';
 import {
   Table,
   TableBody,
@@ -13,27 +29,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { EmptyState } from '@/components/empty-state'
-import {
-  EMPTY_FORMS_FILTERS,
-  FormsFilterBar,
-  type FormsFilters,
-} from '@/components/forms/forms-filter-bar'
-import { ReadRate } from '@/components/comms/read-rate'
-import { mockForms } from '@/data/mock-forms'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
+} from '~/shared/components/ui/table';
 
 export const Route = createFileRoute('/forms/')({
   component: FormsPage,
-})
+});
 
 function getStatusBadge(status: FormStatus) {
   const config = {
@@ -49,59 +49,48 @@ function getStatusBadge(status: FormStatus) {
       label: 'Closed',
       className: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
     },
-  }
-  const { label, className } = config[status]
-  return <Badge className={className}>{label}</Badge>
+  };
+  const { label, className } = config[status];
+  return <Badge className={className}>{label}</Badge>;
 }
 
 function FormsPage() {
-  const navigate = useNavigate()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filters, setFilters] = useState<FormsFilters>(EMPTY_FORMS_FILTERS)
-  useSetBreadcrumbs([{ label: 'Forms', href: '/forms' }])
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<FormsFilters>(EMPTY_FORMS_FILTERS);
+  useSetBreadcrumbs([{ label: 'Forms', href: '/forms' }]);
 
   const filteredForms = useMemo(() => {
     return mockForms
       .filter((form) => {
         // Only show custom forms on the Forms page
-        if ((form.source ?? 'custom') !== 'custom') return false
+        if ((form.source ?? 'custom') !== 'custom') return false;
 
-        if (
-          filters.statuses.length > 0 &&
-          !filters.statuses.includes(form.status)
-        )
-          return false
+        if (filters.statuses.length > 0 && !filters.statuses.includes(form.status)) return false;
 
-        if (
-          filters.ownerships.length > 0 &&
-          !filters.ownerships.includes(form.ownership)
-        )
-          return false
+        if (filters.ownerships.length > 0 && !filters.ownerships.includes(form.ownership))
+          return false;
 
         if (filters.dateFrom) {
-          if (new Date(form.createdAt) < new Date(filters.dateFrom))
-            return false
+          if (new Date(form.createdAt) < new Date(filters.dateFrom)) return false;
         }
         if (filters.dateTo) {
-          const end = new Date(filters.dateTo)
-          end.setHours(23, 59, 59, 999)
-          if (new Date(form.createdAt) > end) return false
+          const end = new Date(filters.dateTo);
+          end.setHours(23, 59, 59, 999);
+          if (new Date(form.createdAt) > end) return false;
         }
 
         if (searchQuery) {
-          const query = searchQuery.toLowerCase()
+          const query = searchQuery.toLowerCase();
           return (
             form.title.toLowerCase().includes(query) ||
             form.description.toLowerCase().includes(query)
-          )
+          );
         }
-        return true
+        return true;
       })
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-  }, [searchQuery, filters])
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [searchQuery, filters]);
 
   return (
     <div className="flex flex-col">
@@ -109,7 +98,7 @@ function FormsPage() {
       <div className="mt-4 flex flex-col gap-4 px-6 pb-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search forms..."
@@ -144,7 +133,7 @@ function FormsPage() {
             </TableHeader>
             <TableBody>
               {filteredForms.map((form) => {
-                const isShared = form.ownership === 'shared'
+                const isShared = form.ownership === 'shared';
                 return (
                   <TableRow
                     key={form.id}
@@ -156,13 +145,11 @@ function FormsPage() {
                       })
                     }
                   >
-                    <TableCell className="overflow-hidden whitespace-normal pl-6">
+                    <TableCell className="overflow-hidden pl-6 whitespace-normal">
                       <div className="flex items-start gap-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="truncate font-medium">
-                              {form.title}
-                            </span>
+                            <span className="truncate font-medium">{form.title}</span>
                           </div>
                           <div className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
                             {form.description}
@@ -229,12 +216,12 @@ function FormsPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                );
               })}
             </TableBody>
           </Table>
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,19 +1,18 @@
-import { SecondarySubjectDetail } from './secondary-subject-detail'
-import type { SecondarySubjectPerformance } from '@/types/report'
+import type { SecondarySubjectPerformance } from '~/apps/pg/types/report';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion'
+} from '~/shared/components/ui/accordion';
+
+import { SecondarySubjectDetail } from './secondary-subject-detail';
 
 interface SecondarySubjectAccordionProps {
-  subjects: Array<SecondarySubjectPerformance>
+  subjects: SecondarySubjectPerformance[];
 }
 
-export function SecondarySubjectAccordion({
-  subjects,
-}: SecondarySubjectAccordionProps) {
+export function SecondarySubjectAccordion({ subjects }: SecondarySubjectAccordionProps) {
   return (
     <section>
       <h2 className="mb-3 text-lg font-bold">Subject Performance</h2>
@@ -24,9 +23,7 @@ export function SecondarySubjectAccordion({
               <div className="flex w-full items-center justify-between pr-2">
                 <span>{subject.name}</span>
                 <span className="flex items-center gap-2">
-                  <span className="text-base font-bold">
-                    {subject.currentScore}
-                  </span>
+                  <span className="text-base font-bold">{subject.currentScore}</span>
                   <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-semibold">
                     {subject.currentGrade}
                   </span>
@@ -40,5 +37,5 @@ export function SecondarySubjectAccordion({
         ))}
       </Accordion>
     </section>
-  )
+  );
 }

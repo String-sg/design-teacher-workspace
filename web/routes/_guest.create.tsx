@@ -1,16 +1,16 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { X } from 'lucide-react'
+import { createFileRoute } from '@tanstack/react-router';
+import { X } from 'lucide-react';
 
-import { Button } from '@/components/ui/button'
 import {
   DEFAULT_FEATURE_FLAGS,
   FEATURE_FLAGS_STORAGE_KEY,
-} from '@/lib/feature-flags/constants'
-import type { FeatureFlags } from '@/lib/feature-flags/types'
+} from '~/platform/lib/feature-flags/constants';
+import type { FeatureFlags } from '~/platform/lib/feature-flags/types';
+import { Button } from '~/shared/components/ui/button';
 
 export const Route = createFileRoute('/_guest/create')({
   component: CreatePage,
-})
+});
 
 function AnnouncementMockup() {
   return (
@@ -21,7 +21,7 @@ function AnnouncementMockup() {
       <div className="h-2 w-4/6 rounded-full bg-slate-200" />
       <div className="h-2 w-full rounded-full bg-slate-200" />
     </div>
-  )
+  );
 }
 
 function ResponseMockup() {
@@ -34,7 +34,7 @@ function ResponseMockup() {
         <div className="h-1.5 w-14 rounded-full bg-white/70" />
       </div>
     </div>
-  )
+  );
 }
 
 function FormMockup() {
@@ -53,15 +53,15 @@ function FormMockup() {
         <div className="h-2 w-4/5 rounded-full bg-slate-200" />
       </div>
     </div>
-  )
+  );
 }
 
 interface CreateOption {
-  title: string
-  description: string
-  to: string
-  search?: Record<string, string>
-  mockup: React.ReactNode
+  title: string;
+  description: string;
+  to: string;
+  search?: Record<string, string>;
+  mockup: React.ReactNode;
 }
 
 const CREATE_OPTIONS: CreateOption[] = [
@@ -73,67 +73,59 @@ const CREATE_OPTIONS: CreateOption[] = [
   },
   {
     title: 'Post with Response',
-    description:
-      'Send a post and collect responses from parents — acknowledge or yes/no.',
+    description: 'Send a post and collect responses from parents — acknowledge or yes/no.',
     to: '/announcements/new',
     search: { responseType: 'acknowledge' },
     mockup: <ResponseMockup />,
   },
   {
     title: 'Custom Form',
-    description:
-      'Create a form with custom questions to collect data from parents.',
+    description: 'Create a form with custom questions to collect data from parents.',
     to: '/forms/new',
     mockup: <FormMockup />,
   },
-]
+];
 
 function CreateCard({ option }: { option: CreateOption }) {
   return (
     <button
       type="button"
       onClick={() => {
-        const searchStr = option.search
-          ? '?' + new URLSearchParams(option.search).toString()
-          : ''
-        window.location.href = option.to + searchStr
+        const searchStr = option.search ? '?' + new URLSearchParams(option.search).toString() : '';
+        window.location.href = option.to + searchStr;
       }}
       className="group flex flex-col overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm active:scale-[0.98]"
     >
-      <div className="border-b border-slate-100 bg-slate-50">
-        {option.mockup}
-      </div>
+      <div className="border-b border-slate-100 bg-slate-50">{option.mockup}</div>
       <div className="flex flex-1 flex-col justify-between p-4">
         <div>
           <p className="text-sm font-semibold text-slate-900">{option.title}</p>
-          <p className="mt-1 text-xs leading-relaxed text-slate-500">
-            {option.description}
-          </p>
+          <p className="mt-1 text-xs leading-relaxed text-slate-500">{option.description}</p>
         </div>
       </div>
     </button>
-  )
+  );
 }
 
 function getFormsEnabled(): boolean {
   try {
-    const stored = localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY)
+    const stored = localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY);
     if (stored) {
-      const flags = JSON.parse(stored) as Partial<FeatureFlags>
-      return flags.forms ?? DEFAULT_FEATURE_FLAGS.forms
+      const flags = JSON.parse(stored) as Partial<FeatureFlags>;
+      return flags.forms ?? DEFAULT_FEATURE_FLAGS.forms;
     }
   } catch {
     // ignore
   }
-  return DEFAULT_FEATURE_FLAGS.forms
+  return DEFAULT_FEATURE_FLAGS.forms;
 }
 
 function CreatePage() {
-  const formsEnabled = getFormsEnabled()
+  const formsEnabled = getFormsEnabled();
 
   const options = formsEnabled
     ? CREATE_OPTIONS
-    : CREATE_OPTIONS.filter((o) => o.title !== 'Custom Form')
+    : CREATE_OPTIONS.filter((o) => o.title !== 'Custom Form');
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
@@ -145,7 +137,7 @@ function CreatePage() {
           size="icon"
           className="rounded-full"
           onClick={() => {
-            window.location.href = '/announcements'
+            window.location.href = '/announcements';
           }}
         >
           <X className="h-4 w-4" />
@@ -156,12 +148,10 @@ function CreatePage() {
       <div className="flex flex-1 items-start justify-center px-6 pt-12 sm:items-center sm:pt-0">
         <div className="w-full max-w-3xl">
           <div className="mb-8 text-center">
-            <h1 className="text-xl font-semibold text-slate-900 text-wrap-balance sm:text-2xl">
+            <h1 className="text-wrap-balance text-xl font-semibold text-slate-900 sm:text-2xl">
               What would you like to create?
             </h1>
-            <p className="mt-2 text-sm text-slate-500">
-              Choose a type to get started.
-            </p>
+            <p className="mt-2 text-sm text-slate-500">Choose a type to get started.</p>
           </div>
 
           <div
@@ -174,5 +164,5 @@ function CreatePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

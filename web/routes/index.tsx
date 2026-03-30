@@ -1,17 +1,17 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router';
 
-import { FeaturedAppCard } from '@/components/app-card'
-import { AppSection } from '@/components/app-section'
-import { Greeting } from '@/components/greeting'
-import { appCategories, featuredApp } from '@/data/apps'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
+import { appCategories, featuredApp } from '~/apps/pg/data/apps';
+import { FeaturedAppCard } from '~/platform/components/app-card';
+import { AppSection } from '~/platform/components/app-section';
+import { Greeting } from '~/platform/components/greeting';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
 
 export const Route = createFileRoute('/')({
   component: HomePage,
-})
+});
 
 function HomePage() {
-  useSetBreadcrumbs([{ label: 'Home', href: '/' }])
+  useSetBreadcrumbs([{ label: 'Home', href: '/' }]);
 
   return (
     <main className="mx-auto flex max-w-[760px] flex-col gap-8 px-4 py-8">
@@ -38,5 +38,5 @@ function HomePage() {
         />
       ))}
     </main>
-  )
+  );
 }

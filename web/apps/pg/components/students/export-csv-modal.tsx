@@ -1,89 +1,68 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '~/shared/components/ui/button';
+import { Checkbox } from '~/shared/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
+} from '~/shared/components/ui/dialog';
+import { cn } from '~/shared/lib/utils';
 
-type SenFormat = 'sen-high' | 'sen-norm'
+type SenFormat = 'sen-high' | 'sen-norm';
 
 interface ExportCsvModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onExport: (options: { senFormats: SenFormat[] }) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onExport: (options: { senFormats: SenFormat[] }) => void;
 }
 
 interface CheckboxCardProps {
-  label: string
-  description?: string
-  checked: boolean
-  onChange: () => void
+  label: string;
+  description?: string;
+  checked: boolean;
+  onChange: () => void;
 }
 
-function CheckboxCard({
-  label,
-  description,
-  checked,
-  onChange,
-}: CheckboxCardProps) {
+function CheckboxCard({ label, description, checked, onChange }: CheckboxCardProps) {
   return (
     <button
       type="button"
       onClick={onChange}
       className={cn(
         'flex w-full items-start gap-2 rounded-[14px] border p-4 text-left transition-colors',
-        checked
-          ? 'border-[#98c1ff] bg-[#f5f9ff]'
-          : 'border-border bg-background hover:bg-muted/50',
+        checked ? 'border-[#98c1ff] bg-[#f5f9ff]' : 'border-border bg-background hover:bg-muted/50',
       )}
     >
-      <Checkbox
-        checked={checked}
-        tabIndex={-1}
-        className="pointer-events-none mt-0.5 shrink-0"
-      />
+      <Checkbox checked={checked} tabIndex={-1} className="pointer-events-none mt-0.5 shrink-0" />
       <span className="flex flex-col gap-1">
         <span className="text-base leading-none text-[#1c2024]">{label}</span>
-        {description && (
-          <span className="text-sm leading-none text-[#60646c]">
-            {description}
-          </span>
-        )}
+        {description && <span className="text-sm leading-none text-[#60646c]">{description}</span>}
       </span>
     </button>
-  )
+  );
 }
 
-export function ExportCsvModal({
-  open,
-  onOpenChange,
-  onExport,
-}: ExportCsvModalProps) {
-  const [senFormats, setSenFormats] = useState<Set<SenFormat>>(
-    new Set(['sen-high']),
-  )
+export function ExportCsvModal({ open, onOpenChange, onExport }: ExportCsvModalProps) {
+  const [senFormats, setSenFormats] = useState<Set<SenFormat>>(new Set(['sen-high']));
 
   function toggleFormat(format: SenFormat) {
     setSenFormats((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(format)) {
-        next.delete(format)
+        next.delete(format);
       } else {
-        next.add(format)
+        next.add(format);
       }
-      return next
-    })
+      return next;
+    });
   }
 
   function handleExport() {
-    onExport({ senFormats: Array.from(senFormats) })
-    onOpenChange(false)
+    onExport({ senFormats: Array.from(senFormats) });
+    onOpenChange(false);
   }
 
   return (
@@ -115,5 +94,5 @@ export function ExportCsvModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

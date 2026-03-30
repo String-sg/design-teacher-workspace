@@ -1,11 +1,10 @@
-import type { Form } from '@/types/form'
+import type { Form } from '~/apps/pg/types/form';
 
-export const mockForms: Array<Form> = [
+export const mockForms: Form[] = [
   {
     id: 'form-1',
     title: 'Parent-Teacher Conference Preferences',
-    description:
-      'Collect preferred time slots for upcoming parent-teacher meetings',
+    description: 'Collect preferred time slots for upcoming parent-teacher meetings',
     status: 'active',
     createdAt: '2026-02-20',
     recipientCount: 8,
@@ -26,11 +25,7 @@ export const mockForms: Array<Form> = [
         id: 'q2',
         text: 'Please indicate your preferred time slot',
         type: 'mcq',
-        options: [
-          '9:00 AM – 10:00 AM',
-          '11:00 AM – 12:00 PM',
-          '2:00 PM – 3:00 PM',
-        ],
+        options: ['9:00 AM – 10:00 AM', '11:00 AM – 12:00 PM', '2:00 PM – 3:00 PM'],
         required: true,
       },
       {
@@ -41,8 +36,8 @@ export const mockForms: Array<Form> = [
       },
     ],
   },
-]
+];
 
 export function getFormById(id: string): Form | undefined {
-  return mockForms.find((form) => form.id === id)
+  return mockForms.find((form) => form.id === id);
 }

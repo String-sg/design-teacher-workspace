@@ -1,23 +1,20 @@
-import { useState } from 'react'
-import { CalendarIcon, Filter, RotateCcw } from 'lucide-react'
-import { format, parse } from 'date-fns'
-import type { PGOwnership, PGStatus } from '@/types/pg-announcement'
-import type { ResponseType } from '@/types/form'
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+import { format, parse } from 'date-fns';
+import { CalendarIcon, Filter, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
+
+import type { ResponseType } from '~/apps/pg/types/form';
+import type { PGOwnership, PGStatus } from '~/apps/pg/types/pg-announcement';
+import { Button } from '~/shared/components/ui/button';
+import { Calendar } from '~/shared/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '~/shared/components/ui/popover';
+import { cn } from '~/shared/lib/utils';
 
 export interface AnnouncementFilters {
-  statuses: Array<PGStatus>
-  ownerships: Array<PGOwnership>
-  responseTypes: Array<ResponseType>
-  dateFrom: string
-  dateTo: string
+  statuses: PGStatus[];
+  ownerships: PGOwnership[];
+  responseTypes: ResponseType[];
+  dateFrom: string;
+  dateTo: string;
 }
 
 export const EMPTY_ANNOUNCEMENT_FILTERS: AnnouncementFilters = {
@@ -26,7 +23,7 @@ export const EMPTY_ANNOUNCEMENT_FILTERS: AnnouncementFilters = {
   responseTypes: [],
   dateFrom: '',
   dateTo: '',
-}
+};
 
 function countActiveFilters(filters: AnnouncementFilters): number {
   return (
@@ -35,72 +32,64 @@ function countActiveFilters(filters: AnnouncementFilters): number {
     filters.responseTypes.length +
     (filters.dateFrom ? 1 : 0) +
     (filters.dateTo ? 1 : 0)
-  )
+  );
 }
 
-const RESPONSE_TYPE_OPTIONS: Array<{ value: ResponseType; label: string }> = [
+const RESPONSE_TYPE_OPTIONS: { value: ResponseType; label: string }[] = [
   { value: 'view-only', label: 'View Only' },
   { value: 'acknowledge', label: 'Acknowledge' },
   { value: 'yes-no', label: 'Yes / No' },
-]
+];
 
 interface AnnouncementFilterBarProps {
-  filters: AnnouncementFilters
-  onChange: (filters: AnnouncementFilters) => void
+  filters: AnnouncementFilters;
+  onChange: (filters: AnnouncementFilters) => void;
 }
 
-const STATUS_OPTIONS: Array<{ value: PGStatus; label: string }> = [
+const STATUS_OPTIONS: { value: PGStatus; label: string }[] = [
   { value: 'posted', label: 'Posted' },
   { value: 'draft', label: 'Draft' },
   { value: 'scheduled', label: 'Scheduled' },
-]
+];
 
-const OWNERSHIP_OPTIONS: Array<{ value: PGOwnership; label: string }> = [
+const OWNERSHIP_OPTIONS: { value: PGOwnership; label: string }[] = [
   { value: 'mine', label: 'Created by me' },
   { value: 'shared', label: 'Shared with me' },
-]
+];
 
-export function AnnouncementFilterBar({
-  filters,
-  onChange,
-}: AnnouncementFilterBarProps) {
-  const [open, setOpen] = useState(false)
-  const activeCount = countActiveFilters(filters)
+export function AnnouncementFilterBar({ filters, onChange }: AnnouncementFilterBarProps) {
+  const [open, setOpen] = useState(false);
+  const activeCount = countActiveFilters(filters);
 
   function toggleStatus(status: PGStatus) {
     const next = filters.statuses.includes(status)
       ? filters.statuses.filter((s) => s !== status)
-      : [...filters.statuses, status]
-    onChange({ ...filters, statuses: next })
+      : [...filters.statuses, status];
+    onChange({ ...filters, statuses: next });
   }
 
   function toggleOwnership(ownership: PGOwnership) {
     const next = filters.ownerships.includes(ownership)
       ? filters.ownerships.filter((o) => o !== ownership)
-      : [...filters.ownerships, ownership]
-    onChange({ ...filters, ownerships: next })
+      : [...filters.ownerships, ownership];
+    onChange({ ...filters, ownerships: next });
   }
 
   function toggleResponseType(rt: ResponseType) {
     const next = filters.responseTypes.includes(rt)
       ? filters.responseTypes.filter((r) => r !== rt)
-      : [...filters.responseTypes, rt]
-    onChange({ ...filters, responseTypes: next })
+      : [...filters.responseTypes, rt];
+    onChange({ ...filters, responseTypes: next });
   }
 
   function handleReset() {
-    onChange(EMPTY_ANNOUNCEMENT_FILTERS)
+    onChange(EMPTY_ANNOUNCEMENT_FILTERS);
   }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        render={
-          <Button
-            variant="outline"
-            className="h-9 gap-2 aria-expanded:bg-white"
-          />
-        }
+        render={<Button variant="outline" className="h-9 gap-2 aria-expanded:bg-white" />}
       >
         <Filter className="h-4 w-4" />
         Filter
@@ -113,7 +102,7 @@ export function AnnouncementFilterBar({
 
       <PopoverContent className="w-[460px] gap-0 p-0" align="start">
         {/* Header */}
-        <div className="px-5 pb-3 pt-4">
+        <div className="px-5 pt-4 pb-3">
           <h3 className="text-sm font-semibold">Show records</h3>
         </div>
 
@@ -203,10 +192,7 @@ export function AnnouncementFilterBar({
                 >
                   <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                   {filters.dateFrom
-                    ? format(
-                        parse(filters.dateFrom, 'yyyy-MM-dd', new Date()),
-                        'dd MMM yyyy',
-                      )
+                    ? format(parse(filters.dateFrom, 'yyyy-MM-dd', new Date()), 'dd MMM yyyy')
                     : 'From'}
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -241,19 +227,14 @@ export function AnnouncementFilterBar({
                 >
                   <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                   {filters.dateTo
-                    ? format(
-                        parse(filters.dateTo, 'yyyy-MM-dd', new Date()),
-                        'dd MMM yyyy',
-                      )
+                    ? format(parse(filters.dateTo, 'yyyy-MM-dd', new Date()), 'dd MMM yyyy')
                     : 'To'}
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={
-                      filters.dateTo
-                        ? parse(filters.dateTo, 'yyyy-MM-dd', new Date())
-                        : undefined
+                      filters.dateTo ? parse(filters.dateTo, 'yyyy-MM-dd', new Date()) : undefined
                     }
                     onSelect={(date) =>
                       onChange({
@@ -283,5 +264,5 @@ export function AnnouncementFilterBar({
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

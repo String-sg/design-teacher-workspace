@@ -8,23 +8,25 @@ import {
   Star,
   Trophy,
   User,
-} from 'lucide-react'
-import { TEMPLATES } from './hdp-template-step'
-import type { TemplateId } from './hdp-template-step'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+} from 'lucide-react';
+
+import { Badge } from '~/shared/components/ui/badge';
+import { Checkbox } from '~/shared/components/ui/checkbox';
+import { cn } from '~/shared/lib/utils';
+
+import type { TemplateId } from './hdp-template-step';
+import { TEMPLATES } from './hdp-template-step';
 
 interface SectionDef {
-  key: string
-  label: string
-  description: string
-  icon: React.ReactNode
-  iconBg: string
-  required?: boolean
+  key: string;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  required?: boolean;
 }
 
-const SECTION_DEFS: Array<SectionDef> = [
+const SECTION_DEFS: SectionDef[] = [
   {
     key: 'studentInfo',
     label: 'Student Information',
@@ -82,22 +84,17 @@ const SECTION_DEFS: Array<SectionDef> = [
     icon: <Trophy className="size-4 text-cyan-600" />,
     iconBg: 'bg-cyan-50',
   },
-]
+];
 
 interface HdpDataStepProps {
-  selectedSections: Record<string, boolean>
-  onToggleSection: (key: string) => void
-  templateId: TemplateId | null
+  selectedSections: Record<string, boolean>;
+  onToggleSection: (key: string) => void;
+  templateId: TemplateId | null;
 }
 
-export function HdpDataStep({
-  selectedSections,
-  onToggleSection,
-  templateId,
-}: HdpDataStepProps) {
-  const templateName =
-    TEMPLATES.find((t) => t.id === templateId)?.name ?? 'Custom'
-  const enabledCount = Object.values(selectedSections).filter(Boolean).length
+export function HdpDataStep({ selectedSections, onToggleSection, templateId }: HdpDataStepProps) {
+  const templateName = TEMPLATES.find((t) => t.id === templateId)?.name ?? 'Custom';
+  const enabledCount = Object.values(selectedSections).filter(Boolean).length;
 
   return (
     <div className="flex flex-col gap-5">
@@ -111,24 +108,22 @@ export function HdpDataStep({
       <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
         <Info className="size-4 shrink-0" />
         <span>
-          Only data you have permission to access will be included. Restricted
-          fields are hidden based on your access level.
+          Only data you have permission to access will be included. Restricted fields are hidden
+          based on your access level.
         </span>
       </div>
 
       <div className="flex flex-col gap-2">
         {SECTION_DEFS.map((section) => {
-          const checked = section.required || selectedSections[section.key]
-          const disabled = section.required
+          const checked = section.required || selectedSections[section.key];
+          const disabled = section.required;
 
           return (
             <label
               key={section.key}
               className={cn(
                 'flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors',
-                disabled
-                  ? 'cursor-default bg-muted/30'
-                  : 'cursor-pointer hover:bg-muted/50',
+                disabled ? 'cursor-default bg-muted/30' : 'cursor-pointer hover:bg-muted/50',
                 checked && !disabled && 'border-primary/30 bg-primary/5',
               )}
             >
@@ -136,7 +131,7 @@ export function HdpDataStep({
                 checked={checked}
                 disabled={disabled}
                 onCheckedChange={() => {
-                  if (!disabled) onToggleSection(section.key)
+                  if (!disabled) onToggleSection(section.key);
                 }}
               />
               <div
@@ -156,12 +151,10 @@ export function HdpDataStep({
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {section.description}
-                </p>
+                <p className="text-xs text-muted-foreground">{section.description}</p>
               </div>
             </label>
-          )
+          );
         })}
       </div>
 
@@ -169,5 +162,5 @@ export function HdpDataStep({
         {enabledCount} of {SECTION_DEFS.length} sections selected
       </p>
     </div>
-  )
+  );
 }

@@ -1,32 +1,29 @@
-import type { Shortcut } from '@/types/pg-announcement'
-import { PG_SHORTCUT_PRESETS } from '@/data/pg-shortcuts'
-import { cn } from '@/lib/utils'
+import { PG_SHORTCUT_PRESETS } from '~/apps/pg/data/pg-shortcuts';
+import type { Shortcut } from '~/apps/pg/types/pg-announcement';
+import { cn } from '~/shared/lib/utils';
 
 interface PGShortcutsSelectorProps {
-  value: Array<Shortcut>
-  onChange: (shortcuts: Array<Shortcut>) => void
+  value: Shortcut[];
+  onChange: (shortcuts: Shortcut[]) => void;
 }
 
-export function PGShortcutsSelector({
-  value,
-  onChange,
-}: PGShortcutsSelectorProps) {
+export function PGShortcutsSelector({ value, onChange }: PGShortcutsSelectorProps) {
   function toggle(id: string) {
-    const preset = PG_SHORTCUT_PRESETS.find((p) => p.id === id)
-    if (!preset) return
+    const preset = PG_SHORTCUT_PRESETS.find((p) => p.id === id);
+    if (!preset) return;
 
-    const isSelected = value.some((s) => s.url === preset.url)
+    const isSelected = value.some((s) => s.url === preset.url);
     if (isSelected) {
-      onChange(value.filter((s) => s.url !== preset.url))
+      onChange(value.filter((s) => s.url !== preset.url));
     } else {
-      onChange([...value, { label: preset.label, url: preset.url }])
+      onChange([...value, { label: preset.label, url: preset.url }]);
     }
   }
 
   return (
     <div className="space-y-2">
       {PG_SHORTCUT_PRESETS.map((preset) => {
-        const isSelected = value.some((s) => s.url === preset.url)
+        const isSelected = value.some((s) => s.url === preset.url);
         return (
           <button
             key={preset.id}
@@ -43,9 +40,7 @@ export function PGShortcutsSelector({
             <span
               className={cn(
                 'flex h-4 w-4 shrink-0 items-center justify-center rounded border',
-                isSelected
-                  ? 'border-blue-600 bg-blue-600 text-white'
-                  : 'border-slate-300 bg-white',
+                isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-white',
               )}
             >
               {isSelected && (
@@ -65,16 +60,13 @@ export function PGShortcutsSelector({
 
             {/* Label — teacher-facing; parent-facing label shown accurately in the preview */}
             <p
-              className={cn(
-                'text-sm font-medium',
-                isSelected ? 'text-blue-900' : 'text-slate-800',
-              )}
+              className={cn('text-sm font-medium', isSelected ? 'text-blue-900' : 'text-slate-800')}
             >
               {preset.composerLabel}
             </p>
           </button>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

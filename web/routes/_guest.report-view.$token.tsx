@@ -1,19 +1,19 @@
-import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { CheckCircle, Send } from 'lucide-react'
-import { toast } from 'sonner'
+import { createFileRoute } from '@tanstack/react-router';
+import { CheckCircle, Send } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-import { ReportOverviewTab } from '@/components/reports/report-overview-tab'
-import { AcademicTab } from '@/components/reports/academic-tab'
-import { HolisticTab } from '@/components/reports/holistic-tab'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { getReportById } from '@/data/mock-reports'
+import { AcademicTab } from '~/apps/pg/components/reports/academic-tab';
+import { HolisticTab } from '~/apps/pg/components/reports/holistic-tab';
+import { ReportOverviewTab } from '~/apps/pg/components/reports/report-overview-tab';
+import { getReportById } from '~/apps/pg/data/mock-reports';
+import { Avatar, AvatarFallback } from '~/shared/components/ui/avatar';
+import { Button } from '~/shared/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/shared/components/ui/tabs';
 
 export const Route = createFileRoute('/_guest/report-view/$token')({
   component: GuestReportViewPage,
-})
+});
 
 function getInitials(name: string): string {
   return name
@@ -22,43 +22,43 @@ function getInitials(name: string): string {
     .slice(0, 2)
     .map((part) => part[0])
     .join('')
-    .toUpperCase()
+    .toUpperCase();
 }
 
 function getFirstName(name: string): string {
-  return name.split(' ').filter((part) => part.length > 0)[0] ?? name
+  return name.split(' ').filter((part) => part.length > 0)[0] ?? name;
 }
 
 function GuestReportViewPage() {
-  const { token } = Route.useParams()
-  const report = getReportById(token)
-  const [acknowledged, setAcknowledged] = useState(false)
-  const [sentToParents, setSentToParents] = useState(false)
+  const { token } = Route.useParams();
+  const report = getReportById(token);
+  const [acknowledged, setAcknowledged] = useState(false);
+  const [sentToParents, setSentToParents] = useState(false);
 
   if (!report) {
     return (
       <main className="mx-auto flex max-w-md flex-col items-center gap-4 px-4 py-16">
         <h1 className="text-2xl font-semibold">Report Not Found</h1>
-        <p className="text-muted-foreground text-center">
+        <p className="text-center text-muted-foreground">
           This report link may have expired or is invalid.
         </p>
       </main>
-    )
+    );
   }
 
   const handleAcknowledge = () => {
-    setAcknowledged(true)
-    toast.success('Report acknowledged successfully')
-  }
+    setAcknowledged(true);
+    toast.success('Report acknowledged successfully');
+  };
 
   const handleSendToParents = () => {
-    setSentToParents(true)
-    toast.success('Report sent to parents successfully')
-  }
+    setSentToParents(true);
+    toast.success('Report sent to parents successfully');
+  };
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col">
-      <div className="flex-1 px-4 pb-32 pt-6">
+      <div className="flex-1 px-4 pt-6 pb-32">
         {/* Header */}
         <div className="mb-1 text-center text-sm font-medium text-muted-foreground">
           Student Profile
@@ -69,9 +69,7 @@ function GuestReportViewPage() {
           </Avatar>
           <div className="text-center">
             <h1 className="text-xl font-semibold">{report.studentName}</h1>
-            <p className="text-muted-foreground text-sm">
-              {report.studentClass}
-            </p>
+            <p className="text-sm text-muted-foreground">{report.studentClass}</p>
           </div>
         </div>
 
@@ -130,7 +128,7 @@ function GuestReportViewPage() {
       </div>
 
       {/* Sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 mx-auto max-w-md border-t bg-white px-4 py-4">
+      <div className="fixed right-0 bottom-0 left-0 mx-auto max-w-md border-t bg-white px-4 py-4">
         {!acknowledged ? (
           <Button
             className="w-full bg-[#f26c47] text-white hover:bg-[#e05a37]"
@@ -141,9 +139,7 @@ function GuestReportViewPage() {
           </Button>
         ) : !sentToParents ? (
           <div className="flex flex-col gap-2">
-            <div className="text-center text-xs text-green-600">
-              Report acknowledged
-            </div>
+            <div className="text-center text-xs text-green-600">Report acknowledged</div>
             <Button
               className="w-full bg-[#f26c47] text-white hover:bg-[#e05a37]"
               onClick={handleSendToParents}
@@ -159,5 +155,5 @@ function GuestReportViewPage() {
         )}
       </div>
     </main>
-  )
+  );
 }

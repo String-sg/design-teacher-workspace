@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
-import { Button } from '@/components/ui/button'
+import { Button } from '~/shared/components/ui/button';
+import { Checkbox } from '~/shared/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Checkbox } from '@/components/ui/checkbox'
+} from '~/shared/components/ui/dialog';
 
 export const SUBJECT_GROUPS = [
   {
@@ -36,12 +36,7 @@ export const SUBJECT_GROUPS = [
   },
   {
     group: 'Humanities',
-    subjects: [
-      'Geography',
-      'History',
-      'Literature in English',
-      'Social Studies',
-    ],
+    subjects: ['Geography', 'History', 'Literature in English', 'Social Studies'],
   },
   {
     group: 'Others',
@@ -54,15 +49,15 @@ export const SUBJECT_GROUPS = [
       'Physical Education',
     ],
   },
-]
+];
 
-export const ALL_SUBJECTS = SUBJECT_GROUPS.flatMap((g) => g.subjects)
+export const ALL_SUBJECTS = SUBJECT_GROUPS.flatMap((g) => g.subjects);
 
 interface SubjectSelectorDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  selectedSubjects: Array<string> | null
-  onApply: (subjects: Array<string> | null) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  selectedSubjects: string[] | null;
+  onApply: (subjects: string[] | null) => void;
 }
 
 export function SubjectSelectorDialog({
@@ -72,66 +67,62 @@ export function SubjectSelectorDialog({
   onApply,
 }: SubjectSelectorDialogProps) {
   // Local draft state while dialog is open
-  const [draft, setDraft] = useState<Set<string>>(
-    () => new Set(selectedSubjects ?? ALL_SUBJECTS),
-  )
+  const [draft, setDraft] = useState<Set<string>>(() => new Set(selectedSubjects ?? ALL_SUBJECTS));
 
   // Re-sync draft when dialog opens
   const handleOpenChange = (next: boolean) => {
     if (next) {
-      setDraft(new Set(selectedSubjects ?? ALL_SUBJECTS))
+      setDraft(new Set(selectedSubjects ?? ALL_SUBJECTS));
     }
-    onOpenChange(next)
-  }
+    onOpenChange(next);
+  };
 
   const toggle = (subject: string) => {
     setDraft((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(subject)) {
-        next.delete(subject)
+        next.delete(subject);
       } else {
-        next.add(subject)
+        next.add(subject);
       }
-      return next
-    })
-  }
+      return next;
+    });
+  };
 
-  const toggleGroup = (subjects: Array<string>) => {
-    const allSelected = subjects.every((s) => draft.has(s))
+  const toggleGroup = (subjects: string[]) => {
+    const allSelected = subjects.every((s) => draft.has(s));
     setDraft((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (allSelected) {
-        subjects.forEach((s) => next.delete(s))
+        subjects.forEach((s) => next.delete(s));
       } else {
-        subjects.forEach((s) => next.add(s))
+        subjects.forEach((s) => next.add(s));
       }
-      return next
-    })
-  }
+      return next;
+    });
+  };
 
   const handleApply = () => {
     // If all subjects selected, treat as "no filter" (null)
-    const isAll = ALL_SUBJECTS.every((s) => draft.has(s))
-    onApply(isAll ? null : Array.from(draft))
-    onOpenChange(false)
-  }
+    const isAll = ALL_SUBJECTS.every((s) => draft.has(s));
+    onApply(isAll ? null : Array.from(draft));
+    onOpenChange(false);
+  };
 
   const handleReset = () => {
-    onApply(null)
-    onOpenChange(false)
-  }
+    onApply(null);
+    onOpenChange(false);
+  };
 
-  const selectedCount = draft.size
-  const totalCount = ALL_SUBJECTS.length
-  const isCustom = selectedCount < totalCount
+  const selectedCount = draft.size;
+  const totalCount = ALL_SUBJECTS.length;
+  const isCustom = selectedCount < totalCount;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md gap-4">
         <DialogHeader className="gap-2">
-          <DialogTitle className="text-lg font-semibold">
-            Select subjects for Overall %
-          </DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Select subjects for Overall %</DialogTitle>
           <p className="text-sm text-muted-foreground">
             Pick the subjects you want to include in the calculation.
           </p>
@@ -139,10 +130,9 @@ export function SubjectSelectorDialog({
 
         <div className="space-y-8">
           {SUBJECT_GROUPS.map(({ group, subjects }) => {
-            const groupSelected = subjects.filter((s) => draft.has(s))
-            const allGroupSelected = groupSelected.length === subjects.length
-            const someGroupSelected =
-              groupSelected.length > 0 && !allGroupSelected
+            const groupSelected = subjects.filter((s) => draft.has(s));
+            const allGroupSelected = groupSelected.length === subjects.length;
+            const someGroupSelected = groupSelected.length > 0 && !allGroupSelected;
 
             return (
               <div key={group}>
@@ -150,7 +140,7 @@ export function SubjectSelectorDialog({
                 <button
                   type="button"
                   onClick={() => toggleGroup(subjects)}
-                  className="flex items-start gap-2 mb-2 w-full text-left"
+                  className="mb-2 flex w-full items-start gap-2 text-left"
                 >
                   <Checkbox
                     checked={allGroupSelected}
@@ -163,10 +153,7 @@ export function SubjectSelectorDialog({
                 {/* Subjects */}
                 <div className="grid grid-cols-2 gap-y-1 pl-6">
                   {subjects.map((subject) => (
-                    <label
-                      key={subject}
-                      className="flex items-start gap-2 cursor-pointer py-0.5"
-                    >
+                    <label key={subject} className="flex cursor-pointer items-start gap-2 py-0.5">
                       <Checkbox
                         checked={draft.has(subject)}
                         onCheckedChange={() => toggle(subject)}
@@ -176,14 +163,14 @@ export function SubjectSelectorDialog({
                   ))}
                 </div>
               </div>
-            )
+            );
           })}
         </div>
 
         <DialogFooter className="flex-row items-center gap-2 sm:justify-between">
           <p className="text-xs text-muted-foreground">
             {isCustom ? (
-              <span className="text-blue-600 font-medium">
+              <span className="font-medium text-blue-600">
                 {selectedCount} of {totalCount} subjects selected
               </span>
             ) : (
@@ -201,5 +188,5 @@ export function SubjectSelectorDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

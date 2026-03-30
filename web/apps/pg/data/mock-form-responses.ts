@@ -1,4 +1,4 @@
-import type { FormRecipient } from '@/types/form'
+import type { FormRecipient } from '~/apps/pg/types/form';
 
 // Maps form.id → FormRecipient[]
 export const FORM_RESPONSES: Record<string, FormRecipient[]> = {
@@ -37,11 +37,7 @@ export const FORM_RESPONSES: Record<string, FormRecipient[]> = {
       responseStatus: 'responded',
       respondedAt: '2026-03-08T10:31:00',
       formResponse: 'no',
-      questionAnswers: [
-        'No, unable to attend',
-        '',
-        'Please schedule via email instead.',
-      ],
+      questionAnswers: ['No, unable to attend', '', 'Please schedule via email instead.'],
     },
     {
       studentId: 's003',
@@ -73,11 +69,7 @@ export const FORM_RESPONSES: Record<string, FormRecipient[]> = {
       responseStatus: 'responded',
       respondedAt: '2026-03-09T08:02:00',
       formResponse: 'yes',
-      questionAnswers: [
-        'Yes, can attend',
-        '2:00 PM – 3:00 PM',
-        'Prefer to discuss math results.',
-      ],
+      questionAnswers: ['Yes, can attend', '2:00 PM – 3:00 PM', 'Prefer to discuss math results.'],
     },
     {
       studentId: 's005',
@@ -132,8 +124,8 @@ export const FORM_RESPONSES: Record<string, FormRecipient[]> = {
       responseStatus: 'pending',
     },
   ],
-}
+};
 
 export function getFormRecipients(formId: string): FormRecipient[] {
-  return FORM_RESPONSES[formId] ?? []
+  return FORM_RESPONSES[formId] ?? [];
 }

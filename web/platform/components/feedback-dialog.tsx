@@ -1,6 +1,6 @@
-import * as React from 'react'
+import * as React from 'react';
 
-import { Button } from '@/components/ui/button'
+import { Button } from '~/shared/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,21 +8,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
+} from '~/shared/components/ui/dialog';
+import { Textarea } from '~/shared/components/ui/textarea';
 
 interface FeedbackDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
-  const [message, setMessage] = React.useState('')
+  const [message, setMessage] = React.useState('');
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    onOpenChange(false)
-    setMessage('')
+    e.preventDefault();
+    onOpenChange(false);
+    setMessage('');
   }
 
   return (
@@ -30,9 +30,7 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Send feedback</DialogTitle>
-          <DialogDescription>
-            Let us know how we can improve your experience.
-          </DialogDescription>
+          <DialogDescription>Let us know how we can improve your experience.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <Textarea
@@ -42,11 +40,7 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
             rows={4}
           />
           <DialogFooter className="mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit">Submit</Button>
@@ -54,5 +48,5 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

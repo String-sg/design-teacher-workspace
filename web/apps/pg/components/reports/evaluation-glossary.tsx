@@ -1,11 +1,12 @@
-import { statusColors } from './learning-outcome-row'
-import type { LearningOutcomeStatus } from '@/types/report'
-import { cn } from '@/lib/utils'
+import type { LearningOutcomeStatus } from '~/apps/pg/types/report';
+import { cn } from '~/shared/lib/utils';
 
-const glossaryItems: Array<{
-  status: LearningOutcomeStatus
-  description: string
-}> = [
+import { statusColors } from './learning-outcome-row';
+
+const glossaryItems: {
+  status: LearningOutcomeStatus;
+  description: string;
+}[] = [
   {
     status: 'Accomplished',
     description:
@@ -26,7 +27,7 @@ const glossaryItems: Array<{
     description:
       'Student is starting to develop understanding of basic concepts and requires significant support.',
   },
-]
+];
 
 export function EvaluationGlossary() {
   return (
@@ -36,7 +37,7 @@ export function EvaluationGlossary() {
         {glossaryItems.map((item) => (
           <div
             key={item.status}
-            className="border-border flex flex-col gap-2 rounded-lg border p-4"
+            className="flex flex-col gap-2 rounded-lg border border-border p-4"
           >
             <span
               className={cn(
@@ -46,10 +47,10 @@ export function EvaluationGlossary() {
             >
               {item.status}
             </span>
-            <p className="text-muted-foreground text-sm">{item.description}</p>
+            <p className="text-sm text-muted-foreground">{item.description}</p>
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }

@@ -1,30 +1,30 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router';
 
-import type { FeatureFlagKey } from '@/lib/feature-flags'
-import { useFeatureFlags } from '@/lib/feature-flags'
+import type { FeatureFlagKey } from '~/platform/lib/feature-flags';
+import { useFeatureFlags } from '~/platform/lib/feature-flags';
+import { Badge } from '~/shared/components/ui/badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
+} from '~/shared/components/ui/card';
+import { Label } from '~/shared/components/ui/label';
+import { Switch } from '~/shared/components/ui/switch';
 
 export const Route = createFileRoute('/flags')({
   component: FeatureFlagsPage,
-})
+});
 
 interface FeatureFlagConfig {
-  key: FeatureFlagKey
-  label: string
-  description: string
-  stage: string
+  key: FeatureFlagKey;
+  label: string;
+  description: string;
+  stage: string;
 }
 
-const featureFlagConfigs: Array<FeatureFlagConfig> = [
+const featureFlagConfigs: FeatureFlagConfig[] = [
   {
     key: 'notifications',
     label: 'Notifications',
@@ -67,14 +67,13 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
   {
     key: 'student-groups',
     label: 'Student Groups',
-    description:
-      'Show the Groups page in the sidebar for organising students into reusable groups',
+    description: 'Show the Groups page in the sidebar for organising students into reusable groups',
     stage: 'Experiment',
   },
-]
+];
 
 function FeatureFlagsPage() {
-  const { flags, setFlag } = useFeatureFlags()
+  const { flags, setFlag } = useFeatureFlags();
 
   return (
     <div className="mx-auto w-full max-w-2xl p-6">
@@ -82,16 +81,13 @@ function FeatureFlagsPage() {
         <CardHeader>
           <CardTitle>Feature Flags</CardTitle>
           <CardDescription>
-            Manage feature flags for this application. Changes are stored
-            locally and persist across sessions.
+            Manage feature flags for this application. Changes are stored locally and persist across
+            sessions.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {featureFlagConfigs.map((config) => (
-            <div
-              key={config.key}
-              className="flex items-center justify-between gap-4"
-            >
+            <div key={config.key} className="flex items-center justify-between gap-4">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-1.5">
                   <Label htmlFor={config.key} className="text-sm font-medium">
@@ -108,9 +104,7 @@ function FeatureFlagsPage() {
                     {config.stage}
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {config.description}
-                </p>
+                <p className="text-sm text-muted-foreground">{config.description}</p>
               </div>
               <Switch
                 id={config.key}
@@ -122,5 +116,5 @@ function FeatureFlagsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

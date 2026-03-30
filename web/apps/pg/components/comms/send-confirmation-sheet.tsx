@@ -1,5 +1,6 @@
-import { CalendarClock, Send, Users, Zap } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { CalendarClock, Send, Users, Zap } from 'lucide-react';
+
+import { Button } from '~/shared/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,16 +8,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '~/shared/components/ui/dialog';
 
 interface SendConfirmationSheetProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title: string
-  recipientClasses: Array<string>
-  totalRecipients: number
-  scheduledAt?: string // ISO string — if set, this is a scheduled send
-  onConfirm: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  recipientClasses: string[];
+  totalRecipients: number;
+  scheduledAt?: string; // ISO string — if set, this is a scheduled send
+  onConfirm: () => void;
 }
 
 function formatScheduledAt(iso: string): string {
@@ -26,7 +27,7 @@ function formatScheduledAt(iso: string): string {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  })
+  });
 }
 
 export function SendConfirmationSheet({
@@ -38,34 +39,29 @@ export function SendConfirmationSheet({
   scheduledAt,
   onConfirm,
 }: SendConfirmationSheetProps) {
-  const isScheduled = Boolean(scheduledAt)
+  const isScheduled = Boolean(scheduledAt);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {isScheduled ? 'Schedule announcement?' : 'Send announcement?'}
-          </DialogTitle>
+          <DialogTitle>{isScheduled ? 'Schedule announcement?' : 'Send announcement?'}</DialogTitle>
           <DialogDescription>
-            Review the details below before{' '}
-            {isScheduled ? 'scheduling.' : 'sending to parents.'}
+            Review the details below before {isScheduled ? 'scheduling.' : 'sending to parents.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Announcement title */}
           <div className="rounded-lg border bg-slate-50 px-4 py-3">
-            <p className="text-sm font-medium text-slate-800">
-              {title || 'Untitled announcement'}
-            </p>
+            <p className="text-sm font-medium text-slate-800">{title || 'Untitled announcement'}</p>
           </div>
 
           {/* Target audience */}
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
               <Users className="h-3.5 w-3.5 text-muted-foreground" />
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 Target audience
               </p>
             </div>
@@ -96,7 +92,7 @@ export function SendConfirmationSheet({
               ) : (
                 <Zap className="h-3.5 w-3.5 text-muted-foreground" />
               )}
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 Delivery
               </p>
             </div>
@@ -128,5 +124,5 @@ export function SendConfirmationSheet({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

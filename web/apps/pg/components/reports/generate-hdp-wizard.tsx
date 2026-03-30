@@ -1,29 +1,24 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link } from '@tanstack/react-router'
-import {
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Save,
-  X,
-} from 'lucide-react'
-import { HdpTemplateStep, TEMPLATES } from './hdp-template-step'
-import { HdpDataStep } from './hdp-data-step'
-import { HdpPreviewStep } from './hdp-preview-step'
-import type { Student } from '@/types/student'
-import type { HolisticReport, Term } from '@/types/report'
-import type { TemplateId } from './hdp-template-step'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import {
-  CURRENT_ACADEMIC_YEAR,
-  addReport,
-  generateReportFromStudent,
-} from '@/data/mock-reports'
-import { getSchoolLevel } from '@/data/mock-students'
+import { Link } from '@tanstack/react-router';
+import { CheckCircle, ChevronLeft, ChevronRight, Eye, Save, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
-const STEPS = ['Template', 'Selection', 'Preview', 'Save']
+import {
+  addReport,
+  CURRENT_ACADEMIC_YEAR,
+  generateReportFromStudent,
+} from '~/apps/pg/data/mock-reports';
+import { getSchoolLevel } from '~/apps/pg/data/mock-students';
+import type { HolisticReport, Term } from '~/apps/pg/types/report';
+import type { Student } from '~/apps/pg/types/student';
+import { Button } from '~/shared/components/ui/button';
+import { cn } from '~/shared/lib/utils';
+
+import { HdpDataStep } from './hdp-data-step';
+import { HdpPreviewStep } from './hdp-preview-step';
+import type { TemplateId } from './hdp-template-step';
+import { HdpTemplateStep, TEMPLATES } from './hdp-template-step';
+
+const STEPS = ['Template', 'Selection', 'Preview', 'Save'];
 
 const DEFAULT_SECTIONS: Record<string, boolean> = {
   studentInfo: true,
@@ -34,13 +29,13 @@ const DEFAULT_SECTIONS: Record<string, boolean> = {
   physicalFitness: true,
   via: true,
   cca: true,
-}
+};
 
 interface GenerateHdpWizardProps {
-  student: Student
-  missingTerms: Array<Term>
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  student: Student;
+  missingTerms: Term[];
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function GenerateHdpWizard({
@@ -49,78 +44,69 @@ export function GenerateHdpWizard({
   open,
   onOpenChange,
 }: GenerateHdpWizardProps) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId | null>(
-    null,
-  )
-  const [selectedTerm, setSelectedTerm] = useState<Term>(missingTerms[0])
+  const [currentStep, setCurrentStep] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId | null>(null);
+  const [selectedTerm, setSelectedTerm] = useState<Term>(missingTerms[0]);
   const [selectedSections, setSelectedSections] =
-    useState<Record<string, boolean>>(DEFAULT_SECTIONS)
-  const [generatedReport, setGeneratedReport] = useState<HolisticReport | null>(
-    null,
-  )
-  const [isSaved, setIsSaved] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
+    useState<Record<string, boolean>>(DEFAULT_SECTIONS);
+  const [generatedReport, setGeneratedReport] = useState<HolisticReport | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const schoolLevel = getSchoolLevel(student.class)
+  const schoolLevel = getSchoolLevel(student.class);
 
   // Reset state when closed
   useEffect(() => {
     if (!open) {
-      setCurrentStep(0)
-      setSelectedTemplate(null)
-      setSelectedTerm(missingTerms[0])
-      setSelectedSections(DEFAULT_SECTIONS)
-      setGeneratedReport(null)
-      setIsSaved(false)
+      setCurrentStep(0);
+      setSelectedTemplate(null);
+      setSelectedTerm(missingTerms[0]);
+      setSelectedSections(DEFAULT_SECTIONS);
+      setGeneratedReport(null);
+      setIsSaved(false);
     }
-  }, [open, missingTerms])
+  }, [open, missingTerms]);
 
   // Scroll to top on step change
   useEffect(() => {
-    scrollRef.current?.scrollTo(0, 0)
-  }, [currentStep])
+    scrollRef.current?.scrollTo(0, 0);
+  }, [currentStep]);
 
   function handleSelectTemplate(id: TemplateId) {
-    setSelectedTemplate(id)
-    const template = TEMPLATES.find((t) => t.id === id)
+    setSelectedTemplate(id);
+    const template = TEMPLATES.find((t) => t.id === id);
     if (template) {
-      setSelectedSections({ ...template.sections })
+      setSelectedSections({ ...template.sections });
     }
   }
 
   function handleToggleSection(key: string) {
-    setSelectedSections((prev) => ({ ...prev, [key]: !prev[key] }))
+    setSelectedSections((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
   function handleNext() {
     if (currentStep === 1) {
       // Moving to preview — generate the report
-      const report = generateReportFromStudent(
-        student,
-        selectedTerm,
-        CURRENT_ACADEMIC_YEAR,
-      )
-      setGeneratedReport(report)
+      const report = generateReportFromStudent(student, selectedTerm, CURRENT_ACADEMIC_YEAR);
+      setGeneratedReport(report);
     }
-    setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1))
+    setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1));
   }
 
   function handleBack() {
-    setCurrentStep((prev) => Math.max(prev - 1, 0))
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
   }
 
   function handleSave() {
     if (generatedReport) {
-      addReport(generatedReport)
-      setIsSaved(true)
+      addReport(generatedReport);
+      setIsSaved(true);
     }
   }
 
-  const canGoNext =
-    currentStep === 0 ? selectedTemplate !== null : currentStep < 2
+  const canGoNext = currentStep === 0 ? selectedTemplate !== null : currentStep < 2;
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-white">
@@ -133,11 +119,7 @@ export function GenerateHdpWizard({
               {student.name} &middot; {student.class}
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)}>
             <X className="size-4" />
           </Button>
         </div>
@@ -146,8 +128,8 @@ export function GenerateHdpWizard({
         <div className="mx-auto mt-3 flex max-w-2xl flex-col gap-2">
           <div className="flex items-center gap-1.5">
             {STEPS.map((step, i) => {
-              const isCompleted = i < currentStep
-              const isActive = i === currentStep
+              const isCompleted = i < currentStep;
+              const isActive = i === currentStep;
 
               return (
                 <div
@@ -157,14 +139,12 @@ export function GenerateHdpWizard({
                     isCompleted || isActive ? 'bg-primary' : 'bg-muted',
                   )}
                 />
-              )
+              );
             })}
           </div>
           <p className="text-xs text-muted-foreground">
             Step {currentStep + 1} of {STEPS.length} &middot;{' '}
-            <span className="font-medium text-foreground">
-              {STEPS[currentStep]}
-            </span>
+            <span className="font-medium text-foreground">{STEPS[currentStep]}</span>
           </p>
         </div>
       </div>
@@ -238,8 +218,8 @@ export function GenerateHdpWizard({
               <Button
                 className="bg-[#f26c47] text-white hover:bg-[#e05a37]"
                 onClick={() => {
-                  handleNext()
-                  handleSave()
+                  handleNext();
+                  handleSave();
                 }}
               >
                 <Save className="mr-1.5 size-4" />
@@ -249,9 +229,7 @@ export function GenerateHdpWizard({
             {currentStep === 3 && isSaved && generatedReport && (
               <Button
                 className="bg-[#f26c47] text-white hover:bg-[#e05a37]"
-                render={
-                  <Link to="/reports/$id" params={{ id: generatedReport.id }} />
-                }
+                render={<Link to="/reports/$id" params={{ id: generatedReport.id }} />}
               >
                 <Eye className="mr-1.5 size-4" />
                 View Report
@@ -261,7 +239,7 @@ export function GenerateHdpWizard({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function SuccessStep({
@@ -270,17 +248,17 @@ function SuccessStep({
   studentName,
   term,
 }: {
-  report: HolisticReport | null
-  isSaved: boolean
-  studentName: string
-  term: Term
+  report: HolisticReport | null;
+  isSaved: boolean;
+  studentName: string;
+  term: Term;
 }) {
   if (!isSaved || !report) {
     return (
       <div className="flex flex-1 items-center justify-center py-16">
         <p className="text-muted-foreground">Saving report...</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -291,12 +269,12 @@ function SuccessStep({
       <h3 className="text-xl font-semibold">Report Saved Successfully</h3>
       <p className="max-w-sm text-sm text-muted-foreground">
         The Holistic Development Profile for{' '}
-        <span className="font-medium text-foreground">{studentName}</span> —{' '}
-        {term} {report.academicYear} has been saved.
+        <span className="font-medium text-foreground">{studentName}</span> — {term}{' '}
+        {report.academicYear} has been saved.
       </p>
       <p className="text-xs text-muted-foreground">
         You can view, edit, and send this report from the Reports page.
       </p>
     </div>
-  )
+  );
 }

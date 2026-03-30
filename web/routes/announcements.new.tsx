@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import {
   ArrowDown,
   ArrowLeft,
@@ -19,52 +18,46 @@ import {
   Send,
   User,
   X,
-} from 'lucide-react'
-import { toast } from 'sonner'
-import type { ChangeEvent } from 'react'
-import type {
-  PGAnnouncement,
-  PGRecipient,
-  Shortcut,
-} from '@/types/pg-announcement'
-import type { FormQuestion, ReminderType, ResponseType } from '@/types/form'
-import type { SelectedEntity } from '@/components/comms/entity-selector'
-import { QuestionBuilder } from '@/components/comms/question-builder'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { StudentRecipientSelector } from '@/components/comms/student-recipient-selector'
-import { SendConfirmationSheet } from '@/components/comms/send-confirmation-sheet'
-import { RichTextArea } from '@/components/comms/rich-text-area'
-import { PGShortcutsSelector } from '@/components/comms/pg-shortcuts-selector'
-import { StaffSelector } from '@/components/comms/staff-selector'
-import { EnquiryEmailSelector } from '@/components/comms/enquiry-email-selector'
-import { mockStudents } from '@/data/mock-students'
-import {
-  getPGAnnouncementById,
-  mockPGAnnouncements,
-} from '@/data/mock-pg-announcements'
-import { MOCK_STAFF } from '@/data/mock-staff'
-import { PG_SHORTCUT_PRESETS } from '@/data/pg-shortcuts'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from 'lucide-react';
+import type { ChangeEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+
+import { EnquiryEmailSelector } from '~/apps/pg/components/comms/enquiry-email-selector';
+import type { SelectedEntity } from '~/apps/pg/components/comms/entity-selector';
+import { PGShortcutsSelector } from '~/apps/pg/components/comms/pg-shortcuts-selector';
+import { QuestionBuilder } from '~/apps/pg/components/comms/question-builder';
+import { RichTextArea } from '~/apps/pg/components/comms/rich-text-area';
+import { SendConfirmationSheet } from '~/apps/pg/components/comms/send-confirmation-sheet';
+import { StaffSelector } from '~/apps/pg/components/comms/staff-selector';
+import { StudentRecipientSelector } from '~/apps/pg/components/comms/student-recipient-selector';
+import { getPGAnnouncementById, mockPGAnnouncements } from '~/apps/pg/data/mock-pg-announcements';
+import { MOCK_STAFF } from '~/apps/pg/data/mock-staff';
+import { mockStudents } from '~/apps/pg/data/mock-students';
+import { PG_SHORTCUT_PRESETS } from '~/apps/pg/data/pg-shortcuts';
+import type { FormQuestion, ReminderType, ResponseType } from '~/apps/pg/types/form';
+import type { PGAnnouncement, PGRecipient, Shortcut } from '~/apps/pg/types/pg-announcement';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Button } from '~/shared/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { cn } from '@/lib/utils'
+} from '~/shared/components/ui/dropdown-menu';
+import { Input } from '~/shared/components/ui/input';
+import { Label } from '~/shared/components/ui/label';
+import { cn } from '~/shared/lib/utils';
 
 export const Route = createFileRoute('/announcements/new')({
   validateSearch: (search: Record<string, unknown>) => ({
     edit: typeof search.edit === 'string' ? search.edit : undefined,
-    responseType:
-      typeof search.responseType === 'string' ? search.responseType : undefined,
+    responseType: typeof search.responseType === 'string' ? search.responseType : undefined,
   }),
   component: NewAnnouncementPage,
-})
+});
 
-type SendOption = 'now' | 'scheduled'
+type SendOption = 'now' | 'scheduled';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -75,10 +68,10 @@ function linkifyHtml(html: string): string {
   return html.replace(
     /(<a\b[^>]*>[\s\S]*?<\/a>)|(<[^>]+>)|(https?:\/\/[^\s<>"']+)/g,
     (match, aBlock, tag, url) => {
-      if (aBlock ?? tag) return match
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
+      if (aBlock ?? tag) return match;
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
     },
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -86,9 +79,9 @@ function linkifyHtml(html: string): string {
 // ---------------------------------------------------------------------------
 
 function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 // ---------------------------------------------------------------------------
@@ -104,7 +97,7 @@ function AcknowledgeMockup() {
         <div className="h-1.5 w-14 rounded-full bg-white/70" />
       </div>
     </div>
-  )
+  );
 }
 
 function YesNoMockup() {
@@ -121,7 +114,7 @@ function YesNoMockup() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -131,19 +124,19 @@ function YesNoMockup() {
 type AnnouncementPreviewScreen =
   | 'main'
   | 'submitted'
-  | { questionId: string; responseChoice: 'yes' | 'no' }
+  | { questionId: string; responseChoice: 'yes' | 'no' };
 
 interface AnnouncementPreviewProps {
-  title: string
-  description: string
-  shortcuts: Array<Shortcut>
-  staffInCharge: string
-  enquiryEmail: string
-  recipients: Array<SelectedEntity>
-  responseType: ResponseType
-  dueDate?: string
-  questions?: FormQuestion[]
-  editingQuestionId?: string | null
+  title: string;
+  description: string;
+  shortcuts: Shortcut[];
+  staffInCharge: string;
+  enquiryEmail: string;
+  recipients: SelectedEntity[];
+  responseType: ResponseType;
+  dueDate?: string;
+  questions?: FormQuestion[];
+  editingQuestionId?: string | null;
 }
 
 function AnnouncementPreview({
@@ -158,19 +151,19 @@ function AnnouncementPreview({
   questions = [],
   editingQuestionId,
 }: AnnouncementPreviewProps) {
-  const totalCount = recipients.reduce((s, r) => s + r.count, 0)
-  const [screen, setScreen] = useState<AnnouncementPreviewScreen>('main')
+  const totalCount = recipients.reduce((s, r) => s + r.count, 0);
+  const [screen, setScreen] = useState<AnnouncementPreviewScreen>('main');
 
   // Reset to main when responseType changes
   useEffect(() => {
-    setScreen('main')
-  }, [responseType])
+    setScreen('main');
+  }, [responseType]);
 
   // Auto-navigate to question being edited
   useEffect(() => {
-    if (!editingQuestionId) return
-    setScreen({ questionId: editingQuestionId, responseChoice: 'yes' })
-  }, [editingQuestionId])
+    if (!editingQuestionId) return;
+    setScreen({ questionId: editingQuestionId, responseChoice: 'yes' });
+  }, [editingQuestionId]);
 
   const previewDate = new Date()
     .toLocaleDateString('en-SG', {
@@ -178,15 +171,15 @@ function AnnouncementPreview({
       month: 'short',
       year: 'numeric',
     })
-    .toUpperCase()
+    .toUpperCase();
   const previewTime = new Date()
     .toLocaleTimeString('en-SG', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
     })
-    .toUpperCase()
-  const timestamp = `${previewDate}, ${previewTime}`
+    .toUpperCase();
+  const timestamp = `${previewDate}, ${previewTime}`;
 
   const formattedDueDate = dueDate
     ? new Date(dueDate).toLocaleDateString('en-SG', {
@@ -194,53 +187,48 @@ function AnnouncementPreview({
         month: 'short',
         year: 'numeric',
       })
-    : 'DD Mmm YYYY'
+    : 'DD Mmm YYYY';
 
   // Question screen helpers
-  const isMainScreen = screen === 'main'
-  const isSubmittedScreen = screen === 'submitted'
-  const isQuestionScreen = !isMainScreen && !isSubmittedScreen
+  const isMainScreen = screen === 'main';
+  const isSubmittedScreen = screen === 'submitted';
+  const isQuestionScreen = !isMainScreen && !isSubmittedScreen;
   const screenChoice = isQuestionScreen
-    ? (screen as { questionId: string; responseChoice: 'yes' | 'no' })
-        .responseChoice
-    : 'yes'
+    ? (screen as { questionId: string; responseChoice: 'yes' | 'no' }).responseChoice
+    : 'yes';
   const currentQuestionId = isQuestionScreen
-    ? (screen as { questionId: string; responseChoice: 'yes' | 'no' })
-        .questionId
-    : null
+    ? (screen as { questionId: string; responseChoice: 'yes' | 'no' }).questionId
+    : null;
 
   function getRelevantQuestions(_choice: 'yes' | 'no') {
-    return questions
+    return questions;
   }
 
-  const relevantQuestions = getRelevantQuestions(screenChoice)
-  const currentQIndex = relevantQuestions.findIndex(
-    (q) => q.id === currentQuestionId,
-  )
-  const currentQ = relevantQuestions[currentQIndex] ?? null
-  const isLastQ = currentQIndex === relevantQuestions.length - 1
+  const relevantQuestions = getRelevantQuestions(screenChoice);
+  const currentQIndex = relevantQuestions.findIndex((q) => q.id === currentQuestionId);
+  const currentQ = relevantQuestions[currentQIndex] ?? null;
+  const isLastQ = currentQIndex === relevantQuestions.length - 1;
   const progressPct = isSubmittedScreen
     ? 100
     : isQuestionScreen
       ? ((currentQIndex + 1) / Math.max(relevantQuestions.length, 1)) * 100
-      : 0
+      : 0;
 
   function handleYesClick() {
-    const qs = getRelevantQuestions('yes')
-    if (qs.length > 0)
-      setScreen({ questionId: qs[0].id, responseChoice: 'yes' })
+    const qs = getRelevantQuestions('yes');
+    if (qs.length > 0) setScreen({ questionId: qs[0].id, responseChoice: 'yes' });
   }
   function handleNoClick() {
-    const qs = getRelevantQuestions('no')
-    if (qs.length > 0) setScreen({ questionId: qs[0].id, responseChoice: 'no' })
+    const qs = getRelevantQuestions('no');
+    if (qs.length > 0) setScreen({ questionId: qs[0].id, responseChoice: 'no' });
   }
   function handleNextQuestion() {
-    const next = relevantQuestions[currentQIndex + 1]
-    if (next) setScreen({ questionId: next.id, responseChoice: screenChoice })
-    else setScreen('submitted')
+    const next = relevantQuestions[currentQIndex + 1];
+    if (next) setScreen({ questionId: next.id, responseChoice: screenChoice });
+    else setScreen('submitted');
   }
   function handleNavBack() {
-    if (isQuestionScreen || isSubmittedScreen) setScreen('main')
+    if (isQuestionScreen || isSubmittedScreen) setScreen('main');
   }
 
   // ---------------------------------------------------------------------------
@@ -251,13 +239,9 @@ function AnnouncementPreview({
       {/* Announcement header */}
       <div className="px-4 py-4">
         {title ? (
-          <h3 className="text-sm font-bold leading-snug text-slate-900">
-            {title}
-          </h3>
+          <h3 className="text-sm leading-snug font-bold text-slate-900">{title}</h3>
         ) : (
-          <h3 className="text-sm font-bold leading-snug text-slate-300">
-            Announcement title
-          </h3>
+          <h3 className="text-sm leading-snug font-bold text-slate-300">Announcement title</h3>
         )}
         <p className="mt-1 text-[10px] text-slate-400">
           {timestamp}
@@ -265,7 +249,7 @@ function AnnouncementPreview({
         </p>
         <div className="mt-2 flex items-center gap-1.5">
           <User className="h-3 w-3 shrink-0 text-slate-400" />
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+          <p className="text-[11px] font-semibold tracking-wide text-slate-600 uppercase">
             STUDENT NAME
           </p>
         </div>
@@ -273,7 +257,7 @@ function AnnouncementPreview({
 
       {/* Details */}
       <div className="px-4 py-4">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+        <p className="mb-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
           Details
         </p>
         {description ? (
@@ -291,29 +275,25 @@ function AnnouncementPreview({
       {/* Shortcuts */}
       {shortcuts.length > 0 && (
         <div className="px-4 py-4">
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          <p className="mb-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
             Shortcuts
           </p>
           <div className="space-y-2">
             {shortcuts.map((s, i) => {
-              const preset = PG_SHORTCUT_PRESETS.find((p) => p.url === s.url)
+              const preset = PG_SHORTCUT_PRESETS.find((p) => p.url === s.url);
               return (
                 <div
                   key={i}
                   className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2.5"
                 >
                   {preset ? (
-                    <span className="text-base leading-none">
-                      {preset.emoji}
-                    </span>
+                    <span className="text-base leading-none">{preset.emoji}</span>
                   ) : (
                     <ExternalLink className="h-4 w-4 shrink-0 text-slate-400" />
                   )}
-                  <span className="text-xs font-semibold text-slate-800">
-                    {s.label}
-                  </span>
+                  <span className="text-xs font-semibold text-slate-800">{s.label}</span>
                 </div>
-              )
+              );
             })}
           </div>
         </div>
@@ -321,19 +301,17 @@ function AnnouncementPreview({
 
       {/* Enquiry footer */}
       <div className="px-4 py-5">
-        <p className="text-center text-[10px] italic text-slate-500">
+        <p className="text-center text-[10px] text-slate-500 italic">
           For enquiries on this post, please contact{' '}
           {enquiryEmail ? (
-            <span className="not-italic text-primary">{enquiryEmail}</span>
+            <span className="text-primary not-italic">{enquiryEmail}</span>
           ) : (
-            <span className="not-italic text-slate-300">
-              enquiry@school.edu.sg
-            </span>
+            <span className="text-slate-300 not-italic">enquiry@school.edu.sg</span>
           )}
         </p>
       </div>
     </div>
-  )
+  );
 
   // ---------------------------------------------------------------------------
   // Main screen (with footer based on responseType)
@@ -347,14 +325,10 @@ function AnnouncementPreview({
         <div className="shrink-0 border-t border-slate-100 bg-white px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <div className="shrink-0">
-              <p className="text-[10px] text-slate-400">
-                Please acknowledge by
-              </p>
-              <p className="text-xs font-bold text-slate-700">
-                {formattedDueDate}
-              </p>
+              <p className="text-[10px] text-slate-400">Please acknowledge by</p>
+              <p className="text-xs font-bold text-slate-700">{formattedDueDate}</p>
             </div>
-            <div className="whitespace-nowrap rounded-lg bg-[#c47565] px-4 py-1.5 text-[11px] font-semibold text-white opacity-80">
+            <div className="rounded-lg bg-[#c47565] px-4 py-1.5 text-[11px] font-semibold whitespace-nowrap text-white opacity-80">
               Acknowledge
             </div>
           </div>
@@ -366,9 +340,7 @@ function AnnouncementPreview({
           <div className="flex items-center justify-between gap-2">
             <div className="shrink-0">
               <p className="text-[10px] text-slate-400">Please respond by</p>
-              <p className="text-xs font-bold text-slate-700">
-                {formattedDueDate}
-              </p>
+              <p className="text-xs font-bold text-slate-700">{formattedDueDate}</p>
             </div>
             <div className="flex gap-1.5">
               <button
@@ -402,7 +374,7 @@ function AnnouncementPreview({
         </div>
       )}
     </div>
-  )
+  );
 
   // ---------------------------------------------------------------------------
   // Question screen
@@ -410,7 +382,7 @@ function AnnouncementPreview({
   const questionScreenContent = currentQ ? (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Progress bar */}
-      <div className="shrink-0 border-b border-slate-100 bg-white px-4 pb-2 pt-2">
+      <div className="shrink-0 border-b border-slate-100 bg-white px-4 pt-2 pb-2">
         <div className="flex items-center justify-between">
           <div className="mr-3 h-0.5 flex-1 rounded-full bg-slate-100">
             <div
@@ -426,21 +398,15 @@ function AnnouncementPreview({
 
       {/* Question body */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
-        <p className="mb-4 text-[11px] font-medium leading-snug text-slate-800">
+        <p className="mb-4 text-[11px] leading-snug font-medium text-slate-800">
           {currentQ.required && <span className="text-red-500">* </span>}
-          {currentQ.text || (
-            <span className="text-slate-300">Question text</span>
-          )}
+          {currentQ.text || <span className="text-slate-300">Question text</span>}
         </p>
 
         {currentQ.type === 'free-text' && (
           <div className="rounded-lg border border-slate-200 bg-white p-3">
-            <p className="text-[11px] text-slate-300">
-              Type your answer here...
-            </p>
-            <p className="mt-8 text-right text-[10px] text-slate-300">
-              500 characters left
-            </p>
+            <p className="text-[11px] text-slate-300">Type your answer here...</p>
+            <p className="mt-8 text-right text-[10px] text-slate-300">500 characters left</p>
           </div>
         )}
 
@@ -470,14 +436,14 @@ function AnnouncementPreview({
         </button>
       </div>
     </div>
-  ) : null
+  ) : null;
 
   // ---------------------------------------------------------------------------
   // Submitted screen
   // ---------------------------------------------------------------------------
   const submittedContent = (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="shrink-0 border-b border-slate-100 bg-white px-4 pb-2 pt-2">
+      <div className="shrink-0 border-b border-slate-100 bg-white px-4 pt-2 pb-2">
         <div className="flex items-center justify-between">
           <div className="mr-3 h-0.5 flex-1 rounded-full bg-slate-100">
             <div className="h-0.5 w-full rounded-full bg-slate-500" />
@@ -489,9 +455,7 @@ function AnnouncementPreview({
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
           <CheckCircle2 className="h-6 w-6 text-emerald-500" />
         </div>
-        <p className="text-center text-sm font-semibold text-slate-800">
-          Response submitted
-        </p>
+        <p className="text-center text-sm font-semibold text-slate-800">Response submitted</p>
         <p className="text-center text-[11px] leading-relaxed text-slate-400">
           This is a preview —<br />
           no data was sent.
@@ -507,22 +471,19 @@ function AnnouncementPreview({
         </button>
       </div>
     </div>
-  )
+  );
 
   return (
     <div className="overflow-hidden rounded-xl border bg-white">
       {/* Card header */}
       <div className="flex items-center justify-between border-b bg-slate-50 px-4 py-3">
         <span className="text-sm font-semibold">Preview</span>
-        <span className="text-xs text-muted-foreground">
-          As seen by parents
-        </span>
+        <span className="text-xs text-muted-foreground">As seen by parents</span>
       </div>
 
       <div className="p-4">
         <p className="mb-3 text-xs text-muted-foreground">
-          This is how parents will see your announcement on the Parents Gateway
-          App.
+          This is how parents will see your announcement on the Parents Gateway App.
         </p>
 
         {/* Phone mockup */}
@@ -562,7 +523,7 @@ function AnnouncementPreview({
         )}
       </div>
     </div>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -571,29 +532,25 @@ function AnnouncementPreview({
 function getValidationHint(
   sendOption: SendOption,
   title: string,
-  recipients: Array<SelectedEntity>,
+  recipients: SelectedEntity[],
   scheduledDate: string,
 ): string | null {
-  const noTitle = !title.trim()
-  const noRecipients = recipients.length === 0
-  if (noTitle && noRecipients)
-    return 'Add a title and select recipients to continue'
-  if (noTitle) return 'Add a title to continue'
-  if (noRecipients) return 'Select recipients to continue'
-  if (sendOption === 'scheduled' && !scheduledDate)
-    return 'Select a send date to continue'
-  return null
+  const noTitle = !title.trim();
+  const noRecipients = recipients.length === 0;
+  if (noTitle && noRecipients) return 'Add a title and select recipients to continue';
+  if (noTitle) return 'Add a title to continue';
+  if (noRecipients) return 'Select recipients to continue';
+  if (sendOption === 'scheduled' && !scheduledDate) return 'Select a send date to continue';
+  return null;
 }
 
 // ---------------------------------------------------------------------------
 // Page component
 // ---------------------------------------------------------------------------
 function NewAnnouncementPage() {
-  const { edit: editId, responseType: initialResponseType } = Route.useSearch()
-  const isEditing = Boolean(editId)
-  const existingAnnouncement = editId
-    ? getPGAnnouncementById(editId)
-    : undefined
+  const { edit: editId, responseType: initialResponseType } = Route.useSearch();
+  const isEditing = Boolean(editId);
+  const existingAnnouncement = editId ? getPGAnnouncementById(editId) : undefined;
 
   useSetBreadcrumbs([
     { label: 'Posts', href: '/announcements' },
@@ -601,28 +558,26 @@ function NewAnnouncementPage() {
       label: isEditing ? 'Edit Post' : 'New Post',
       href: '/announcements/new',
     },
-  ])
+  ]);
 
   const showResponseSection =
-    initialResponseType === 'acknowledge' || initialResponseType === 'yes-no'
+    initialResponseType === 'acknowledge' || initialResponseType === 'yes-no';
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // Form state
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [shortcuts, setShortcuts] = useState<Array<Shortcut>>([])
-  const [recipients, setRecipients] = useState<Array<SelectedEntity>>([])
-  const [staffInCharge, setStaffInCharge] = useState<Array<SelectedEntity>>([])
-  const [enquiryEmail, setEnquiryEmail] = useState('')
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
+  const [recipients, setRecipients] = useState<SelectedEntity[]>([]);
+  const [staffInCharge, setStaffInCharge] = useState<SelectedEntity[]>([]);
+  const [enquiryEmail, setEnquiryEmail] = useState('');
 
   // Attachment state
-  const [uploadedFiles, setUploadedFiles] = useState<Array<File>>([])
-  const [uploadedPhotos, setUploadedPhotos] = useState<
-    Array<{ file: File; url: string }>
-  >([])
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const photoInputRef = useRef<HTMLInputElement>(null)
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedPhotos, setUploadedPhotos] = useState<{ file: File; url: string }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   // Response type
   const [responseType, setResponseType] = useState<ResponseType>(
@@ -631,90 +586,86 @@ function NewAnnouncementPage() {
       : initialResponseType === 'yes-no'
         ? 'yes-no'
         : 'view-only',
-  )
-  const [dueDate, setDueDate] = useState('')
-  const [reminderType, setReminderType] = useState<ReminderType>('none')
-  const [reminderDate, setReminderDate] = useState('')
-  const [questions, setQuestions] = useState<FormQuestion[]>([])
-  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(
-    null,
-  )
+  );
+  const [dueDate, setDueDate] = useState('');
+  const [reminderType, setReminderType] = useState<ReminderType>('none');
+  const [reminderDate, setReminderDate] = useState('');
+  const [questions, setQuestions] = useState<FormQuestion[]>([]);
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
 
   // Event details (acknowledge + yes-no)
-  const [eventStart, setEventStart] = useState('')
-  const [eventStartTime, setEventStartTime] = useState('')
-  const [eventEnd, setEventEnd] = useState('')
-  const [eventEndTime, setEventEndTime] = useState('')
-  const [venue, setVenue] = useState('')
+  const [eventStart, setEventStart] = useState('');
+  const [eventStartTime, setEventStartTime] = useState('');
+  const [eventEnd, setEventEnd] = useState('');
+  const [eventEndTime, setEventEndTime] = useState('');
+  const [venue, setVenue] = useState('');
 
   function handleResponseTypeChange(type: ResponseType) {
-    setResponseType(type)
+    setResponseType(type);
     if (type === 'view-only') {
-      setDueDate('')
-      setReminderType('none')
-      setReminderDate('')
-      setQuestions([])
-      setEditingQuestionId(null)
-      setEventStart('')
-      setEventStartTime('')
-      setEventEnd('')
-      setEventEndTime('')
-      setVenue('')
+      setDueDate('');
+      setReminderType('none');
+      setReminderDate('');
+      setQuestions([]);
+      setEditingQuestionId(null);
+      setEventStart('');
+      setEventStartTime('');
+      setEventEnd('');
+      setEventEndTime('');
+      setVenue('');
     }
   }
 
   // Send options
-  const [sendOption, setSendOption] = useState<SendOption>('now')
-  const [scheduledDate, setScheduledDate] = useState('')
-  const [scheduledTime, setScheduledTime] = useState('08:00')
+  const [sendOption, setSendOption] = useState<SendOption>('now');
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [scheduledTime, setScheduledTime] = useState('08:00');
 
   // UI state
-  const [showConfirmSheet, setShowConfirmSheet] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
-  const [savedAt, setSavedAt] = useState<Date | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
-  const autosaveTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [showConfirmSheet, setShowConfirmSheet] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const autosaveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Keep a ref so triggerAutosave doesn't need to close over title
   // (avoids recreating the function — and the Tiptap onBlur prop — on every keystroke)
-  const titleRef = useRef(title)
+  const titleRef = useRef(title);
   useEffect(() => {
-    titleRef.current = title
-  }, [title])
+    titleRef.current = title;
+  }, [title]);
 
   // Autosave simulation — stable (no title dependency)
   const triggerAutosave = useCallback(() => {
-    if (!titleRef.current.trim()) return
-    setIsSaving(true)
+    if (!titleRef.current.trim()) return;
+    setIsSaving(true);
     setTimeout(() => {
-      setIsSaving(false)
-      setSavedAt(new Date())
-    }, 600)
-  }, [])
+      setIsSaving(false);
+      setSavedAt(new Date());
+    }, 600);
+  }, []);
 
   useEffect(() => {
-    autosaveTimer.current = setInterval(triggerAutosave, 30000)
+    autosaveTimer.current = setInterval(triggerAutosave, 30000);
     return () => {
-      if (autosaveTimer.current) clearInterval(autosaveTimer.current)
-    }
-  }, [triggerAutosave])
+      if (autosaveTimer.current) clearInterval(autosaveTimer.current);
+    };
+  }, [triggerAutosave]);
 
   // Pre-fill form from existing announcement when editing
   useEffect(() => {
-    if (!existingAnnouncement) return
-    setTitle(existingAnnouncement.title)
-    setDescription(existingAnnouncement.description)
-    setShortcuts(existingAnnouncement.shortcuts)
-    setEnquiryEmail(existingAnnouncement.enquiryEmail)
+    if (!existingAnnouncement) return;
+    setTitle(existingAnnouncement.title);
+    setDescription(existingAnnouncement.description);
+    setShortcuts(existingAnnouncement.shortcuts);
+    setEnquiryEmail(existingAnnouncement.enquiryEmail);
 
     // Re-hydrate staffInCharge: match names back to MOCK_STAFF entries
     if (existingAnnouncement.staffInCharge) {
-      const names = existingAnnouncement.staffInCharge
-        .split(', ')
-        .filter(Boolean)
-      const staffEntities: Array<SelectedEntity> = names.flatMap((name) => {
-        const found = MOCK_STAFF.find((s) => s.name === name)
-        if (!found) return []
+      const names = existingAnnouncement.staffInCharge.split(', ').filter(Boolean);
+      const staffEntities: SelectedEntity[] = names.flatMap((name) => {
+        const found = MOCK_STAFF.find((s) => s.name === name);
+        if (!found) return [];
         return [
           {
             id: found.id,
@@ -722,132 +673,116 @@ function NewAnnouncementPage() {
             count: 1,
             type: 'individual' as const,
           },
-        ]
-      })
-      setStaffInCharge(staffEntities)
+        ];
+      });
+      setStaffInCharge(staffEntities);
     }
 
     // Re-hydrate recipients: group PGRecipients by classLabel
     if (existingAnnouncement.recipients.length > 0) {
-      const byClass = new Map<string, number>()
+      const byClass = new Map<string, number>();
       for (const r of existingAnnouncement.recipients) {
-        byClass.set(r.classLabel, (byClass.get(r.classLabel) ?? 0) + 1)
+        byClass.set(r.classLabel, (byClass.get(r.classLabel) ?? 0) + 1);
       }
-      const recipientEntities: Array<SelectedEntity> = Array.from(
-        byClass.entries(),
-      ).map(([cls, count]) => ({
-        id: `class:${cls}`,
-        label: cls,
-        count,
-        groupType: 'class' as const,
-      }))
-      setRecipients(recipientEntities)
+      const recipientEntities: SelectedEntity[] = Array.from(byClass.entries()).map(
+        ([cls, count]) => ({
+          id: `class:${cls}`,
+          label: cls,
+          count,
+          groupType: 'class' as const,
+        }),
+      );
+      setRecipients(recipientEntities);
     }
 
     // Restore scheduled date/time if applicable
     if (existingAnnouncement.scheduledAt) {
-      const dt = new Date(existingAnnouncement.scheduledAt)
-      const pad = (n: number) => String(n).padStart(2, '0')
-      setScheduledDate(
-        `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`,
-      )
-      setScheduledTime(`${pad(dt.getHours())}:${pad(dt.getMinutes())}`)
-      setSendOption('scheduled')
+      const dt = new Date(existingAnnouncement.scheduledAt);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      setScheduledDate(`${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`);
+      setScheduledTime(`${pad(dt.getHours())}:${pad(dt.getMinutes())}`);
+      setSendOption('scheduled');
     }
-  }, [])
+  }, []);
 
   // Attachment handlers
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const incoming = Array.from(e.target.files ?? [])
-    setUploadedFiles((prev) => [...prev, ...incoming].slice(0, 3))
-    e.target.value = '' // reset so same file can be re-selected after removal
+    const incoming = Array.from(e.target.files ?? []);
+    setUploadedFiles((prev) => [...prev, ...incoming].slice(0, 3));
+    e.target.value = ''; // reset so same file can be re-selected after removal
   }
 
   function handlePhotoChange(e: ChangeEvent<HTMLInputElement>) {
-    const incoming = Array.from(e.target.files ?? [])
+    const incoming = Array.from(e.target.files ?? []);
     setUploadedPhotos((prev) => {
-      const remaining = 12 - prev.length
+      const remaining = 12 - prev.length;
       const toAdd = incoming.slice(0, remaining).map((file) => ({
         file,
         url: URL.createObjectURL(file),
-      }))
-      return [...prev, ...toAdd]
-    })
-    e.target.value = ''
+      }));
+      return [...prev, ...toAdd];
+    });
+    e.target.value = '';
   }
 
   function removeFile(index: number) {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index))
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
   function removePhoto(index: number) {
     setUploadedPhotos((prev) => {
-      URL.revokeObjectURL(prev[index].url)
-      return prev.filter((_, i) => i !== index)
-    })
+      URL.revokeObjectURL(prev[index].url);
+      return prev.filter((_, i) => i !== index);
+    });
   }
 
   // Strip HTML tags to get plain-text character count for description
-  const descriptionCharCount = description.replace(/<[^>]*>/g, '').length
+  const descriptionCharCount = description.replace(/<[^>]*>/g, '').length;
 
   // Validation
-  const totalRecipientCount = recipients.reduce((s, r) => s + r.count, 0)
-  const canPost = title.trim().length > 0 && recipients.length > 0
-  const canSchedule =
-    canPost && scheduledDate.length > 0 && scheduledTime.length > 0
-  const canSubmit = sendOption === 'scheduled' ? canSchedule : canPost
-  const validationHint = getValidationHint(
-    sendOption,
-    title,
-    recipients,
-    scheduledDate,
-  )
+  const totalRecipientCount = recipients.reduce((s, r) => s + r.count, 0);
+  const canPost = title.trim().length > 0 && recipients.length > 0;
+  const canSchedule = canPost && scheduledDate.length > 0 && scheduledTime.length > 0;
+  const canSubmit = sendOption === 'scheduled' ? canSchedule : canPost;
+  const validationHint = getValidationHint(sendOption, title, recipients, scheduledDate);
 
   // Show a toast when user clicks the disabled submit button
   function handlePostClick() {
     if (!canSubmit) {
-      toast.error(
-        validationHint ?? 'Complete the required fields to continue',
-        {
-          duration: 3000,
-        },
-      )
-      return
+      toast.error(validationHint ?? 'Complete the required fields to continue', {
+        duration: 3000,
+      });
+      return;
     }
-    setShowConfirmSheet(true)
+    setShowConfirmSheet(true);
   }
 
   function getScheduledAt(): string | undefined {
-    if (sendOption !== 'scheduled' || !scheduledDate) return undefined
-    return new Date(
-      `${scheduledDate}T${scheduledTime || '08:00'}:00`,
-    ).toISOString()
+    if (sendOption !== 'scheduled' || !scheduledDate) return undefined;
+    return new Date(`${scheduledDate}T${scheduledTime || '08:00'}:00`).toISOString();
   }
 
   function handleConfirmPost() {
-    const scheduledAt = getScheduledAt()
-    const isScheduled = sendOption === 'scheduled' && Boolean(scheduledAt)
+    const scheduledAt = getScheduledAt();
+    const isScheduled = sendOption === 'scheduled' && Boolean(scheduledAt);
 
-    const builtRecipients: Array<PGRecipient> = recipients.flatMap((entity) => {
+    const builtRecipients: PGRecipient[] = recipients.flatMap((entity) => {
       if (entity.groupType === 'class') {
-        const cls = entity.id.replace('class:', '')
+        const cls = entity.id.replace('class:', '');
         return mockStudents
-          .filter(
-            (s) =>
-              s.class === cls && s.schoolName === 'Bandung Secondary School',
-          )
+          .filter((s) => s.class === cls && s.schoolName === 'Bandung Secondary School')
           .map((s) => ({
             studentId: s.id,
             studentName: s.name,
             classLabel: s.class,
             parentName: `Parent of ${s.name.split(' ')[0]}`,
             readStatus: 'unread' as const,
-          }))
+          }));
       }
       if (entity.type === 'individual') {
-        const studentId = entity.id.replace('student:', '')
-        const student = mockStudents.find((s) => s.id === studentId)
-        if (!student) return []
+        const studentId = entity.id.replace('student:', '');
+        const student = mockStudents.find((s) => s.id === studentId);
+        if (!student) return [];
         return [
           {
             studentId: student.id,
@@ -856,7 +791,7 @@ function NewAnnouncementPage() {
             parentName: `Parent of ${student.name.split(' ')[0]}`,
             readStatus: 'unread' as const,
           },
-        ]
+        ];
       }
       // For level / school / CCA / teaching / custom groups:
       // Expand into placeholder recipients by count (real data would come from API)
@@ -866,10 +801,10 @@ function NewAnnouncementPage() {
         classLabel: entity.label,
         parentName: `Parent ${i + 1}`,
         readStatus: 'unread' as const,
-      }))
-    })
+      }));
+    });
 
-    const staffLabel = staffInCharge.map((s) => s.label).join(', ')
+    const staffLabel = staffInCharge.map((s) => s.label).join(', ');
 
     const newAnnouncement: PGAnnouncement = {
       id: `pg-${Date.now()}`,
@@ -886,11 +821,11 @@ function NewAnnouncementPage() {
       createdAt: new Date().toISOString(),
       postedAt: isScheduled ? undefined : new Date().toISOString(),
       scheduledAt: isScheduled ? scheduledAt : undefined,
-    }
+    };
 
     if (isEditing && editId) {
       // Update the existing announcement in place
-      const idx = mockPGAnnouncements.findIndex((a) => a.id === editId)
+      const idx = mockPGAnnouncements.findIndex((a) => a.id === editId);
       if (idx !== -1) {
         mockPGAnnouncements[idx] = {
           ...mockPGAnnouncements[idx],
@@ -903,33 +838,27 @@ function NewAnnouncementPage() {
           recipients: newAnnouncement.recipients,
           postedAt: newAnnouncement.postedAt,
           scheduledAt: newAnnouncement.scheduledAt,
-        }
+        };
       }
-      setShowConfirmSheet(false)
-      toast.success(
-        isScheduled ? 'Schedule updated' : 'Announcement sent to parents',
-      )
-      navigate({ to: '/announcements/$id', params: { id: editId } })
+      setShowConfirmSheet(false);
+      toast.success(isScheduled ? 'Schedule updated' : 'Announcement sent to parents');
+      navigate({ to: '/announcements/$id', params: { id: editId } });
     } else {
-      mockPGAnnouncements.unshift(newAnnouncement)
-      setShowConfirmSheet(false)
-      toast.success(
-        isScheduled ? 'Announcement scheduled' : 'Announcement sent to parents',
-      )
+      mockPGAnnouncements.unshift(newAnnouncement);
+      setShowConfirmSheet(false);
+      toast.success(isScheduled ? 'Announcement scheduled' : 'Announcement sent to parents');
       navigate({
         to: '/announcements/$id',
         params: { id: newAnnouncement.id },
-      })
+      });
     }
   }
 
   const recipientClasses = [
     ...new Set(
-      recipients.flatMap((r) =>
-        r.groupType === 'class' ? [r.id.replace('class:', '')] : [],
-      ),
+      recipients.flatMap((r) => (r.groupType === 'class' ? [r.id.replace('class:', '')] : [])),
     ),
-  ]
+  ];
 
   // Formatted save time
   const savedTimeLabel = savedAt
@@ -937,7 +866,7 @@ function NewAnnouncementPage() {
         hour: '2-digit',
         minute: '2-digit',
       })
-    : null
+    : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
@@ -953,9 +882,7 @@ function NewAnnouncementPage() {
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="flex-1 text-base font-semibold">
-            {isEditing ? 'Edit Post' : 'New Post'}
-          </h1>
+          <h1 className="flex-1 text-base font-semibold">{isEditing ? 'Edit Post' : 'New Post'}</h1>
 
           {/* Autosave status — replaces Save Draft button */}
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -996,10 +923,7 @@ function NewAnnouncementPage() {
             <div className="flex overflow-hidden rounded-md">
               <Button
                 size="sm"
-                className={cn(
-                  'rounded-r-none',
-                  !canSubmit && 'cursor-not-allowed opacity-50',
-                )}
+                className={cn('rounded-r-none', !canSubmit && 'cursor-not-allowed opacity-50')}
                 onClick={handlePostClick}
               >
                 {sendOption === 'scheduled' ? (
@@ -1033,9 +957,7 @@ function NewAnnouncementPage() {
                   <DropdownMenuItem onClick={() => setSendOption('now')}>
                     <Send className="h-4 w-4" />
                     Post now
-                    {sendOption === 'now' && (
-                      <Check className="ml-auto h-3.5 w-3.5 text-primary" />
-                    )}
+                    {sendOption === 'now' && <Check className="ml-auto h-3.5 w-3.5 text-primary" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSendOption('scheduled')}>
                     <CalendarClock className="h-4 w-4" />
@@ -1093,24 +1015,17 @@ function NewAnnouncementPage() {
       </div>
 
       {/* Form body */}
-      <div
-        className={cn(
-          'mx-auto w-full px-6 py-8',
-          showPreview ? 'max-w-5xl' : 'max-w-2xl',
-        )}
-      >
+      <div className={cn('mx-auto w-full px-6 py-8', showPreview ? 'max-w-5xl' : 'max-w-2xl')}>
         <div
           className={cn(
-            showPreview
-              ? 'grid gap-6 lg:grid-cols-[1fr_320px] lg:items-start'
-              : 'space-y-6',
+            showPreview ? 'grid gap-6 lg:grid-cols-[1fr_320px] lg:items-start' : 'space-y-6',
           )}
         >
           {/* Form sections */}
           <div className="space-y-6">
             {/* RECIPIENTS — first section */}
             <section className="rounded-xl border bg-white p-6">
-              <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <h2 className="mb-5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                 Recipients
               </h2>
               <div className="space-y-5">
@@ -1120,46 +1035,34 @@ function NewAnnouncementPage() {
                     Students <span className="text-destructive">*</span>
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Parents of the selected students will receive this post via
-                    Parents Gateway.
+                    Parents of the selected students will receive this post via Parents Gateway.
                   </p>
-                  <StudentRecipientSelector
-                    value={recipients}
-                    onChange={setRecipients}
-                  />
+                  <StudentRecipientSelector value={recipients} onChange={setRecipients} />
                 </div>
 
                 {/* Staff in charge */}
                 <div className="space-y-1.5">
                   <Label>Staff in charge</Label>
                   <p className="text-xs text-muted-foreground">
-                    These staff will be able to view read status, and delete the
-                    post.
+                    These staff will be able to view read status, and delete the post.
                   </p>
-                  <StaffSelector
-                    value={staffInCharge}
-                    onChange={setStaffInCharge}
-                  />
+                  <StaffSelector value={staffInCharge} onChange={setStaffInCharge} />
                 </div>
 
                 {/* Enquiry email */}
                 <div className="space-y-1.5">
                   <Label>Enquiry email</Label>
                   <p className="text-xs text-muted-foreground">
-                    Select the preferred email address to receive enquiries from
-                    parents.
+                    Select the preferred email address to receive enquiries from parents.
                   </p>
-                  <EnquiryEmailSelector
-                    value={enquiryEmail}
-                    onChange={setEnquiryEmail}
-                  />
+                  <EnquiryEmailSelector value={enquiryEmail} onChange={setEnquiryEmail} />
                 </div>
               </div>
             </section>
 
             {/* CONTENT */}
             <section className="rounded-xl border bg-white p-6">
-              <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              <h2 className="mb-5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                 Content
               </h2>
               <div className="space-y-4">
@@ -1172,9 +1075,7 @@ function NewAnnouncementPage() {
                     <span
                       className={cn(
                         'text-xs tabular-nums',
-                        title.length > 120
-                          ? 'text-destructive'
-                          : 'text-muted-foreground',
+                        title.length > 120 ? 'text-destructive' : 'text-muted-foreground',
                       )}
                     >
                       {title.length}/120
@@ -1197,9 +1098,7 @@ function NewAnnouncementPage() {
                     <span
                       className={cn(
                         'text-xs tabular-nums',
-                        descriptionCharCount > 2000
-                          ? 'text-destructive'
-                          : 'text-muted-foreground',
+                        descriptionCharCount > 2000 ? 'text-destructive' : 'text-muted-foreground',
                       )}
                     >
                       {descriptionCharCount}/2000
@@ -1218,13 +1117,9 @@ function NewAnnouncementPage() {
                 <div className="space-y-2">
                   <Label>Shortcuts</Label>
                   <p className="text-xs text-muted-foreground">
-                    To direct parents to existing features within Parents
-                    Gateway app.
+                    To direct parents to existing features within Parents Gateway app.
                   </p>
-                  <PGShortcutsSelector
-                    value={shortcuts}
-                    onChange={setShortcuts}
-                  />
+                  <PGShortcutsSelector value={shortcuts} onChange={setShortcuts} />
                 </div>
 
                 {/* Attachments */}
@@ -1234,9 +1129,7 @@ function NewAnnouncementPage() {
                   {/* ── Files ── */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-medium text-slate-600">
-                        Files
-                      </span>
+                      <span className="text-xs font-medium text-slate-600">Files</span>
                       <span className="text-xs text-muted-foreground">
                         {uploadedFiles.length}/3
                       </span>
@@ -1283,9 +1176,7 @@ function NewAnnouncementPage() {
                         className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-slate-400 hover:bg-slate-50 hover:text-foreground"
                       >
                         <Paperclip className="h-3.5 w-3.5" />
-                        {uploadedFiles.length > 0
-                          ? 'Add more files'
-                          : 'Add files'}
+                        {uploadedFiles.length > 0 ? 'Add more files' : 'Add files'}
                       </button>
                     )}
                     <input
@@ -1301,9 +1192,7 @@ function NewAnnouncementPage() {
                   {/* ── Photos ── */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-medium text-slate-600">
-                        Photos
-                      </span>
+                      <span className="text-xs font-medium text-slate-600">Photos</span>
                       <span className="text-xs text-muted-foreground">
                         {uploadedPhotos.length}/12
                       </span>
@@ -1329,7 +1218,7 @@ function NewAnnouncementPage() {
                               type="button"
                               aria-label={`Remove ${photo.file.name}`}
                               onClick={() => removePhoto(i)}
-                              className="absolute right-1 top-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-slate-900/65 text-white transition-colors hover:bg-slate-900/90"
+                              className="absolute top-1 right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-slate-900/65 text-white transition-colors hover:bg-slate-900/90"
                             >
                               <X className="h-2.5 w-2.5" />
                             </button>
@@ -1346,9 +1235,7 @@ function NewAnnouncementPage() {
                         className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-slate-400 hover:bg-slate-50 hover:text-foreground"
                       >
                         <ImagePlus className="h-3.5 w-3.5" />
-                        {uploadedPhotos.length > 0
-                          ? 'Add more photos'
-                          : 'Add photos'}
+                        {uploadedPhotos.length > 0 ? 'Add more photos' : 'Add photos'}
                       </button>
                     )}
                     <input
@@ -1367,7 +1254,7 @@ function NewAnnouncementPage() {
             {/* RESPONSE TYPE */}
             {showResponseSection && (
               <section className="rounded-xl border bg-white p-6">
-                <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                   Response Type
                 </h2>
                 <p className="mb-5 text-xs text-muted-foreground">
@@ -1413,9 +1300,7 @@ function NewAnnouncementPage() {
                       </div>
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="text-sm font-semibold text-foreground">
-                            {opt.label}
-                          </p>
+                          <p className="text-sm font-semibold text-foreground">{opt.label}</p>
                           <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                             {opt.hint}
                           </p>
@@ -1439,9 +1324,7 @@ function NewAnnouncementPage() {
                     <FileText className="h-4 w-4 text-slate-400" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">
-                      Attach a Form
-                    </p>
+                    <p className="text-sm font-medium text-foreground">Attach a Form</p>
                     <p className="text-xs text-muted-foreground">
                       Create a custom form in the Forms section.
                     </p>
@@ -1464,7 +1347,7 @@ function NewAnnouncementPage() {
             {/* EVENT DETAILS — acknowledge + yes/no */}
             {responseType !== 'view-only' && (
               <section className="rounded-xl border bg-white p-6">
-                <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                <h2 className="mb-5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                   Event Details
                 </h2>
                 <div className="space-y-4">
@@ -1507,7 +1390,7 @@ function NewAnnouncementPage() {
                   <div className="space-y-1.5">
                     <div className="flex items-baseline justify-between">
                       <Label>Venue (optional)</Label>
-                      <span className="text-xs tabular-nums text-muted-foreground">
+                      <span className="text-xs text-muted-foreground tabular-nums">
                         {venue.length}/100
                       </span>
                     </div>
@@ -1525,15 +1408,14 @@ function NewAnnouncementPage() {
             {/* SETTINGS (due date + reminders) — acknowledge + yes/no */}
             {responseType !== 'view-only' && (
               <section className="rounded-xl border bg-white p-6">
-                <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                <h2 className="mb-5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
                   Settings
                 </h2>
                 <div className="space-y-5">
                   {/* Due date */}
                   <div className="space-y-1.5">
                     <Label>
-                      Due date to respond by{' '}
-                      <span className="text-destructive">*</span>
+                      Due date to respond by <span className="text-destructive">*</span>
                     </Label>
                     <input
                       type="date"
@@ -1565,10 +1447,7 @@ function NewAnnouncementPage() {
                           { value: 'daily', label: 'Daily' },
                         ] as const
                       ).map((opt) => (
-                        <label
-                          key={opt.value}
-                          className="flex cursor-pointer items-center gap-2"
-                        >
+                        <label key={opt.value} className="flex cursor-pointer items-center gap-2">
                           <input
                             type="radio"
                             name="pg-reminder"
@@ -1578,22 +1457,19 @@ function NewAnnouncementPage() {
                             className="h-3.5 w-3.5 accent-primary"
                           />
                           <span className="text-sm">{opt.label}</span>
-                          {reminderType === opt.value &&
-                            opt.value !== 'none' && (
-                              <div className="ml-2 flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground">
-                                  {opt.value === 'one-time' ? 'on' : 'from'}
-                                </span>
-                                <input
-                                  type="date"
-                                  value={reminderDate}
-                                  onChange={(e) =>
-                                    setReminderDate(e.target.value)
-                                  }
-                                  className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
-                                />
-                              </div>
-                            )}
+                          {reminderType === opt.value && opt.value !== 'none' && (
+                            <div className="ml-2 flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">
+                                {opt.value === 'one-time' ? 'on' : 'from'}
+                              </span>
+                              <input
+                                type="date"
+                                value={reminderDate}
+                                onChange={(e) => setReminderDate(e.target.value)}
+                                className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
+                              />
+                            </div>
+                          )}
                         </label>
                       ))}
                     </div>
@@ -1633,5 +1509,5 @@ function NewAnnouncementPage() {
         onConfirm={handleConfirmPost}
       />
     </div>
-  )
+  );
 }

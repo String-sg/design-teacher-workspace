@@ -1,46 +1,31 @@
-import { useState } from 'react'
-import {
-  ArrowDown,
-  ArrowUp,
-  Check,
-  ChevronDown,
-  Filter,
-  Settings2,
-  X,
-} from 'lucide-react'
+import { ArrowDown, ArrowUp, Check, ChevronDown, Filter, Settings2, X } from 'lucide-react';
+import { useState } from 'react';
 
-import type { FilterField, SortConfig, SortDirection } from '@/types/student'
-import type { ColumnConfig } from './column-visibility-popover'
-import { cn } from '@/lib/utils'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { TableHead } from '@/components/ui/table'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import type { FilterField, SortConfig, SortDirection } from '~/apps/pg/types/student';
+import { Popover, PopoverContent, PopoverTrigger } from '~/shared/components/ui/popover';
+import { TableHead } from '~/shared/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/shared/components/ui/tooltip';
+import { cn } from '~/shared/lib/utils';
+
+import type { ColumnConfig } from './column-visibility-popover';
 
 interface ColumnHeaderMenuProps {
-  column: ColumnConfig
-  currentSort: SortConfig | null
-  activeFilterFields: Set<FilterField>
-  onSort: (field: string, direction: SortDirection) => void
-  onClearSort: () => void
-  onAddQuickFilter: (field: FilterField) => void
-  onClearFilter: (field: FilterField) => void
-  className?: string
-  isSticky?: boolean
-  stickyLeft?: string
+  column: ColumnConfig;
+  currentSort: SortConfig | null;
+  activeFilterFields: Set<FilterField>;
+  onSort: (field: string, direction: SortDirection) => void;
+  onClearSort: () => void;
+  onAddQuickFilter: (field: FilterField) => void;
+  onClearFilter: (field: FilterField) => void;
+  className?: string;
+  isSticky?: boolean;
+  stickyLeft?: string;
   /** Show shadow on right edge (for last sticky column) */
-  showStickyShadow?: boolean
+  showStickyShadow?: boolean;
   /** When provided, adds a "Select subjects..." item below sort options */
-  onConfigureSubjects?: () => void
+  onConfigureSubjects?: () => void;
   /** Whether a custom subject selection is currently active */
-  hasCustomSubjects?: boolean
+  hasCustomSubjects?: boolean;
 }
 
 export function ColumnHeaderMenu({
@@ -58,41 +43,32 @@ export function ColumnHeaderMenu({
   onConfigureSubjects,
   hasCustomSubjects,
 }: ColumnHeaderMenuProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
-  const isSortedBy = currentSort?.field === column.id
-  const sortDirection = isSortedBy ? currentSort.direction : null
-  const hasActiveFilter =
-    column.filterField && activeFilterFields.has(column.filterField)
+  const isSortedBy = currentSort?.field === column.id;
+  const sortDirection = isSortedBy ? currentSort.direction : null;
+  const hasActiveFilter = column.filterField && activeFilterFields.has(column.filterField);
 
   // All column headers need border shadows (thead has none). Last sticky column also gets drop shadow.
   const stickyShadow = showStickyShadow
     ? 'shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border),2px_0_5px_-2px_rgba(0,0,0,0.1)]'
-    : 'shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border)]'
+    : 'shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border)]';
 
   // Non-interactive columns render as plain TableHead
   if (!column.sortable && !column.filterable) {
     return (
       <TableHead
-        className={cn(
-          className,
-          isSticky && 'sticky z-20 bg-white',
-          stickyShadow,
-        )}
+        className={cn(className, isSticky && 'sticky z-20 bg-white', stickyShadow)}
         style={stickyLeft ? { left: stickyLeft } : undefined}
       >
         {column.label}
       </TableHead>
-    )
+    );
   }
 
   return (
     <TableHead
-      className={cn(
-        className,
-        isSticky && 'sticky z-20 bg-white',
-        stickyShadow,
-      )}
+      className={cn(className, isSticky && 'sticky z-20 bg-white', stickyShadow)}
       style={stickyLeft ? { left: stickyLeft } : undefined}
     >
       <Popover open={open} onOpenChange={setOpen}>
@@ -104,8 +80,8 @@ export function ColumnHeaderMenu({
                   <button
                     type="button"
                     className={cn(
-                      'flex items-center gap-1 rounded-md px-2 py-1 -ml-2 transition-colors whitespace-nowrap',
-                      'hover:bg-accent hover:text-accent-foreground cursor-pointer',
+                      '-ml-2 flex items-center gap-1 rounded-md px-2 py-1 whitespace-nowrap transition-colors',
+                      'cursor-pointer hover:bg-accent hover:text-accent-foreground',
                       (isSortedBy || hasActiveFilter) && 'text-primary',
                     )}
                   >
@@ -137,8 +113,8 @@ export function ColumnHeaderMenu({
               <button
                 type="button"
                 onClick={() => {
-                  onSort(column.id, 'asc')
-                  setOpen(false)
+                  onSort(column.id, 'asc');
+                  setOpen(false);
                 }}
                 className={cn(
                   'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]',
@@ -154,8 +130,8 @@ export function ColumnHeaderMenu({
               <button
                 type="button"
                 onClick={() => {
-                  onSort(column.id, 'desc')
-                  setOpen(false)
+                  onSort(column.id, 'desc');
+                  setOpen(false);
                 }}
                 className={cn(
                   'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]',
@@ -172,8 +148,8 @@ export function ColumnHeaderMenu({
                 <button
                   type="button"
                   onClick={() => {
-                    onClearSort()
-                    setOpen(false)
+                    onClearSort();
+                    setOpen(false);
                   }}
                   className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]"
                 >
@@ -190,8 +166,8 @@ export function ColumnHeaderMenu({
               <button
                 type="button"
                 onClick={() => {
-                  onConfigureSubjects()
-                  setOpen(false)
+                  onConfigureSubjects();
+                  setOpen(false);
                 }}
                 className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]"
               >
@@ -204,25 +180,17 @@ export function ColumnHeaderMenu({
           {(column.source || column.lastUpdated) && (
             <>
               <div className="my-1 h-px bg-border" />
-              <div className="px-3 py-1 space-y-1.5">
+              <div className="space-y-1.5 px-3 py-1">
                 {column.source && (
                   <div>
-                    <p className="text-xs font-medium text-foreground">
-                      Source:
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {column.source}
-                    </p>
+                    <p className="text-xs font-medium text-foreground">Source:</p>
+                    <p className="text-xs text-muted-foreground">{column.source}</p>
                   </div>
                 )}
                 {column.lastUpdated && (
                   <div>
-                    <p className="text-xs font-medium text-foreground">
-                      Last updated:
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {column.lastUpdated}
-                    </p>
+                    <p className="text-xs font-medium text-foreground">Last updated:</p>
+                    <p className="text-xs text-muted-foreground">{column.lastUpdated}</p>
                   </div>
                 )}
               </div>
@@ -231,5 +199,5 @@ export function ColumnHeaderMenu({
         </PopoverContent>
       </Popover>
     </TableHead>
-  )
+  );
 }

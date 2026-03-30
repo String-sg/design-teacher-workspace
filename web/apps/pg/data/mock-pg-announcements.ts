@@ -1,38 +1,32 @@
-import type { PGAnnouncement } from '@/types/pg-announcement'
+import type { PGAnnouncement } from '~/apps/pg/types/pg-announcement';
 
-const now = new Date()
-const daysAgo = (d: number) =>
-  new Date(now.getTime() - d * 86400000).toISOString()
-const hoursAgo = (h: number) =>
-  new Date(now.getTime() - h * 3600000).toISOString()
-const daysFromNow = (d: number) =>
-  new Date(now.getTime() + d * 86400000).toISOString()
+const now = new Date();
+const daysAgo = (d: number) => new Date(now.getTime() - d * 86400000).toISOString();
+const hoursAgo = (h: number) => new Date(now.getTime() - h * 3600000).toISOString();
+const daysFromNow = (d: number) => new Date(now.getTime() + d * 86400000).toISOString();
 
 // Parent contact details per student (relationship + mobile)
-const parentContactMap: Record<
-  string,
-  { parentRelationship: string; parentContact: string }
-> = {
+const parentContactMap: Record<string, { parentRelationship: string; parentContact: string }> = {
   '1': { parentRelationship: 'Father', parentContact: '9123 4567' },
   '2': { parentRelationship: 'Father', parentContact: '8234 5678' },
   '4': { parentRelationship: 'Father', parentContact: '8456 7890' },
-}
+};
 
 // pgStatus key by studentId
 const pgStatusMap: Record<string, 'onboarded' | 'not_onboarded'> = {
   '1': 'onboarded',
   '2': 'onboarded',
   '4': 'onboarded',
-}
+};
 
 // Class index numbers per student
 const classIndexMap: Record<string, string> = {
   '1': '01',
   '2': '02',
   '4': '04',
-}
+};
 
-export const mockPGAnnouncements: Array<PGAnnouncement> = [
+export const mockPGAnnouncements: PGAnnouncement[] = [
   // 1. View-only post
   {
     id: 'pg-1',
@@ -200,8 +194,8 @@ export const mockPGAnnouncements: Array<PGAnnouncement> = [
       },
     ],
   },
-]
+];
 
 export function getPGAnnouncementById(id: string): PGAnnouncement | undefined {
-  return mockPGAnnouncements.find((a) => a.id === id)
+  return mockPGAnnouncements.find((a) => a.id === id);
 }

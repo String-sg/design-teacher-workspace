@@ -1,25 +1,18 @@
-import { SubjectAccordion } from './subject-accordion'
-import { EvaluationGlossary } from './evaluation-glossary'
-import { SecondaryAcademicTab } from './secondary-academic-tab'
-import type {
-  AcademicData,
-  SchoolLevel,
-  SecondaryAcademicData,
-} from '@/types/report'
+import type { AcademicData, SchoolLevel, SecondaryAcademicData } from '~/apps/pg/types/report';
+
+import { EvaluationGlossary } from './evaluation-glossary';
+import { SecondaryAcademicTab } from './secondary-academic-tab';
+import { SubjectAccordion } from './subject-accordion';
 
 interface AcademicTabProps {
-  data: AcademicData
-  secondaryData?: SecondaryAcademicData
-  schoolLevel?: SchoolLevel
+  data: AcademicData;
+  secondaryData?: SecondaryAcademicData;
+  schoolLevel?: SchoolLevel;
 }
 
-export function AcademicTab({
-  data,
-  secondaryData,
-  schoolLevel,
-}: AcademicTabProps) {
+export function AcademicTab({ data, secondaryData, schoolLevel }: AcademicTabProps) {
   if (schoolLevel === 'secondary' && secondaryData) {
-    return <SecondaryAcademicTab data={secondaryData} />
+    return <SecondaryAcademicTab data={secondaryData} />;
   }
 
   return (
@@ -28,5 +21,5 @@ export function AcademicTab({
       <SubjectAccordion subjects={data.subjects} />
       <EvaluationGlossary />
     </div>
-  )
+  );
 }

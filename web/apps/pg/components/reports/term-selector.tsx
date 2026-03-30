@@ -1,20 +1,20 @@
-import type { Term } from '@/types/report'
+import { TERMS } from '~/apps/pg/data/mock-reports';
+import type { Term } from '~/apps/pg/types/report';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { TERMS } from '@/data/mock-reports'
+} from '~/shared/components/ui/select';
 
 interface TermSelectorProps {
-  value: Term | ''
-  onValueChange: (value: Term | '') => void
+  value: Term | '';
+  onValueChange: (value: Term | '') => void;
 }
 
 export function TermSelector({ value, onValueChange }: TermSelectorProps) {
-  const displayValue = value || 'All terms'
+  const displayValue = value || 'All terms';
 
   return (
     <Select
@@ -31,5 +31,5 @@ export function TermSelector({ value, onValueChange }: TermSelectorProps) {
         ))}
       </SelectContent>
     </Select>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-import type { App } from '@/data/apps'
-import { AppCard } from '@/components/app-card'
+import type { App } from '~/apps/pg/data/apps';
+import { AppCard } from '~/platform/components/app-card';
 
 interface AppSectionProps {
-  title: string
-  description?: string
-  apps: Array<App>
+  title: string;
+  description?: string;
+  apps: App[];
 }
 
 export function AppSection({ title, description, apps }: AppSectionProps) {
@@ -12,9 +12,7 @@ export function AppSection({ title, description, apps }: AppSectionProps) {
     <section className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-        {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>
       <div className="grid grid-cols-1 gap-4 rounded-2xl sm:grid-cols-3">
         {apps.map((app) => (
@@ -29,5 +27,5 @@ export function AppSection({ title, description, apps }: AppSectionProps) {
         ))}
       </div>
     </section>
-  )
+  );
 }

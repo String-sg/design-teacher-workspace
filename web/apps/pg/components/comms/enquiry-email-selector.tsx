@@ -1,54 +1,47 @@
-import { useState } from 'react'
-import { Check, ChevronDown, Mail, Plus, X } from 'lucide-react'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { SAVED_ENQUIRY_EMAILS } from '@/data/mock-staff'
+import { Check, ChevronDown, Mail, Plus, X } from 'lucide-react';
+import { useState } from 'react';
+
+import { SAVED_ENQUIRY_EMAILS } from '~/apps/pg/data/mock-staff';
+import { Button } from '~/shared/components/ui/button';
+import { Input } from '~/shared/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '~/shared/components/ui/popover';
+import { cn } from '~/shared/lib/utils';
 
 interface EnquiryEmailSelectorProps {
-  value: string // selected email or ''
-  onChange: (email: string) => void
+  value: string; // selected email or ''
+  onChange: (email: string) => void;
 }
 
-export function EnquiryEmailSelector({
-  value,
-  onChange,
-}: EnquiryEmailSelectorProps) {
-  const [savedEmails, setSavedEmails] =
-    useState<Array<string>>(SAVED_ENQUIRY_EMAILS)
-  const [showAddNew, setShowAddNew] = useState(false)
-  const [newEmail, setNewEmail] = useState('')
-  const [addError, setAddError] = useState('')
+export function EnquiryEmailSelector({ value, onChange }: EnquiryEmailSelectorProps) {
+  const [savedEmails, setSavedEmails] = useState<string[]>(SAVED_ENQUIRY_EMAILS);
+  const [showAddNew, setShowAddNew] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [addError, setAddError] = useState('');
 
   function selectEmail(email: string) {
-    onChange(email)
-    setShowAddNew(false)
-    setNewEmail('')
-    setAddError('')
+    onChange(email);
+    setShowAddNew(false);
+    setNewEmail('');
+    setAddError('');
   }
 
   function clearEmail(e: React.MouseEvent) {
-    e.stopPropagation()
-    onChange('')
+    e.stopPropagation();
+    onChange('');
   }
 
   function handleAddNew() {
-    const email = newEmail.trim()
-    if (!email) return
-    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    const email = newEmail.trim();
+    if (!email) return;
+    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (!isValid) {
-      setAddError('Please enter a valid email address.')
-      return
+      setAddError('Please enter a valid email address.');
+      return;
     }
     if (!savedEmails.includes(email)) {
-      setSavedEmails((prev) => [...prev, email])
+      setSavedEmails((prev) => [...prev, email]);
     }
-    selectEmail(email)
+    selectEmail(email);
   }
 
   return (
@@ -60,19 +53,12 @@ export function EnquiryEmailSelector({
               type="button"
               className={cn(
                 'flex items-center gap-2 rounded-md border border-input bg-background text-sm transition-colors hover:bg-slate-50',
-                value
-                  ? 'px-3 py-1.5 text-slate-700'
-                  : 'h-9 w-full px-3 py-2 text-muted-foreground',
+                value ? 'px-3 py-1.5 text-slate-700' : 'h-9 w-full px-3 py-2 text-muted-foreground',
               )}
             />
           }
         >
-          <Mail
-            className={cn(
-              'shrink-0 text-slate-400',
-              value ? 'h-3.5 w-3.5' : 'h-4 w-4',
-            )}
-          />
+          <Mail className={cn('shrink-0 text-slate-400', value ? 'h-3.5 w-3.5' : 'h-4 w-4')} />
           {value ? (
             <span>{value}</span>
           ) : (
@@ -93,7 +79,7 @@ export function EnquiryEmailSelector({
           {/* Saved email list */}
           <div className="py-1">
             {savedEmails.map((email) => {
-              const isSelected = value === email
+              const isSelected = value === email;
               return (
                 <button
                   key={email}
@@ -105,18 +91,14 @@ export function EnquiryEmailSelector({
                   <span
                     className={cn(
                       'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
-                      isSelected
-                        ? 'border-primary bg-primary'
-                        : 'border-slate-300',
+                      isSelected ? 'border-primary bg-primary' : 'border-slate-300',
                     )}
                   >
                     {isSelected && <Check className="h-2.5 w-2.5 text-white" />}
                   </span>
-                  <span className="flex-1 truncate text-slate-700">
-                    {email}
-                  </span>
+                  <span className="flex-1 truncate text-slate-700">{email}</span>
                 </button>
-              )
+              );
             })}
           </div>
 
@@ -131,21 +113,19 @@ export function EnquiryEmailSelector({
                 placeholder="you@school.edu.sg"
                 value={newEmail}
                 onChange={(e) => {
-                  setNewEmail(e.target.value)
-                  setAddError('')
+                  setNewEmail(e.target.value);
+                  setAddError('');
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    e.preventDefault()
-                    handleAddNew()
+                    e.preventDefault();
+                    handleAddNew();
                   }
                 }}
                 autoFocus
                 className="h-8 text-sm"
               />
-              {addError && (
-                <p className="text-xs text-destructive">{addError}</p>
-              )}
+              {addError && <p className="text-xs text-destructive">{addError}</p>}
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -160,9 +140,9 @@ export function EnquiryEmailSelector({
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setShowAddNew(false)
-                    setNewEmail('')
-                    setAddError('')
+                    setShowAddNew(false);
+                    setNewEmail('');
+                    setAddError('');
                   }}
                   className="h-7 text-xs"
                 >
@@ -195,5 +175,5 @@ export function EnquiryEmailSelector({
         </button>
       )}
     </div>
-  )
+  );
 }

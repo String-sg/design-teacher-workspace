@@ -1,11 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '~/shared/components/ui/card';
 
 interface TeacherCommentsCardProps {
-  comments: string | null
+  comments: string | null;
 }
 
 export function TeacherCommentsCard({ comments }: TeacherCommentsCardProps) {
-  if (!comments) return null
+  if (!comments) return null;
 
   return (
     <Card>
@@ -16,5 +16,5 @@ export function TeacherCommentsCard({ comments }: TeacherCommentsCardProps) {
         <p className="text-sm leading-relaxed">{comments}</p>
       </CardContent>
     </Card>
-  )
+  );
 }

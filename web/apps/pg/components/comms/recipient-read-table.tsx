@@ -1,4 +1,3 @@
-import { useMemo, useState } from 'react'
 import {
   Check,
   CheckCircle2,
@@ -10,16 +9,14 @@ import {
   ThumbsDown,
   ThumbsUp,
   X,
-} from 'lucide-react'
-import type { PGQuestion, PGRecipient } from '@/types/pg-announcement'
-import type { ResponseType } from '@/types/form'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
+
+import type { ResponseType } from '~/apps/pg/types/form';
+import type { PGQuestion, PGRecipient } from '~/apps/pg/types/pg-announcement';
+import { Button } from '~/shared/components/ui/button';
+import { Input } from '~/shared/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '~/shared/components/ui/popover';
 import {
   Table,
   TableBody,
@@ -27,28 +24,28 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { cn } from '@/lib/utils'
+} from '~/shared/components/ui/table';
+import { cn } from '~/shared/lib/utils';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 interface RecipientReadTableProps {
-  recipients: Array<PGRecipient>
-  announcementTitle: string
-  responseType?: ResponseType
-  questions?: Array<PGQuestion>
+  recipients: PGRecipient[];
+  announcementTitle: string;
+  responseType?: ResponseType;
+  questions?: PGQuestion[];
 }
 
-type ColumnKey = 'indexNo' | 'readAt' | 'readBy' | 'pgStatus'
+type ColumnKey = 'indexNo' | 'readAt' | 'readBy' | 'pgStatus';
 
 const COLUMN_LABELS: Record<ColumnKey, string> = {
   indexNo: 'Index No.',
   readAt: 'Timestamp',
   readBy: 'Parent / Guardian',
   pgStatus: 'PG Status',
-}
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -61,37 +58,30 @@ function formatTimestamp(iso: string): string {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  })
+  });
 }
 
 /** Derive a unified "response status" string for filtering */
 function getResponseStatus(r: PGRecipient, responseType: ResponseType): string {
   if (responseType === 'acknowledge') {
-    return r.respondedAt ? 'acknowledged' : 'pending'
+    return r.respondedAt ? 'acknowledged' : 'pending';
   }
   if (responseType === 'yes-no') {
-    if (!r.respondedAt) return 'pending'
-    return r.formResponse ?? 'pending'
+    if (!r.respondedAt) return 'pending';
+    return r.formResponse ?? 'pending';
   }
   // view-only
-  return r.readStatus
+  return r.readStatus;
 }
 
 /** Timestamp to show in the "Timestamp" column */
-function getTimestamp(
-  r: PGRecipient,
-  responseType: ResponseType,
-): string | undefined {
-  if (responseType === 'acknowledge') return r.respondedAt ?? r.acknowledgedAt
-  if (responseType === 'yes-no') return r.respondedAt
-  return r.readAt
+function getTimestamp(r: PGRecipient, responseType: ResponseType): string | undefined {
+  if (responseType === 'acknowledge') return r.respondedAt ?? r.acknowledgedAt;
+  if (responseType === 'yes-no') return r.respondedAt;
+  return r.readAt;
 }
 
-function exportCSV(
-  rows: Array<PGRecipient>,
-  title: string,
-  responseType: ResponseType,
-) {
+function exportCSV(rows: PGRecipient[], title: string, responseType: ResponseType) {
   const headers = [
     'Student',
     'Index No.',
@@ -106,7 +96,7 @@ function exportCSV(
     'Parent / Guardian',
     'Relationship',
     'Contact',
-  ]
+  ];
   const data = rows.map((r) => [
     r.studentName,
     r.indexNo ?? '',
@@ -123,27 +113,23 @@ function exportCSV(
         : r.readStatus === 'read'
           ? 'Read'
           : 'Unread',
-    getTimestamp(r, responseType)
-      ? formatTimestamp(getTimestamp(r, responseType)!)
-      : '',
+    getTimestamp(r, responseType) ? formatTimestamp(getTimestamp(r, responseType)!) : '',
     r.parentName,
     r.parentRelationship ?? '',
     r.parentContact ?? '',
-  ])
+  ]);
   const csv = [headers, ...data]
-    .map((row) =>
-      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','),
-    )
-    .join('\n')
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-status.csv`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-status.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ---------------------------------------------------------------------------
@@ -157,20 +143,18 @@ export function RecipientReadTable({
   questions = [],
 }: RecipientReadTableProps) {
   // Only show questions that are relevant to yes-no type
-  const visibleQuestions = responseType === 'yes-no' ? questions : []
-  const [search, setSearch] = useState('')
-  const [classFilter, setClassFilter] = useState('all')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [pgFilter, setPgFilter] = useState<
-    'all' | 'onboarded' | 'not_onboarded'
-  >('all')
+  const visibleQuestions = responseType === 'yes-no' ? questions : [];
+  const [search, setSearch] = useState('');
+  const [classFilter, setClassFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [pgFilter, setPgFilter] = useState<'all' | 'onboarded' | 'not_onboarded'>('all');
 
   const [visibleCols, setVisibleCols] = useState<Set<ColumnKey>>(
     new Set(['indexNo', 'readAt', 'readBy', 'pgStatus']),
-  )
+  );
 
   // Dynamic status filter options
-  const statusOptions: Array<[string, string]> =
+  const statusOptions: [string, string][] =
     responseType === 'acknowledge'
       ? [
           ['all', 'All'],
@@ -188,7 +172,7 @@ export function RecipientReadTable({
             ['all', 'All'],
             ['read', 'Read'],
             ['unread', 'Unread'],
-          ]
+          ];
 
   // Derived column header labels for the table
   const statusColLabel =
@@ -196,22 +180,22 @@ export function RecipientReadTable({
       ? 'Acknowledged'
       : responseType === 'yes-no'
         ? 'Response'
-        : 'Read Status'
+        : 'Read Status';
 
   const timestampColLabel =
     responseType === 'acknowledge'
       ? 'Acknowledged At'
       : responseType === 'yes-no'
         ? 'Responded At'
-        : 'Read At'
+        : 'Read At';
 
   const uniqueClasses = useMemo(
     () => [...new Set(recipients.map((r) => r.classLabel))].sort(),
     [recipients],
-  )
+  );
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase()
+    const q = search.toLowerCase();
     return [...recipients]
       .filter((r) => {
         if (
@@ -220,57 +204,56 @@ export function RecipientReadTable({
           !r.parentName.toLowerCase().includes(q) &&
           !r.classLabel.toLowerCase().includes(q)
         )
-          return false
-        if (classFilter !== 'all' && r.classLabel !== classFilter) return false
+          return false;
+        if (classFilter !== 'all' && r.classLabel !== classFilter) return false;
         if (statusFilter !== 'all') {
-          const rs = getResponseStatus(r, responseType)
-          if (rs !== statusFilter) return false
+          const rs = getResponseStatus(r, responseType);
+          if (rs !== statusFilter) return false;
         }
-        if (pgFilter !== 'all' && r.pgStatus !== pgFilter) return false
-        return true
+        if (pgFilter !== 'all' && r.pgStatus !== pgFilter) return false;
+        return true;
       })
       .sort((a, b) => {
         // Pending/unread first, then alphabetical
-        const aStatus = getResponseStatus(a, responseType)
-        const bStatus = getResponseStatus(b, responseType)
-        const aPending = aStatus === 'pending' || aStatus === 'unread'
-        const bPending = bStatus === 'pending' || bStatus === 'unread'
-        if (aPending !== bPending) return aPending ? -1 : 1
-        return a.studentName.localeCompare(b.studentName)
-      })
-  }, [recipients, search, classFilter, statusFilter, pgFilter, responseType])
+        const aStatus = getResponseStatus(a, responseType);
+        const bStatus = getResponseStatus(b, responseType);
+        const aPending = aStatus === 'pending' || aStatus === 'unread';
+        const bPending = bStatus === 'pending' || bStatus === 'unread';
+        if (aPending !== bPending) return aPending ? -1 : 1;
+        return a.studentName.localeCompare(b.studentName);
+      });
+  }, [recipients, search, classFilter, statusFilter, pgFilter, responseType]);
 
   function toggleCol(col: ColumnKey) {
     setVisibleCols((prev) => {
-      const next = new Set(prev)
-      if (next.has(col)) next.delete(col)
-      else next.add(col)
-      return next
-    })
+      const next = new Set(prev);
+      if (next.has(col)) next.delete(col);
+      else next.add(col);
+      return next;
+    });
   }
 
   function show(col: ColumnKey) {
-    return visibleCols.has(col)
+    return visibleCols.has(col);
   }
 
   const activeFilterCount = [
     classFilter !== 'all',
     statusFilter !== 'all',
     pgFilter !== 'all',
-  ].filter(Boolean).length
+  ].filter(Boolean).length;
 
   const activeFilters = [
     classFilter !== 'all' && classFilter,
     statusFilter !== 'all' &&
       (statusOptions.find(([v]) => v === statusFilter)?.[1] ?? statusFilter),
-    pgFilter !== 'all' &&
-      (pgFilter === 'onboarded' ? 'Onboarded' : 'Not Onboarded'),
-  ].filter(Boolean) as Array<string>
+    pgFilter !== 'all' && (pgFilter === 'onboarded' ? 'Onboarded' : 'Not Onboarded'),
+  ].filter(Boolean) as string[];
 
   function resetFilters() {
-    setClassFilter('all')
-    setStatusFilter('all')
-    setPgFilter('all')
+    setClassFilter('all');
+    setStatusFilter('all');
+    setPgFilter('all');
   }
 
   return (
@@ -278,7 +261,7 @@ export function RecipientReadTable({
       {/* ── Toolbar ── */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[180px] flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search student or parent…"
             value={search}
@@ -293,10 +276,7 @@ export function RecipientReadTable({
             <Button
               variant="outline"
               size="sm"
-              className={cn(
-                'gap-1.5',
-                activeFilterCount > 0 && 'border-twblue-9 text-twblue-9',
-              )}
+              className={cn('gap-1.5', activeFilterCount > 0 && 'border-twblue-9 text-twblue-9')}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
               Filter
@@ -309,7 +289,7 @@ export function RecipientReadTable({
           </PopoverTrigger>
           <PopoverContent align="end" className="w-52 p-0">
             <div className="px-3 pt-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 Filters
               </p>
             </div>
@@ -328,9 +308,7 @@ export function RecipientReadTable({
                     <span
                       className={cn(
                         'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors',
-                        classFilter === cls
-                          ? 'border-twblue-9 bg-twblue-9'
-                          : 'border-slate-300',
+                        classFilter === cls ? 'border-twblue-9 bg-twblue-9' : 'border-slate-300',
                       )}
                     >
                       {classFilter === cls && (
@@ -357,9 +335,7 @@ export function RecipientReadTable({
                     <span
                       className={cn(
                         'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors',
-                        statusFilter === val
-                          ? 'border-twblue-9 bg-twblue-9'
-                          : 'border-slate-300',
+                        statusFilter === val ? 'border-twblue-9 bg-twblue-9' : 'border-slate-300',
                       )}
                     >
                       {statusFilter === val && (
@@ -392,14 +368,10 @@ export function RecipientReadTable({
                     <span
                       className={cn(
                         'flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border transition-colors',
-                        pgFilter === val
-                          ? 'border-twblue-9 bg-twblue-9'
-                          : 'border-slate-300',
+                        pgFilter === val ? 'border-twblue-9 bg-twblue-9' : 'border-slate-300',
                       )}
                     >
-                      {pgFilter === val && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                      )}
+                      {pgFilter === val && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
                     </span>
                     {label}
                   </button>
@@ -430,10 +402,10 @@ export function RecipientReadTable({
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-52 p-2">
-            <p className="mb-1.5 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="mb-1.5 px-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
               Show / hide columns
             </p>
-            {(Object.keys(COLUMN_LABELS) as Array<ColumnKey>).map((col) => (
+            {(Object.keys(COLUMN_LABELS) as ColumnKey[]).map((col) => (
               <button
                 key={col}
                 type="button"
@@ -443,9 +415,7 @@ export function RecipientReadTable({
                 <span
                   className={cn(
                     'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
-                    show(col)
-                      ? 'border-twblue-9 bg-twblue-9 text-white'
-                      : 'border-input',
+                    show(col) ? 'border-twblue-9 bg-twblue-9 text-white' : 'border-input',
                   )}
                 >
                   {show(col) && <Check className="h-2.5 w-2.5" />}
@@ -486,8 +456,7 @@ export function RecipientReadTable({
           )}
           {statusFilter !== 'all' && (
             <span className="inline-flex items-center gap-1 rounded-full bg-twblue-2 px-2.5 py-0.5 text-xs font-medium text-twblue-9">
-              {statusOptions.find(([v]) => v === statusFilter)?.[1] ??
-                statusFilter}
+              {statusOptions.find(([v]) => v === statusFilter)?.[1] ?? statusFilter}
               <button
                 type="button"
                 onClick={() => setStatusFilter('all')}
@@ -525,18 +494,14 @@ export function RecipientReadTable({
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead>Student</TableHead>
-              {show('indexNo') && (
-                <TableHead className="w-20">Index No.</TableHead>
-              )}
+              {show('indexNo') && <TableHead className="w-20">Index No.</TableHead>}
               <TableHead className="w-16">Class</TableHead>
               <TableHead>{statusColLabel}</TableHead>
               {show('readAt') && <TableHead>{timestampColLabel}</TableHead>}
               {visibleQuestions.map((q) => (
                 <TableHead key={q.id}>
                   <div className="w-[160px]">
-                    <span className="line-clamp-2 text-xs leading-snug">
-                      {q.text}
-                    </span>
+                    <span className="line-clamp-2 text-xs leading-snug">{q.text}</span>
                   </div>
                 </TableHead>
               ))}
@@ -550,12 +515,9 @@ export function RecipientReadTable({
                 <TableCell
                   colSpan={
                     4 +
-                    [
-                      show('indexNo'),
-                      show('readAt'),
-                      show('readBy'),
-                      show('pgStatus'),
-                    ].filter(Boolean).length +
+                    [show('indexNo'), show('readAt'), show('readBy'), show('pgStatus')].filter(
+                      Boolean,
+                    ).length +
                     visibleQuestions.length
                   }
                   className="h-24 text-center text-muted-foreground"
@@ -565,22 +527,16 @@ export function RecipientReadTable({
               </TableRow>
             ) : (
               filtered.map((r) => {
-                const ts = getTimestamp(r, responseType)
-                const status = getResponseStatus(r, responseType)
+                const ts = getTimestamp(r, responseType);
+                const status = getResponseStatus(r, responseType);
 
                 return (
                   <TableRow key={r.studentId}>
-                    <TableCell className="font-medium">
-                      {r.studentName}
-                    </TableCell>
+                    <TableCell className="font-medium">{r.studentName}</TableCell>
                     {show('indexNo') && (
-                      <TableCell className="text-muted-foreground">
-                        {r.indexNo ?? '—'}
-                      </TableCell>
+                      <TableCell className="text-muted-foreground">{r.indexNo ?? '—'}</TableCell>
                     )}
-                    <TableCell className="text-muted-foreground">
-                      {r.classLabel}
-                    </TableCell>
+                    <TableCell className="text-muted-foreground">{r.classLabel}</TableCell>
 
                     {/* Status cell — adapts to responseType */}
                     <TableCell>
@@ -634,15 +590,11 @@ export function RecipientReadTable({
                     {visibleQuestions.map((q) => {
                       // Only show answer if the question applies to this recipient's response
                       const applies =
-                        !q.showAfter ||
-                        q.showAfter === 'both' ||
-                        q.showAfter === r.formResponse
-                      const answer = applies
-                        ? (r.questionAnswers?.[q.id] ?? null)
-                        : null
+                        !q.showAfter || q.showAfter === 'both' || q.showAfter === r.formResponse;
+                      const answer = applies ? (r.questionAnswers?.[q.id] ?? null) : null;
                       return (
                         <TableCell key={q.id} className="text-sm">
-                          <div className="w-[160px] whitespace-normal break-words">
+                          <div className="w-[160px] break-words whitespace-normal">
                             {answer ? (
                               <span className="text-foreground">{answer}</span>
                             ) : (
@@ -650,7 +602,7 @@ export function RecipientReadTable({
                             )}
                           </div>
                         </TableCell>
-                      )
+                      );
                     })}
                     {show('readBy') && (
                       <TableCell className="text-sm">
@@ -667,9 +619,7 @@ export function RecipientReadTable({
                               : r.parentName}
                           </span>
                           {r.parentContact && (
-                            <span className="text-xs text-muted-foreground">
-                              {r.parentContact}
-                            </span>
+                            <span className="text-xs text-muted-foreground">{r.parentContact}</span>
                           )}
                         </div>
                       </TableCell>
@@ -684,19 +634,17 @@ export function RecipientReadTable({
                               : 'bg-slate-100 text-slate-500',
                           )}
                         >
-                          {r.pgStatus === 'onboarded'
-                            ? 'Onboarded'
-                            : 'Not Onboarded'}
+                          {r.pgStatus === 'onboarded' ? 'Onboarded' : 'Not Onboarded'}
                         </span>
                       </TableCell>
                     )}
                   </TableRow>
-                )
+                );
               })
             )}
           </TableBody>
         </Table>
       </div>
     </div>
-  )
+  );
 }

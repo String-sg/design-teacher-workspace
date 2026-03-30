@@ -1,12 +1,11 @@
-import { memo, useCallback, useEffect } from 'react'
-import { EditorContent, useEditor } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
-import TextAlign from '@tiptap/extension-text-align'
-import Link from '@tiptap/extension-link'
-import TaskList from '@tiptap/extension-task-list'
-import TaskItem from '@tiptap/extension-task-item'
-import Highlight from '@tiptap/extension-highlight'
+import Highlight from '@tiptap/extension-highlight';
+import Link from '@tiptap/extension-link';
+import TaskItem from '@tiptap/extension-task-item';
+import TaskList from '@tiptap/extension-task-list';
+import TextAlign from '@tiptap/extension-text-align';
+import Underline from '@tiptap/extension-underline';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 import {
   AlignCenter,
   AlignLeft,
@@ -26,37 +25,34 @@ import {
   RemoveFormatting,
   Strikethrough,
   Underline as UnderlineIcon,
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+} from 'lucide-react';
+import { memo, useCallback, useEffect } from 'react';
+
+import { cn } from '~/shared/lib/utils';
 
 interface RichTextEditorProps {
-  value: string
-  onChange: (html: string) => void
-  placeholder?: string
-  className?: string
-  onBlur?: () => void
-  minHeight?: string
+  value: string;
+  onChange: (html: string) => void;
+  placeholder?: string;
+  className?: string;
+  onBlur?: () => void;
+  minHeight?: string;
 }
 
 interface ToolbarButtonProps {
-  onClick: () => void
-  title: string
-  isActive?: boolean
-  children: React.ReactNode
+  onClick: () => void;
+  title: string;
+  isActive?: boolean;
+  children: React.ReactNode;
 }
 
-function ToolbarButton({
-  onClick,
-  title,
-  isActive,
-  children,
-}: ToolbarButtonProps) {
+function ToolbarButton({ onClick, title, isActive, children }: ToolbarButtonProps) {
   return (
     <button
       type="button"
       onMouseDown={(e) => {
-        e.preventDefault()
-        onClick()
+        e.preventDefault();
+        onClick();
       }}
       title={title}
       className={cn(
@@ -68,11 +64,11 @@ function ToolbarButton({
     >
       {children}
     </button>
-  )
+  );
 }
 
 function Divider() {
-  return <div className="mx-1 h-4 w-px shrink-0 bg-border" />
+  return <div className="mx-1 h-4 w-px shrink-0 bg-border" />;
 }
 
 export const RichTextEditor = memo(function RichTextEditor({
@@ -100,8 +96,8 @@ export const RichTextEditor = memo(function RichTextEditor({
     ],
     content: value || '',
     onUpdate: ({ editor: e }) => {
-      const html = e.getHTML()
-      onChange(html === '<p></p>' ? '' : html)
+      const html = e.getHTML();
+      onChange(html === '<p></p>' ? '' : html);
     },
     onBlur: () => onBlur?.(),
     editorProps: {
@@ -120,39 +116,34 @@ export const RichTextEditor = memo(function RichTextEditor({
         ].join(' '),
       },
     },
-  })
+  });
 
   // Sync external value when not focused (e.g. loading a saved draft)
   useEffect(() => {
-    if (!editor) return
+    if (!editor) return;
     if (value !== editor.getHTML() && !editor.view.hasFocus()) {
-      editor.commands.setContent(value || '', false)
+      editor.commands.setContent(value || '', false);
     }
-  }, [editor, value])
+  }, [editor, value]);
 
   const setLink = useCallback(() => {
-    if (!editor) return
-    const previousUrl = editor.getAttributes('link').href as string | undefined
-    const url = window.prompt('Enter link URL:', previousUrl ?? 'https://')
-    if (url === null) return
+    if (!editor) return;
+    const previousUrl = editor.getAttributes('link').href as string | undefined;
+    const url = window.prompt('Enter link URL:', previousUrl ?? 'https://');
+    if (url === null) return;
     if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run()
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
     } else {
-      editor
-        .chain()
-        .focus()
-        .extendMarkRange('link')
-        .setLink({ href: url })
-        .run()
+      editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
     }
-  }, [editor])
+  }, [editor]);
 
   // Guard: immediatelyRender: false causes useEditor to return null on the first render pass.
   // All hooks above are called unconditionally (Rules of Hooks). This guard is placed after
   // all hooks, before any editor.* access, so it is safe.
-  if (!editor) return null
+  if (!editor) return null;
 
-  const showPlaceholder = editor.isEmpty && Boolean(placeholder)
+  const showPlaceholder = editor.isEmpty && Boolean(placeholder);
 
   // Pre-compute active states for toolbar buttons
   const active = {
@@ -173,20 +164,15 @@ export const RichTextEditor = memo(function RichTextEditor({
     blockquote: editor.isActive('blockquote'),
     link: editor.isActive('link'),
     highlight: editor.isActive('highlight'),
-  }
+  };
 
   // Convenience — chain always from focus
-  const cmd = editor.chain().focus()
+  const cmd = editor.chain().focus();
 
   return (
-    <div
-      className={cn(
-        'overflow-hidden rounded-md border bg-background',
-        className,
-      )}
-    >
+    <div className={cn('overflow-hidden rounded-md border bg-background', className)}>
       {/* Toolbar — scrolls horizontally on narrow viewports */}
-      <div className="flex items-center gap-0.5 overflow-x-auto border-b px-2 py-1 scrollbar-none">
+      <div className="scrollbar-none flex items-center gap-0.5 overflow-x-auto border-b px-2 py-1">
         {/* Group 1: inline marks */}
         <ToolbarButton
           onClick={() => cmd.toggleBold().run()}
@@ -313,11 +299,7 @@ export const RichTextEditor = memo(function RichTextEditor({
         <Divider />
 
         {/* Group 6: insert + highlight */}
-        <ToolbarButton
-          onClick={setLink}
-          isActive={active.link}
-          title="Insert / edit link"
-        >
+        <ToolbarButton onClick={setLink} isActive={active.link} title="Insert / edit link">
           <LinkIcon className="h-3.5 w-3.5" />
         </ToolbarButton>
         <ToolbarButton
@@ -342,12 +324,12 @@ export const RichTextEditor = memo(function RichTextEditor({
       {/* Editable area with overlay placeholder */}
       <div className="relative">
         {showPlaceholder && (
-          <p className="pointer-events-none absolute left-3 top-2.5 select-none text-sm text-muted-foreground">
+          <p className="pointer-events-none absolute top-2.5 left-3 text-sm text-muted-foreground select-none">
             {placeholder}
           </p>
         )}
         <EditorContent editor={editor} style={{ minHeight }} />
       </div>
     </div>
-  )
-})
+  );
+});

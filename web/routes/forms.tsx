@@ -1,26 +1,22 @@
-import {
-  Outlet,
-  Link,
-  createFileRoute,
-  useLocation,
-} from '@tanstack/react-router'
-import { Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router';
+import { Plus } from 'lucide-react';
+
+import { Button } from '~/shared/components/ui/button';
 
 export const Route = createFileRoute('/forms')({
   component: FormsLayout,
-})
+});
 
 function FormsLayout() {
-  const location = useLocation()
+  const location = useLocation();
   const isSubPage =
     location.pathname.startsWith('/forms/new') ||
     (location.pathname.startsWith('/forms/') &&
       location.pathname !== '/forms/' &&
-      location.pathname !== '/forms')
+      location.pathname !== '/forms');
 
   if (isSubPage) {
-    return <Outlet />
+    return <Outlet />;
   }
 
   return (
@@ -39,5 +35,5 @@ function FormsLayout() {
       </div>
       <Outlet />
     </div>
-  )
+  );
 }

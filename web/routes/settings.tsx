@@ -1,17 +1,17 @@
-import { useState } from 'react'
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { FlagIcon } from 'lucide-react'
-import { toast } from 'sonner'
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { FlagIcon } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-import { useAuth } from '@/lib/auth'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { useAuth } from '~/platform/lib/auth';
+import { Button } from '~/shared/components/ui/button';
+import { Input } from '~/shared/components/ui/input';
+import { Label } from '~/shared/components/ui/label';
 
 export const Route = createFileRoute('/settings')({
   component: SettingsPage,
-})
+});
 
 function getInitials(name: string): string {
   return name
@@ -19,34 +19,34 @@ function getInitials(name: string): string {
     .map((part) => part[0])
     .join('')
     .toUpperCase()
-    .slice(0, 2)
+    .slice(0, 2);
 }
 
 function SettingsPage() {
-  const { user, updateUser } = useAuth()
+  const { user, updateUser } = useAuth();
 
-  useSetBreadcrumbs([{ label: 'Settings', href: '/settings' }])
+  useSetBreadcrumbs([{ label: 'Settings', href: '/settings' }]);
 
   const [form, setForm] = useState({
     name: user.name,
     email: user.email,
     role: user.role,
-  })
+  });
 
   function handleChange(field: keyof typeof form, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }))
+    setForm((prev) => ({ ...prev, [field]: value }));
   }
 
   function handleSave() {
-    updateUser(form)
-    toast.success('Account updated')
+    updateUser(form);
+    toast.success('Account updated');
   }
 
   return (
     <main className="mx-auto flex w-[640px] flex-col gap-8 px-4 py-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground text-sm">Manage your account</p>
+        <p className="text-sm text-muted-foreground">Manage your account</p>
       </div>
 
       <section className="flex flex-col gap-4">
@@ -59,9 +59,7 @@ function SettingsPage() {
             </div>
             <div>
               <p className="font-medium">{form.name || user.name}</p>
-              <p className="text-muted-foreground text-sm">
-                {form.role || user.role}
-              </p>
+              <p className="text-sm text-muted-foreground">{form.role || user.role}</p>
             </div>
           </div>
 
@@ -111,7 +109,7 @@ function SettingsPage() {
           <div className="flex flex-col items-start justify-start gap-4">
             <div>
               <p className="font-medium">Feature Flags</p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 Toggle experimental features and control app behavior
               </p>
             </div>
@@ -123,5 +121,5 @@ function SettingsPage() {
         </div>
       </section>
     </main>
-  )
+  );
 }

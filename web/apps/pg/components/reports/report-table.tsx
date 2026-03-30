@@ -1,24 +1,18 @@
-import React, { useMemo, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { ChevronDown, ChevronLeft, ChevronRight, Send } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router';
+import { ChevronDown, ChevronLeft, ChevronRight, Send } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 
+import { EmptyState } from '~/apps/pg/components/empty-state';
 import type {
   HolisticReport,
   ParentStatus,
   ReviewStatus,
   SchoolLevel,
   StudentStatus,
-} from '@/types/report'
-import { cn } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { EmptyState } from '@/components/empty-state'
+} from '~/apps/pg/types/report';
+import { Badge } from '~/shared/components/ui/badge';
+import { Button } from '~/shared/components/ui/button';
+import { Checkbox } from '~/shared/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -26,19 +20,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { usePagination } from '@/hooks/use-pagination'
+} from '~/shared/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/shared/components/ui/tooltip';
+import { usePagination } from '~/shared/hooks/use-pagination';
+import { cn } from '~/shared/lib/utils';
 
 interface ReportTableProps {
-  reports: Array<HolisticReport>
-  className?: string
-  pageSize?: number
-  selectedIds: Set<string>
-  onSelectionChange: (ids: Set<string>) => void
-  schoolLevel?: SchoolLevel
-  groupBy?: 'none' | 'student' | 'term'
-  onQuickSendStudent?: (id: string) => void
-  onQuickSendParent?: (id: string) => void
+  reports: HolisticReport[];
+  className?: string;
+  pageSize?: number;
+  selectedIds: Set<string>;
+  onSelectionChange: (ids: Set<string>) => void;
+  schoolLevel?: SchoolLevel;
+  groupBy?: 'none' | 'student' | 'term';
+  onQuickSendStudent?: (id: string) => void;
+  onQuickSendParent?: (id: string) => void;
 }
 
 function getReviewStatusBadge(status: ReviewStatus) {
@@ -55,9 +51,9 @@ function getReviewStatusBadge(status: ReviewStatus) {
       label: 'Approved',
       className: 'bg-green-100 text-green-700 hover:bg-green-100',
     },
-  }
-  const { label, className } = config[status]
-  return <Badge className={className}>{label}</Badge>
+  };
+  const { label, className } = config[status];
+  return <Badge className={className}>{label}</Badge>;
 }
 
 function getParentStatusBadge(status: ParentStatus) {
@@ -78,9 +74,9 @@ function getParentStatusBadge(status: ParentStatus) {
       label: 'Acknowledged',
       className: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
     },
-  }
-  const { label, className } = config[status]
-  return <Badge className={className}>{label}</Badge>
+  };
+  const { label, className } = config[status];
+  return <Badge className={className}>{label}</Badge>;
 }
 
 function getStudentStatusBadge(status: StudentStatus) {
@@ -105,9 +101,9 @@ function getStudentStatusBadge(status: StudentStatus) {
       label: 'Sent to Parents',
       className: 'bg-teal-100 text-teal-700 hover:bg-teal-100',
     },
-  }
-  const { label, className } = config[status]
-  return <Badge className={className}>{label}</Badge>
+  };
+  const { label, className } = config[status];
+  return <Badge className={className}>{label}</Badge>;
 }
 
 function ReportRow({
@@ -119,13 +115,13 @@ function ReportRow({
   onQuickSendStudent,
   onQuickSendParent,
 }: {
-  report: HolisticReport
-  isSecondary: boolean
-  isSelected: boolean
-  onSelect: (id: string, e: React.MouseEvent) => void
-  onNavigate: () => void
-  onQuickSendStudent?: (id: string) => void
-  onQuickSendParent?: (id: string) => void
+  report: HolisticReport;
+  isSecondary: boolean;
+  isSelected: boolean;
+  onSelect: (id: string, e: React.MouseEvent) => void;
+  onNavigate: () => void;
+  onQuickSendStudent?: (id: string) => void;
+  onQuickSendParent?: (id: string) => void;
 }) {
   return (
     <TableRow
@@ -137,10 +133,7 @@ function ReportRow({
         className="sticky left-0 z-10 bg-white pl-6 group-hover:bg-muted/50 group-data-[selected]:bg-muted"
         onClick={(e) => onSelect(report.id, e)}
       >
-        <Checkbox
-          checked={isSelected}
-          aria-label={`Select report for ${report.studentName}`}
-        />
+        <Checkbox checked={isSelected} aria-label={`Select report for ${report.studentName}`} />
       </TableCell>
       <TableCell className="sticky left-12 z-10 bg-white font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] group-hover:bg-muted/50 group-data-[selected]:bg-muted">
         {report.studentName}
@@ -160,10 +153,10 @@ function ReportRow({
                   render={
                     <button
                       type="button"
-                      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
+                      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-muted hover:text-foreground"
                       onClick={(e) => {
-                        e.stopPropagation()
-                        onQuickSendStudent(report.id)
+                        e.stopPropagation();
+                        onQuickSendStudent(report.id);
                       }}
                       aria-label={`Send report to ${report.studentName}`}
                     >
@@ -186,10 +179,10 @@ function ReportRow({
                 render={
                   <button
                     type="button"
-                    className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover:opacity-100"
+                    className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-muted hover:text-foreground"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      onQuickSendParent(report.id)
+                      e.stopPropagation();
+                      onQuickSendParent(report.id);
                     }}
                     aria-label={`Send report to ${report.studentName}'s parents`}
                   >
@@ -203,7 +196,7 @@ function ReportRow({
         </div>
       </TableCell>
     </TableRow>
-  )
+  );
 }
 
 export function ReportTable({
@@ -217,192 +210,180 @@ export function ReportTable({
   onQuickSendStudent,
   onQuickSendParent,
 }: ReportTableProps) {
-  const navigate = useNavigate()
-  const isSecondary = schoolLevel === 'secondary'
+  const navigate = useNavigate();
+  const isSecondary = schoolLevel === 'secondary';
 
   // Build all groups from the full report list (before pagination)
   const allGroups = useMemo(() => {
-    if (groupBy === 'none') return null
-    const groups: Array<{ name: string; reports: Array<HolisticReport> }> = []
-    const groupMap = new Map<string, Array<HolisticReport>>()
+    if (groupBy === 'none') return null;
+    const groups: { name: string; reports: HolisticReport[] }[] = [];
+    const groupMap = new Map<string, HolisticReport[]>();
     for (const report of reports) {
-      const key = groupBy === 'student' ? report.studentName : report.term
-      let group = groupMap.get(key)
+      const key = groupBy === 'student' ? report.studentName : report.term;
+      let group = groupMap.get(key);
       if (!group) {
-        group = []
-        groupMap.set(key, group)
-        groups.push({ name: key, reports: group })
+        group = [];
+        groupMap.set(key, group);
+        groups.push({ name: key, reports: group });
       }
-      group.push(report)
+      group.push(report);
     }
-    return groups
-  }, [reports, groupBy])
+    return groups;
+  }, [reports, groupBy]);
 
   // Group-aware pagination: pack complete groups into pages
   const groupPages = useMemo(() => {
-    if (!allGroups) return null
-    const pages: Array<
-      Array<{ name: string; reports: Array<HolisticReport> }>
-    > = []
-    let currentPageGroups: Array<{
-      name: string
-      reports: Array<HolisticReport>
-    }> = []
-    let currentPageSize = 0
+    if (!allGroups) return null;
+    const pages: { name: string; reports: HolisticReport[] }[][] = [];
+    let currentPageGroups: {
+      name: string;
+      reports: HolisticReport[];
+    }[] = [];
+    let currentPageSize = 0;
 
     for (const group of allGroups) {
       // If adding this group would exceed pageSize and we already have groups on this page, start a new page
-      if (
-        currentPageSize > 0 &&
-        currentPageSize + group.reports.length > pageSize
-      ) {
-        pages.push(currentPageGroups)
-        currentPageGroups = []
-        currentPageSize = 0
+      if (currentPageSize > 0 && currentPageSize + group.reports.length > pageSize) {
+        pages.push(currentPageGroups);
+        currentPageGroups = [];
+        currentPageSize = 0;
       }
-      currentPageGroups.push(group)
-      currentPageSize += group.reports.length
+      currentPageGroups.push(group);
+      currentPageSize += group.reports.length;
     }
     if (currentPageGroups.length > 0) {
-      pages.push(currentPageGroups)
+      pages.push(currentPageGroups);
     }
-    return pages
-  }, [allGroups, pageSize])
+    return pages;
+  }, [allGroups, pageSize]);
 
   // Flat pagination (ungrouped)
   const flatPagination = usePagination({
     totalItems: groupBy === 'none' ? reports.length : 0,
     pageSize,
-  })
+  });
 
   // Group pagination state
-  const [groupPage, setGroupPage] = useState(1)
-  const groupTotalPages = groupPages?.length ?? 0
+  const [groupPage, setGroupPage] = useState(1);
+  const groupTotalPages = groupPages?.length ?? 0;
 
   // Reset group page when groups change
-  const groupPagesRef = React.useRef(groupPages)
+  const groupPagesRef = React.useRef(groupPages);
   if (groupPagesRef.current !== groupPages) {
-    groupPagesRef.current = groupPages
+    groupPagesRef.current = groupPages;
     if (groupPage > (groupPages?.length ?? 1)) {
-      setGroupPage(1)
+      setGroupPage(1);
     }
   }
 
   const groupPageNumbers = useMemo(() => {
-    const pages: Array<number | 'ellipsis'> = []
-    const maxVisible = 5
+    const pages: (number | 'ellipsis')[] = [];
+    const maxVisible = 5;
     if (groupTotalPages <= maxVisible) {
-      for (let i = 1; i <= groupTotalPages; i++) pages.push(i)
+      for (let i = 1; i <= groupTotalPages; i++) pages.push(i);
     } else if (groupPage <= 3) {
-      for (let i = 1; i <= 4; i++) pages.push(i)
-      pages.push('ellipsis')
-      pages.push(groupTotalPages)
+      for (let i = 1; i <= 4; i++) pages.push(i);
+      pages.push('ellipsis');
+      pages.push(groupTotalPages);
     } else if (groupPage >= groupTotalPages - 2) {
-      pages.push(1)
-      pages.push('ellipsis')
-      for (let i = groupTotalPages - 3; i <= groupTotalPages; i++) pages.push(i)
+      pages.push(1);
+      pages.push('ellipsis');
+      for (let i = groupTotalPages - 3; i <= groupTotalPages; i++) pages.push(i);
     } else {
-      pages.push(1)
-      pages.push('ellipsis')
-      pages.push(groupPage - 1)
-      pages.push(groupPage)
-      pages.push(groupPage + 1)
-      pages.push('ellipsis')
-      pages.push(groupTotalPages)
+      pages.push(1);
+      pages.push('ellipsis');
+      pages.push(groupPage - 1);
+      pages.push(groupPage);
+      pages.push(groupPage + 1);
+      pages.push('ellipsis');
+      pages.push(groupTotalPages);
     }
-    return pages
-  }, [groupTotalPages, groupPage])
+    return pages;
+  }, [groupTotalPages, groupPage]);
 
   // Determine what's visible on the current page
   const visibleReports = useMemo(() => {
     if (groupPages && groupPages.length > 0) {
-      const pageIdx = Math.min(groupPage - 1, groupPages.length - 1)
-      return groupPages[pageIdx].flatMap((g) => g.reports)
+      const pageIdx = Math.min(groupPage - 1, groupPages.length - 1);
+      return groupPages[pageIdx].flatMap((g) => g.reports);
     }
-    return reports.slice(
-      flatPagination.startIndex,
-      flatPagination.startIndex + pageSize,
-    )
-  }, [groupPages, groupPage, reports, flatPagination.startIndex, pageSize])
+    return reports.slice(flatPagination.startIndex, flatPagination.startIndex + pageSize);
+  }, [groupPages, groupPage, reports, flatPagination.startIndex, pageSize]);
 
   const visibleGroups = useMemo(() => {
-    if (!groupPages || groupPages.length === 0) return null
-    const pageIdx = Math.min(groupPage - 1, groupPages.length - 1)
-    return groupPages[pageIdx]
-  }, [groupPages, groupPage])
+    if (!groupPages || groupPages.length === 0) return null;
+    const pageIdx = Math.min(groupPage - 1, groupPages.length - 1);
+    return groupPages[pageIdx];
+  }, [groupPages, groupPage]);
 
   const visibleIds = useMemo(() => {
-    return new Set(visibleReports.map((r) => r.id))
-  }, [visibleReports])
+    return new Set(visibleReports.map((r) => r.id));
+  }, [visibleReports]);
 
   const allPageSelected =
-    visibleReports.length > 0 &&
-    visibleReports.every((r) => selectedIds.has(r.id))
+    visibleReports.length > 0 && visibleReports.every((r) => selectedIds.has(r.id));
 
-  const somePageSelected =
-    visibleReports.some((r) => selectedIds.has(r.id)) && !allPageSelected
+  const somePageSelected = visibleReports.some((r) => selectedIds.has(r.id)) && !allPageSelected;
 
   const handleSelectAll = () => {
     if (allPageSelected) {
-      const newSelection = new Set(selectedIds)
+      const newSelection = new Set(selectedIds);
       for (const id of visibleIds) {
-        newSelection.delete(id)
+        newSelection.delete(id);
       }
-      onSelectionChange(newSelection)
+      onSelectionChange(newSelection);
     } else {
-      const newSelection = new Set(selectedIds)
+      const newSelection = new Set(selectedIds);
       for (const id of visibleIds) {
-        newSelection.add(id)
+        newSelection.add(id);
       }
-      onSelectionChange(newSelection)
+      onSelectionChange(newSelection);
     }
-  }
+  };
 
   const handleSelectRow = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation()
-    const newSelection = new Set(selectedIds)
+    e.stopPropagation();
+    const newSelection = new Set(selectedIds);
     if (newSelection.has(id)) {
-      newSelection.delete(id)
+      newSelection.delete(id);
     } else {
-      newSelection.add(id)
+      newSelection.add(id);
     }
-    onSelectionChange(newSelection)
-  }
+    onSelectionChange(newSelection);
+  };
 
-  const colSpan = isSecondary ? 7 : 6
+  const colSpan = isSecondary ? 7 : 6;
 
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
   const toggleGroup = (groupName: string) => {
     setCollapsedGroups((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(groupName)) {
-        next.delete(groupName)
+        next.delete(groupName);
       } else {
-        next.add(groupName)
+        next.add(groupName);
       }
-      return next
-    })
-  }
+      return next;
+    });
+  };
 
   // Unified pagination values
-  const isGrouped = groupBy !== 'none'
-  const currentPage = isGrouped ? groupPage : flatPagination.currentPage
-  const totalPages = isGrouped ? groupTotalPages : flatPagination.totalPages
-  const pageNumbers = isGrouped ? groupPageNumbers : flatPagination.pageNumbers
-  const canGoPrevious = isGrouped ? groupPage > 1 : flatPagination.canGoPrevious
-  const canGoNext = isGrouped
-    ? groupPage < groupTotalPages
-    : flatPagination.canGoNext
+  const isGrouped = groupBy !== 'none';
+  const currentPage = isGrouped ? groupPage : flatPagination.currentPage;
+  const totalPages = isGrouped ? groupTotalPages : flatPagination.totalPages;
+  const pageNumbers = isGrouped ? groupPageNumbers : flatPagination.pageNumbers;
+  const canGoPrevious = isGrouped ? groupPage > 1 : flatPagination.canGoPrevious;
+  const canGoNext = isGrouped ? groupPage < groupTotalPages : flatPagination.canGoNext;
   const goToPage = isGrouped
     ? (p: number) => setGroupPage(Math.max(1, Math.min(p, groupTotalPages)))
-    : flatPagination.goToPage
+    : flatPagination.goToPage;
   const goToPreviousPage = isGrouped
     ? () => setGroupPage((p) => Math.max(1, p - 1))
-    : flatPagination.goToPreviousPage
+    : flatPagination.goToPreviousPage;
   const goToNextPage = isGrouped
     ? () => setGroupPage((p) => Math.min(groupTotalPages, p + 1))
-    : flatPagination.goToNextPage
+    : flatPagination.goToNextPage;
 
   return (
     <div className={cn('max-w-full overflow-x-auto bg-white', className)}>
@@ -423,14 +404,8 @@ export function ReportTable({
             <TableHead className="min-w-[90px]">Class</TableHead>
             <TableHead className="min-w-[90px]">Term</TableHead>
             <TableHead className="min-w-[120px]">Review Status</TableHead>
-            {isSecondary && (
-              <TableHead className="min-w-[130px]">
-                Student View Status
-              </TableHead>
-            )}
-            <TableHead className="min-w-[120px] pr-6">
-              Parent View Status
-            </TableHead>
+            {isSecondary && <TableHead className="min-w-[130px]">Student View Status</TableHead>}
+            <TableHead className="min-w-[120px] pr-6">Parent View Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -445,7 +420,7 @@ export function ReportTable({
             </TableRow>
           ) : visibleGroups ? (
             visibleGroups.map(({ name: groupName, reports: groupReports }) => {
-              const isCollapsed = collapsedGroups.has(groupName)
+              const isCollapsed = collapsedGroups.has(groupName);
               return (
                 <React.Fragment key={groupName}>
                   <TableRow
@@ -454,7 +429,7 @@ export function ReportTable({
                   >
                     <TableCell
                       colSpan={colSpan}
-                      className="bg-muted/50 py-2 pl-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                      className="bg-muted/50 py-2 pl-6 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                     >
                       <div className="flex items-center gap-2">
                         <ChevronDown
@@ -464,9 +439,7 @@ export function ReportTable({
                           )}
                         />
                         {groupName}
-                        <span className="font-normal">
-                          ({groupReports.length})
-                        </span>
+                        <span className="font-normal">({groupReports.length})</span>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -489,7 +462,7 @@ export function ReportTable({
                       />
                     ))}
                 </React.Fragment>
-              )
+              );
             })
           ) : (
             visibleReports.map((report) => (
@@ -515,17 +488,10 @@ export function ReportTable({
 
       {/* Record count and Pagination */}
       <div className="flex shrink-0 items-center justify-between px-6 py-4">
-        <div className="text-sm text-muted-foreground">
-          {reports.length} reports
-        </div>
+        <div className="text-sm text-muted-foreground">{reports.length} reports</div>
         {totalPages > 1 && (
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={goToPreviousPage}
-              disabled={!canGoPrevious}
-            >
+            <Button variant="ghost" size="sm" onClick={goToPreviousPage} disabled={!canGoPrevious}>
               <ChevronLeft className="h-4 w-4" />
               Previous
             </Button>
@@ -554,12 +520,7 @@ export function ReportTable({
               ),
             )}
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={goToNextPage}
-              disabled={!canGoNext}
-            >
+            <Button variant="ghost" size="sm" onClick={goToNextPage} disabled={!canGoNext}>
               Next
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -567,5 +528,5 @@ export function ReportTable({
         )}
       </div>
     </div>
-  )
+  );
 }

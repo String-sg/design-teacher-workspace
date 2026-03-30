@@ -1,11 +1,11 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Upload, Users, X } from 'lucide-react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Upload, Users, X } from 'lucide-react';
 
-import { Button } from '@/components/ui/button'
+import { Button } from '~/shared/components/ui/button';
 
 export const Route = createFileRoute('/groups/create')({
   component: GroupsCreate,
-})
+});
 
 function ManualMockup() {
   return (
@@ -17,7 +17,7 @@ function ManualMockup() {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 function UploadMockup() {
@@ -31,7 +31,7 @@ function UploadMockup() {
         <div className="h-1.5 w-32 rounded-full bg-slate-200" />
       </div>
     </div>
-  )
+  );
 }
 
 const OPTIONS = [
@@ -51,10 +51,10 @@ const OPTIONS = [
     href: '/groups/upload',
     mockup: <UploadMockup />,
   },
-]
+];
 
 function GroupsCreate() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <div className="flex min-h-[calc(100vh-57px)] flex-col bg-muted/30">
@@ -78,9 +78,7 @@ function GroupsCreate() {
             <h1 className="text-xl font-semibold sm:text-2xl">
               How would you like to add students?
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Choose a method to get started.
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Choose a method to get started.</p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -91,13 +89,9 @@ function GroupsCreate() {
                 onClick={() => navigate({ to: opt.href })}
                 className="group flex flex-col overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left transition-all duration-150 ease-out hover:border-primary/40 hover:shadow-sm active:scale-[0.98]"
               >
-                <div className="border-b border-slate-100 bg-slate-50">
-                  {opt.mockup}
-                </div>
+                <div className="border-b border-slate-100 bg-slate-50">{opt.mockup}</div>
                 <div className="p-4">
-                  <p className="text-sm font-semibold">
-                    {opt.title}
-                  </p>
+                  <p className="text-sm font-semibold">{opt.title}</p>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     {opt.description}
                   </p>
@@ -108,5 +102,5 @@ function GroupsCreate() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,34 +1,26 @@
-import { useState } from 'react'
-import { Columns3, RotateCcw } from 'lucide-react'
+import { Columns3, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
 
-import type { FilterField } from '@/types/student'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import type { FilterField } from '~/apps/pg/types/student';
+import { Button } from '~/shared/components/ui/button';
+import { Checkbox } from '~/shared/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '~/shared/components/ui/popover';
+import { ScrollArea } from '~/shared/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/shared/components/ui/tooltip';
+import { cn } from '~/shared/lib/utils';
 
 export interface ColumnConfig {
-  id: string
-  label: string
-  visible: boolean
-  sortable?: boolean
-  filterable?: boolean
-  filterField?: FilterField
-  source?: string
-  lastUpdated?: string
+  id: string;
+  label: string;
+  visible: boolean;
+  sortable?: boolean;
+  filterable?: boolean;
+  filterField?: FilterField;
+  source?: string;
+  lastUpdated?: string;
 }
 
-export const defaultColumns: Array<ColumnConfig> = [
+export const defaultColumns: ColumnConfig[] = [
   {
     id: 'index',
     label: '#',
@@ -286,12 +278,12 @@ export const defaultColumns: Array<ColumnConfig> = [
     source: 'School Cockpit, RE_FA_006',
     lastUpdated: '16 Sep 2025 by Ang Wei Pan',
   },
-]
+];
 
 interface ColumnVisibilityPopoverProps {
-  columns: Array<ColumnConfig>
-  onColumnsChange: (columns: Array<ColumnConfig>) => void
-  className?: string
+  columns: ColumnConfig[];
+  onColumnsChange: (columns: ColumnConfig[]) => void;
+  className?: string;
 }
 
 export function ColumnVisibilityPopover({
@@ -299,25 +291,23 @@ export function ColumnVisibilityPopover({
   onColumnsChange,
   className,
 }: ColumnVisibilityPopoverProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
-  const visibleCount = columns.filter((c) => c.visible).length
+  const visibleCount = columns.filter((c) => c.visible).length;
 
   const handleToggle = (id: string) => {
     onColumnsChange(
-      columns.map((col) =>
-        col.id === id ? { ...col, visible: !col.visible } : col,
-      ),
-    )
-  }
+      columns.map((col) => (col.id === id ? { ...col, visible: !col.visible } : col)),
+    );
+  };
 
   const handleReset = () => {
-    onColumnsChange(defaultColumns)
-  }
+    onColumnsChange(defaultColumns);
+  };
 
   const handleShowAll = () => {
-    onColumnsChange(columns.map((col) => ({ ...col, visible: true })))
-  }
+    onColumnsChange(columns.map((col) => ({ ...col, visible: true })));
+  };
 
   const handleHideAll = () => {
     // Keep at least name and index visible
@@ -326,8 +316,8 @@ export function ColumnVisibilityPopover({
         ...col,
         visible: col.id === 'name' || col.id === 'index',
       })),
-    )
-  }
+    );
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -335,13 +325,7 @@ export function ColumnVisibilityPopover({
         <TooltipTrigger
           render={
             <PopoverTrigger
-              render={
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={cn(className)}
-                />
-              }
+              render={<Button variant="outline" size="icon" className={cn(className)} />}
             >
               <Columns3 className="h-4 w-4" />
             </PopoverTrigger>
@@ -396,5 +380,5 @@ export function ColumnVisibilityPopover({
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

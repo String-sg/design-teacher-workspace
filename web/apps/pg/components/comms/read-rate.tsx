@@ -1,25 +1,20 @@
-import { cn } from '@/lib/utils'
+import { cn } from '~/shared/lib/utils';
 
 interface ReadRateProps {
-  readCount: number
-  totalCount: number
+  readCount: number;
+  totalCount: number;
   /** Show just the bar without the fraction label */
-  compact?: boolean
-  className?: string
+  compact?: boolean;
+  className?: string;
 }
 
-export function ReadRate({
-  readCount,
-  totalCount,
-  compact = false,
-  className,
-}: ReadRateProps) {
+export function ReadRate({ readCount, totalCount, compact = false, className }: ReadRateProps) {
   if (totalCount === 0) {
-    return <span className="text-sm text-muted-foreground">—</span>
+    return <span className="text-sm text-muted-foreground">—</span>;
   }
 
-  const pct = Math.round((readCount / totalCount) * 100)
-  const isLow = pct < 50
+  const pct = Math.round((readCount / totalCount) * 100);
+  const isLow = pct < 50;
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
@@ -34,10 +29,10 @@ export function ReadRate({
         />
       </div>
       {!compact && (
-        <span className="whitespace-nowrap text-sm text-muted-foreground">
+        <span className="text-sm whitespace-nowrap text-muted-foreground">
           {readCount} / {totalCount}
         </span>
       )}
     </div>
-  )
+  );
 }

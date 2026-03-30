@@ -1,17 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  LabelList,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
 import {
   ArrowDown,
   ArrowUp,
@@ -26,30 +13,43 @@ import {
   SlidersHorizontal,
   X,
 } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  LabelList,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { AttendanceRing } from '~/apps/pg/components/reports/attendance-ring'
+import { LevelDropdown } from '~/apps/pg/components/students/academic-analytics'
+import { mockStudents } from '~/apps/pg/data/mock-students'
+import { Button } from '~/shared/components/ui/button'
+import { Input } from '~/shared/components/ui/input'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover'
+} from '~/shared/components/ui/popover'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '~/shared/components/ui/select'
 import {
+  Tooltip as TooltipUI,
   TooltipContent,
   TooltipTrigger,
-  Tooltip as TooltipUI,
-} from '@/components/ui/tooltip'
-import { mockStudents } from '@/data/mock-students'
-import { LevelDropdown } from '@/components/students/academic-analytics'
-import { AttendanceRing } from '@/components/reports/attendance-ring'
+} from '~/shared/components/ui/tooltip'
+import { cn } from '~/shared/lib/utils'
 
 const studentIdByName = new Map(mockStudents.map((s) => [s.name, s.id]))
 
@@ -101,7 +101,7 @@ interface MonthlyEntry {
 }
 
 // null = no occurrences that month (prevents empty bar slots)
-const MONTHLY_DATA: Array<MonthlyEntry> = [
+const MONTHLY_DATA: MonthlyEntry[] = [
   {
     month: 'Jan',
     latecoming: 1,
@@ -254,7 +254,7 @@ function AbsenceBarChart({
   onSegmentClick,
 }: {
   barSize?: number
-  data?: Array<MonthlyEntry>
+  data?: MonthlyEntry[]
   onSegmentClick?: (month: string, categoryKey: string, count: number) => void
 }) {
   const reversedCategories = [...BAR_CATEGORIES].reverse()
@@ -394,7 +394,7 @@ function CustomBarTooltip({
   clickable,
 }: {
   active?: boolean
-  payload?: Array<{ name: string; value: number; color?: string }>
+  payload?: { name: string; value: number; color?: string }[]
   label?: string
   clickable?: boolean
 }) {
@@ -533,7 +533,7 @@ interface AttendanceStudent {
 }
 
 // Derive attendance table rows from mockStudents so the count matches
-const ATTENDANCE_STUDENTS: Array<AttendanceStudent> = mockStudents.map(
+const ATTENDANCE_STUDENTS: AttendanceStudent[] = mockStudents.map(
   (s, i) => {
     // Spread values deterministically from existing student data
     const seed = i + 1
@@ -611,7 +611,7 @@ function matchesNumericFilter(value: number, filter: NumericFilter): boolean {
 }
 
 // Deterministically assign months to students based on their counts
-const STUDENT_MONTHS: Array<Array<string>> = ATTENDANCE_STUDENTS.map((s, i) => {
+const STUDENT_MONTHS: string[][] = ATTENDANCE_STUDENTS.map((s, i) => {
   const total =
     s.nonVRAbsences +
     s.late +
@@ -791,7 +791,7 @@ function NumericFilterRow({
             align="start"
             alignItemWithTrigger={false}
           >
-            {(Object.entries(OP_LABELS) as Array<[FilterOp, string]>).map(
+            {(Object.entries(OP_LABELS) as [FilterOp, string][]).map(
               ([op, lbl]) => (
                 <SelectItem key={op} value={op}>
                   {lbl}
@@ -1349,7 +1349,7 @@ function AttendanceStudentsTable({
             .filter(
               (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1,
             )
-            .reduce<Array<number | '…'>>((acc, p, i, arr) => {
+            .reduce<(number | '…')[]>((acc, p, i, arr) => {
               if (i > 0 && p - arr[i - 1] > 1) acc.push('…')
               acc.push(p)
               return acc
@@ -1528,8 +1528,7 @@ export function AttendanceLevelAnalytics() {
             aria-modal="true"
             aria-label="Absences / Late-coming by Month"
             tabIndex={-1}
-            // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus
+            autoFocus  
             onKeyDown={(e) => {
               if (e.key === 'Escape') setChartExpanded(false)
             }}
@@ -1695,8 +1694,7 @@ export function AttendanceAnalytics() {
             aria-modal="true"
             aria-label="Absences / Late-coming by Month"
             tabIndex={-1}
-            // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus
+            autoFocus  
             onKeyDown={(e) => {
               if (e.key === 'Escape') setChartExpanded(false)
             }}

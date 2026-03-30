@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router';
 import {
   BoldIcon,
   ChevronDownIcon,
@@ -14,18 +13,17 @@ import {
   TableIcon,
   TrashIcon,
   UserIcon,
-} from 'lucide-react'
+} from 'lucide-react';
+import { useState } from 'react';
 
-import { cn } from '@/lib/utils'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+} from '~/shared/components/ui/accordion';
+import { Alert, AlertDescription, AlertTitle } from '~/shared/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,14 +34,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarGroup,
-  AvatarImage,
-} from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
+} from '~/shared/components/ui/alert-dialog';
+import { Avatar, AvatarFallback, AvatarGroup, AvatarImage } from '~/shared/components/ui/avatar';
+import { Badge } from '~/shared/components/ui/badge';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -51,8 +44,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import { Button } from '@/components/ui/button'
+} from '~/shared/components/ui/breadcrumb';
+import { Button } from '~/shared/components/ui/button';
 import {
   Card,
   CardContent,
@@ -60,8 +53,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
+} from '~/shared/components/ui/card';
+import { Checkbox } from '~/shared/components/ui/checkbox';
 import {
   Dialog,
   DialogClose,
@@ -71,7 +64,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '~/shared/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -83,14 +76,10 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from '@/components/ui/input-group'
-import { Label } from '@/components/ui/label'
+} from '~/shared/components/ui/dropdown-menu';
+import { Input } from '~/shared/components/ui/input';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '~/shared/components/ui/input-group';
+import { Label } from '~/shared/components/ui/label';
 import {
   Popover,
   PopoverContent,
@@ -98,16 +87,16 @@ import {
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
-} from '@/components/ui/popover'
-import { ScrollArea } from '@/components/ui/scroll-area'
+} from '~/shared/components/ui/popover';
+import { ScrollArea } from '~/shared/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
+} from '~/shared/components/ui/select';
+import { Separator } from '~/shared/components/ui/separator';
 import {
   Sheet,
   SheetContent,
@@ -115,9 +104,9 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Switch } from '@/components/ui/switch'
+} from '~/shared/components/ui/sheet';
+import { Skeleton } from '~/shared/components/ui/skeleton';
+import { Switch } from '~/shared/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -125,18 +114,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from '~/shared/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/shared/components/ui/tabs';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '~/shared/components/ui/tooltip';
+import { cn } from '~/shared/lib/utils';
 
 export const Route = createFileRoute('/ds/tw-theme')({
   component: DesignSystemPage,
-})
+});
 
 // --- Nav sections ---
 
@@ -177,7 +167,7 @@ const NAV_SECTIONS = [
       { id: 'breadcrumb', label: 'Breadcrumb' },
     ],
   },
-]
+];
 
 // --- Helpers ---
 
@@ -186,16 +176,16 @@ function Section({
   title,
   children,
 }: {
-  id: string
-  title: string
-  children: React.ReactNode
+  id: string;
+  title: string;
+  children: React.ReactNode;
 }) {
   return (
     <section id={id} className="scroll-mt-8">
-      <h2 className="text-xl font-semibold mb-4">{title}</h2>
+      <h2 className="mb-4 text-xl font-semibold">{title}</h2>
       {children}
     </section>
-  )
+  );
 }
 
 function Swatch({
@@ -203,35 +193,24 @@ function Swatch({
   cssVar,
   className,
 }: {
-  name: string
-  cssVar?: string
-  className?: string
+  name: string;
+  cssVar?: string;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 w-12">
+    <div className="flex w-12 flex-col items-center gap-1.5">
       <div
-        className={cn(
-          'size-12 rounded-lg border border-border shrink-0',
-          className,
-        )}
+        className={cn('size-12 shrink-0 rounded-lg border border-border', className)}
         style={cssVar ? { backgroundColor: `var(${cssVar})` } : undefined}
       />
-      <span className="text-xs text-muted-foreground text-center leading-tight break-words w-full">
+      <span className="w-full text-center text-xs leading-tight break-words text-muted-foreground">
         {name}
       </span>
     </div>
-  )
+  );
 }
 
-function ColorScale({
-  name,
-  prefix,
-  steps,
-}: {
-  name: string
-  prefix: string
-  steps: Array<number>
-}) {
+function ColorScale({ name, prefix, steps }: { name: string; prefix: string; steps: number[] }) {
   return (
     <div className="space-y-2">
       <h4 className="text-sm font-medium capitalize">{name}</h4>
@@ -241,22 +220,16 @@ function ColorScale({
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-function ShowcaseRow({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
+function ShowcaseRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <div className="flex flex-wrap items-center gap-3">{children}</div>
     </div>
-  )
+  );
 }
 
 // --- Page ---
@@ -265,19 +238,19 @@ function DesignSystemPage() {
   useSetBreadcrumbs([
     { label: 'Design System', href: '/ds' },
     { label: 'TW Theme', href: '/ds/tw-theme' },
-  ])
+  ]);
 
-  const [activeSection, setActiveSection] = useState('colors')
+  const [activeSection, setActiveSection] = useState('colors');
 
   return (
     <div className="flex h-full">
       {/* Left Nav */}
-      <nav className="w-52 shrink-0 border-r border-border sticky top-0 h-[calc(100vh-3.5rem)]">
+      <nav className="sticky top-0 h-[calc(100vh-3.5rem)] w-52 shrink-0 border-r border-border">
         <ScrollArea className="h-full">
-          <div className="p-4 space-y-6">
+          <div className="space-y-6 p-4">
             {NAV_SECTIONS.map((section) => (
               <div key={section.title}>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                   {section.title}
                 </p>
                 <ul className="space-y-0.5">
@@ -287,10 +260,10 @@ function DesignSystemPage() {
                         href={`#${item.id}`}
                         onClick={() => setActiveSection(item.id)}
                         className={cn(
-                          'block px-2 py-1.5 text-sm rounded-md transition-colors',
+                          'block rounded-md px-2 py-1.5 text-sm transition-colors',
                           activeSection === item.id
-                            ? 'bg-muted text-foreground font-medium'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                            ? 'bg-muted font-medium text-foreground'
+                            : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
                         )}
                       >
                         {item.label}
@@ -306,10 +279,10 @@ function DesignSystemPage() {
 
       {/* Main Content */}
       <ScrollArea className="flex-1">
-        <div className="max-w-4xl mx-auto p-8 space-y-16">
+        <div className="mx-auto max-w-4xl space-y-16 p-8">
           <div>
             <h1 className="text-2xl font-bold">TW Theme</h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="mt-1 text-muted-foreground">
               Tokens and component reference for the MOE Teacher Workspace.
             </p>
           </div>
@@ -348,16 +321,19 @@ function DesignSystemPage() {
         </div>
       </ScrollArea>
     </div>
-  )
+  );
 }
 
 // ============================================================
 // TOKEN SECTIONS
 // ============================================================
 
-type ColorEntry = { name: string; cssVar: string }
+interface ColorEntry {
+  name: string;
+  cssVar: string;
+}
 
-const SEMANTIC_COLORS: Array<ColorEntry> = [
+const SEMANTIC_COLORS: ColorEntry[] = [
   { name: 'background', cssVar: '--background' },
   { name: 'foreground', cssVar: '--foreground' },
   { name: 'primary', cssVar: '--primary' },
@@ -371,22 +347,22 @@ const SEMANTIC_COLORS: Array<ColorEntry> = [
   { name: 'ring', cssVar: '--ring' },
   { name: 'card', cssVar: '--card' },
   { name: 'popover', cssVar: '--popover' },
-]
+];
 
-const CHART_COLORS: Array<ColorEntry> = [1, 2, 3, 4, 5].map((n) => ({
+const CHART_COLORS: ColorEntry[] = [1, 2, 3, 4, 5].map((n) => ({
   name: `chart-${n}`,
   cssVar: `--chart-${n}`,
-}))
+}));
 
-const SIDEBAR_COLORS: Array<ColorEntry> = [
+const SIDEBAR_COLORS: ColorEntry[] = [
   { name: 'sidebar', cssVar: '--sidebar' },
   { name: 'sidebar-fg', cssVar: '--sidebar-foreground' },
   { name: 'sidebar-primary', cssVar: '--sidebar-primary' },
   { name: 'sidebar-accent', cssVar: '--sidebar-accent' },
   { name: 'sidebar-border', cssVar: '--sidebar-border' },
-]
+];
 
-const SCALE_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+const SCALE_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const COLOR_SCALES = [
   { name: 'TWBlue', prefix: 'twblue' },
   { name: 'Slate', prefix: 'slate' },
@@ -394,21 +370,21 @@ const COLOR_SCALES = [
   { name: 'Orange', prefix: 'orange' },
   { name: 'Lime', prefix: 'lime' },
   { name: 'Amber', prefix: 'amber' },
-]
+];
 
-function ColorSwatchList({ colors }: { colors: Array<ColorEntry> }) {
+function ColorSwatchList({ colors }: { colors: ColorEntry[] }) {
   return (
     <div className="flex flex-wrap gap-2">
       {colors.map((c) => (
         <Swatch key={c.cssVar} name={c.name} cssVar={c.cssVar} />
       ))}
     </div>
-  )
+  );
 }
 
-function ColorTableList({ colors }: { colors: Array<ColorEntry> }) {
+function ColorTableList({ colors }: { colors: ColorEntry[] }) {
   return (
-    <div className="border border-border rounded-xl overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -426,7 +402,7 @@ function ColorTableList({ colors }: { colors: Array<ColorEntry> }) {
                   style={{ backgroundColor: `var(${c.cssVar})` }}
                 />
               </TableCell>
-              <TableCell className="font-medium text-sm">{c.name}</TableCell>
+              <TableCell className="text-sm font-medium">{c.name}</TableCell>
               <TableCell className="font-mono text-xs text-muted-foreground">
                 var({c.cssVar})
               </TableCell>
@@ -435,7 +411,7 @@ function ColorTableList({ colors }: { colors: Array<ColorEntry> }) {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
 
 function ColorScaleTable({
@@ -443,14 +419,14 @@ function ColorScaleTable({
   prefix,
   steps,
 }: {
-  name: string
-  prefix: string
-  steps: Array<number>
+  name: string;
+  prefix: string;
+  steps: number[];
 }) {
   return (
     <div className="space-y-2">
       <h4 className="text-sm font-medium">{name}</h4>
-      <div className="border border-border rounded-xl overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -468,7 +444,7 @@ function ColorScaleTable({
                     style={{ backgroundColor: `var(--${prefix}-${step})` }}
                   />
                 </TableCell>
-                <TableCell className="font-medium text-sm">{step}</TableCell>
+                <TableCell className="text-sm font-medium">{step}</TableCell>
                 <TableCell className="font-mono text-xs text-muted-foreground">
                   var(--{prefix}-{step})
                 </TableCell>
@@ -478,16 +454,16 @@ function ColorScaleTable({
         </Table>
       </div>
     </div>
-  )
+  );
 }
 
 function ColorsSection() {
-  const [view, setView] = useState<'swatch' | 'table'>('swatch')
+  const [view, setView] = useState<'swatch' | 'table'>('swatch');
 
   return (
     <Section id="colors" title="Colors">
       <div className="space-y-8">
-        <div className="flex gap-1 p-0.5 bg-muted rounded-lg w-fit">
+        <div className="flex w-fit gap-1 rounded-lg bg-muted p-0.5">
           <Button
             size="xs"
             variant={view === 'swatch' ? 'outline' : 'ghost'}
@@ -556,18 +532,18 @@ function ColorsSection() {
         )}
       </div>
     </Section>
-  )
+  );
 }
 
 // --- Token Mapping types & data ---
 
-type MappingRow = {
-  twToken: string
-  value: string
-  flowDsToken?: string
+interface MappingRow {
+  twToken: string;
+  value: string;
+  flowDsToken?: string;
 }
 
-const SEMANTIC_MAPPING: Array<MappingRow> = [
+const SEMANTIC_MAPPING: MappingRow[] = [
   {
     twToken: '--background',
     value: 'var(--slate-1)',
@@ -643,15 +619,15 @@ const SEMANTIC_MAPPING: Array<MappingRow> = [
     value: 'var(--twblue-8)',
     flowDsToken: '--color-border-focus',
   },
-]
+];
 
-type ScaleMappingRow = {
-  flowDsScale: string
-  radixScale: string
-  role: string
+interface ScaleMappingRow {
+  flowDsScale: string;
+  radixScale: string;
+  role: string;
 }
 
-const SCALE_MAPPING: Array<ScaleMappingRow> = [
+const SCALE_MAPPING: ScaleMappingRow[] = [
   { flowDsScale: 'color-brand', radixScale: 'twblue', role: 'Brand / Primary' },
   { flowDsScale: 'color-neutral', radixScale: 'slate', role: 'Neutral / Gray' },
   {
@@ -664,25 +640,25 @@ const SCALE_MAPPING: Array<ScaleMappingRow> = [
   { flowDsScale: 'color-info', radixScale: 'amber', role: 'Info' },
   { flowDsScale: 'color-accent', radixScale: 'amber', role: 'Accent' },
   { flowDsScale: 'color-blue', radixScale: 'twblue', role: 'Blue' },
-]
+];
 
 function TokenMappingSection() {
   return (
     <Section id="token-mapping" title="Token Mapping">
       <div className="space-y-8">
         <p className="text-sm text-muted-foreground">
-          Shows how Tailwind theme tokens resolve to underlying color scales,
-          and how Flow DS tokens map back to the same values.
+          Shows how Tailwind theme tokens resolve to underlying color scales, and how Flow DS tokens
+          map back to the same values.
         </p>
 
         {/* Semantic token mapping */}
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Semantic Tokens</h4>
           <p className="text-xs text-muted-foreground">
-            TW theme tokens and their resolved values. Where a Flow DS semantic
-            token points back to the same value, it is shown.
+            TW theme tokens and their resolved values. Where a Flow DS semantic token points back to
+            the same value, it is shown.
           </p>
-          <div className="border border-border rounded-xl overflow-hidden">
+          <div className="overflow-hidden rounded-xl border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -701,22 +677,18 @@ function TokenMappingSection() {
                         style={{ backgroundColor: `var(${row.twToken})` }}
                       />
                     </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {row.twToken}
-                    </TableCell>
+                    <TableCell className="font-mono text-xs">{row.twToken}</TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
                       {row.value}
                     </TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
                       {row.flowDsToken ? (
                         <span className="inline-flex items-center gap-1.5">
-                          <span className="size-1.5 rounded-full bg-primary shrink-0" />
+                          <span className="size-1.5 shrink-0 rounded-full bg-primary" />
                           {row.flowDsToken}
                         </span>
                       ) : (
-                        <span className="text-muted-foreground/40">
-                          &mdash;
-                        </span>
+                        <span className="text-muted-foreground/40">&mdash;</span>
                       )}
                     </TableCell>
                   </TableRow>
@@ -730,10 +702,10 @@ function TokenMappingSection() {
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Color Scale Mapping</h4>
           <p className="text-xs text-muted-foreground">
-            Each Flow DS color scale (1-12) is overridden to point at a Radix UI
-            / custom color scale.
+            Each Flow DS color scale (1-12) is overridden to point at a Radix UI / custom color
+            scale.
           </p>
-          <div className="border border-border rounded-xl overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -746,15 +718,11 @@ function TokenMappingSection() {
               <TableBody>
                 {SCALE_MAPPING.map((row) => (
                   <TableRow key={row.flowDsScale}>
-                    <TableCell className="font-mono text-xs">
-                      --{row.flowDsScale}-*
-                    </TableCell>
+                    <TableCell className="font-mono text-xs">--{row.flowDsScale}-*</TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
                       --{row.radixScale}-*
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {row.role}
-                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{row.role}</TableCell>
                     <TableCell>
                       <div className="flex gap-0.5">
                         {SCALE_STEPS.map((step) => (
@@ -780,10 +748,9 @@ function TokenMappingSection() {
         <div className="space-y-3">
           <h4 className="text-sm font-medium">Additional Flow DS Overrides</h4>
           <p className="text-xs text-muted-foreground">
-            Flow DS semantic tokens that are wired back to TW theme values for
-            consistency.
+            Flow DS semantic tokens that are wired back to TW theme values for consistency.
           </p>
-          <div className="border border-border rounded-xl overflow-hidden">
+          <div className="overflow-hidden rounded-xl border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -804,9 +771,7 @@ function TokenMappingSection() {
                   },
                 ].map((row) => (
                   <TableRow key={row.flow}>
-                    <TableCell className="font-mono text-xs">
-                      {row.flow}
-                    </TableCell>
+                    <TableCell className="font-mono text-xs">{row.flow}</TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
                       {row.tw}
                     </TableCell>
@@ -818,7 +783,7 @@ function TokenMappingSection() {
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function TypographySection() {
@@ -831,14 +796,14 @@ function TypographySection() {
     { name: '2xl', class: 'text-2xl' },
     { name: '3xl', class: 'text-3xl' },
     { name: '4xl', class: 'text-4xl' },
-  ]
+  ];
 
   const weights = [
     { name: 'normal (400)', class: 'font-normal' },
     { name: 'medium (500)', class: 'font-medium' },
     { name: 'semibold (600)', class: 'font-semibold' },
     { name: 'bold (700)', class: 'font-bold' },
-  ]
+  ];
 
   return (
     <Section id="typography" title="Typography">
@@ -853,12 +818,8 @@ function TypographySection() {
           <div className="space-y-3">
             {sizes.map((s) => (
               <div key={s.name} className="flex items-baseline gap-4">
-                <span className="text-xs text-muted-foreground w-12 shrink-0">
-                  {s.name}
-                </span>
-                <span className={s.class}>
-                  The quick brown fox jumps over the lazy dog
-                </span>
+                <span className="w-12 shrink-0 text-xs text-muted-foreground">{s.name}</span>
+                <span className={s.class}>The quick brown fox jumps over the lazy dog</span>
               </div>
             ))}
           </div>
@@ -869,9 +830,7 @@ function TypographySection() {
           <div className="space-y-3">
             {weights.map((w) => (
               <div key={w.name} className="flex items-baseline gap-4">
-                <span className="text-xs text-muted-foreground w-28 shrink-0">
-                  {w.name}
-                </span>
+                <span className="w-28 shrink-0 text-xs text-muted-foreground">{w.name}</span>
                 <span className={cn('text-lg', w.class)}>
                   The quick brown fox jumps over the lazy dog
                 </span>
@@ -881,7 +840,7 @@ function TypographySection() {
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function SpacingSection() {
@@ -900,26 +859,21 @@ function SpacingSection() {
     { name: '16', value: '4rem' },
     { name: '20', value: '5rem' },
     { name: '24', value: '6rem' },
-  ]
+  ];
 
   return (
     <Section id="spacing" title="Spacing">
       <div className="space-y-2">
         {spacings.map((s) => (
           <div key={s.name} className="flex items-center gap-4">
-            <span className="text-xs text-muted-foreground w-8 shrink-0 text-right">
-              {s.name}
-            </span>
-            <div
-              className="h-4 bg-primary/60 rounded-sm"
-              style={{ width: s.value }}
-            />
+            <span className="w-8 shrink-0 text-right text-xs text-muted-foreground">{s.name}</span>
+            <div className="h-4 rounded-sm bg-primary/60" style={{ width: s.value }} />
             <span className="text-xs text-muted-foreground">{s.value}</span>
           </div>
         ))}
       </div>
     </Section>
-  )
+  );
 }
 
 function RadiusSection() {
@@ -932,25 +886,20 @@ function RadiusSection() {
     { name: '3xl', class: 'rounded-3xl' },
     { name: '4xl', class: 'rounded-4xl' },
     { name: 'full', class: 'rounded-full' },
-  ]
+  ];
 
   return (
     <Section id="radius" title="Border Radius">
       <div className="flex flex-wrap gap-4">
         {radii.map((r) => (
           <div key={r.name} className="flex flex-col items-center gap-2">
-            <div
-              className={cn(
-                'size-16 border-2 border-primary bg-primary/10',
-                r.class,
-              )}
-            />
+            <div className={cn('size-16 border-2 border-primary bg-primary/10', r.class)} />
             <span className="text-xs text-muted-foreground">{r.name}</span>
           </div>
         ))}
       </div>
     </Section>
-  )
+  );
 }
 
 function ShadowsSection() {
@@ -961,25 +910,20 @@ function ShadowsSection() {
     { name: 'lg', class: 'shadow-lg' },
     { name: 'xl', class: 'shadow-xl' },
     { name: '2xl', class: 'shadow-2xl' },
-  ]
+  ];
 
   return (
     <Section id="shadows" title="Shadows">
       <div className="flex flex-wrap gap-6">
         {shadows.map((s) => (
           <div key={s.name} className="flex flex-col items-center gap-2">
-            <div
-              className={cn(
-                'size-20 rounded-xl bg-card border border-border',
-                s.class,
-              )}
-            />
+            <div className={cn('size-20 rounded-xl border border-border bg-card', s.class)} />
             <span className="text-xs text-muted-foreground">{s.name}</span>
           </div>
         ))}
       </div>
     </Section>
-  )
+  );
 }
 
 // ============================================================
@@ -987,15 +931,8 @@ function ShadowsSection() {
 // ============================================================
 
 function ButtonSection() {
-  const variants = [
-    'default',
-    'outline',
-    'secondary',
-    'ghost',
-    'destructive',
-    'link',
-  ] as const
-  const sizes = ['xs', 'sm', 'default', 'lg'] as const
+  const variants = ['default', 'outline', 'secondary', 'ghost', 'destructive', 'link'] as const;
+  const sizes = ['xs', 'sm', 'default', 'lg'] as const;
 
   return (
     <Section id="button" title="Button">
@@ -1050,11 +987,11 @@ function ButtonSection() {
         </ShowcaseRow>
       </div>
     </Section>
-  )
+  );
 }
 
 function BadgeSection() {
-  const variants = ['default', 'secondary', 'destructive', 'outline'] as const
+  const variants = ['default', 'secondary', 'destructive', 'outline'] as const;
 
   return (
     <Section id="badge" title="Badge">
@@ -1066,7 +1003,7 @@ function BadgeSection() {
         ))}
       </ShowcaseRow>
     </Section>
-  )
+  );
 }
 
 function CardSection() {
@@ -1076,9 +1013,7 @@ function CardSection() {
         <Card>
           <CardHeader>
             <CardTitle>Default Card</CardTitle>
-            <CardDescription>
-              Card with default size and padding.
-            </CardDescription>
+            <CardDescription>Card with default size and padding.</CardDescription>
           </CardHeader>
           <CardContent>
             <p>Card content goes here.</p>
@@ -1096,9 +1031,7 @@ function CardSection() {
         <Card size="sm">
           <CardHeader>
             <CardTitle>Small Card</CardTitle>
-            <CardDescription>
-              Compact card with size=&quot;sm&quot;.
-            </CardDescription>
+            <CardDescription>Compact card with size=&quot;sm&quot;.</CardDescription>
           </CardHeader>
           <CardContent>
             <p>Smaller padding and gaps.</p>
@@ -1109,13 +1042,13 @@ function CardSection() {
         </Card>
       </div>
     </Section>
-  )
+  );
 }
 
 function InputSection() {
   return (
     <Section id="input" title="Input">
-      <div className="space-y-6 max-w-sm">
+      <div className="max-w-sm space-y-6">
         <div className="space-y-2">
           <Label>Default Input</Label>
           <Input placeholder="Enter text..." />
@@ -1137,7 +1070,7 @@ function InputSection() {
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function SelectSection() {
@@ -1159,7 +1092,7 @@ function SelectSection() {
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function CheckboxSwitchSection() {
@@ -1197,7 +1130,7 @@ function CheckboxSwitchSection() {
         </ShowcaseRow>
       </div>
     </Section>
-  )
+  );
 }
 
 function TabsSection() {
@@ -1205,9 +1138,7 @@ function TabsSection() {
     <Section id="tabs" title="Tabs">
       <div className="space-y-8">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">
-            Default variant
-          </p>
+          <p className="text-sm font-medium text-muted-foreground">Default variant</p>
           <Tabs defaultValue="tab1">
             <TabsList>
               <TabsTrigger value="tab1">Account</TabsTrigger>
@@ -1227,9 +1158,7 @@ function TabsSection() {
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">
-            Line variant
-          </p>
+          <p className="text-sm font-medium text-muted-foreground">Line variant</p>
           <Tabs defaultValue="tab1">
             <TabsList variant="line">
               <TabsTrigger value="tab1">Overview</TabsTrigger>
@@ -1249,35 +1178,30 @@ function TabsSection() {
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function DialogSection() {
   return (
     <Section id="dialog" title="Dialog">
       <Dialog>
-        <DialogTrigger render={<Button variant="outline" />}>
-          Open Dialog
-        </DialogTrigger>
+        <DialogTrigger render={<Button variant="outline" />}>Open Dialog</DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Dialog Title</DialogTitle>
             <DialogDescription>
-              This is a dialog description. It provides context about the
-              dialog&apos;s purpose.
+              This is a dialog description. It provides context about the dialog&apos;s purpose.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 text-sm">Dialog body content goes here.</div>
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>
-              Cancel
-            </DialogClose>
+            <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
             <Button>Confirm</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </Section>
-  )
+  );
 }
 
 function AlertDialogSection() {
@@ -1291,8 +1215,8 @@ function AlertDialogSection() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              item and remove it from our servers.
+              This action cannot be undone. This will permanently delete the item and remove it from
+              our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1302,7 +1226,7 @@ function AlertDialogSection() {
         </AlertDialogContent>
       </AlertDialog>
     </Section>
-  )
+  );
 }
 
 function DropdownMenuSection() {
@@ -1353,7 +1277,7 @@ function DropdownMenuSection() {
         </DropdownMenuContent>
       </DropdownMenu>
     </Section>
-  )
+  );
 }
 
 function AvatarSection() {
@@ -1398,7 +1322,7 @@ function AvatarSection() {
         </ShowcaseRow>
       </div>
     </Section>
-  )
+  );
 }
 
 function TooltipSection() {
@@ -1407,33 +1331,27 @@ function TooltipSection() {
       <TooltipProvider>
         <div className="flex gap-4">
           <Tooltip>
-            <TooltipTrigger render={<Button variant="outline" />}>
-              Hover me (top)
-            </TooltipTrigger>
+            <TooltipTrigger render={<Button variant="outline" />}>Hover me (top)</TooltipTrigger>
             <TooltipContent side="top">Tooltip on top</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<Button variant="outline" />}>
-              Hover me (bottom)
-            </TooltipTrigger>
+            <TooltipTrigger render={<Button variant="outline" />}>Hover me (bottom)</TooltipTrigger>
             <TooltipContent side="bottom">Tooltip on bottom</TooltipContent>
           </Tooltip>
           <Tooltip>
-            <TooltipTrigger render={<Button variant="outline" />}>
-              Hover me (right)
-            </TooltipTrigger>
+            <TooltipTrigger render={<Button variant="outline" />}>Hover me (right)</TooltipTrigger>
             <TooltipContent side="right">Tooltip on right</TooltipContent>
           </Tooltip>
         </div>
       </TooltipProvider>
     </Section>
-  )
+  );
 }
 
 function AlertSection() {
   return (
     <Section id="alert" title="Alert">
-      <div className="space-y-4 max-w-lg">
+      <div className="max-w-lg space-y-4">
         <Alert>
           <AlertTitle>Default Alert</AlertTitle>
           <AlertDescription>
@@ -1443,22 +1361,18 @@ function AlertSection() {
 
         <Alert variant="destructive">
           <AlertTitle>Destructive Alert</AlertTitle>
-          <AlertDescription>
-            Something went wrong. Please try again later.
-          </AlertDescription>
+          <AlertDescription>Something went wrong. Please try again later.</AlertDescription>
         </Alert>
       </div>
     </Section>
-  )
+  );
 }
 
 function PopoverSection() {
   return (
     <Section id="popover" title="Popover">
       <Popover>
-        <PopoverTrigger render={<Button variant="outline" />}>
-          Open Popover
-        </PopoverTrigger>
+        <PopoverTrigger render={<Button variant="outline" />}>Open Popover</PopoverTrigger>
         <PopoverContent>
           <PopoverHeader>
             <PopoverTitle>Popover Title</PopoverTitle>
@@ -1472,7 +1386,7 @@ function PopoverSection() {
         </PopoverContent>
       </Popover>
     </Section>
-  )
+  );
 }
 
 function TableSection() {
@@ -1480,11 +1394,11 @@ function TableSection() {
     { name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin' },
     { name: 'Bob Smith', email: 'bob@example.com', role: 'Editor' },
     { name: 'Carol White', email: 'carol@example.com', role: 'Viewer' },
-  ]
+  ];
 
   return (
     <Section id="table" title="Table">
-      <div className="border border-border rounded-xl overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -1507,7 +1421,7 @@ function TableSection() {
         </Table>
       </div>
     </Section>
-  )
+  );
 }
 
 function SeparatorSection() {
@@ -1515,12 +1429,12 @@ function SeparatorSection() {
     <Section id="separator" title="Separator">
       <div className="space-y-4">
         <div>
-          <p className="text-sm text-muted-foreground mb-2">Horizontal</p>
+          <p className="mb-2 text-sm text-muted-foreground">Horizontal</p>
           <Separator />
         </div>
         <div>
-          <p className="text-sm text-muted-foreground mb-2">Vertical</p>
-          <div className="flex items-center gap-4 h-8">
+          <p className="mb-2 text-sm text-muted-foreground">Vertical</p>
+          <div className="flex h-8 items-center gap-4">
             <span className="text-sm">Left</span>
             <Separator orientation="vertical" />
             <span className="text-sm">Right</span>
@@ -1528,16 +1442,16 @@ function SeparatorSection() {
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function SkeletonSection() {
   return (
     <Section id="skeleton" title="Skeleton">
-      <div className="space-y-4 max-w-sm">
+      <div className="max-w-sm space-y-4">
         <div className="flex items-center gap-3">
           <Skeleton className="size-10 rounded-full" />
-          <div className="space-y-2 flex-1">
+          <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />
           </div>
@@ -1550,7 +1464,7 @@ function SkeletonSection() {
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function AccordionSection() {
@@ -1561,22 +1475,22 @@ function AccordionSection() {
           <AccordionItem value="item-1">
             <AccordionTrigger>What is this design system?</AccordionTrigger>
             <AccordionContent>
-              A reference of all design tokens and UI components used in the MOE
-              Teacher Workspace application.
+              A reference of all design tokens and UI components used in the MOE Teacher Workspace
+              application.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="item-2">
             <AccordionTrigger>What UI library is used?</AccordionTrigger>
             <AccordionContent>
-              Components are built with Shadcn UI using Base UI (MUI)
-              primitives, styled with Tailwind CSS v4.
+              Components are built with Shadcn UI using Base UI (MUI) primitives, styled with
+              Tailwind CSS v4.
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="item-3">
             <AccordionTrigger>How do I add new components?</AccordionTrigger>
             <AccordionContent>
               Run{' '}
-              <code className="bg-muted px-1 py-0.5 rounded text-xs">
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">
                 bunx shadcn@latest add &lt;component-name&gt;
               </code>{' '}
               to add new Shadcn components.
@@ -1585,7 +1499,7 @@ function AccordionSection() {
         </Accordion>
       </div>
     </Section>
-  )
+  );
 }
 
 function SheetSection() {
@@ -1593,9 +1507,7 @@ function SheetSection() {
     <Section id="sheet" title="Sheet">
       <div className="flex gap-3">
         <Sheet>
-          <SheetTrigger render={<Button variant="outline" />}>
-            Open Right Sheet
-          </SheetTrigger>
+          <SheetTrigger render={<Button variant="outline" />}>Open Right Sheet</SheetTrigger>
           <SheetContent side="right">
             <SheetHeader>
               <SheetTitle>Sheet Title</SheetTitle>
@@ -1608,9 +1520,7 @@ function SheetSection() {
         </Sheet>
 
         <Sheet>
-          <SheetTrigger render={<Button variant="outline" />}>
-            Open Left Sheet
-          </SheetTrigger>
+          <SheetTrigger render={<Button variant="outline" />}>Open Left Sheet</SheetTrigger>
           <SheetContent side="left">
             <SheetHeader>
               <SheetTitle>Left Sheet</SheetTitle>
@@ -1621,7 +1531,7 @@ function SheetSection() {
         </Sheet>
       </div>
     </Section>
-  )
+  );
 }
 
 function BreadcrumbSection() {
@@ -1643,5 +1553,5 @@ function BreadcrumbSection() {
         </BreadcrumbList>
       </Breadcrumb>
     </Section>
-  )
+  );
 }

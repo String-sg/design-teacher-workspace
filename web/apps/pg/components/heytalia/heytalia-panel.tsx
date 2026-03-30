@@ -1,7 +1,6 @@
-'use client'
+'use client';
 
-import { useEffect, useId, useRef, useState } from 'react'
-import { useRouterState } from '@tanstack/react-router'
+import { useRouterState } from '@tanstack/react-router';
 import {
   Check,
   ChevronDown,
@@ -17,10 +16,13 @@ import {
   Sparkles,
   ThumbsDown,
   ThumbsUp,
-} from 'lucide-react'
-import { useHeyTalia } from './heytalia-context'
-import { cn } from '@/lib/utils'
-import { useIsMobile } from '@/hooks/use-mobile'
+} from 'lucide-react';
+import { useEffect, useId, useRef, useState } from 'react';
+
+import { useIsMobile } from '~/shared/hooks/use-mobile';
+import { cn } from '~/shared/lib/utils';
+
+import { useHeyTalia } from './heytalia-context';
 
 // ---------------------------------------------------------------------------
 // Colour constants
@@ -32,13 +34,13 @@ const HT = {
   light: 'var(--twpurple-3)',
   border: 'var(--twpurple-5)',
   text: 'var(--twpurple-11)',
-} as const
+} as const;
 
 // Width presets
-const W_DEFAULT = 368
-const W_WIDE = 560
-const W_MIN = 300
-const W_MAX = 720
+const W_DEFAULT = 368;
+const W_WIDE = 560;
+const W_MIN = 300;
+const W_MAX = 720;
 
 // ---------------------------------------------------------------------------
 // HeyTalia mascot — inline SVG, uid-namespaced masks
@@ -48,13 +50,13 @@ function HeyTaliaLogo({
   uid,
   className,
 }: {
-  size?: number
-  uid: string
-  className?: string
+  size?: number;
+  uid: string;
+  className?: string;
 }) {
-  const h = Math.round((size * 163) / 211)
-  const ml = `htmask-l-${uid}`
-  const mr = `htmask-r-${uid}`
+  const h = Math.round((size * 163) / 211);
+  const ml = `htmask-l-${uid}`;
+  const mr = `htmask-r-${uid}`;
   return (
     <svg
       width={size}
@@ -152,43 +154,43 @@ function HeyTaliaLogo({
         strokeWidth="9"
       />
     </svg>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-type PageContext = 'list' | 'create' | 'detail' | 'other'
+type PageContext = 'list' | 'create' | 'detail' | 'other';
 
 interface DraftBlock {
-  title: string
-  body: string
-  warning: string
+  title: string;
+  body: string;
+  warning: string;
 }
 
 interface Message {
-  role: 'user' | 'assistant'
-  text: string
-  chips?: Array<string>
-  draft?: DraftBlock
+  role: 'user' | 'assistant';
+  text: string;
+  chips?: string[];
+  draft?: DraftBlock;
 }
 
 // ---------------------------------------------------------------------------
 // Context detection
 // ---------------------------------------------------------------------------
 function usePageContext(): PageContext {
-  const pathname = useRouterState({ select: (s) => s.location.pathname })
-  if (pathname === '/announcements') return 'list'
-  if (pathname.startsWith('/announcements/new')) return 'create'
-  if (/^\/announcements\/pg-/.test(pathname)) return 'detail'
-  return 'other'
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  if (pathname === '/announcements') return 'list';
+  if (pathname.startsWith('/announcements/new')) return 'create';
+  if (/^\/announcements\/pg-/.test(pathname)) return 'detail';
+  return 'other';
 }
 
 // ---------------------------------------------------------------------------
 // Draft builder
 // ---------------------------------------------------------------------------
 function buildDraft(topic: string): DraftBlock {
-  const t = topic.charAt(0).toUpperCase() + topic.slice(1)
+  const t = topic.charAt(0).toUpperCase() + topic.slice(1);
   return {
     title: t,
     body: [
@@ -212,7 +214,7 @@ function buildDraft(topic: string): DraftBlock {
     ].join('\n'),
     warning:
       'Your draft is missing some details. Do check out the [For input] fields and use the Edit tool to update them. Hyperlinks are **not supported** in the Description field when using "Use draft".',
-  }
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -221,9 +223,9 @@ function buildDraft(topic: string): DraftBlock {
 const SEED: Record<
   PageContext,
   {
-    greeting: string
-    chips: Array<string>
-    demoReplies: { [k: string]: string | undefined }
+    greeting: string;
+    chips: string[];
+    demoReplies: Record<string, string | undefined>;
   }
 > = {
   list: {
@@ -236,8 +238,7 @@ const SEED: Record<
     },
   },
   create: {
-    greeting:
-      'I can help you draft or improve this announcement. What do you need?',
+    greeting: 'I can help you draft or improve this announcement. What do you need?',
     chips: ['Create announcement', 'Create form'],
     demoReplies: {
       'Create announcement': '__ask_topic__',
@@ -259,7 +260,7 @@ const SEED: Record<
     chips: ['Create announcement', 'Create form'],
     demoReplies: {},
   },
-}
+};
 
 // ---------------------------------------------------------------------------
 // Panel
@@ -268,15 +269,15 @@ const SEED: Record<
 // Agent definitions
 // ---------------------------------------------------------------------------
 export interface AgentDef {
-  id: string
-  name: string
-  description: string
-  icon: string
-  color: string
-  tag?: string
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  tag?: string;
 }
 
-export const AGENTS: Array<AgentDef> = [
+export const AGENTS: AgentDef[] = [
   {
     id: 'heytalia',
     name: 'HeyTalia',
@@ -285,102 +286,99 @@ export const AGENTS: Array<AgentDef> = [
     color: '#9575CD',
     tag: 'Beta',
   },
-]
+];
 
 export function HeyTaliaPanel() {
-  const { view, setView } = useHeyTalia()
-  const [input, setInput] = useState('')
-  const [messages, setMessages] = useState<Array<Message>>([])
-  const [isTyping, setIsTyping] = useState(false)
-  const [awaitingTopic, setAwaitingTopic] = useState(false)
-  const [copied, setCopied] = useState<number | null>(null)
-  const [thumbed, setThumbed] = useState<Record<number, 'up' | 'down'>>({})
-  const [panelWidth, setPanelWidth] = useState(W_DEFAULT)
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [agentDropdownOpen, setAgentDropdownOpen] = useState(false)
+  const { view, setView } = useHeyTalia();
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [awaitingTopic, setAwaitingTopic] = useState(false);
+  const [copied, setCopied] = useState<number | null>(null);
+  const [thumbed, setThumbed] = useState<Record<number, 'up' | 'down'>>({});
+  const [panelWidth, setPanelWidth] = useState(W_DEFAULT);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [agentDropdownOpen, setAgentDropdownOpen] = useState(false);
 
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const isDragging = useRef(false)
-  const dragStartX = useRef(0)
-  const dragStartWidth = useRef(0)
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isDragging = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartWidth = useRef(0);
 
-  const triggerUid = useId()
-  const headerUid = useId()
-  const ctx = usePageContext()
-  const seed = SEED[ctx]
-  const isMobile = useIsMobile()
+  const triggerUid = useId();
+  const headerUid = useId();
+  const ctx = usePageContext();
+  const seed = SEED[ctx];
+  const isMobile = useIsMobile();
 
-  const isOpen = view === 'chat'
-  const isPickerOpen = view === 'picker'
+  const isOpen = view === 'chat';
+  const isPickerOpen = view === 'picker';
 
   // Effective panel width: full-screen on mobile, state-driven on desktop
-  const effectiveWidth = isMobile ? '100vw' : panelWidth
+  const effectiveWidth = isMobile ? '100vw' : panelWidth;
 
   useEffect(() => {
-    setAwaitingTopic(false)
-    setMessages([{ role: 'assistant', text: seed.greeting, chips: seed.chips }])
-  }, [ctx])
+    setAwaitingTopic(false);
+    setMessages([{ role: 'assistant', text: seed.greeting, chips: seed.chips }]);
+  }, [ctx]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isTyping])
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
 
   useEffect(() => {
-    if (view === 'chat') setTimeout(() => inputRef.current?.focus(), 150)
-  }, [view])
+    if (view === 'chat') setTimeout(() => inputRef.current?.focus(), 150);
+  }, [view]);
 
   // ── Drag-to-resize ──────────────────────────────────────────────────────
   function startResize(e: React.MouseEvent) {
-    e.preventDefault()
-    isDragging.current = true
-    dragStartX.current = e.clientX
-    dragStartWidth.current = panelWidth
+    e.preventDefault();
+    isDragging.current = true;
+    dragStartX.current = e.clientX;
+    dragStartWidth.current = panelWidth;
 
     function onMouseMove(ev: MouseEvent) {
-      if (!isDragging.current) return
+      if (!isDragging.current) return;
       // Dragging left = growing wider
-      const delta = dragStartX.current - ev.clientX
-      const next = Math.min(
-        W_MAX,
-        Math.max(W_MIN, dragStartWidth.current + delta),
-      )
-      setPanelWidth(next)
-      setIsExpanded(next > W_DEFAULT + 20)
+      const delta = dragStartX.current - ev.clientX;
+      const next = Math.min(W_MAX, Math.max(W_MIN, dragStartWidth.current + delta));
+      setPanelWidth(next);
+      setIsExpanded(next > W_DEFAULT + 20);
     }
 
     function onMouseUp() {
-      isDragging.current = false
-      document.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('mouseup', onMouseUp)
-      document.body.style.cursor = ''
-      document.body.style.userSelect = ''
+      isDragging.current = false;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
     }
 
-    document.addEventListener('mousemove', onMouseMove)
-    document.addEventListener('mouseup', onMouseUp)
-    document.body.style.cursor = 'col-resize'
-    document.body.style.userSelect = 'none'
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
   }
 
   // ── Width toggle ─────────────────────────────────────────────────────────
   function toggleWidth() {
-    const next = isExpanded ? W_DEFAULT : W_WIDE
-    setPanelWidth(next)
-    setIsExpanded(!isExpanded)
+    const next = isExpanded ? W_DEFAULT : W_WIDE;
+    setPanelWidth(next);
+    setIsExpanded(!isExpanded);
   }
 
   // ── Chat logic ───────────────────────────────────────────────────────────
   function sendMessage(text: string) {
-    if (!text.trim()) return
-    setInput('')
-    setMessages((prev) => [...prev, { role: 'user', text }])
-    setIsTyping(true)
+    if (!text.trim()) return;
+    setInput('');
+    setMessages((prev) => [...prev, { role: 'user', text }]);
+    setIsTyping(true);
 
     if (awaitingTopic) {
-      setAwaitingTopic(false)
+      setAwaitingTopic(false);
       setTimeout(() => {
-        setIsTyping(false)
+        setIsTyping(false);
         setMessages((prev) => [
           ...prev,
           {
@@ -388,52 +386,52 @@ export function HeyTaliaPanel() {
             text: "Here's your **Announcement** draft:",
             draft: buildDraft(text),
           },
-        ])
-      }, 1100)
-      return
+        ]);
+      }, 1100);
+      return;
     }
 
-    const raw = seed.demoReplies[text]
+    const raw = seed.demoReplies[text];
     if (raw === '__ask_topic__') {
-      setAwaitingTopic(true)
+      setAwaitingTopic(true);
       setTimeout(() => {
-        setIsTyping(false)
+        setIsTyping(false);
         setMessages((prev) => [
           ...prev,
           {
             role: 'assistant',
             text: "Sure! What's the title of your announcement? I'll draft it for you.\n\ne.g. *Learning Journey Update*, *Term 4 Letter 2026*",
           },
-        ])
-      }, 800)
-      return
+        ]);
+      }, 800);
+      return;
     }
 
     const reply =
       raw ??
-      "I'm still learning that one! For now, I can help with drafting, reviewing, and navigating your announcements."
+      "I'm still learning that one! For now, I can help with drafting, reviewing, and navigating your announcements.";
 
     setTimeout(() => {
-      setIsTyping(false)
-      setMessages((prev) => [...prev, { role: 'assistant', text: reply }])
-    }, 900)
+      setIsTyping(false);
+      setMessages((prev) => [...prev, { role: 'assistant', text: reply }]);
+    }, 900);
   }
 
   function handleCopy(msgIdx: number, text: string) {
-    void navigator.clipboard.writeText(text)
-    setCopied(msgIdx)
-    setTimeout(() => setCopied(null), 2000)
+    void navigator.clipboard.writeText(text);
+    setCopied(msgIdx);
+    setTimeout(() => setCopied(null), 2000);
   }
 
   function handleThumb(msgIdx: number, dir: 'up' | 'down') {
     setThumbed((prev) => ({
       ...prev,
       [msgIdx]: prev[msgIdx] === dir ? (undefined as unknown as 'up') : dir,
-    }))
+    }));
   }
 
   function handleSelectAgent(_agentId: string) {
-    setView('chat')
+    setView('chat');
   }
 
   return (
@@ -449,7 +447,7 @@ export function HeyTaliaPanel() {
       {/* Panel */}
       <div
         className={cn(
-          'fixed bottom-0 right-0 top-0 z-50 flex flex-col border-l bg-background shadow-xl',
+          'fixed top-0 right-0 bottom-0 z-50 flex flex-col border-l bg-background shadow-xl',
           // Smooth slide for open/close; no width transition while dragging
           'transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : 'translate-x-full',
@@ -475,18 +473,12 @@ export function HeyTaliaPanel() {
             className="flex min-w-0 flex-1 items-center gap-3 rounded-lg px-1 py-1 transition-colors hover:bg-muted"
           >
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
-              <img
-                src="/logos/heytalia-logo.svg"
-                alt="HeyTalia"
-                className="h-5 w-5"
-              />
+              <img src="/logos/heytalia-logo.svg" alt="HeyTalia" className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1 text-left">
               <div className="flex items-center gap-1.5">
-                <span className="text-sm font-semibold text-foreground">
-                  HeyTalia
-                </span>
-                <span className="rounded-full bg-twblue-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-twblue-9">
+                <span className="text-sm font-semibold text-foreground">HeyTalia</span>
+                <span className="rounded-full bg-twblue-3 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-twblue-9 uppercase">
                   Beta
                 </span>
               </div>
@@ -528,14 +520,11 @@ export function HeyTaliaPanel() {
           {/* ── Agent Picker Dropdown ── */}
           {agentDropdownOpen && (
             <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setAgentDropdownOpen(false)}
-              />
+              <div className="fixed inset-0 z-40" onClick={() => setAgentDropdownOpen(false)} />
               <AgentPickerDropdown
                 onSelect={(id) => {
-                  setAgentDropdownOpen(false)
-                  handleSelectAgent(id)
+                  setAgentDropdownOpen(false);
+                  handleSelectAgent(id);
                 }}
                 onClose={() => setAgentDropdownOpen(false)}
               />
@@ -562,7 +551,7 @@ export function HeyTaliaPanel() {
         </div>
 
         {/* ── Input footer ── */}
-        <div className="shrink-0 border-t bg-white px-3 pb-3 pt-2.5">
+        <div className="shrink-0 border-t bg-white px-3 pt-2.5 pb-3">
           <div className="relative flex h-9 items-center">
             <input
               ref={inputRef}
@@ -571,12 +560,12 @@ export function HeyTaliaPanel() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  sendMessage(input)
+                  e.preventDefault();
+                  sendMessage(input);
                 }
               }}
               placeholder="Ask HeyTalia…"
-              className="h-9 w-full rounded-[var(--radius-input)] border border-input bg-white pr-10 pl-3 text-sm shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="h-9 w-full rounded-[var(--radius-input)] border border-input bg-white pr-10 pl-3 text-sm shadow-xs transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
             />
             <button
               type="button"
@@ -603,7 +592,7 @@ export function HeyTaliaPanel() {
         </div>
       </div>
     </>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -613,19 +602,15 @@ function AgentPickerDropdown({
   onSelect,
   onClose,
 }: {
-  onSelect: (agentId: string) => void
-  onClose: () => void
+  onSelect: (agentId: string) => void;
+  onClose: () => void;
 }) {
   return (
-    <div className="absolute left-3 right-3 top-[calc(100%+4px)] z-50 overflow-hidden rounded-xl border bg-white shadow-lg">
+    <div className="absolute top-[calc(100%+4px)] right-3 left-3 z-50 overflow-hidden rounded-xl border bg-white shadow-lg">
       {/* Header */}
       <div className="px-4 pt-3.5 pb-2.5">
-        <p className="text-sm font-semibold text-foreground">
-          Teacher Assistant
-        </p>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          Choose an agent to help you
-        </p>
+        <p className="text-sm font-semibold text-foreground">Teacher Assistant</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">Choose an agent to help you</p>
       </div>
 
       <div className="mx-4 border-t" />
@@ -646,18 +631,14 @@ function AgentPickerDropdown({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-medium text-foreground">
-                {agent.name}
-              </span>
+              <span className="text-sm font-medium text-foreground">{agent.name}</span>
               {agent.tag && (
-                <span className="rounded-full bg-twblue-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-twblue-9">
+                <span className="rounded-full bg-twblue-3 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-twblue-9 uppercase">
                   {agent.tag}
                 </span>
               )}
             </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {agent.description}
-            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{agent.description}</p>
           </div>
           <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
         </button>
@@ -675,16 +656,12 @@ function AgentPickerDropdown({
           <Plus className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="min-w-0 flex-1">
-          <span className="text-sm font-medium text-foreground">
-            Add new agents
-          </span>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Browse and add more assistants
-          </p>
+          <span className="text-sm font-medium text-foreground">Add new agents</span>
+          <p className="mt-0.5 text-xs text-muted-foreground">Browse and add more assistants</p>
         </div>
       </button>
     </div>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -695,9 +672,9 @@ function HdrBtn({
   title,
   onClick,
 }: {
-  children: React.ReactNode
-  title: string
-  onClick?: () => void
+  children: React.ReactNode;
+  title: string;
+  onClick?: () => void;
 }) {
   return (
     <button
@@ -708,7 +685,7 @@ function HdrBtn({
     >
       {children}
     </button>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -723,35 +700,26 @@ function MessageBubble({
   onCopy,
   onThumb,
 }: {
-  msg: Message
-  msgIdx: number
-  onChipClick: (text: string) => void
-  copied: boolean
-  thumbed: 'up' | 'down' | undefined
-  onCopy: () => void
-  onThumb: (dir: 'up' | 'down') => void
+  msg: Message;
+  msgIdx: number;
+  onChipClick: (text: string) => void;
+  copied: boolean;
+  thumbed: 'up' | 'down' | undefined;
+  onCopy: () => void;
+  onThumb: (dir: 'up' | 'down') => void;
 }) {
-  const isAI = msg.role === 'assistant'
-  const avatarUid = useId()
+  const isAI = msg.role === 'assistant';
+  const avatarUid = useId();
 
   return (
     <div className={cn('flex gap-2', !isAI && 'flex-row-reverse')}>
       {isAI && (
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twpurple-3">
-          <img
-            src="/logos/heytalia-logo.svg"
-            alt="HeyTalia"
-            className="h-4 w-4"
-          />
+          <img src="/logos/heytalia-logo.svg" alt="HeyTalia" className="h-4 w-4" />
         </div>
       )}
 
-      <div
-        className={cn(
-          'min-w-0 space-y-2',
-          isAI ? 'max-w-[85%]' : 'max-w-[78%] items-end',
-        )}
-      >
+      <div className={cn('min-w-0 space-y-2', isAI ? 'max-w-[85%]' : 'max-w-[78%] items-end')}>
         {/* Bubble: white card for AI, brand colour for user */}
         <div
           className={cn(
@@ -793,7 +761,7 @@ function MessageBubble({
         )}
       </div>
     </div>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -807,12 +775,12 @@ function DraftCard({
   onCopy,
   onThumb,
 }: {
-  draft: DraftBlock
-  msgIdx: number
-  copied: boolean
-  thumbed: 'up' | 'down' | undefined
-  onCopy: () => void
-  onThumb: (dir: 'up' | 'down') => void
+  draft: DraftBlock;
+  msgIdx: number;
+  copied: boolean;
+  thumbed: 'up' | 'down' | undefined;
+  onCopy: () => void;
+  onThumb: (dir: 'up' | 'down') => void;
 }) {
   return (
     <div className="space-y-2">
@@ -825,9 +793,7 @@ function DraftCard({
           className="flex items-center gap-2 border-b px-3 py-2"
           style={{ borderColor: HT.border, background: HT.ultraLight }}
         >
-          <span className="text-xs font-medium text-muted-foreground">
-            Title
-          </span>
+          <span className="text-xs font-medium text-muted-foreground">Title</span>
           <span
             className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
             style={{ background: HT.light, color: HT.text }}
@@ -849,35 +815,20 @@ function DraftCard({
           color: HT.text,
         }}
       >
-        <Info
-          className="mt-0.5 h-3 w-3 shrink-0"
-          style={{ color: HT.primary }}
-        />
+        <Info className="mt-0.5 h-3 w-3 shrink-0" style={{ color: HT.primary }} />
         <MarkdownText text={draft.warning} isUser={false} />
       </div>
 
       {/* Single action row: icons left · buttons right */}
       <div className="flex items-center gap-1">
         {/* Icon buttons */}
-        <DraftIconBtn
-          title={copied ? 'Copied!' : 'Copy draft'}
-          onClick={onCopy}
-          active={copied}
-        >
-          {copied ? (
-            <Check className="h-3 w-3" />
-          ) : (
-            <Copy className="h-3 w-3" />
-          )}
+        <DraftIconBtn title={copied ? 'Copied!' : 'Copy draft'} onClick={onCopy} active={copied}>
+          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
         </DraftIconBtn>
         <DraftIconBtn title="Edit draft">
           <Pencil className="h-3 w-3" />
         </DraftIconBtn>
-        <DraftIconBtn
-          title="Good response"
-          onClick={() => onThumb('up')}
-          active={thumbed === 'up'}
-        >
+        <DraftIconBtn title="Good response" onClick={() => onThumb('up')} active={thumbed === 'up'}>
           <ThumbsUp className="h-3 w-3" />
         </DraftIconBtn>
         <DraftIconBtn
@@ -918,7 +869,7 @@ function DraftCard({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -930,10 +881,10 @@ function DraftIconBtn({
   onClick,
   active,
 }: {
-  children: React.ReactNode
-  title: string
-  onClick?: () => void
-  active?: boolean
+  children: React.ReactNode;
+  title: string;
+  onClick?: () => void;
+  active?: boolean;
 }) {
   return (
     <button
@@ -949,7 +900,7 @@ function DraftIconBtn({
     >
       {children}
     </button>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -959,7 +910,7 @@ function DraftBody({ body }: { body: string }) {
   return (
     <div className="space-y-0.5">
       {body.split('\n').map((line, li) => {
-        if (!line) return <div key={li} className="h-1.5" />
+        if (!line) return <div key={li} className="h-1.5" />;
         return (
           <p key={li} className="text-xs leading-relaxed text-foreground">
             {line.split(/(\[For input[^\]]*\])/g).map((part, pi) =>
@@ -976,10 +927,10 @@ function DraftBody({ body }: { body: string }) {
               ),
             )}
           </p>
-        )
+        );
       })}
     </div>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -989,11 +940,7 @@ function TypingIndicator() {
   return (
     <div className="flex items-center gap-2">
       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twpurple-3">
-        <img
-          src="/logos/heytalia-logo.svg"
-          alt="HeyTalia"
-          className="h-4 w-4"
-        />
+        <img src="/logos/heytalia-logo.svg" alt="HeyTalia" className="h-4 w-4" />
       </div>
       <div className="flex items-center gap-1 rounded-xl rounded-tl-sm border border-border bg-white px-3.5 py-2.5 shadow-xs">
         {[0, 1, 2].map((i) => (
@@ -1005,7 +952,7 @@ function TypingIndicator() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -1021,26 +968,23 @@ function MarkdownText({ text, isUser }: { text: string; isUser: boolean }) {
         </span>
       ))}
     </>
-  )
+  );
 }
 
 function parseBold(text: string, isUser: boolean) {
   return text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/).map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**'))
       return (
-        <strong
-          key={i}
-          className={isUser ? 'font-semibold' : 'font-semibold text-foreground'}
-        >
+        <strong key={i} className={isUser ? 'font-semibold' : 'font-semibold text-foreground'}>
           {part.slice(2, -2)}
         </strong>
-      )
+      );
     if (part.startsWith('*') && part.endsWith('*') && part.length > 2)
       return (
         <em key={i} className={isUser ? 'opacity-90' : 'text-muted-foreground'}>
           {part.slice(1, -1)}
         </em>
-      )
-    return part
-  })
+      );
+    return part;
+  });
 }

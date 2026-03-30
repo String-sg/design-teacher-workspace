@@ -1,24 +1,21 @@
-import { Info, Send, X } from 'lucide-react'
-import { ReportOverviewTab } from './report-overview-tab'
-import { AcademicTab } from './academic-tab'
-import { HolisticTab } from './holistic-tab'
-import type { HolisticReport, SchoolLevel } from '@/types/report'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Info, Send, X } from 'lucide-react';
+
+import type { HolisticReport, SchoolLevel } from '~/apps/pg/types/report';
+import { Button } from '~/shared/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/shared/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/shared/components/ui/tabs';
+
+import { AcademicTab } from './academic-tab';
+import { HolisticTab } from './holistic-tab';
+import { ReportOverviewTab } from './report-overview-tab';
 
 interface PgPreviewDialogProps {
-  report: HolisticReport
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSend: () => void
-  studentFirstName: string
-  schoolLevel?: SchoolLevel
+  report: HolisticReport;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSend: () => void;
+  studentFirstName: string;
+  schoolLevel?: SchoolLevel;
 }
 
 export function PgPreviewDialog({
@@ -37,15 +34,9 @@ export function PgPreviewDialog({
       >
         <div className="flex items-center justify-between border-b px-5 py-3">
           <DialogHeader className="flex-1">
-            <DialogTitle className="text-sm">
-              Parents Gateway Preview
-            </DialogTitle>
+            <DialogTitle className="text-sm">Parents Gateway Preview</DialogTitle>
           </DialogHeader>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="ghost" size="icon-sm" onClick={() => onOpenChange(false)}>
             <X className="size-4" />
           </Button>
         </div>
@@ -57,14 +48,14 @@ export function PgPreviewDialog({
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          <div className="px-4 pb-6 pt-4">
+          <div className="px-4 pt-4 pb-6">
             <div className="mb-1 text-lg font-semibold">
               {report.studentName}
-              <span className="text-muted-foreground ml-1.5 text-sm font-normal">
+              <span className="ml-1.5 text-sm font-normal text-muted-foreground">
                 {report.studentClass}
               </span>
             </div>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {report.term} {report.academicYear}
             </p>
 
@@ -100,10 +91,7 @@ export function PgPreviewDialog({
                 />
               </TabsContent>
               <TabsContent value="holistic">
-                <HolisticTab
-                  data={report.holistic}
-                  studentFirstName={studentFirstName}
-                />
+                <HolisticTab data={report.holistic} studentFirstName={studentFirstName} />
               </TabsContent>
             </Tabs>
           </div>
@@ -129,5 +117,5 @@ export function PgPreviewDialog({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

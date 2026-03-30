@@ -1,21 +1,15 @@
-import { useMemo, useState } from 'react'
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
-import {
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-  Info,
-  Search,
-} from 'lucide-react'
+import { createFileRoute, Link, notFound } from '@tanstack/react-router';
+import { ArrowLeft, ChevronLeft, ChevronRight, Info, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
-import { getStructuredTypeLabel } from '@/types/student-group'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { getStructuredGroupById } from '@/data/mock-structured-groups'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { getStructuredGroupById } from '~/apps/pg/data/mock-structured-groups';
+import { getStructuredTypeLabel } from '~/apps/pg/types/student-group';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Alert, AlertDescription } from '~/shared/components/ui/alert';
+import { Badge } from '~/shared/components/ui/badge';
+import { Button } from '~/shared/components/ui/button';
+import { Input } from '~/shared/components/ui/input';
+import { Separator } from '~/shared/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -23,58 +17,55 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '~/shared/components/ui/table';
 
 export const Route = createFileRoute('/groups/structured/$groupId')({
   component: StructuredGroupDetailPage,
   loader: ({ params }) => {
-    const group = getStructuredGroupById(params.groupId)
-    if (!group) throw notFound()
-    return { group }
+    const group = getStructuredGroupById(params.groupId);
+    if (!group) throw notFound();
+    return { group };
   },
-})
+});
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 10;
 
 function StructuredGroupDetailPage() {
-  const { group } = Route.useLoaderData()
-  const { groupId } = Route.useParams()
+  const { group } = Route.useLoaderData();
+  const { groupId } = Route.useParams();
 
   useSetBreadcrumbs([
     { label: 'Student Groups', href: '/groups' },
     { label: group.name, href: `/groups/structured/${groupId}` },
-  ])
+  ]);
 
-  const [memberSearch, setMemberSearch] = useState('')
-  const [page, setPage] = useState(1)
+  const [memberSearch, setMemberSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   const filteredMembers = useMemo(() => {
-    const q = memberSearch.toLowerCase()
-    if (!q) return group.members
+    const q = memberSearch.toLowerCase();
+    if (!q) return group.members;
     return group.members.filter(
       (m) =>
         m.name.toLowerCase().includes(q) ||
         m.class.toLowerCase().includes(q) ||
         (m.nric?.toLowerCase().includes(q) ?? false),
-    )
-  }, [group.members, memberSearch])
+    );
+  }, [group.members, memberSearch]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE))
-  const safePage = Math.min(page, totalPages)
-  const pagedMembers = filteredMembers.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  )
+  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedMembers = filteredMembers.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
     <div className="flex flex-col">
       {/* ── Back link ────────────────────────────────────────────────────────── */}
-      <div className="pt-6 px-6">
+      <div className="px-6 pt-6">
         <Button
           variant="ghost"
           size="sm"
           render={<Link to="/groups" />}
-          className="gap-1.5 -ml-2 text-muted-foreground"
+          className="-ml-2 gap-1.5 text-muted-foreground"
         >
           <ArrowLeft className="size-4" />
           Groups
@@ -86,19 +77,12 @@ function StructuredGroupDetailPage() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">{group.name}</h1>
-            <div className="mt-2 flex items-center gap-2 flex-wrap">
-              <Badge variant="outline">
-                {getStructuredTypeLabel(group.structuredType)}
-              </Badge>
-              <Badge
-                variant="outline"
-                className="gap-1 text-blue-700 border-blue-200 bg-blue-50"
-              >
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <Badge variant="outline">{getStructuredTypeLabel(group.structuredType)}</Badge>
+              <Badge variant="outline" className="gap-1 border-blue-200 bg-blue-50 text-blue-700">
                 Synced from School Cockpit
               </Badge>
-              <span className="text-sm text-muted-foreground">
-                {group.members.length} students
-              </span>
+              <span className="text-sm text-muted-foreground">{group.members.length} students</span>
             </div>
           </div>
         </div>
@@ -111,29 +95,29 @@ function StructuredGroupDetailPage() {
         <Alert className="border-blue-200 bg-blue-50/60 text-blue-900">
           <Info className="h-4 w-4 text-blue-500" />
           <AlertDescription className="text-blue-800">
-            These groups are managed in School Cockpit. Changes to membership
-            and student details must be made by your school administrator.
+            These groups are managed in School Cockpit. Changes to membership and student details
+            must be made by your school administrator.
           </AlertDescription>
         </Alert>
       </div>
 
       {/* ── Members table ────────────────────────────────────────────────────── */}
       <div className="px-6 pt-5 pb-4">
-        <div className="flex items-center justify-between mb-3">
+        <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold">
             Members ({filteredMembers.length}
             {memberSearch && ` of ${group.members.length}`})
           </h2>
           <div className="relative w-[220px]">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search members…"
               value={memberSearch}
               onChange={(e) => {
-                setMemberSearch(e.target.value)
-                setPage(1)
+                setMemberSearch(e.target.value);
+                setPage(1);
               }}
-              className="pl-9 h-8 text-sm"
+              className="h-8 pl-9 text-sm"
             />
           </div>
         </div>
@@ -142,19 +126,16 @@ function StructuredGroupDetailPage() {
       <Table>
         <TableHeader className="border-b bg-white">
           <TableRow className="border-0 hover:bg-transparent">
-            <TableHead className="pl-6 w-14">#</TableHead>
+            <TableHead className="w-14 pl-6">#</TableHead>
             <TableHead className="min-w-[200px]">Name</TableHead>
             <TableHead className="w-36">Class</TableHead>
-            <TableHead className="pr-6 w-36">NRIC</TableHead>
+            <TableHead className="w-36 pr-6">NRIC</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {pagedMembers.length === 0 ? (
             <TableRow>
-              <TableCell
-                colSpan={4}
-                className="py-12 text-center text-sm text-muted-foreground"
-              >
+              <TableCell colSpan={4} className="py-12 text-center text-sm text-muted-foreground">
                 No members match your search.
               </TableCell>
             </TableRow>
@@ -165,9 +146,7 @@ function StructuredGroupDetailPage() {
                   {(safePage - 1) * PAGE_SIZE + idx + 1}
                 </TableCell>
                 <TableCell className="font-medium">{member.name}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {member.class}
-                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">{member.class}</TableCell>
                 <TableCell className="pr-6 font-mono text-xs text-muted-foreground">
                   {member.nric ?? '—'}
                 </TableCell>
@@ -179,11 +158,10 @@ function StructuredGroupDetailPage() {
 
       {/* ── Pagination ───────────────────────────────────────────────────────── */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-6 py-3 border-t">
+        <div className="flex items-center justify-between border-t px-6 py-3">
           <p className="text-xs text-muted-foreground">
             Showing {(safePage - 1) * PAGE_SIZE + 1}–
-            {Math.min(safePage * PAGE_SIZE, filteredMembers.length)} of{' '}
-            {filteredMembers.length}
+            {Math.min(safePage * PAGE_SIZE, filteredMembers.length)} of {filteredMembers.length}
           </p>
           <div className="flex items-center gap-1">
             <Button
@@ -211,5 +189,5 @@ function StructuredGroupDetailPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

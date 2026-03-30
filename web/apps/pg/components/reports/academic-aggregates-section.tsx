@@ -1,7 +1,7 @@
-import type { AcademicAggregate } from '@/types/report'
+import type { AcademicAggregate } from '~/apps/pg/types/report';
 
 interface AcademicAggregatesSectionProps {
-  aggregates: Array<AcademicAggregate>
+  aggregates: AcademicAggregate[];
 }
 
 const AGGREGATE_COLORS = [
@@ -14,33 +14,27 @@ const AGGREGATE_COLORS = [
     border: 'border-emerald-200',
   },
   { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
-]
+];
 
-export function AcademicAggregatesSection({
-  aggregates,
-}: AcademicAggregatesSectionProps) {
+export function AcademicAggregatesSection({ aggregates }: AcademicAggregatesSectionProps) {
   return (
     <section>
       <h2 className="mb-3 text-lg font-bold">Academic Aggregates</h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
         {aggregates.map((agg, i) => {
-          const color = AGGREGATE_COLORS[i % AGGREGATE_COLORS.length]
+          const color = AGGREGATE_COLORS[i % AGGREGATE_COLORS.length];
           return (
             <div
               key={agg.label}
               className={`flex flex-col items-center rounded-lg border p-3 ${color.bg} ${color.border}`}
             >
-              <p className="text-muted-foreground text-[10px] uppercase">
-                {agg.label}
-              </p>
+              <p className="text-[10px] text-muted-foreground uppercase">{agg.label}</p>
               <p className={`text-2xl font-bold ${color.text}`}>{agg.value}</p>
-              <p className="text-muted-foreground text-center text-[10px]">
-                {agg.description}
-              </p>
+              <p className="text-center text-[10px] text-muted-foreground">{agg.description}</p>
             </div>
-          )
+          );
         })}
       </div>
     </section>
-  )
+  );
 }

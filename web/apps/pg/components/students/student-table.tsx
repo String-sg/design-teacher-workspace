@@ -1,19 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
-import { ChevronLeft, ChevronRight, FileText } from 'lucide-react'
+import { Link, useNavigate } from '@tanstack/react-router';
+import { ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { ColumnHeaderMenu } from './column-header-menu'
+import { tagColors } from '~/apps/pg/data/mock-students';
 import type {
   AttentionTag,
   FilterField,
   SortConfig,
   SortDirection,
   Student,
-} from '@/types/student'
-import type { ColumnConfig } from './column-visibility-popover'
-import { cn } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+} from '~/apps/pg/types/student';
+import { useFeatureFlags } from '~/platform/lib/feature-flags';
+import { Badge } from '~/shared/components/ui/badge';
+import { Button } from '~/shared/components/ui/button';
 import {
   Table,
   TableBody,
@@ -21,55 +20,52 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { usePagination } from '@/hooks/use-pagination'
-import { tagColors } from '@/data/mock-students'
-import { useFeatureFlags } from '@/lib/feature-flags'
+} from '~/shared/components/ui/table';
+import { usePagination } from '~/shared/hooks/use-pagination';
+import { cn } from '~/shared/lib/utils';
+
+import { ColumnHeaderMenu } from './column-header-menu';
+import type { ColumnConfig } from './column-visibility-popover';
 
 interface StudentTableProps {
-  students: Array<Student>
-  columns: Array<ColumnConfig>
-  className?: string
-  pageSize?: number
+  students: Student[];
+  columns: ColumnConfig[];
+  className?: string;
+  pageSize?: number;
   /** When provided, a divider will be shown between matched and unmatched students */
-  matchedIds?: Set<string>
+  matchedIds?: Set<string>;
   /** Number of matched students (used to show divider at correct position) */
-  matchedCount?: number
+  matchedCount?: number;
   /** Current sort configuration */
-  sort: SortConfig | null
+  sort: SortConfig | null;
   /** Set of filter fields that have active filters */
-  activeFilterFields: Set<FilterField>
+  activeFilterFields: Set<FilterField>;
   /** Handler for sorting by a column */
-  onSort: (field: string, direction: SortDirection) => void
+  onSort: (field: string, direction: SortDirection) => void;
   /** Handler for clearing the current sort */
-  onClearSort: () => void
+  onClearSort: () => void;
   /** Handler for adding a quick filter */
-  onAddQuickFilter: (field: FilterField) => void
+  onAddQuickFilter: (field: FilterField) => void;
   /** Handler for clearing a filter by field */
-  onClearFilter: (field: FilterField) => void
+  onClearFilter: (field: FilterField) => void;
   /** Selected subjects for overall % computation (null = all subjects) */
-  selectedSubjects?: Array<string> | null
+  selectedSubjects?: string[] | null;
   /** Opens the subject selector dialog */
-  onConfigureSubjects?: () => void
+  onConfigureSubjects?: () => void;
 }
 
-const tagVariantMap: Record<AttentionTag, 'default' | 'secondary' | 'outline'> =
-  tagColors
+const tagVariantMap: Record<AttentionTag, 'default' | 'secondary' | 'outline'> = tagColors;
 
 function computeOverallPct(
   student: Student,
-  selectedSubjects: Array<string> | null | undefined,
+  selectedSubjects: string[] | null | undefined,
 ): number {
   if (!selectedSubjects || !student.subjectScores) {
-    return student.overallPercentage
+    return student.overallPercentage;
   }
-  const relevant = student.subjectScores.filter((s) =>
-    selectedSubjects.includes(s.subject),
-  )
-  if (relevant.length === 0) return student.overallPercentage
-  return Math.round(
-    relevant.reduce((sum, s) => sum + s.percentage, 0) / relevant.length,
-  )
+  const relevant = student.subjectScores.filter((s) => selectedSubjects.includes(s.subject));
+  if (relevant.length === 0) return student.overallPercentage;
+  return Math.round(relevant.reduce((sum, s) => sum + s.percentage, 0) / relevant.length);
 }
 
 export function StudentTable({
@@ -88,120 +84,110 @@ export function StudentTable({
   selectedSubjects,
   onConfigureSubjects,
 }: StudentTableProps) {
-  const navigate = useNavigate()
-  const { isEnabled } = useFeatureFlags()
+  const navigate = useNavigate();
+  const { isEnabled } = useFeatureFlags();
   // Sticky header state
-  const tableContainerRef = useRef<HTMLDivElement>(null)
-  const stickyHeaderRef = useRef<HTMLDivElement>(null)
-  const sentinelRef = useRef<HTMLDivElement>(null)
-  const isScrollingSyncRef = useRef(false)
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const stickyHeaderRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const isScrollingSyncRef = useRef(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   // Find the scroll container by data attribute
-  const findScrollContainer = useCallback(
-    (el: HTMLElement | null): HTMLElement | null => {
-      while (el) {
-        if (el.hasAttribute('data-scroll-container')) {
-          return el
-        }
-        el = el.parentElement
+  const findScrollContainer = useCallback((el: HTMLElement | null): HTMLElement | null => {
+    while (el) {
+      if (el.hasAttribute('data-scroll-container')) {
+        return el;
       }
-      return null
-    },
-    [],
-  )
+      el = el.parentElement;
+    }
+    return null;
+  }, []);
 
   // Detect when header should be sticky using IntersectionObserver
   useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
 
-    let observer: IntersectionObserver | null = null
-    let mounted = true
+    let observer: IntersectionObserver | null = null;
+    let mounted = true;
 
     const setupObserver = () => {
-      if (!mounted) return
+      if (!mounted) return;
 
-      const scrollContainer = findScrollContainer(sentinel.parentElement)
+      const scrollContainer = findScrollContainer(sentinel.parentElement);
 
       // Retry after a frame if scroll container not found yet
       if (!scrollContainer) {
-        requestAnimationFrame(setupObserver)
-        return
+        requestAnimationFrame(setupObserver);
+        return;
       }
 
       // Set initial state based on current scroll position
-      const sentinelRect = sentinel.getBoundingClientRect()
-      const containerRect = scrollContainer.getBoundingClientRect()
-      setIsHeaderVisible(sentinelRect.top >= containerRect.top)
+      const sentinelRect = sentinel.getBoundingClientRect();
+      const containerRect = scrollContainer.getBoundingClientRect();
+      setIsHeaderVisible(sentinelRect.top >= containerRect.top);
 
       observer = new IntersectionObserver(
         ([entry]) => {
-          setIsHeaderVisible(entry.isIntersecting)
+          setIsHeaderVisible(entry.isIntersecting);
         },
         {
           root: scrollContainer,
           threshold: 0,
         },
-      )
+      );
 
-      observer.observe(sentinel)
-    }
+      observer.observe(sentinel);
+    };
 
     // Use RAF to ensure initial layout is complete
-    requestAnimationFrame(setupObserver)
+    requestAnimationFrame(setupObserver);
 
     return () => {
-      mounted = false
-      observer?.disconnect()
-    }
-  }, [findScrollContainer])
+      mounted = false;
+      observer?.disconnect();
+    };
+  }, [findScrollContainer]);
 
   // Sync scroll position when sticky header becomes visible
   useEffect(() => {
-    if (
-      !isHeaderVisible &&
-      stickyHeaderRef.current &&
-      tableContainerRef.current
-    ) {
-      stickyHeaderRef.current.scrollLeft = tableContainerRef.current.scrollLeft
+    if (!isHeaderVisible && stickyHeaderRef.current && tableContainerRef.current) {
+      stickyHeaderRef.current.scrollLeft = tableContainerRef.current.scrollLeft;
     }
-  }, [isHeaderVisible])
+  }, [isHeaderVisible]);
 
   // Bidirectional scroll sync with loop prevention
   const handleTableScroll = useCallback(() => {
-    if (isScrollingSyncRef.current) return
-    isScrollingSyncRef.current = true
+    if (isScrollingSyncRef.current) return;
+    isScrollingSyncRef.current = true;
     if (stickyHeaderRef.current && tableContainerRef.current) {
-      stickyHeaderRef.current.scrollLeft = tableContainerRef.current.scrollLeft
+      stickyHeaderRef.current.scrollLeft = tableContainerRef.current.scrollLeft;
     }
     requestAnimationFrame(() => {
-      isScrollingSyncRef.current = false
-    })
-  }, [])
+      isScrollingSyncRef.current = false;
+    });
+  }, []);
 
-  const handleStickyHeaderScroll = useCallback(
-    (e: React.UIEvent<HTMLDivElement>) => {
-      if (isScrollingSyncRef.current) return
-      isScrollingSyncRef.current = true
-      if (tableContainerRef.current) {
-        tableContainerRef.current.scrollLeft = e.currentTarget.scrollLeft
-      }
-      requestAnimationFrame(() => {
-        isScrollingSyncRef.current = false
-      })
-    },
-    [],
-  )
+  const handleStickyHeaderScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    if (isScrollingSyncRef.current) return;
+    isScrollingSyncRef.current = true;
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollLeft = e.currentTarget.scrollLeft;
+    }
+    requestAnimationFrame(() => {
+      isScrollingSyncRef.current = false;
+    });
+  }, []);
 
   // Attach scroll listener to table container
   useEffect(() => {
-    const container = tableContainerRef.current
-    if (!container) return
+    const container = tableContainerRef.current;
+    if (!container) return;
 
-    container.addEventListener('scroll', handleTableScroll)
-    return () => container.removeEventListener('scroll', handleTableScroll)
-  }, [handleTableScroll])
+    container.addEventListener('scroll', handleTableScroll);
+    return () => container.removeEventListener('scroll', handleTableScroll);
+  }, [handleTableScroll]);
 
   const {
     currentPage,
@@ -216,18 +202,17 @@ export function StudentTable({
   } = usePagination({
     totalItems: students.length,
     pageSize,
-  })
+  });
 
   const paginatedStudents = useMemo(() => {
-    return students.slice(startIndex, startIndex + pageSize)
-  }, [students, startIndex, pageSize])
+    return students.slice(startIndex, startIndex + pageSize);
+  }, [students, startIndex, pageSize]);
 
   // Convert to 1-based for display
-  const displayStartIndex = startIndex + 1
+  const displayStartIndex = startIndex + 1;
 
   // Helper to check if a column is visible
-  const isVisible = (id: string) =>
-    columns.find((c) => c.id === id)?.visible ?? true
+  const isVisible = (id: string) => columns.find((c) => c.id === id)?.visible ?? true;
 
   // Render header content (reusable for both regular and fixed header)
   const renderHeaderContent = () => (
@@ -564,7 +549,7 @@ export function StudentTable({
         />
       )}
     </TableRow>
-  )
+  );
 
   return (
     <>
@@ -582,21 +567,14 @@ export function StudentTable({
         onScroll={handleStickyHeaderScroll}
       >
         <Table>
-          <TableHeader className="border-b bg-white">
-            {renderHeaderContent()}
-          </TableHeader>
+          <TableHeader className="border-b bg-white">{renderHeaderContent()}</TableHeader>
         </Table>
       </div>
 
       {/* Main table container */}
-      <div
-        ref={tableContainerRef}
-        className={cn('max-w-full overflow-x-auto bg-white', className)}
-      >
+      <div ref={tableContainerRef} className={cn('max-w-full overflow-x-auto bg-white', className)}>
         <Table>
-          <TableHeader className="border-b bg-white">
-            {renderHeaderContent()}
-          </TableHeader>
+          <TableHeader className="border-b bg-white">{renderHeaderContent()}</TableHeader>
           <TableBody>
             {paginatedStudents.map((student, index) => {
               return (
@@ -635,20 +613,14 @@ export function StudentTable({
                         </div>
                       </TableCell>
                     )}
-                    {isVisible('class') && (
-                      <TableCell>{student.class}</TableCell>
-                    )}
+                    {isVisible('class') && <TableCell>{student.class}</TableCell>}
                     {isVisible('cca') && <TableCell>{student.cca}</TableCell>}
                     {isVisible('attentionTags') && (
                       <TableCell>
                         {student.attentionTags.length > 0 ? (
                           <div className="flex gap-1">
                             {student.attentionTags
-                              .filter(
-                                (tag) =>
-                                  tag !== 'LTA' ||
-                                  isEnabled('lta-intervention'),
-                              )
+                              .filter((tag) => tag !== 'LTA' || isEnabled('lta-intervention'))
                               .map((tag) => (
                                 <Badge
                                   key={tag}
@@ -671,45 +643,26 @@ export function StudentTable({
                     {isVisible('attendance') && (
                       <TableCell>
                         {student.totalSchoolDays > 0
-                          ? Math.round(
-                              (student.daysPresent / student.totalSchoolDays) *
-                                100,
-                            )
+                          ? Math.round((student.daysPresent / student.totalSchoolDays) * 100)
                           : 0}
                         %
                       </TableCell>
                     )}
-                    {isVisible('lateComing') && (
-                      <TableCell>{student.lateComing}</TableCell>
-                    )}
-                    {isVisible('absences') && (
-                      <TableCell>{student.absences}</TableCell>
-                    )}
-                    {isVisible('ccaMissed') && (
-                      <TableCell>{student.ccaMissed}</TableCell>
-                    )}
-                    {isVisible('offences') && (
-                      <TableCell>{student.offences}</TableCell>
-                    )}
-                    {isVisible('conduct') && (
-                      <TableCell>{student.conduct}</TableCell>
-                    )}
+                    {isVisible('lateComing') && <TableCell>{student.lateComing}</TableCell>}
+                    {isVisible('absences') && <TableCell>{student.absences}</TableCell>}
+                    {isVisible('ccaMissed') && <TableCell>{student.ccaMissed}</TableCell>}
+                    {isVisible('offences') && <TableCell>{student.offences}</TableCell>}
+                    {isVisible('conduct') && <TableCell>{student.conduct}</TableCell>}
                     {isVisible('counsellingSessions') && (
                       <TableCell>{student.counsellingSessions}</TableCell>
                     )}
                     {isVisible('sen') && (
                       <TableCell>
-                        {student.sen || (
-                          <span className="text-muted-foreground">-</span>
-                        )}
+                        {student.sen || <span className="text-muted-foreground">-</span>}
                       </TableCell>
                     )}
-                    {isVisible('socialLinks') && (
-                      <TableCell>{student.socialLinks}</TableCell>
-                    )}
-                    {isVisible('riskIndicators') && (
-                      <TableCell>{student.riskIndicators}</TableCell>
-                    )}
+                    {isVisible('socialLinks') && <TableCell>{student.socialLinks}</TableCell>}
+                    {isVisible('riskIndicators') && <TableCell>{student.riskIndicators}</TableCell>}
                     {isVisible('lowMoodFlagged') && (
                       <TableCell>
                         {student.lowMoodFlagged || (
@@ -718,15 +671,11 @@ export function StudentTable({
                       </TableCell>
                     )}
                     {isVisible('overallPercentage') && (
-                      <TableCell>
-                        {computeOverallPct(student, selectedSubjects)}%
-                      </TableCell>
+                      <TableCell>{computeOverallPct(student, selectedSubjects)}%</TableCell>
                     )}
                     {isVisible('approvedMtl') && (
                       <TableCell>
-                        {student.approvedMtl || (
-                          <span className="text-muted-foreground">-</span>
-                        )}
+                        {student.approvedMtl || <span className="text-muted-foreground">-</span>}
                       </TableCell>
                     )}
                     {isVisible('learningSupport') && (
@@ -743,16 +692,12 @@ export function StudentTable({
                     )}
                     {isVisible('fas') && (
                       <TableCell>
-                        {student.fas || (
-                          <span className="text-muted-foreground">-</span>
-                        )}
+                        {student.fas || <span className="text-muted-foreground">-</span>}
                       </TableCell>
                     )}
                     {isVisible('housing') && (
                       <TableCell>
-                        {student.housing || (
-                          <span className="text-muted-foreground">-</span>
-                        )}
+                        {student.housing || <span className="text-muted-foreground">-</span>}
                       </TableCell>
                     )}
                     {isVisible('housingType') && (
@@ -768,26 +713,20 @@ export function StudentTable({
                     )}
                     {isVisible('custody') && (
                       <TableCell>
-                        {student.custody || (
-                          <span className="text-muted-foreground">-</span>
-                        )}
+                        {student.custody || <span className="text-muted-foreground">-</span>}
                       </TableCell>
                     )}
                     {isVisible('commuterStatus') && (
                       <TableCell>
                         {student.commuterStatus || (
-                          <span className="text-muted-foreground">
-                            Non-commuter
-                          </span>
+                          <span className="text-muted-foreground">Non-commuter</span>
                         )}
                       </TableCell>
                     )}
                     {isVisible('afterSchoolArrangement') && (
                       <TableCell>
                         {student.afterSchoolArrangement || (
-                          <span className="text-muted-foreground">
-                            No arrangement
-                          </span>
+                          <span className="text-muted-foreground">No arrangement</span>
                         )}
                       </TableCell>
                     )}
@@ -796,7 +735,7 @@ export function StudentTable({
                     )}
                   </TableRow>
                 </React.Fragment>
-              )
+              );
             })}
           </TableBody>
         </Table>
@@ -804,8 +743,7 @@ export function StudentTable({
         {/* Record count and Pagination */}
         <div className="flex shrink-0 items-center justify-between px-6 py-4">
           <div className="text-sm text-muted-foreground">
-            {displayStartIndex}–
-            {Math.min(startIndex + pageSize, students.length)} of{' '}
+            {displayStartIndex}–{Math.min(startIndex + pageSize, students.length)} of{' '}
             {students.length} records
           </div>
           {totalPages > 1 && (
@@ -844,12 +782,7 @@ export function StudentTable({
                 ),
               )}
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={goToNextPage}
-                disabled={!canGoNext}
-              >
+              <Button variant="ghost" size="sm" onClick={goToNextPage} disabled={!canGoNext}>
                 Next
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -858,5 +791,5 @@ export function StudentTable({
         </div>
       </div>
     </>
-  )
+  );
 }

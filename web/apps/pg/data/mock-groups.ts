@@ -1,56 +1,45 @@
-import type { StudentGroup } from '@/types/student-group'
-import { mockStudents } from '@/data/mock-students'
+import { mockStudents } from '~/apps/pg/data/mock-students';
+import type { StudentGroup } from '~/apps/pg/types/student-group';
 
 export function getMockStudentById(id: string) {
-  const s = mockStudents.find((student) => student.id === id)
-  if (!s) return undefined
+  const s = mockStudents.find((student) => student.id === id);
+  if (!s) return undefined;
   return {
     name: s.name,
     class: s.class,
     nric: s.nric,
     indexNumber: s.indexNumber,
-  }
+  };
 }
 
 // Learning Support Students — students from Bandung Secondary where learningSupport is not null
 const lsStudents = mockStudents
-  .filter(
-    (s) =>
-      s.schoolName === 'Bandung Secondary School' && s.learningSupport !== null,
-  )
-  .sort((a, b) => a.indexNumber - b.indexNumber)
+  .filter((s) => s.schoolName === 'Bandung Secondary School' && s.learningSupport !== null)
+  .sort((a, b) => a.indexNumber - b.indexNumber);
 
 // Drama Festival Cast — 6 from 3A, 6 from 3B
 const aspirationStudents = mockStudents
-  .filter(
-    (s) => s.schoolName === 'Bandung Secondary School' && s.class === '3A',
-  )
+  .filter((s) => s.schoolName === 'Bandung Secondary School' && s.class === '3A')
   .sort((a, b) => a.indexNumber - b.indexNumber)
-  .slice(0, 6)
+  .slice(0, 6);
 
 const creativityStudents = mockStudents
-  .filter(
-    (s) => s.schoolName === 'Bandung Secondary School' && s.class === '3B',
-  )
+  .filter((s) => s.schoolName === 'Bandung Secondary School' && s.class === '3B')
   .sort((a, b) => a.indexNumber - b.indexNumber)
-  .slice(0, 6)
+  .slice(0, 6);
 
 // Science Olympiad Team — 4 from 4A, 4 from 4B
 const dedicationStudents = mockStudents
-  .filter(
-    (s) => s.schoolName === 'Bandung Secondary School' && s.class === '4A',
-  )
+  .filter((s) => s.schoolName === 'Bandung Secondary School' && s.class === '4A')
   .sort((a, b) => a.indexNumber - b.indexNumber)
-  .slice(0, 4)
+  .slice(0, 4);
 
 const endeavourStudents = mockStudents
-  .filter(
-    (s) => s.schoolName === 'Bandung Secondary School' && s.class === '4B',
-  )
+  .filter((s) => s.schoolName === 'Bandung Secondary School' && s.class === '4B')
   .sort((a, b) => a.indexNumber - b.indexNumber)
-  .slice(0, 4)
+  .slice(0, 4);
 
-export const MOCK_GROUPS: Array<StudentGroup> = [
+export const MOCK_GROUPS: StudentGroup[] = [
   {
     id: 'cg-learning-support',
     kind: 'regular',
@@ -65,9 +54,7 @@ export const MOCK_GROUPS: Array<StudentGroup> = [
       nric: s.nric,
       indexNumber: s.indexNumber,
     })),
-    staffInCharge: [
-      { id: 'tan-ml', name: 'Mrs Tan Mei Lin', type: 'individual' },
-    ],
+    staffInCharge: [{ id: 'tan-ml', name: 'Mrs Tan Mei Lin', type: 'individual' }],
     visibility: 'private',
     sharedWith: [
       {
@@ -99,8 +86,7 @@ export const MOCK_GROUPS: Array<StudentGroup> = [
     kind: 'regular',
     source: 'created',
     name: 'Drama Festival Cast',
-    description:
-      'Selected students from 3A and 3B performing in the school Drama Festival 2025.',
+    description: 'Selected students from 3A and 3B performing in the school Drama Festival 2025.',
     members: [...aspirationStudents, ...creativityStudents].map((s) => ({
       id: s.id,
       name: s.name,
@@ -108,9 +94,7 @@ export const MOCK_GROUPS: Array<StudentGroup> = [
       nric: s.nric,
       indexNumber: s.indexNumber,
     })),
-    staffInCharge: [
-      { id: 'wong-km', name: 'Mr Wong Kai Ming', type: 'individual' },
-    ],
+    staffInCharge: [{ id: 'wong-km', name: 'Mr Wong Kai Ming', type: 'individual' }],
     visibility: 'private',
     sharedWith: [
       {
@@ -145,9 +129,7 @@ export const MOCK_GROUPS: Array<StudentGroup> = [
       nric: s.nric,
       indexNumber: s.indexNumber,
     })),
-    staffInCharge: [
-      { id: 'rajan-s', name: 'Mr Rajan Subramaniam', type: 'individual' },
-    ],
+    staffInCharge: [{ id: 'rajan-s', name: 'Mr Rajan Subramaniam', type: 'individual' }],
     visibility: 'private',
     sharedWith: [
       {
@@ -168,24 +150,20 @@ export const MOCK_GROUPS: Array<StudentGroup> = [
     updatedAt: '2025-10-30T16:00:00.000Z',
     lastUsedAt: '2025-10-30T16:00:00.000Z',
   },
-]
+];
 
 // Shared groups — created by other teachers, shared with Mrs Tan
 const brightSparksStudents = mockStudents
-  .filter(
-    (s) => s.schoolName === 'Bandung Secondary School' && s.class === '3A',
-  )
+  .filter((s) => s.schoolName === 'Bandung Secondary School' && s.class === '3A')
   .sort((a, b) => a.indexNumber - b.indexNumber)
-  .slice(6, 14)
+  .slice(6, 14);
 
 const readingStudents = mockStudents
-  .filter(
-    (s) => s.schoolName === 'Bandung Secondary School' && s.class === '4A',
-  )
+  .filter((s) => s.schoolName === 'Bandung Secondary School' && s.class === '4A')
   .sort((a, b) => a.indexNumber - b.indexNumber)
-  .slice(4, 10)
+  .slice(4, 10);
 
-export const MOCK_SHARED_GROUPS: Array<StudentGroup> = [
+export const MOCK_SHARED_GROUPS: StudentGroup[] = [
   {
     id: 'cg-bright-sparks',
     kind: 'regular',
@@ -200,9 +178,7 @@ export const MOCK_SHARED_GROUPS: Array<StudentGroup> = [
       nric: s.nric,
       indexNumber: s.indexNumber,
     })),
-    staffInCharge: [
-      { id: 'wong-km', name: 'Mr Wong Kai Ming', type: 'individual' },
-    ],
+    staffInCharge: [{ id: 'wong-km', name: 'Mr Wong Kai Ming', type: 'individual' }],
     visibility: 'private',
     sharedWith: [
       {
@@ -231,9 +207,7 @@ export const MOCK_SHARED_GROUPS: Array<StudentGroup> = [
       nric: s.nric,
       indexNumber: s.indexNumber,
     })),
-    staffInCharge: [
-      { id: 'lim-bh', name: 'Mr Lim Beng Huat', type: 'individual' },
-    ],
+    staffInCharge: [{ id: 'lim-bh', name: 'Mr Lim Beng Huat', type: 'individual' }],
     visibility: 'private',
     sharedWith: [
       {
@@ -248,8 +222,8 @@ export const MOCK_SHARED_GROUPS: Array<StudentGroup> = [
     updatedAt: '2025-12-01T10:00:00.000Z',
     lastUsedAt: '2025-12-01T10:00:00.000Z',
   },
-]
+];
 
 export function getGroupById(id: string): StudentGroup | undefined {
-  return [...MOCK_GROUPS, ...MOCK_SHARED_GROUPS].find((g) => g.id === id)
+  return [...MOCK_GROUPS, ...MOCK_SHARED_GROUPS].find((g) => g.id === id);
 }

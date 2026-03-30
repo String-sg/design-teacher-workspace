@@ -1,21 +1,18 @@
-import { useState } from 'react'
-import { CalendarIcon, Filter, RotateCcw } from 'lucide-react'
-import { format, parse } from 'date-fns'
-import type { FormOwnership, FormStatus } from '@/types/form'
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+import { format, parse } from 'date-fns';
+import { CalendarIcon, Filter, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
+
+import type { FormOwnership, FormStatus } from '~/apps/pg/types/form';
+import { Button } from '~/shared/components/ui/button';
+import { Calendar } from '~/shared/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '~/shared/components/ui/popover';
+import { cn } from '~/shared/lib/utils';
 
 export interface FormsFilters {
-  statuses: Array<FormStatus>
-  ownerships: Array<FormOwnership>
-  dateFrom: string
-  dateTo: string
+  statuses: FormStatus[];
+  ownerships: FormOwnership[];
+  dateFrom: string;
+  dateTo: string;
 }
 
 export const EMPTY_FORMS_FILTERS: FormsFilters = {
@@ -23,7 +20,7 @@ export const EMPTY_FORMS_FILTERS: FormsFilters = {
   ownerships: [],
   dateFrom: '',
   dateTo: '',
-}
+};
 
 function countActiveFilters(filters: FormsFilters): number {
   return (
@@ -31,56 +28,51 @@ function countActiveFilters(filters: FormsFilters): number {
     filters.ownerships.length +
     (filters.dateFrom ? 1 : 0) +
     (filters.dateTo ? 1 : 0)
-  )
+  );
 }
 
 interface FormsFilterBarProps {
-  filters: FormsFilters
-  onChange: (filters: FormsFilters) => void
+  filters: FormsFilters;
+  onChange: (filters: FormsFilters) => void;
 }
 
-const STATUS_OPTIONS: Array<{ value: FormStatus; label: string }> = [
+const STATUS_OPTIONS: { value: FormStatus; label: string }[] = [
   { value: 'active', label: 'Active' },
   { value: 'draft', label: 'Draft' },
   { value: 'closed', label: 'Closed' },
-]
+];
 
-const OWNERSHIP_OPTIONS: Array<{ value: FormOwnership; label: string }> = [
+const OWNERSHIP_OPTIONS: { value: FormOwnership; label: string }[] = [
   { value: 'mine', label: 'Created by me' },
   { value: 'shared', label: 'Shared with me' },
-]
+];
 
 export function FormsFilterBar({ filters, onChange }: FormsFilterBarProps) {
-  const [open, setOpen] = useState(false)
-  const activeCount = countActiveFilters(filters)
+  const [open, setOpen] = useState(false);
+  const activeCount = countActiveFilters(filters);
 
   function toggleStatus(status: FormStatus) {
     const next = filters.statuses.includes(status)
       ? filters.statuses.filter((s) => s !== status)
-      : [...filters.statuses, status]
-    onChange({ ...filters, statuses: next })
+      : [...filters.statuses, status];
+    onChange({ ...filters, statuses: next });
   }
 
   function toggleOwnership(ownership: FormOwnership) {
     const next = filters.ownerships.includes(ownership)
       ? filters.ownerships.filter((o) => o !== ownership)
-      : [...filters.ownerships, ownership]
-    onChange({ ...filters, ownerships: next })
+      : [...filters.ownerships, ownership];
+    onChange({ ...filters, ownerships: next });
   }
 
   function handleReset() {
-    onChange(EMPTY_FORMS_FILTERS)
+    onChange(EMPTY_FORMS_FILTERS);
   }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        render={
-          <Button
-            variant="outline"
-            className="h-9 gap-2 aria-expanded:bg-white"
-          />
-        }
+        render={<Button variant="outline" className="h-9 gap-2 aria-expanded:bg-white" />}
       >
         <Filter className="h-4 w-4" />
         Filter
@@ -93,7 +85,7 @@ export function FormsFilterBar({ filters, onChange }: FormsFilterBarProps) {
 
       <PopoverContent className="w-[460px] gap-0 p-0" align="start">
         {/* Header */}
-        <div className="px-5 pb-3 pt-4">
+        <div className="px-5 pt-4 pb-3">
           <h3 className="text-sm font-semibold">Show records</h3>
         </div>
 
@@ -161,10 +153,7 @@ export function FormsFilterBar({ filters, onChange }: FormsFilterBarProps) {
                 >
                   <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                   {filters.dateFrom
-                    ? format(
-                        parse(filters.dateFrom, 'yyyy-MM-dd', new Date()),
-                        'dd MMM yyyy',
-                      )
+                    ? format(parse(filters.dateFrom, 'yyyy-MM-dd', new Date()), 'dd MMM yyyy')
                     : 'From'}
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -199,19 +188,14 @@ export function FormsFilterBar({ filters, onChange }: FormsFilterBarProps) {
                 >
                   <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                   {filters.dateTo
-                    ? format(
-                        parse(filters.dateTo, 'yyyy-MM-dd', new Date()),
-                        'dd MMM yyyy',
-                      )
+                    ? format(parse(filters.dateTo, 'yyyy-MM-dd', new Date()), 'dd MMM yyyy')
                     : 'To'}
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={
-                      filters.dateTo
-                        ? parse(filters.dateTo, 'yyyy-MM-dd', new Date())
-                        : undefined
+                      filters.dateTo ? parse(filters.dateTo, 'yyyy-MM-dd', new Date()) : undefined
                     }
                     onSelect={(date) =>
                       onChange({
@@ -241,5 +225,5 @@ export function FormsFilterBar({ filters, onChange }: FormsFilterBarProps) {
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

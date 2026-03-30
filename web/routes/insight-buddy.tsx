@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { ArrowRight, ArrowUp, LineChart, Search, Sparkles } from 'lucide-react'
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { ArrowRight, ArrowUp, LineChart, Search, Sparkles } from 'lucide-react';
+import type { KeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -10,24 +11,20 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts'
-import type { KeyboardEvent } from 'react'
-import {
-  DEFAULT_FEATURE_FLAGS,
-  FEATURE_FLAGS_STORAGE_KEY,
-} from '@/lib/feature-flags'
+} from 'recharts';
 
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { DEFAULT_FEATURE_FLAGS, FEATURE_FLAGS_STORAGE_KEY } from '~/platform/lib/feature-flags';
+import { Badge } from '~/shared/components/ui/badge';
+import { Button } from '~/shared/components/ui/button';
+import { Input } from '~/shared/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '~/shared/components/ui/select';
 import {
   Table,
   TableBody,
@@ -35,20 +32,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
+} from '~/shared/components/ui/table';
+import { Textarea } from '~/shared/components/ui/textarea';
+import { cn } from '~/shared/lib/utils';
 
 export const Route = createFileRoute('/insight-buddy')({
   beforeLoad: () => {
-    const stored = localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY)
+    const stored = localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY);
     const flags = stored
       ? { ...DEFAULT_FEATURE_FLAGS, ...JSON.parse(stored) }
-      : DEFAULT_FEATURE_FLAGS
-    if (!flags['student-analytics']) throw redirect({ to: '/' })
+      : DEFAULT_FEATURE_FLAGS;
+    if (!flags['student-analytics']) throw redirect({ to: '/' });
   },
   component: InsightBuddyPage,
-})
+});
 
 const SUGGESTIONS = [
   { label: 'Who has LTA this term?', resultType: 'lta' as const },
@@ -57,23 +54,23 @@ const SUGGESTIONS = [
     label: "How does this term's weighted assessment compare to last term?",
     resultType: 'performance-per-subject' as const,
   },
-]
+];
 
-const TOTAL_SCHOOL_DAYS = 45
+const TOTAL_SCHOOL_DAYS = 45;
 
 interface LtaStudent {
-  name: string
-  class: string
-  attendedDays: number
-  latecoming: number
-  absentWithoutValidReason: number
-  absentWithValidReasonPrivate: number
-  absentWithValidReasonOfficial: number
-  absentWithMC: number
-  absencePendingReason: number
+  name: string;
+  class: string;
+  attendedDays: number;
+  latecoming: number;
+  absentWithoutValidReason: number;
+  absentWithValidReasonPrivate: number;
+  absentWithValidReasonOfficial: number;
+  absentWithMC: number;
+  absencePendingReason: number;
 }
 
-const LTA_STUDENTS: Array<LtaStudent> = [
+const LTA_STUDENTS: LtaStudent[] = [
   {
     name: 'Ahmad Bin Ismail',
     class: '3A',
@@ -206,7 +203,7 @@ const LTA_STUDENTS: Array<LtaStudent> = [
     absentWithMC: 3,
     absencePendingReason: 1,
   },
-]
+];
 
 const PERFORMANCE_DATA = [
   { subject: 'English', thisTerm: 72, lastTerm: 68 },
@@ -215,21 +212,21 @@ const PERFORMANCE_DATA = [
   { subject: 'History', thisTerm: 60, lastTerm: 63 },
   { subject: 'Geography', thisTerm: 74, lastTerm: 69 },
   { subject: 'Literature', thisTerm: 81, lastTerm: 77 },
-]
+];
 
-type ResultType = 'performance-per-subject' | 'lta' | 'generic'
+type ResultType = 'performance-per-subject' | 'lta' | 'generic';
 
 interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  resultType?: ResultType
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  resultType?: ResultType;
 }
 
 function ChatEmptyState({
   onSuggestion,
 }: {
-  onSuggestion: (text: string, resultType?: ResultType) => void
+  onSuggestion: (text: string, resultType?: ResultType) => void;
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-12 text-center">
@@ -242,12 +239,9 @@ function ChatEmptyState({
 
       {/* Title + description */}
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">
-          What would you like to explore?
-        </h2>
+        <h2 className="text-xl font-semibold">What would you like to explore?</h2>
         <p className="text-sm text-muted-foreground">
-          Spot patterns, understand trends, or identify students who may need
-          support.
+          Spot patterns, understand trends, or identify students who may need support.
         </p>
       </div>
 
@@ -260,13 +254,13 @@ function ChatEmptyState({
             className="group animate-fade-slide-up flex items-center gap-3 rounded-xl border bg-background px-4 py-3 text-left text-sm transition-all hover:-translate-y-px hover:border-primary/20 hover:bg-primary/5 hover:shadow-sm active:translate-y-0"
             style={{ animationDelay: `${i * 60}ms` }}
           >
-            <span className="text-foreground flex-1">{s.label}</span>
+            <span className="flex-1 text-foreground">{s.label}</span>
             <ArrowRight className="size-4 shrink-0 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-primary/60" />
           </button>
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 function ResultsEmptyState() {
@@ -282,7 +276,7 @@ function ResultsEmptyState() {
         </p>
       </div>
     </div>
-  )
+  );
 }
 
 function TypingIndicator() {
@@ -303,7 +297,7 @@ function TypingIndicator() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 function PerformancePerSubjectChart() {
@@ -322,11 +316,7 @@ function PerformancePerSubjectChart() {
           barCategoryGap="30%"
           barGap={4}
         >
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="hsl(var(--border))"
-            vertical={false}
-          />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis
             dataKey="subject"
             tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
@@ -351,44 +341,29 @@ function PerformancePerSubjectChart() {
           />
           <Legend
             wrapperStyle={{ fontSize: 12, paddingTop: 16 }}
-            formatter={(value) =>
-              value === 'thisTerm' ? 'This Term' : 'Last Term'
-            }
+            formatter={(value) => (value === 'thisTerm' ? 'This Term' : 'Last Term')}
           />
-          <Bar
-            dataKey="thisTerm"
-            name="thisTerm"
-            fill="#3b82f6"
-            radius={[4, 4, 0, 0]}
-          />
-          <Bar
-            dataKey="lastTerm"
-            name="lastTerm"
-            fill="#bfdbfe"
-            radius={[4, 4, 0, 0]}
-          />
+          <Bar dataKey="thisTerm" name="thisTerm" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="lastTerm" name="lastTerm" fill="#bfdbfe" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }
 
 function LtaResultsTable() {
-  const [search, setSearch] = useState('')
-  const [classFilter, setClassFilter] = useState('all')
+  const [search, setSearch] = useState('');
+  const [classFilter, setClassFilter] = useState('all');
 
-  const classes = useMemo(
-    () => [...new Set(LTA_STUDENTS.map((s) => s.class))].sort(),
-    [],
-  )
+  const classes = useMemo(() => [...new Set(LTA_STUDENTS.map((s) => s.class))].sort(), []);
 
   const filtered = useMemo(() => {
     return LTA_STUDENTS.filter((s) => {
-      const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase())
-      const matchesClass = classFilter === 'all' || s.class === classFilter
-      return matchesSearch && matchesClass
-    })
-  }, [search, classFilter])
+      const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase());
+      const matchesClass = classFilter === 'all' || s.class === classFilter;
+      return matchesSearch && matchesClass;
+    });
+  }, [search, classFilter]);
 
   return (
     <div className="flex h-full flex-col gap-4">
@@ -396,7 +371,7 @@ function LtaResultsTable() {
         {/* Search & Filters */}
         <div className="flex items-center gap-3 border-b px-4 py-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -424,9 +399,7 @@ function LtaResultsTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="sticky left-0 bg-background">
-                  Name
-                </TableHead>
+                <TableHead className="sticky left-0 bg-background">Name</TableHead>
                 <TableHead>Class</TableHead>
                 <TableHead className="text-center">Attendance</TableHead>
                 <TableHead className="text-center">Latecoming</TableHead>
@@ -439,9 +412,7 @@ function LtaResultsTable() {
                 <TableHead className="text-center whitespace-nowrap">
                   Absent w/ Valid Reason (Official)
                 </TableHead>
-                <TableHead className="text-center whitespace-nowrap">
-                  Absent w/ MC
-                </TableHead>
+                <TableHead className="text-center whitespace-nowrap">Absent w/ MC</TableHead>
                 <TableHead className="text-center whitespace-nowrap">
                   Absence Pending Reason
                 </TableHead>
@@ -457,32 +428,21 @@ function LtaResultsTable() {
                   <TableCell className="text-center">
                     {student.attendedDays}/{TOTAL_SCHOOL_DAYS}
                   </TableCell>
-                  <TableCell className="text-center">
-                    {student.latecoming}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {student.absentWithoutValidReason}
-                  </TableCell>
+                  <TableCell className="text-center">{student.latecoming}</TableCell>
+                  <TableCell className="text-center">{student.absentWithoutValidReason}</TableCell>
                   <TableCell className="text-center">
                     {student.absentWithValidReasonPrivate}
                   </TableCell>
                   <TableCell className="text-center">
                     {student.absentWithValidReasonOfficial}
                   </TableCell>
-                  <TableCell className="text-center">
-                    {student.absentWithMC}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {student.absencePendingReason}
-                  </TableCell>
+                  <TableCell className="text-center">{student.absentWithMC}</TableCell>
+                  <TableCell className="text-center">{student.absencePendingReason}</TableCell>
                 </TableRow>
               ))}
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={9}
-                    className="py-8 text-center text-muted-foreground"
-                  >
+                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
                     No students found
                   </TableCell>
                 </TableRow>
@@ -493,42 +453,39 @@ function LtaResultsTable() {
 
         {/* Footer */}
         <div className="border-t px-4 py-2 text-xs text-muted-foreground">
-          Showing {filtered.length} of {LTA_STUDENTS.length} students with LTA
-          this term
+          Showing {filtered.length} of {LTA_STUDENTS.length} students with LTA this term
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function InsightBuddyPage() {
-  useSetBreadcrumbs([{ label: 'Insight Buddy', href: '/insight-buddy' }])
+  useSetBreadcrumbs([{ label: 'Insight Buddy', href: '/insight-buddy' }]);
 
-  const [messages, setMessages] = useState<Array<Message>>([])
-  const [input, setInput] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
-  const [activeResultType, setActiveResultType] = useState<ResultType | null>(
-    null,
-  )
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [activeResultType, setActiveResultType] = useState<ResultType | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isTyping])
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
 
   function handleSend(text?: string, resultType?: ResultType) {
-    const query = (text ?? input).trim()
-    if (!query || isTyping) return
+    const query = (text ?? input).trim();
+    if (!query || isTyping) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: query,
-    }
+    };
 
-    setMessages((prev) => [...prev, userMsg])
-    setInput('')
-    setIsTyping(true)
+    setMessages((prev) => [...prev, userMsg]);
+    setInput('');
+    setIsTyping(true);
 
     setTimeout(() => {
       const assistantContent =
@@ -536,29 +493,29 @@ function InsightBuddyPage() {
           ? "Here's a comparison of weighted assessment scores per subject for this term versus last term."
           : resultType === 'lta'
             ? `I found ${LTA_STUDENTS.length} students with Latecoming/Truancy/Absenteeism (LTA) this term. The results are shown on the right.`
-            : `I'm analysing your query: "${query}". Results will appear on the right.`
+            : `I'm analysing your query: "${query}". Results will appear on the right.`;
 
       const assistantMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: assistantContent,
         resultType,
-      }
+      };
 
-      setIsTyping(false)
-      setMessages((prev) => [...prev, assistantMsg])
-      setActiveResultType(resultType ?? 'generic')
-    }, 900)
+      setIsTyping(false);
+      setMessages((prev) => [...prev, assistantMsg]);
+      setActiveResultType(resultType ?? 'generic');
+    }, 900);
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+      e.preventDefault();
+      handleSend();
     }
   }
 
-  const isEmpty = messages.length === 0 && !isTyping
+  const isEmpty = messages.length === 0 && !isTyping;
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -599,11 +556,7 @@ function InsightBuddyPage() {
                         : 'bg-muted text-muted-foreground',
                     )}
                   >
-                    {msg.role === 'assistant' ? (
-                      <Sparkles className="size-4" />
-                    ) : (
-                      'You'
-                    )}
+                    {msg.role === 'assistant' ? <Sparkles className="size-4" /> : 'You'}
                   </div>
                   {/* Bubble */}
                   <div
@@ -656,24 +609,15 @@ function InsightBuddyPage() {
         </div>
 
         {activeResultType === 'lta' ? (
-          <div
-            key="lta"
-            className="animate-fade-slide-up flex-1 overflow-auto p-6"
-          >
+          <div key="lta" className="animate-fade-slide-up flex-1 overflow-auto p-6">
             <LtaResultsTable />
           </div>
         ) : activeResultType === 'performance-per-subject' ? (
-          <div
-            key="perf"
-            className="animate-fade-slide-up flex-1 overflow-auto p-6"
-          >
+          <div key="perf" className="animate-fade-slide-up flex-1 overflow-auto p-6">
             <PerformancePerSubjectChart />
           </div>
         ) : activeResultType === 'generic' ? (
-          <div
-            key="generic"
-            className="animate-fade-slide-up flex-1 overflow-auto p-6"
-          >
+          <div key="generic" className="animate-fade-slide-up flex-1 overflow-auto p-6">
             <div className="rounded-xl border bg-background p-6 shadow-sm">
               <p className="text-sm text-muted-foreground">
                 Analytics results will appear here based on your query.
@@ -685,5 +629,5 @@ function InsightBuddyPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

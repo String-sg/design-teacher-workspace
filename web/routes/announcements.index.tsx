@@ -1,28 +1,31 @@
-import { useMemo, useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { AlertTriangle, Copy, Lock, MoreHorizontal, Search, Trash2, Users } from 'lucide-react';
+import { useMemo, useState } from 'react';
+
+import type { AnnouncementFilters } from '~/apps/pg/components/comms/announcement-filter-bar';
 import {
-  AlertTriangle,
-  Copy,
-  Lock,
-  MoreHorizontal,
-  Search,
-  Trash2,
-  Users,
-} from 'lucide-react'
-import type { PGStatus } from '@/types/pg-announcement'
-import type { FormStatus } from '@/types/form'
-import type { AnnouncementFilters } from '@/components/comms/announcement-filter-bar'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { mockPGAnnouncements } from '@/data/mock-pg-announcements'
-import { mockForms } from '@/data/mock-forms'
-import { StatusBadge } from '@/components/comms/status-badge'
-import { ReadRate } from '@/components/comms/read-rate'
-import {
-  EMPTY_ANNOUNCEMENT_FILTERS,
   AnnouncementFilterBar,
-} from '@/components/comms/announcement-filter-bar'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
+  EMPTY_ANNOUNCEMENT_FILTERS,
+} from '~/apps/pg/components/comms/announcement-filter-bar';
+import { ReadRate } from '~/apps/pg/components/comms/read-rate';
+import { StatusBadge } from '~/apps/pg/components/comms/status-badge';
+import { EmptyState } from '~/apps/pg/components/empty-state';
+import { mockForms } from '~/apps/pg/data/mock-forms';
+import { mockPGAnnouncements } from '~/apps/pg/data/mock-pg-announcements';
+import { useFeatureFlag } from '~/apps/pg/hooks/use-feature-flag';
+import type { FormStatus } from '~/apps/pg/types/form';
+import type { PGStatus } from '~/apps/pg/types/pg-announcement';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Badge } from '~/shared/components/ui/badge';
+import { Button } from '~/shared/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '~/shared/components/ui/dropdown-menu';
+import { Input } from '~/shared/components/ui/input';
 import {
   Table,
   TableBody,
@@ -30,40 +33,26 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { EmptyState } from '@/components/empty-state'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { useFeatureFlag } from '@/hooks/use-feature-flag'
+} from '~/shared/components/ui/table';
+import { cn } from '~/shared/lib/utils';
 
 export const Route = createFileRoute('/announcements/')({
   component: ParentsGatewayPage,
-})
+});
 
 function formatDate(iso: string | undefined): string {
-  if (!iso) return '—'
+  if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-SG', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  })
+  });
 }
 
-function isLowReadRate(
-  postedAt: string | undefined,
-  readCount: number,
-  total: number,
-): boolean {
-  if (!postedAt || total === 0) return false
-  const hoursElapsed = (Date.now() - new Date(postedAt).getTime()) / 3600000
-  return hoursElapsed >= 48 && readCount / total < 0.5
+function isLowReadRate(postedAt: string | undefined, readCount: number, total: number): boolean {
+  if (!postedAt || total === 0) return false;
+  const hoursElapsed = (Date.now() - new Date(postedAt).getTime()) / 3600000;
+  return hoursElapsed >= 48 && readCount / total < 0.5;
 }
 
 function getRelevantDate(
@@ -72,9 +61,9 @@ function getRelevantDate(
   scheduledAt?: string,
   createdAt?: string,
 ): string | undefined {
-  if (status === 'posted') return postedAt
-  if (status === 'scheduled') return scheduledAt
-  return createdAt
+  if (status === 'posted') return postedAt;
+  if (status === 'scheduled') return scheduledAt;
+  return createdAt;
 }
 
 function SegmentedTab({
@@ -82,14 +71,14 @@ function SegmentedTab({
   onClick,
   children,
 }: {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
 }) {
   return (
     <button
       className={cn(
-        'whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all',
+        'rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all',
         active
           ? 'bg-background text-foreground shadow-sm'
           : 'text-muted-foreground hover:text-foreground',
@@ -98,7 +87,7 @@ function SegmentedTab({
     >
       {children}
     </button>
-  )
+  );
 }
 
 function getFormStatusBadge(status: FormStatus) {
@@ -115,145 +104,110 @@ function getFormStatusBadge(status: FormStatus) {
       label: 'Closed',
       className: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
     },
-  }
-  const { label, className } = config[status]
-  return <Badge className={className}>{label}</Badge>
+  };
+  const { label, className } = config[status];
+  return <Badge className={className}>{label}</Badge>;
 }
 
-type PostTab = 'view-only' | 'with-responses' | 'custom-forms'
+type PostTab = 'view-only' | 'with-responses' | 'custom-forms';
 
 function ParentsGatewayPage() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [tab, setTab] = useState<PostTab>('view-only')
-  const [filters, setFilters] = useState<AnnouncementFilters>(
-    EMPTY_ANNOUNCEMENT_FILTERS,
-  )
-  const formsEnabled = useFeatureFlag('forms')
+  const [searchQuery, setSearchQuery] = useState('');
+  const [tab, setTab] = useState<PostTab>('view-only');
+  const [filters, setFilters] = useState<AnnouncementFilters>(EMPTY_ANNOUNCEMENT_FILTERS);
+  const formsEnabled = useFeatureFlag('forms');
 
-  useSetBreadcrumbs([{ label: 'Posts', href: '/announcements' }])
-  const navigate = useNavigate()
+  useSetBreadcrumbs([{ label: 'Posts', href: '/announcements' }]);
+  const navigate = useNavigate();
 
   const filtered = useMemo(() => {
     return mockPGAnnouncements
       .filter((a) => {
         // Tab filter
-        const hasResponse =
-          a.responseType === 'acknowledge' || a.responseType === 'yes-no'
-        if (tab === 'view-only' && hasResponse) return false
-        if (tab === 'with-responses' && !hasResponse) return false
+        const hasResponse = a.responseType === 'acknowledge' || a.responseType === 'yes-no';
+        if (tab === 'view-only' && hasResponse) return false;
+        if (tab === 'with-responses' && !hasResponse) return false;
 
         // Response type filter
         if (filters.responseTypes.length > 0) {
-          const effectiveType = a.responseType ?? 'view-only'
-          if (!filters.responseTypes.includes(effectiveType)) return false
+          const effectiveType = a.responseType ?? 'view-only';
+          if (!filters.responseTypes.includes(effectiveType)) return false;
         }
         // Status filter
-        if (filters.statuses.length > 0 && !filters.statuses.includes(a.status))
-          return false
+        if (filters.statuses.length > 0 && !filters.statuses.includes(a.status)) return false;
 
         // Ownership filter
-        if (
-          filters.ownerships.length > 0 &&
-          !filters.ownerships.includes(a.ownership)
-        )
-          return false
+        if (filters.ownerships.length > 0 && !filters.ownerships.includes(a.ownership))
+          return false;
 
         // Date range filter — compare against the relevant date for this status
-        const relevantDate = getRelevantDate(
-          a.status,
-          a.postedAt,
-          a.scheduledAt,
-          a.createdAt,
-        )
+        const relevantDate = getRelevantDate(a.status, a.postedAt, a.scheduledAt, a.createdAt);
         if (filters.dateFrom && relevantDate) {
-          if (new Date(relevantDate) < new Date(filters.dateFrom)) return false
+          if (new Date(relevantDate) < new Date(filters.dateFrom)) return false;
         }
         if (filters.dateTo && relevantDate) {
           // dateTo is inclusive — compare to end of day
-          const toEnd = new Date(filters.dateTo)
-          toEnd.setHours(23, 59, 59, 999)
-          if (new Date(relevantDate) > toEnd) return false
+          const toEnd = new Date(filters.dateTo);
+          toEnd.setHours(23, 59, 59, 999);
+          if (new Date(relevantDate) > toEnd) return false;
         }
 
         // Search query
         if (searchQuery) {
-          const q = searchQuery.toLowerCase()
-          return (
-            a.title.toLowerCase().includes(q) ||
-            a.description.toLowerCase().includes(q)
-          )
+          const q = searchQuery.toLowerCase();
+          return a.title.toLowerCase().includes(q) || a.description.toLowerCase().includes(q);
         }
-        return true
+        return true;
       })
       .sort((a, b) => {
-        const dateA =
-          getRelevantDate(a.status, a.postedAt, a.scheduledAt, a.createdAt) ??
-          ''
-        const dateB =
-          getRelevantDate(b.status, b.postedAt, b.scheduledAt, b.createdAt) ??
-          ''
-        return new Date(dateB).getTime() - new Date(dateA).getTime()
-      })
-  }, [searchQuery, filters, tab])
+        const dateA = getRelevantDate(a.status, a.postedAt, a.scheduledAt, a.createdAt) ?? '';
+        const dateB = getRelevantDate(b.status, b.postedAt, b.scheduledAt, b.createdAt) ?? '';
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
+      });
+  }, [searchQuery, filters, tab]);
 
   const filteredForms = useMemo(() => {
     return mockForms
       .filter((form) => {
-        if ((form.source ?? 'custom') !== 'custom') return false
+        if ((form.source ?? 'custom') !== 'custom') return false;
         if (searchQuery) {
-          const q = searchQuery.toLowerCase()
-          return (
-            form.title.toLowerCase().includes(q) ||
-            form.description.toLowerCase().includes(q)
-          )
+          const q = searchQuery.toLowerCase();
+          return form.title.toLowerCase().includes(q) || form.description.toLowerCase().includes(q);
         }
-        return true
+        return true;
       })
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-  }, [searchQuery])
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [searchQuery]);
 
-  const tabs: Array<{ value: PostTab; label: string; hidden?: boolean }> = [
+  const tabs: { value: PostTab; label: string; hidden?: boolean }[] = [
     { value: 'view-only', label: 'Posts' },
     { value: 'with-responses', label: 'Posts with responses' },
     { value: 'custom-forms', label: 'Custom forms', hidden: !formsEnabled },
-  ]
-  const visibleTabs = tabs.filter((t) => !t.hidden)
+  ];
+  const visibleTabs = tabs.filter((t) => !t.hidden);
 
   return (
     <div className="flex flex-col">
       {/* Segmented tabs, Search & Filter */}
       <div className="mt-4 space-y-4">
         <div className="flex items-center justify-between gap-4 px-6 pb-0">
-          <div className="flex shrink-0 rounded-full bg-muted p-1 gap-1">
+          <div className="flex shrink-0 gap-1 rounded-full bg-muted p-1">
             {visibleTabs.map((t) => (
-              <SegmentedTab
-                key={t.value}
-                active={tab === t.value}
-                onClick={() => setTab(t.value)}
-              >
+              <SegmentedTab key={t.value} active={tab === t.value} onClick={() => setTab(t.value)}>
                 {t.label}
               </SegmentedTab>
             ))}
           </div>
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder={
-                  tab === 'custom-forms' ? 'Search forms...' : 'Search posts...'
-                }
+                placeholder={tab === 'custom-forms' ? 'Search forms...' : 'Search posts...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-[240px] pl-9"
-                aria-label={
-                  tab === 'custom-forms'
-                    ? 'Search forms'
-                    : 'Search announcements'
-                }
+                aria-label={tab === 'custom-forms' ? 'Search forms' : 'Search announcements'}
               />
             </div>
             <AnnouncementFilterBar filters={filters} onChange={setFilters} />
@@ -282,7 +236,7 @@ function ParentsGatewayPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredForms.map((form) => {
-                    const isShared = form.ownership === 'shared'
+                    const isShared = form.ownership === 'shared';
                     return (
                       <TableRow
                         key={form.id}
@@ -294,25 +248,20 @@ function ParentsGatewayPage() {
                           })
                         }
                       >
-                        <TableCell className="overflow-hidden whitespace-normal pl-6">
+                        <TableCell className="overflow-hidden pl-6 whitespace-normal">
                           <div className="min-w-0">
-                            <span className="truncate font-medium">
-                              {form.title}
-                            </span>
+                            <span className="truncate font-medium">{form.title}</span>
                             <div className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
                               {form.description}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {new Date(form.createdAt).toLocaleDateString(
-                            'en-SG',
-                            {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            },
-                          )}
+                          {new Date(form.createdAt).toLocaleDateString('en-SG', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
                         </TableCell>
                         <TableCell>{getFormStatusBadge(form.status)}</TableCell>
                         <TableCell>
@@ -329,9 +278,7 @@ function ParentsGatewayPage() {
                         </TableCell>
                         <TableCell className="pr-6">
                           {form.status === 'draft' ? (
-                            <span className="text-sm text-muted-foreground">
-                              —
-                            </span>
+                            <span className="text-sm text-muted-foreground">—</span>
                           ) : (
                             <ReadRate
                               readCount={form.completedCount}
@@ -368,7 +315,7 @@ function ParentsGatewayPage() {
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                    )
+                    );
                   })}
                 </TableBody>
               </Table>
@@ -395,35 +342,31 @@ function ParentsGatewayPage() {
                 </TableHeader>
                 <TableBody>
                   {filtered.map((announcement) => {
-                    const totalCount = announcement.recipients.length
+                    const totalCount = announcement.recipients.length;
                     const readCount = announcement.recipients.filter(
                       (r) => r.readStatus === 'read',
-                    ).length
+                    ).length;
                     const responseCount = announcement.recipients.filter(
                       (r) => r.respondedAt != null,
-                    ).length
+                    ).length;
                     const yesCount = announcement.recipients.filter(
                       (r) => r.formResponse === 'yes',
-                    ).length
+                    ).length;
                     const noCount = announcement.recipients.filter(
                       (r) => r.formResponse === 'no',
-                    ).length
+                    ).length;
                     const hasResponseType =
                       announcement.responseType === 'acknowledge' ||
-                      announcement.responseType === 'yes-no'
-                    const showUrgency = isLowReadRate(
-                      announcement.postedAt,
-                      readCount,
-                      totalCount,
-                    )
+                      announcement.responseType === 'yes-no';
+                    const showUrgency = isLowReadRate(announcement.postedAt, readCount, totalCount);
                     const relevantDate = getRelevantDate(
                       announcement.status,
                       announcement.postedAt,
                       announcement.scheduledAt,
                       announcement.createdAt,
-                    )
-                    const isViewer = announcement.role === 'viewer'
-                    const isShared = announcement.ownership === 'shared'
+                    );
+                    const isViewer = announcement.role === 'viewer';
+                    const isShared = announcement.ownership === 'shared';
 
                     return (
                       <TableRow
@@ -436,21 +379,18 @@ function ParentsGatewayPage() {
                           })
                         }
                       >
-                        <TableCell className="overflow-hidden whitespace-normal pl-6">
+                        <TableCell className="overflow-hidden pl-6 whitespace-normal">
                           <div className="flex items-start gap-2">
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <span className="truncate font-medium">
-                                  {announcement.title}
-                                </span>
-                                {announcement.responseType ===
-                                  'acknowledge' && (
-                                  <span className="shrink-0 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 ring-1 ring-inset ring-blue-200">
+                                <span className="truncate font-medium">{announcement.title}</span>
+                                {announcement.responseType === 'acknowledge' && (
+                                  <span className="shrink-0 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 ring-1 ring-blue-200 ring-inset">
                                     Acknowledge
                                   </span>
                                 )}
                                 {announcement.responseType === 'yes-no' && (
-                                  <span className="shrink-0 rounded-full bg-violet-50 px-1.5 py-0.5 text-[10px] font-medium text-violet-600 ring-1 ring-inset ring-violet-200">
+                                  <span className="shrink-0 rounded-full bg-violet-50 px-1.5 py-0.5 text-[10px] font-medium text-violet-600 ring-1 ring-violet-200 ring-inset">
                                     Yes/No
                                   </span>
                                 )}
@@ -459,10 +399,7 @@ function ParentsGatewayPage() {
                                 )}
                               </div>
                               <div className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
-                                {announcement.description.replace(
-                                  /<[^>]*>/g,
-                                  '',
-                                )}
+                                {announcement.description.replace(/<[^>]*>/g, '')}
                               </div>
                             </div>
                           </div>
@@ -470,9 +407,7 @@ function ParentsGatewayPage() {
                         <TableCell className="text-sm text-muted-foreground">
                           <span
                             className={
-                              announcement.status === 'scheduled'
-                                ? 'text-amber-600'
-                                : undefined
+                              announcement.status === 'scheduled' ? 'text-amber-600' : undefined
                             }
                           >
                             {formatDate(relevantDate)}
@@ -487,9 +422,7 @@ function ParentsGatewayPage() {
                               <>
                                 <Users className="h-3.5 w-3.5 shrink-0" />
                                 <span>Shared</span>
-                                {isViewer && (
-                                  <Lock className="h-3 w-3 shrink-0 text-slate-400" />
-                                )}
+                                {isViewer && <Lock className="h-3 w-3 shrink-0 text-slate-400" />}
                               </>
                             ) : (
                               <span>Mine</span>
@@ -498,32 +431,21 @@ function ParentsGatewayPage() {
                         </TableCell>
                         <TableCell className="pr-6">
                           {announcement.status !== 'posted' ? (
-                            <span className="text-sm text-muted-foreground">
-                              —
-                            </span>
+                            <span className="text-sm text-muted-foreground">—</span>
                           ) : hasResponseType ? (
                             <div className="space-y-0.5">
-                              <ReadRate
-                                readCount={responseCount}
-                                totalCount={totalCount}
-                              />
-                              {announcement.responseType === 'yes-no' &&
-                                totalCount > 0 && (
-                                  <p className="text-[11px] text-muted-foreground">
-                                    {yesCount} yes · {noCount} no
-                                  </p>
-                                )}
-                              {announcement.responseType === 'acknowledge' && (
+                              <ReadRate readCount={responseCount} totalCount={totalCount} />
+                              {announcement.responseType === 'yes-no' && totalCount > 0 && (
                                 <p className="text-[11px] text-muted-foreground">
-                                  Acknowledged
+                                  {yesCount} yes · {noCount} no
                                 </p>
+                              )}
+                              {announcement.responseType === 'acknowledge' && (
+                                <p className="text-[11px] text-muted-foreground">Acknowledged</p>
                               )}
                             </div>
                           ) : (
-                            <ReadRate
-                              readCount={readCount}
-                              totalCount={totalCount}
-                            />
+                            <ReadRate readCount={readCount} totalCount={totalCount} />
                           )}
                         </TableCell>
                         <TableCell
@@ -555,7 +477,7 @@ function ParentsGatewayPage() {
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                    )
+                    );
                   })}
                 </TableBody>
               </Table>
@@ -564,5 +486,5 @@ function ParentsGatewayPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

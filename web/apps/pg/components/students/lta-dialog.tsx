@@ -1,91 +1,73 @@
-import { useEffect, useRef, useState } from 'react'
-import { ExternalLink, FileText, Send, User, X } from 'lucide-react'
+import { ExternalLink, FileText, Send, User, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
-import type { Student } from '@/types/student'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import type { Student } from '~/apps/pg/types/student';
+import { Button } from '~/shared/components/ui/button';
+import { cn } from '~/shared/lib/utils';
 
-type ResourceTab = 'resources' | 'learn-more'
+type ResourceTab = 'resources' | 'learn-more';
 
 interface GuidanceAction {
-  title: string
-  description: string
+  title: string;
+  description: string;
   urgency: {
-    label: string
-    icon: React.ReactNode
-    textColor: string
-    badgeBg: string
-  }
-  contacts: Array<string>
-  resources: Array<{ label: string; href: string; external?: boolean }>
+    label: string;
+    icon: React.ReactNode;
+    textColor: string;
+    badgeBg: string;
+  };
+  contacts: string[];
+  resources: { label: string; href: string; external?: boolean }[];
 }
 
 // ── Linear-style priority icons ──────────────────────────────
 
 function PriorityUrgentIcon() {
   return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden="true"
-    >
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
       <rect width="16" height="16" rx="3" />
       <rect x="7" y="3" width="2" height="6" rx="1" fill="white" />
       <rect x="7" y="11" width="2" height="2" rx="1" fill="white" />
     </svg>
-  )
+  );
 }
 
 function PriorityMediumIcon() {
   return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden="true"
-    >
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
       <rect x="1" y="9" width="3" height="5" rx="1" />
       <rect x="6.5" y="5" width="3" height="9" rx="1" />
       <rect x="12" y="1" width="3" height="13" rx="1" opacity="0.35" />
     </svg>
-  )
+  );
 }
 
 function PriorityLowIcon() {
   return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden="true"
-    >
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
       <rect x="1" y="9" width="3" height="5" rx="1" />
       <rect x="6.5" y="5" width="3" height="9" rx="1" opacity="0.35" />
       <rect x="12" y="1" width="3" height="13" rx="1" opacity="0.35" />
     </svg>
-  )
+  );
 }
 
 // ── Glow bot avatar (Perplexity-style monitor face with animated eyes) ──
 
 function GlowBotIcon({ size = 28 }: { size?: number }) {
-  const [isHovered, setIsHovered] = useState(false)
-  const [eyeOffset, setEyeOffset] = useState(0)
-  const [blinkScale, setBlinkScale] = useState(1)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [isHovered, setIsHovered] = useState(false);
+  const [eyeOffset, setEyeOffset] = useState(0);
+  const [blinkScale, setBlinkScale] = useState(1);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!isHovered) {
-      setEyeOffset(0)
-      setBlinkScale(1)
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      if (intervalRef.current) clearInterval(intervalRef.current)
-      return
+      setEyeOffset(0);
+      setBlinkScale(1);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
     }
 
     // Eye look sequence: center → left → right → center → blink
@@ -96,28 +78,28 @@ function GlowBotIcon({ size = 28 }: { size?: number }) {
       { delay: 800, offset: 0, blink: 1 },
       { delay: 1100, offset: 0, blink: 0.1 },
       { delay: 1250, offset: 0, blink: 1 },
-    ]
+    ];
 
-    const timers: ReturnType<typeof setTimeout>[] = []
+    const timers: ReturnType<typeof setTimeout>[] = [];
 
     function runSequence() {
       for (const step of sequence) {
         const t = setTimeout(() => {
-          setEyeOffset(step.offset)
-          setBlinkScale(step.blink)
-        }, step.delay)
-        timers.push(t)
+          setEyeOffset(step.offset);
+          setBlinkScale(step.blink);
+        }, step.delay);
+        timers.push(t);
       }
     }
 
-    runSequence()
-    intervalRef.current = setInterval(runSequence, 2000)
+    runSequence();
+    intervalRef.current = setInterval(runSequence, 2000);
 
     return () => {
-      timers.forEach(clearTimeout)
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    }
-  }, [isHovered])
+      timers.forEach(clearTimeout);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [isHovered]);
 
   return (
     <span
@@ -194,7 +176,7 @@ function GlowBotIcon({ size = 28 }: { size?: number }) {
         />
       </svg>
     </span>
-  )
+  );
 }
 
 function getStudentInitials(name: string): string {
@@ -204,10 +186,10 @@ function getStudentInitials(name: string): string {
     .map((w) => w[0])
     .join('')
     .slice(0, 2)
-    .toUpperCase()
+    .toUpperCase();
 }
 
-const guidanceActions: Array<GuidanceAction> = [
+const guidanceActions: GuidanceAction[] = [
   {
     title: 'Consider a 1-on-1 check-in within 48 hours',
     description:
@@ -266,7 +248,7 @@ const guidanceActions: Array<GuidanceAction> = [
     contacts: ['CCA Teacher-in-Charge', 'Form Teacher'],
     resources: [{ label: 'CCA re-engagement guide', href: '#' }],
   },
-]
+];
 
 const caseResources = [
   { label: 'Check-in guide (SwAN-adapted)', href: '#' },
@@ -277,7 +259,7 @@ const caseResources = [
   { label: 'Case Management Guide', href: '#' },
   { label: 'CCA re-engagement guide', href: '#' },
   { label: 'Open CaseSync', href: '#', external: true },
-]
+];
 
 const learnMoreItems = [
   {
@@ -307,27 +289,24 @@ const learnMoreItems = [
     description:
       'Practical techniques for 1-on-1 conversations with students showing low mood — building trust, asking the right questions, and knowing when to refer.',
   },
-]
+];
 
 interface GlowStudentSupportPageProps {
-  student: Student
-  onClose: () => void
+  student: Student;
+  onClose: () => void;
 }
 
-export function GlowStudentSupportPage({
-  student,
-  onClose,
-}: GlowStudentSupportPageProps) {
-  const [activeTab, setActiveTab] = useState<ResourceTab>('resources')
+export function GlowStudentSupportPage({ student, onClose }: GlowStudentSupportPageProps) {
+  const [activeTab, setActiveTab] = useState<ResourceTab>('resources');
 
-  const initials = getStudentInitials(student.name)
-  const firstName = student.name.split(' ')[0]
+  const initials = getStudentInitials(student.name);
+  const firstName = student.name.split(' ')[0];
 
   const suggestedQuestions = [
     'Which issue should I tackle first?',
     `How do I adjust my approach for his SwAN profile?`,
     'When should I loop in the School Counsellor?',
-  ]
+  ];
 
   return (
     // Fills the full viewport — no fixed/z-index needed since this IS the page
@@ -336,16 +315,9 @@ export function GlowStudentSupportPage({
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2.5">
           <GlowBotIcon size={28} />
-          <span className="text-sm font-medium text-slate-700">
-            Glow · Student Support
-          </span>
+          <span className="text-sm font-medium text-slate-700">Glow · Student Support</span>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          className="rounded-full"
-          onClick={onClose}
-        >
+        <Button variant="outline" size="icon" className="rounded-full" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -356,9 +328,7 @@ export function GlowStudentSupportPage({
         <aside className="flex w-full shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-[0px_1px_2px_0px_rgb(0_0_0/0.05)] lg:w-[420px]">
           {/* Panel header */}
           <div className="shrink-0 border-b border-border px-5 py-3.5">
-            <h2 className="text-sm font-medium text-foreground">
-              Student context
-            </h2>
+            <h2 className="text-sm font-medium text-foreground">Student context</h2>
           </div>
 
           <div className="max-h-[40vh] overflow-y-auto p-5 lg:max-h-none">
@@ -379,21 +349,19 @@ export function GlowStudentSupportPage({
             </div>
 
             {/* Context question */}
-            <h2 className="mt-5 text-sm font-semibold leading-snug text-foreground">
+            <h2 className="mt-5 text-sm leading-snug font-semibold text-foreground">
               How to support a SwAN student with multiple concerns?
             </h2>
             <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-              Co-occurring behavioural, social-emotional, and engagement
-              challenges require a sequenced, differentiated approach.
+              Co-occurring behavioural, social-emotional, and engagement challenges require a
+              sequenced, differentiated approach.
             </p>
 
             {/* Divider */}
             <div className="my-5 border-t border-border" />
 
             {/* Active triggers */}
-            <p className="text-xs font-medium text-muted-foreground">
-              Active Triggers
-            </p>
+            <p className="text-xs font-medium text-muted-foreground">Active Triggers</p>
             <div className="mt-2.5 space-y-1.5">
               <div className="flex items-center gap-2 rounded-lg bg-crimson-2 px-3 py-2 text-sm font-medium text-crimson-11">
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-crimson-9" />
@@ -429,11 +397,10 @@ export function GlowStudentSupportPage({
 
               <div className="min-w-0 flex-1">
                 <p className="text-sm leading-relaxed text-foreground">
-                  Three areas have been flagged for {firstName} at the same time
-                  — a bullying incident, disengagement from CCA, and observed
-                  low mood. Each alone may be manageable; together, they suggest
-                  a pattern worth monitoring with a coordinated approach. Here
-                  are some suggested considerations, organised by priority:
+                  Three areas have been flagged for {firstName} at the same time — a bullying
+                  incident, disengagement from CCA, and observed low mood. Each alone may be
+                  manageable; together, they suggest a pattern worth monitoring with a coordinated
+                  approach. Here are some suggested considerations, organised by priority:
                 </p>
 
                 {/* Action cards */}
@@ -457,9 +424,7 @@ export function GlowStudentSupportPage({
                               {action.urgency.icon}
                               {action.urgency.label}
                             </span>
-                            <h4 className="text-sm font-semibold leading-snug">
-                              {action.title}
-                            </h4>
+                            <h4 className="text-sm leading-snug font-semibold">{action.title}</h4>
                           </div>
 
                           <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
@@ -498,27 +463,22 @@ export function GlowStudentSupportPage({
                                 onClick={(e) => e.preventDefault()}
                               >
                                 {r.label}
-                                {r.external && (
-                                  <ExternalLink className="ml-0.5 inline h-3 w-3" />
-                                )}
+                                {r.external && <ExternalLink className="ml-0.5 inline h-3 w-3" />}
                               </a>
                             ))}
                           </div>
                         </div>
                       </div>
-                    )
+                    );
                   })}
                 </div>
 
                 {/* Sharpen prompt */}
                 <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-                  <strong className="text-foreground">
-                    To sharpen this plan:
-                  </strong>{' '}
-                  it would help to know how long the low mood has been observed,
-                  whether the bullying was physical/verbal/cyber and if the
-                  victim is safe, and what {firstName}'s specific SwAN diagnosis
-                  or support needs are. Share what you know in the chat below.
+                  <strong className="text-foreground">To sharpen this plan:</strong> it would help
+                  to know how long the low mood has been observed, whether the bullying was
+                  physical/verbal/cyber and if the victim is safe, and what {firstName}'s specific
+                  SwAN diagnosis or support needs are. Share what you know in the chat below.
                 </p>
               </div>
             </div>
@@ -566,7 +526,7 @@ export function GlowStudentSupportPage({
 
           {/* Segmented tab control */}
           <div className="shrink-0 px-4 py-3">
-            <div className="flex rounded-full bg-muted p-1 gap-1">
+            <div className="flex gap-1 rounded-full bg-muted p-1">
               <TabButton
                 active={activeTab === 'resources'}
                 onClick={() => setActiveTab('resources')}
@@ -623,7 +583,7 @@ export function GlowStudentSupportPage({
 
                       <div className="min-w-0 flex-1">
                         {/* Title */}
-                        <p className="text-sm font-medium leading-snug text-foreground">
+                        <p className="text-sm leading-snug font-medium text-foreground">
                           {item.title}
                         </p>
 
@@ -648,7 +608,7 @@ export function GlowStudentSupportPage({
         </aside>
       </div>
     </div>
-  )
+  );
 }
 
 // ── Sub-components ──────────────────────────────────────────
@@ -659,7 +619,7 @@ function MetaField({ label, value }: { label: string; value: string }) {
       <p className="text-[10px] font-semibold text-muted-foreground">{label}</p>
       <p className="mt-1 text-sm text-foreground">{value}</p>
     </div>
-  )
+  );
 }
 
 function TabButton({
@@ -667,9 +627,9 @@ function TabButton({
   onClick,
   children,
 }: {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
 }) {
   return (
     <button
@@ -683,5 +643,5 @@ function TabButton({
     >
       {children}
     </button>
-  )
+  );
 }

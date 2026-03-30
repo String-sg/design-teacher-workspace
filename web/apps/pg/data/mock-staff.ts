@@ -1,19 +1,19 @@
 export interface StaffMember {
-  id: string
-  name: string
-  email: string
-  role: string
-  formClass?: string // e.g. "3A" — undefined for non-form teachers (HODs, etc.)
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  formClass?: string; // e.g. "3A" — undefined for non-form teachers (HODs, etc.)
 }
 
 export interface StaffGroup {
-  id: string
-  label: string
-  memberIds: Array<string>
-  groupType?: 'level' | 'department' | 'staff-group'
+  id: string;
+  label: string;
+  memberIds: string[];
+  groupType?: 'level' | 'department' | 'staff-group';
 }
 
-export const MOCK_STAFF: Array<StaffMember> = [
+export const MOCK_STAFF: StaffMember[] = [
   {
     id: 'tan-ml',
     name: 'Mrs Tan Mei Lin',
@@ -61,9 +61,9 @@ export const MOCK_STAFF: Array<StaffMember> = [
     email: 'rajans@school.edu.sg',
     role: 'HOD Mathematics',
   },
-]
+];
 
-export const MOCK_STAFF_GROUPS: Array<StaffGroup> = [
+export const MOCK_STAFF_GROUPS: StaffGroup[] = [
   // Level groups — form and co-form teachers grouped by secondary level
   {
     id: 'level:sec3-team',
@@ -88,22 +88,14 @@ export const MOCK_STAFF_GROUPS: Array<StaffGroup> = [
   {
     id: 'school:all-staff',
     label: 'All Teaching Staff',
-    memberIds: [
-      'tan-ml',
-      'wong-km',
-      'priya-n',
-      'chan-hl',
-      'ng-xh',
-      'lim-bh',
-      'rajan-s',
-    ],
+    memberIds: ['tan-ml', 'wong-km', 'priya-n', 'chan-hl', 'ng-xh', 'lim-bh', 'rajan-s'],
     groupType: 'staff-group',
   },
-]
+];
 
 // Saved favourite enquiry emails shown in the quick-select picker
-export const SAVED_ENQUIRY_EMAILS: Array<string> = [
+export const SAVED_ENQUIRY_EMAILS: string[] = [
   'tanml@school.edu.sg',
   'hod@school.edu.sg',
   'admin@school.edu.sg',
-]
+];

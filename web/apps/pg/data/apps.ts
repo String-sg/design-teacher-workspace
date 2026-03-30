@@ -1,23 +1,22 @@
-import type { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react';
 
-export type AppColor = 'pink' | 'blue' | 'orange' | 'green' | 'purple'
+export type AppColor = 'pink' | 'blue' | 'orange' | 'green' | 'purple';
 
 export interface App {
-  id: string
-  name: string
-  description: string
-  icon: LucideIcon | string
-  color: AppColor
-  href: string
-  badge?: string
-
+  id: string;
+  name: string;
+  description: string;
+  icon: LucideIcon | string;
+  color: AppColor;
+  href: string;
+  badge?: string;
 }
 
 export interface AppCategory {
-  id: string
-  title: string
-  description: string
-  apps: Array<App>
+  id: string;
+  title: string;
+  description: string;
+  apps: App[];
 }
 
 export const featuredApp: App = {
@@ -28,10 +27,9 @@ export const featuredApp: App = {
   color: 'purple',
   href: '/students',
   badge: 'Beta',
+};
 
-}
-
-export const appCategories: Array<AppCategory> = [
+export const appCategories: AppCategory[] = [
   {
     id: 'daily-recommended',
     title: 'Essentials',
@@ -40,8 +38,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'school-cockpit',
         name: 'School Cockpit',
-        description:
-          'Your central hub for school management and daily operations',
+        description: 'Your central hub for school management and daily operations',
         icon: '/logos/schoolcockpit-logo.svg',
         color: 'blue',
         href: '/school-cockpit',
@@ -53,7 +50,6 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/scmobile-logo.svg',
         color: 'blue',
         href: 'https://scmobile.moe.edu.sg/login',
-
       },
       {
         id: 'sls',
@@ -63,7 +59,6 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/sls-logo.svg',
         color: 'green',
         href: 'https://vle.learning.moe.edu.sg/login',
-
       },
     ],
   },
@@ -87,7 +82,6 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/students-logo.svg',
         color: 'blue',
         href: '/students',
-      
       },
       {
         id: 'allocate',
@@ -100,8 +94,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'sdis',
         name: 'SDIS',
-        description:
-          'One-Stop Platform for MOE student development programmes',
+        description: 'One-Stop Platform for MOE student development programmes',
         icon: '/logos/sdis-logo.svg',
         color: 'blue',
         href: 'https://www.sdis.moe.gov.sg/oalc/s/login',
@@ -116,8 +109,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'mysei',
         name: 'MySEI',
-        description:
-          'Holistic insights for students\u2019 social-emotional growth & well-being',
+        description: 'Holistic insights for students\u2019 social-emotional growth & well-being',
         icon: '/logos/mysei-logo.svg',
         color: 'blue',
         href: 'https://mysei.digital.moe.gov.sg',
@@ -125,8 +117,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'connectogram',
         name: 'Connecto-gram',
-        description:
-          'Social network analysis for student connectedness and peer relationships',
+        description: 'Social network analysis for student connectedness and peer relationships',
         icon: '/logos/connectogram-logo.svg',
         color: 'blue',
         href: 'https://forms.moe.edu.sg/sna/manage/forms',
@@ -134,8 +125,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'termly-checkin',
         name: 'Termly Check-In',
-        description:
-          'Regular well-being check-ins to support student mental health',
+        description: 'Regular well-being check-ins to support student mental health',
         icon: '/logos/allears-logo.svg',
         color: 'blue',
         href: 'https://forms.moe.edu.sg/dashboards',
@@ -150,8 +140,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'heytalia',
         name: 'HeyTalia',
-        description:
-          'AI-assistant for drafting clear, parent-friendly school communications',
+        description: 'AI-assistant for drafting clear, parent-friendly school communications',
         icon: '/logos/heytalia-logo.svg',
         color: 'purple',
         href: 'https://pg.moe.edu.sg',
@@ -174,12 +163,10 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'langbuddy',
         name: 'LangBuddy',
-        description:
-          'AI conversational chatbot for Mother Tongue Language learning',
+        description: 'AI conversational chatbot for Mother Tongue Language learning',
         icon: '/logos/langbuddy-logo.svg',
         color: 'blue',
         href: 'https://langbuddy.moe.edu.sg/',
-
       },
     ],
   },
@@ -210,7 +197,6 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/opal-logo.svg',
         color: 'blue',
         href: 'https://idm.opal2.moe.edu.sg',
-
       },
       {
         id: 'glow',
@@ -222,4 +208,4 @@ export const appCategories: Array<AppCategory> = [
       },
     ],
   },
-]
+];

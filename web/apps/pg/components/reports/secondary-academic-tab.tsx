@@ -1,11 +1,12 @@
-import { AcademicAggregatesSection } from './academic-aggregates-section'
-import { SecondarySubjectAccordion } from './secondary-subject-accordion'
-import { ExamOverallSection } from './exam-overall-section'
-import { SecondaryGradingGlossary } from './secondary-grading-glossary'
-import type { SecondaryAcademicData } from '@/types/report'
+import type { SecondaryAcademicData } from '~/apps/pg/types/report';
+
+import { AcademicAggregatesSection } from './academic-aggregates-section';
+import { ExamOverallSection } from './exam-overall-section';
+import { SecondaryGradingGlossary } from './secondary-grading-glossary';
+import { SecondarySubjectAccordion } from './secondary-subject-accordion';
 
 interface SecondaryAcademicTabProps {
-  data: SecondaryAcademicData
+  data: SecondaryAcademicData;
 }
 
 export function SecondaryAcademicTab({ data }: SecondaryAcademicTabProps) {
@@ -16,5 +17,5 @@ export function SecondaryAcademicTab({ data }: SecondaryAcademicTabProps) {
       <ExamOverallSection overall={data.overall} />
       <SecondaryGradingGlossary gradingSystem={data.gradingSystem} />
     </div>
-  )
+  );
 }

@@ -1,23 +1,24 @@
-import { useMemo } from 'react'
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
-import { ArrowLeft, Users } from 'lucide-react'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { getFormById } from '@/data/mock-forms'
-import { getFormRecipients } from '@/data/mock-form-responses'
-import { FormResponseTable } from '@/components/forms/form-response-table'
-import { ReadRate } from '@/components/comms/read-rate'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { createFileRoute, Link, notFound } from '@tanstack/react-router';
+import { ArrowLeft, Users } from 'lucide-react';
+import { useMemo } from 'react';
+
+import { ReadRate } from '~/apps/pg/components/comms/read-rate';
+import { FormResponseTable } from '~/apps/pg/components/forms/form-response-table';
+import { getFormRecipients } from '~/apps/pg/data/mock-form-responses';
+import { getFormById } from '~/apps/pg/data/mock-forms';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Badge } from '~/shared/components/ui/badge';
+import { Button } from '~/shared/components/ui/button';
 
 export const Route = createFileRoute('/forms/$id')({
   loader: ({ params }) => {
-    const form = getFormById(params.id)
-    if (!form) throw notFound()
-    const recipients = getFormRecipients(params.id)
-    return { form, recipients }
+    const form = getFormById(params.id);
+    if (!form) throw notFound();
+    const recipients = getFormRecipients(params.id);
+    return { form, recipients };
   },
   component: FormDetailPage,
-})
+});
 
 function getStatusBadge(status: string) {
   const config: Record<string, { label: string; className: string }> = {
@@ -33,45 +34,45 @@ function getStatusBadge(status: string) {
       label: 'Closed',
       className: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
     },
-  }
-  const { label, className } = config[status] ?? config.draft
-  return <Badge className={className}>{label}</Badge>
+  };
+  const { label, className } = config[status] ?? config.draft;
+  return <Badge className={className}>{label}</Badge>;
 }
 
 function getFormTypeLabel(formType?: string): string {
-  if (formType === 'standard') return 'Standard Form'
-  return 'Form'
+  if (formType === 'standard') return 'Standard Form';
+  return 'Form';
 }
 
 function FormDetailPage() {
-  const { form, recipients } = Route.useLoaderData()
+  const { form, recipients } = Route.useLoaderData();
 
   const respondedCount = useMemo(
     () => recipients.filter((r) => r.responseStatus === 'responded').length,
     [recipients],
-  )
-  const totalCount = recipients.length
-  const pendingCount = totalCount - respondedCount
+  );
+  const totalCount = recipients.length;
+  const pendingCount = totalCount - respondedCount;
 
-  const questions = form.questions ?? []
+  const questions = form.questions ?? [];
 
   useSetBreadcrumbs([
     { label: 'Forms', href: '/forms' },
     { label: form.title, href: `/forms/${form.id}` },
-  ])
+  ]);
 
   const createdDate = new Date(form.createdAt).toLocaleDateString('en-SG', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  })
+  });
   const dueDate = form.dueDate
     ? new Date(form.dueDate).toLocaleDateString('en-SG', {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
       })
-    : null
+    : null;
 
   return (
     <div className="flex flex-col gap-6 pt-6">
@@ -108,9 +109,7 @@ function FormDetailPage() {
             <div className="rounded-xl border bg-white p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Responded
-                  </p>
+                  <p className="text-sm font-medium text-muted-foreground">Responded</p>
                   <p className="mt-1 text-3xl font-bold">
                     {respondedCount}
                     <span className="text-xl font-normal text-muted-foreground">
@@ -119,9 +118,7 @@ function FormDetailPage() {
                     </span>
                   </p>
                   {pendingCount > 0 ? (
-                    <p className="mt-1 text-sm text-amber-600">
-                      {pendingCount} pending
-                    </p>
+                    <p className="mt-1 text-sm text-amber-600">{pendingCount} pending</p>
                   ) : totalCount > 0 ? (
                     <p className="mt-1 text-sm text-green-700">All responded</p>
                   ) : null}
@@ -145,9 +142,7 @@ function FormDetailPage() {
           {/* Response table */}
           {totalCount > 0 ? (
             <div className="rounded-xl border bg-white p-6">
-              <h2 className="mb-4 text-base font-semibold">
-                Recipient responses
-              </h2>
+              <h2 className="mb-4 text-base font-semibold">Recipient responses</h2>
               <FormResponseTable
                 recipients={recipients}
                 formTitle={form.title}
@@ -158,8 +153,7 @@ function FormDetailPage() {
           ) : (
             <div className="flex h-40 items-center justify-center rounded-xl border bg-white">
               <p className="text-sm text-muted-foreground">
-                No recipients added yet. Activate the form to start tracking
-                responses.
+                No recipients added yet. Activate the form to start tracking responses.
               </p>
             </div>
           )}
@@ -168,7 +162,7 @@ function FormDetailPage() {
         {/* ── Right: form details (1/3) ── */}
         <div className="space-y-4">
           <div className="rounded-xl border bg-white p-5">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
               Form Details
             </h2>
             <div className="space-y-3">
@@ -191,9 +185,7 @@ function FormDetailPage() {
               {/* Form type */}
               <div>
                 <p className="text-xs text-muted-foreground">Type</p>
-                <p className="text-sm font-medium">
-                  {getFormTypeLabel(form.formType)}
-                </p>
+                <p className="text-sm font-medium">{getFormTypeLabel(form.formType)}</p>
               </div>
 
               {/* Due date */}
@@ -261,5 +253,5 @@ function FormDetailPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

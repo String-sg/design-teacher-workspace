@@ -1,21 +1,3 @@
-import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import {
-  BoldIcon,
-  ChevronRightIcon,
-  CopyIcon,
-  HeartIcon,
-  ItalicIcon,
-  MailIcon,
-  PlusIcon,
-  SearchIcon,
-  SettingsIcon,
-  ShareIcon,
-  TrashIcon,
-  UnderlineIcon,
-  UserIcon,
-} from 'lucide-react'
-
 // Flow DS components (primary subjects of this page)
 import {
   Accordion,
@@ -118,23 +100,40 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@flow/core'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { cn } from '@/lib/utils'
+} from '@flow/core';
+import { createFileRoute } from '@tanstack/react-router';
+import {
+  BoldIcon,
+  ChevronRightIcon,
+  CopyIcon,
+  HeartIcon,
+  ItalicIcon,
+  MailIcon,
+  PlusIcon,
+  SearchIcon,
+  SettingsIcon,
+  ShareIcon,
+  TrashIcon,
+  UnderlineIcon,
+  UserIcon,
+} from 'lucide-react';
+import { useState } from 'react';
 
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
 // Shadcn components for page chrome (prefixed to avoid naming conflicts)
-import { ScrollArea as ShadcnScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea as ShadcnScrollArea } from '~/shared/components/ui/scroll-area';
 import {
   Select as ShadcnSelect,
   SelectContent as ShadcnSelectContent,
   SelectItem as ShadcnSelectItem,
   SelectTrigger as ShadcnSelectTrigger,
   SelectValue as ShadcnSelectValue,
-} from '@/components/ui/select'
+} from '~/shared/components/ui/select';
+import { cn } from '~/shared/lib/utils';
 
 export const Route = createFileRoute('/ds/flow-components')({
   component: FlowComponentsPage,
-})
+});
 
 // --- Nav sections ---
 
@@ -205,7 +204,7 @@ const NAV_SECTIONS = [
       { id: 'collapsible', label: 'Collapsible' },
     ],
   },
-]
+];
 
 // --- Helpers ---
 
@@ -214,31 +213,25 @@ function Section({
   title,
   children,
 }: {
-  id: string
-  title: string
-  children: React.ReactNode
+  id: string;
+  title: string;
+  children: React.ReactNode;
 }) {
   return (
     <section id={id} className="scroll-mt-8">
-      <h2 className="text-xl font-semibold mb-4">{title}</h2>
+      <h2 className="mb-4 text-xl font-semibold">{title}</h2>
       {children}
     </section>
-  )
+  );
 }
 
-function ShowcaseRow({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
+function ShowcaseRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <div className="flex flex-wrap items-center gap-3">{children}</div>
     </div>
-  )
+  );
 }
 
 // --- Component Sections ---
@@ -274,7 +267,7 @@ function ButtonSection({ theme = 'tw' }: { theme?: string }) {
         </ShowcaseRow>
       </div>
     </Section>
-  )
+  );
 }
 
 function ToggleSection() {
@@ -292,7 +285,7 @@ function ToggleSection() {
         </Toggle>
       </ShowcaseRow>
     </Section>
-  )
+  );
 }
 
 function ToggleGroupSection() {
@@ -312,7 +305,7 @@ function ToggleGroupSection() {
         </ToggleGroup>
       </ShowcaseRow>
     </Section>
-  )
+  );
 }
 
 function CardSection() {
@@ -348,7 +341,7 @@ function CardSection() {
         </Card>
       </div>
     </Section>
-  )
+  );
 }
 
 function SeparatorSection() {
@@ -356,18 +349,18 @@ function SeparatorSection() {
     <Section id="separator" title="Separator">
       <div className="space-y-4">
         <div>
-          <p className="text-sm mb-2">Above</p>
+          <p className="mb-2 text-sm">Above</p>
           <Separator />
-          <p className="text-sm mt-2">Below</p>
+          <p className="mt-2 text-sm">Below</p>
         </div>
-        <div className="flex items-center gap-4 h-8">
+        <div className="flex h-8 items-center gap-4">
           <span className="text-sm">Left</span>
           <Separator orientation="vertical" />
           <span className="text-sm">Right</span>
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function GridSection() {
@@ -385,23 +378,20 @@ function GridSection() {
         </Grid>
       </Grid>
     </Section>
-  )
+  );
 }
 
 function InputSection() {
   return (
     <Section id="input" title="Input">
-      <div className="space-y-4 max-w-sm">
+      <div className="max-w-sm space-y-4">
         <Input placeholder="Default input" />
         <Input placeholder="Disabled" disabled />
         <Input type="search" placeholder="Search..." />
-        <Input
-          placeholder="With icon"
-          leading={<SearchIcon className="size-4" />}
-        />
+        <Input placeholder="With icon" leading={<SearchIcon className="size-4" />} />
       </div>
     </Section>
-  )
+  );
 }
 
 function TextareaSection() {
@@ -411,18 +401,18 @@ function TextareaSection() {
         <Textarea placeholder="Type your message here..." />
       </div>
     </Section>
-  )
+  );
 }
 
 function LabelSection() {
   return (
     <Section id="label" title="Label">
-      <div className="space-y-2 max-w-sm">
+      <div className="max-w-sm space-y-2">
         <Label htmlFor="label-demo">Email address</Label>
         <Input id="label-demo" type="email" placeholder="you@example.com" />
       </div>
     </Section>
-  )
+  );
 }
 
 function CheckboxSection() {
@@ -443,7 +433,7 @@ function CheckboxSection() {
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function RadioGroupSection() {
@@ -464,7 +454,7 @@ function RadioGroupSection() {
         </div>
       </RadioGroup>
     </Section>
-  )
+  );
 }
 
 function SelectSection() {
@@ -484,7 +474,7 @@ function SelectSection() {
         </Select>
       </div>
     </Section>
-  )
+  );
 }
 
 function SwitchSection() {
@@ -501,7 +491,7 @@ function SwitchSection() {
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function SliderSection() {
@@ -512,7 +502,7 @@ function SliderSection() {
         <Slider defaultValue={[25, 75]} max={100} step={1} />
       </div>
     </Section>
-  )
+  );
 }
 
 function TabsSection() {
@@ -525,23 +515,17 @@ function TabsSection() {
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="account" className="mt-3">
-          <p className="text-sm text-muted-foreground">
-            Manage your account settings.
-          </p>
+          <p className="text-sm text-muted-foreground">Manage your account settings.</p>
         </TabsContent>
         <TabsContent value="password" className="mt-3">
-          <p className="text-sm text-muted-foreground">
-            Change your password here.
-          </p>
+          <p className="text-sm text-muted-foreground">Change your password here.</p>
         </TabsContent>
         <TabsContent value="settings" className="mt-3">
-          <p className="text-sm text-muted-foreground">
-            Configure your preferences.
-          </p>
+          <p className="text-sm text-muted-foreground">Configure your preferences.</p>
         </TabsContent>
       </Tabs>
     </Section>
-  )
+  );
 }
 
 function BreadcrumbSection() {
@@ -563,7 +547,7 @@ function BreadcrumbSection() {
         </BreadcrumbList>
       </Breadcrumb>
     </Section>
-  )
+  );
 }
 
 function PaginationSection() {
@@ -594,7 +578,7 @@ function PaginationSection() {
         </PaginationContent>
       </Pagination>
     </Section>
-  )
+  );
 }
 
 function DialogSection() {
@@ -626,7 +610,7 @@ function DialogSection() {
         </DialogContent>
       </Dialog>
     </Section>
-  )
+  );
 }
 
 function AlertDialogSection() {
@@ -640,8 +624,8 @@ function AlertDialogSection() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
+              This action cannot be undone. This will permanently delete your account and remove
+              your data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -651,7 +635,7 @@ function AlertDialogSection() {
         </AlertDialogContent>
       </AlertDialog>
     </Section>
-  )
+  );
 }
 
 function DropdownMenuSection() {
@@ -660,7 +644,7 @@ function DropdownMenuSection() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline">
-            <SettingsIcon className="size-4 mr-2" />
+            <SettingsIcon className="mr-2 size-4" />
             Options
           </Button>
         </DropdownMenuTrigger>
@@ -668,19 +652,19 @@ function DropdownMenuSection() {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <CopyIcon className="size-4 mr-2" /> Copy
+            <CopyIcon className="mr-2 size-4" /> Copy
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <ShareIcon className="size-4 mr-2" /> Share
+            <ShareIcon className="mr-2 size-4" /> Share
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="text-destructive">
-            <TrashIcon className="size-4 mr-2" /> Delete
+            <TrashIcon className="mr-2 size-4" /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </Section>
-  )
+  );
 }
 
 function PopoverSection() {
@@ -692,10 +676,8 @@ function PopoverSection() {
         </PopoverTrigger>
         <PopoverContent className="w-72">
           <div className="space-y-2">
-            <h4 className="font-medium text-sm">Dimensions</h4>
-            <p className="text-sm text-muted-foreground">
-              Set the dimensions for the layer.
-            </p>
+            <h4 className="text-sm font-medium">Dimensions</h4>
+            <p className="text-sm text-muted-foreground">Set the dimensions for the layer.</p>
             <div className="grid gap-2">
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label>Width</Label>
@@ -710,7 +692,7 @@ function PopoverSection() {
         </PopoverContent>
       </Popover>
     </Section>
-  )
+  );
 }
 
 function TooltipSection() {
@@ -741,7 +723,7 @@ function TooltipSection() {
         </div>
       </TooltipProvider>
     </Section>
-  )
+  );
 }
 
 function SheetSection() {
@@ -754,19 +736,15 @@ function SheetSection() {
         <SheetContent>
           <SheetHeader>
             <SheetTitle>Sheet Title</SheetTitle>
-            <SheetDescription>
-              This is a sheet panel that slides in from the side.
-            </SheetDescription>
+            <SheetDescription>This is a sheet panel that slides in from the side.</SheetDescription>
           </SheetHeader>
           <div className="p-4">
-            <p className="text-sm text-muted-foreground">
-              Sheet content goes here.
-            </p>
+            <p className="text-sm text-muted-foreground">Sheet content goes here.</p>
           </div>
         </SheetContent>
       </Sheet>
     </Section>
-  )
+  );
 }
 
 function AlertSection() {
@@ -775,19 +753,15 @@ function AlertSection() {
       <div className="space-y-4">
         <Alert>
           <AlertTitle>Heads up!</AlertTitle>
-          <AlertDescription>
-            You can add components to your app using the CLI.
-          </AlertDescription>
+          <AlertDescription>You can add components to your app using the CLI.</AlertDescription>
         </Alert>
         <Alert variant="critical">
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Your session has expired. Please log in again.
-          </AlertDescription>
+          <AlertDescription>Your session has expired. Please log in again.</AlertDescription>
         </Alert>
       </div>
     </Section>
-  )
+  );
 }
 
 function BadgeSection() {
@@ -801,19 +775,19 @@ function BadgeSection() {
         <Badge variant="verified">Verified</Badge>
       </ShowcaseRow>
     </Section>
-  )
+  );
 }
 
 function ProgressSection() {
   return (
     <Section id="progress" title="Progress">
-      <div className="space-y-4 max-w-sm">
+      <div className="max-w-sm space-y-4">
         <Progress value={33} />
         <Progress value={66} />
         <Progress value={100} />
       </div>
     </Section>
-  )
+  );
 }
 
 function SkeletonSection() {
@@ -827,7 +801,7 @@ function SkeletonSection() {
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function TableSection() {
@@ -866,7 +840,7 @@ function TableSection() {
         </TableBody>
       </Table>
     </Section>
-  )
+  );
 }
 
 function AvatarSection() {
@@ -887,7 +861,7 @@ function AvatarSection() {
         </Avatar>
       </ShowcaseRow>
     </Section>
-  )
+  );
 }
 
 function AccordionSection() {
@@ -896,45 +870,32 @@ function AccordionSection() {
       <Accordion type="single" collapsible className="max-w-md">
         <AccordionItem value="item-1">
           <AccordionTrigger>Is it accessible?</AccordionTrigger>
-          <AccordionContent>
-            Yes. It adheres to the WAI-ARIA design pattern.
-          </AccordionContent>
+          <AccordionContent>Yes. It adheres to the WAI-ARIA design pattern.</AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-2">
           <AccordionTrigger>Is it styled?</AccordionTrigger>
-          <AccordionContent>
-            Yes. It comes with default styles from Flow DS.
-          </AccordionContent>
+          <AccordionContent>Yes. It comes with default styles from Flow DS.</AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
           <AccordionTrigger>Is it animated?</AccordionTrigger>
-          <AccordionContent>
-            Yes. It has smooth open/close transitions.
-          </AccordionContent>
+          <AccordionContent>Yes. It has smooth open/close transitions.</AccordionContent>
         </AccordionItem>
       </Accordion>
     </Section>
-  )
+  );
 }
 
 function CollapsibleSection() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   return (
     <Section id="collapsible" title="Collapsible">
-      <Collapsible
-        open={open}
-        onOpenChange={setOpen}
-        className="max-w-md space-y-2"
-      >
+      <Collapsible open={open} onOpenChange={setOpen} className="max-w-md space-y-2">
         <div className="flex items-center justify-between">
           <h4 className="text-sm font-medium">3 items</h4>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm">
               <ChevronRightIcon
-                className={cn(
-                  'size-4 transition-transform',
-                  open && 'rotate-90',
-                )}
+                className={cn('size-4 transition-transform', open && 'rotate-90')}
               />
             </Button>
           </CollapsibleTrigger>
@@ -946,7 +907,7 @@ function CollapsibleSection() {
         </CollapsibleContent>
       </Collapsible>
     </Section>
-  )
+  );
 }
 
 // --- Page ---
@@ -955,20 +916,20 @@ function FlowComponentsPage() {
   useSetBreadcrumbs([
     { label: 'Design System', href: '/ds' },
     { label: 'Flow Components', href: '/ds/flow-components' },
-  ])
+  ]);
 
-  const [activeSection, setActiveSection] = useState('button')
-  const [theme, setTheme] = useState<'tw' | 'flow'>('tw')
+  const [activeSection, setActiveSection] = useState('button');
+  const [theme, setTheme] = useState<'tw' | 'flow'>('tw');
 
   return (
     <div className="flex h-full">
       {/* Left Nav */}
-      <nav className="w-52 shrink-0 border-r border-border sticky top-0 h-[calc(100vh-3.5rem)]">
+      <nav className="sticky top-0 h-[calc(100vh-3.5rem)] w-52 shrink-0 border-r border-border">
         <ShadcnScrollArea className="h-full">
-          <div className="p-4 space-y-6">
+          <div className="space-y-6 p-4">
             {NAV_SECTIONS.map((section) => (
               <div key={section.title}>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                   {section.title}
                 </p>
                 <ul className="space-y-0.5">
@@ -978,10 +939,10 @@ function FlowComponentsPage() {
                         href={`#${item.id}`}
                         onClick={() => setActiveSection(item.id)}
                         className={cn(
-                          'block px-2 py-1.5 text-sm rounded-md transition-colors',
+                          'block rounded-md px-2 py-1.5 text-sm transition-colors',
                           activeSection === item.id
-                            ? 'bg-muted text-foreground font-medium'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                            ? 'bg-muted font-medium text-foreground'
+                            : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
                         )}
                       >
                         {item.label}
@@ -997,30 +958,23 @@ function FlowComponentsPage() {
 
       {/* Main Content */}
       <ShadcnScrollArea className="flex-1">
-        <div className="max-w-4xl mx-auto p-8 space-y-16">
+        <div className="mx-auto max-w-4xl space-y-16 p-8">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold">Flow Components</h1>
-              <p className="text-muted-foreground mt-1">
+              <p className="mt-1 text-muted-foreground">
                 Interactive showcase of @flow/core components.
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex shrink-0 items-center gap-2">
               <Label className="text-sm text-muted-foreground">Theme</Label>
-              <ShadcnSelect
-                value={theme}
-                onValueChange={(v) => setTheme(v as 'tw' | 'flow')}
-              >
+              <ShadcnSelect value={theme} onValueChange={(v) => setTheme(v as 'tw' | 'flow')}>
                 <ShadcnSelectTrigger className="w-40">
                   <ShadcnSelectValue />
                 </ShadcnSelectTrigger>
                 <ShadcnSelectContent>
-                  <ShadcnSelectItem value="tw">
-                    TW Theme (Blue)
-                  </ShadcnSelectItem>
-                  <ShadcnSelectItem value="flow">
-                    Flow Default (Indigo)
-                  </ShadcnSelectItem>
+                  <ShadcnSelectItem value="tw">TW Theme (Blue)</ShadcnSelectItem>
+                  <ShadcnSelectItem value="flow">Flow Default (Indigo)</ShadcnSelectItem>
                 </ShadcnSelectContent>
               </ShadcnSelect>
             </div>
@@ -1077,5 +1031,5 @@ function FlowComponentsPage() {
         </div>
       </ShadcnScrollArea>
     </div>
-  )
+  );
 }

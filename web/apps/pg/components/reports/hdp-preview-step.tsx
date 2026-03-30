@@ -1,44 +1,42 @@
-import { useState } from 'react'
-import { Eye } from 'lucide-react'
-import { ReportOverviewTab } from './report-overview-tab'
-import { AcademicTab } from './academic-tab'
-import { CoreValuesSection } from './core-values-section'
-import { PhysicalFitnessSection } from './physical-fitness-section'
-import { VIASection } from './via-section'
-import { CCASection } from './cca-section'
-import type { HolisticReport, SchoolLevel } from '@/types/report'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Eye } from 'lucide-react';
+import { useState } from 'react';
+
+import type { HolisticReport, SchoolLevel } from '~/apps/pg/types/report';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/shared/components/ui/tabs';
+
+import { AcademicTab } from './academic-tab';
+import { CCASection } from './cca-section';
+import { CoreValuesSection } from './core-values-section';
+import { PhysicalFitnessSection } from './physical-fitness-section';
+import { ReportOverviewTab } from './report-overview-tab';
+import { VIASection } from './via-section';
 
 function getFirstName(name: string): string {
-  return name.split(' ').filter((part) => part.length > 0)[0] ?? name
+  return name.split(' ').filter((part) => part.length > 0)[0] ?? name;
 }
 
 interface HdpPreviewStepProps {
-  report: HolisticReport
-  selectedSections: Record<string, boolean>
-  schoolLevel: SchoolLevel
+  report: HolisticReport;
+  selectedSections: Record<string, boolean>;
+  schoolLevel: SchoolLevel;
 }
 
-export function HdpPreviewStep({
-  report,
-  selectedSections,
-  schoolLevel,
-}: HdpPreviewStepProps) {
-  const [activeTab, setActiveTab] = useState('overview')
+export function HdpPreviewStep({ report, selectedSections, schoolLevel }: HdpPreviewStepProps) {
+  const [activeTab, setActiveTab] = useState('overview');
 
   const hasHolistic =
     selectedSections.coreValues ||
     selectedSections.physicalFitness ||
     selectedSections.via ||
-    selectedSections.cca
+    selectedSections.cca;
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">
         <Eye className="size-4 shrink-0" />
         <span>
-          This is how the report card will appear when downloaded or sent to
-          parents. Review before saving.
+          This is how the report card will appear when downloaded or sent to parents. Review before
+          saving.
         </span>
       </div>
 
@@ -71,9 +69,7 @@ export function HdpPreviewStep({
         <TabsContent value="overview">
           <ReportOverviewTab
             report={report}
-            onViewHolistic={
-              hasHolistic ? () => setActiveTab('holistic') : undefined
-            }
+            onViewHolistic={hasHolistic ? () => setActiveTab('holistic') : undefined}
           />
         </TabsContent>
 
@@ -97,20 +93,14 @@ export function HdpPreviewStep({
                 />
               )}
               {selectedSections.physicalFitness && (
-                <PhysicalFitnessSection
-                  fitness={report.holistic.physicalFitness}
-                />
+                <PhysicalFitnessSection fitness={report.holistic.physicalFitness} />
               )}
-              {selectedSections.via && (
-                <VIASection activities={report.holistic.via} />
-              )}
-              {selectedSections.cca && (
-                <CCASection ccaList={report.holistic.cca} />
-              )}
+              {selectedSections.via && <VIASection activities={report.holistic.via} />}
+              {selectedSections.cca && <CCASection ccaList={report.holistic.cca} />}
             </div>
           </TabsContent>
         )}
       </Tabs>
     </div>
-  )
+  );
 }

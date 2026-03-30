@@ -1,12 +1,12 @@
-import { Toaster as Sonner } from 'sonner'
 import {
   CircleCheckIcon,
   InfoIcon,
   Loader2Icon,
   OctagonXIcon,
   TriangleAlertIcon,
-} from 'lucide-react'
-import type { ToasterProps } from 'sonner'
+} from 'lucide-react';
+import type { ToasterProps } from 'sonner';
+import { Toaster as Sonner } from 'sonner';
 
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
@@ -30,7 +30,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

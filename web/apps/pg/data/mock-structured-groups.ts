@@ -1,41 +1,39 @@
-import type { StructuredGroup } from '@/types/student-group'
-import { mockStudents } from '@/data/mock-students'
+import { mockStudents } from '~/apps/pg/data/mock-students';
+import type { StructuredGroup } from '~/apps/pg/types/student-group';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function nameHash(name: string): number {
-  let h = 0
-  for (const c of name) h = Math.imul(31, h) + c.charCodeAt(0)
-  return Math.abs(h)
+  let h = 0;
+  for (const c of name) h = Math.imul(31, h) + c.charCodeAt(0);
+  return Math.abs(h);
 }
 
 function fakeNric(name: string): string {
-  const h = nameHash(name)
-  const prefix = h % 2 === 0 ? 'S' : 'T'
-  const digits = String(h % 10_000_000).padStart(7, '0')
-  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
-  return `${prefix}${digits}${letters[h % letters.length]}`
+  const h = nameHash(name);
+  const prefix = h % 2 === 0 ? 'S' : 'T';
+  const digits = String(h % 10_000_000).padStart(7, '0');
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  return `${prefix}${digits}${letters[h % letters.length]}`;
 }
 
-const bandung = mockStudents.filter(
-  (s) => s.schoolName === 'Bandung Secondary School',
-)
+const bandung = mockStudents.filter((s) => s.schoolName === 'Bandung Secondary School');
 
 // ─── Teacher's School Cockpit assignment ──────────────────────────────────────
 // Mock: this teacher is assigned 2 classes (3 Aspiration, 3 Creativity) and
 //       2 CCAs (Basketball, Choir) in School Cockpit.
 
-const SYNC_DATE = '2026-03-20T08:00:00.000Z'
+const SYNC_DATE = '2026-03-20T08:00:00.000Z';
 
 // Class: 3A
 const aspirationStudents = bandung
   .filter((s) => s.class === '3A')
-  .sort((a, b) => a.indexNumber - b.indexNumber)
+  .sort((a, b) => a.indexNumber - b.indexNumber);
 
 // Class: 3B
 const creativityStudents = bandung
   .filter((s) => s.class === '3B')
-  .sort((a, b) => a.indexNumber - b.indexNumber)
+  .sort((a, b) => a.indexNumber - b.indexNumber);
 
 // CCA member names
 const BASKETBALL_NAMES = [
@@ -46,7 +44,7 @@ const BASKETBALL_NAMES = [
   'Kevin Ng Wei Ming',
   'Ryan Lim Zhi Hao',
   'Daniel Ong Jun Wei',
-]
+];
 
 const CHOIR_NAMES = [
   'Sarah Chan Jun Kai',
@@ -56,21 +54,19 @@ const CHOIR_NAMES = [
   'Priya Sharma',
   'Emily Tan Shu Wen',
   'Nurul Izzah Binte Kamal',
-]
+];
 
 // Derive a fake class label for CCA members (spread across levels)
-const CCA_CLASSES = ['1A', '1B', '2C', '2D', '3A', '3B', '4A']
+const CCA_CLASSES = ['1A', '1B', '2C', '2D', '3A', '3B', '4A'];
 
 function ccaMemberClass(name: string): string {
-  return CCA_CLASSES[nameHash(name) % CCA_CLASSES.length]
+  return CCA_CLASSES[nameHash(name) % CCA_CLASSES.length];
 }
 
 // Level: Secondary 3 (all Sec 3 students assigned to this teacher's level)
 const sec3Students = bandung
   .filter((s) => ['3A', '3B', '3C', '3D'].includes(s.class))
-  .sort(
-    (a, b) => a.class.localeCompare(b.class) || a.indexNumber - b.indexNumber,
-  )
+  .sort((a, b) => a.class.localeCompare(b.class) || a.indexNumber - b.indexNumber);
 
 // Teaching Group: English Remedial Sec 3 (subset of Sec 3 students)
 const englishRemedialNames = [
@@ -82,17 +78,17 @@ const englishRemedialNames = [
   'Grace Lim Shu Wen',
   'Hassan Bin Yusof',
   'Isabel Tan Xin Yi',
-]
+];
 
-const TEACHING_CLASSES = ['3A', '3B']
+const TEACHING_CLASSES = ['3A', '3B'];
 
 function teachingMemberClass(name: string): string {
-  return TEACHING_CLASSES[nameHash(name) % TEACHING_CLASSES.length]
+  return TEACHING_CLASSES[nameHash(name) % TEACHING_CLASSES.length];
 }
 
 // ─── Exported structured groups ───────────────────────────────────────────────
 
-export const TEACHER_STRUCTURED_GROUPS: Array<StructuredGroup> = [
+export const TEACHER_STRUCTURED_GROUPS: StructuredGroup[] = [
   {
     id: 'structured:class:3a',
     kind: 'structured',
@@ -176,10 +172,8 @@ export const TEACHER_STRUCTURED_GROUPS: Array<StructuredGroup> = [
       nric: fakeNric(name),
     })),
   },
-]
+];
 
-export function getStructuredGroupById(
-  id: string,
-): StructuredGroup | undefined {
-  return TEACHER_STRUCTURED_GROUPS.find((g) => g.id === id)
+export function getStructuredGroupById(id: string): StructuredGroup | undefined {
+  return TEACHER_STRUCTURED_GROUPS.find((g) => g.id === id);
 }

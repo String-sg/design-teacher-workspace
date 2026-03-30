@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router';
 import {
   ArrowLeft,
   ChevronLeft,
@@ -8,34 +7,34 @@ import {
   Eye,
   MoreVertical,
   Send,
-} from 'lucide-react'
+} from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-import { toast } from 'sonner'
-
-import type { SchoolLevel } from '@/types/report'
-import { AcademicTab } from '@/components/reports/academic-tab'
-import { EmailPreviewDialog } from '@/components/reports/email-preview-dialog'
-import { PgPreviewDialog } from '@/components/reports/pg-preview-dialog'
-import { HolisticTab } from '@/components/reports/holistic-tab'
-import { ParentPreviewDialog } from '@/components/reports/parent-preview-dialog'
-import { ReportOverviewTab } from '@/components/reports/report-overview-tab'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { AcademicTab } from '~/apps/pg/components/reports/academic-tab';
+import { EmailPreviewDialog } from '~/apps/pg/components/reports/email-preview-dialog';
+import { HolisticTab } from '~/apps/pg/components/reports/holistic-tab';
+import { ParentPreviewDialog } from '~/apps/pg/components/reports/parent-preview-dialog';
+import { PgPreviewDialog } from '~/apps/pg/components/reports/pg-preview-dialog';
+import { ReportOverviewTab } from '~/apps/pg/components/reports/report-overview-tab';
+import { getAdjacentReportIds, getReportById } from '~/apps/pg/data/mock-reports';
+import { getSchoolLevel } from '~/apps/pg/data/mock-students';
+import type { SchoolLevel } from '~/apps/pg/types/report';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Avatar, AvatarFallback } from '~/shared/components/ui/avatar';
+import { Button, buttonVariants } from '~/shared/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { getAdjacentReportIds, getReportById } from '@/data/mock-reports'
-import { getSchoolLevel } from '@/data/mock-students'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { cn } from '@/lib/utils'
+} from '~/shared/components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/shared/components/ui/tabs';
+import { cn } from '~/shared/lib/utils';
 
 export const Route = createFileRoute('/reports/$id')({
   component: ReportDetailPage,
-})
+});
 
 function getInitials(name: string): string {
   return name
@@ -44,89 +43,82 @@ function getInitials(name: string): string {
     .slice(0, 2)
     .map((part) => part[0])
     .join('')
-    .toUpperCase()
+    .toUpperCase();
 }
 
 function getFirstName(name: string): string {
-  return name.split(' ').filter((part) => part.length > 0)[0] ?? name
+  return name.split(' ').filter((part) => part.length > 0)[0] ?? name;
 }
 
 function ReportDetailPage() {
-  const { id } = Route.useParams()
-  const report = getReportById(id)
-  const defaultLevel = report
-    ? getSchoolLevel(report.studentClass)
-    : 'secondary'
-  const schoolLevel = defaultLevel
-  const [activeTab, setActiveTab] = useState('overview')
-  const [previewOpen, setPreviewOpen] = useState(false)
-  const [previewMode, setPreviewMode] = useState<'parent' | 'student'>('parent')
-  const [emailPreviewOpen, setEmailPreviewOpen] = useState(false)
-  const [pgPreviewOpen, setPgPreviewOpen] = useState(false)
+  const { id } = Route.useParams();
+  const report = getReportById(id);
+  const defaultLevel = report ? getSchoolLevel(report.studentClass) : 'secondary';
+  const schoolLevel = defaultLevel;
+  const [activeTab, setActiveTab] = useState('overview');
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'parent' | 'student'>('parent');
+  const [emailPreviewOpen, setEmailPreviewOpen] = useState(false);
+  const [pgPreviewOpen, setPgPreviewOpen] = useState(false);
 
   const breadcrumbLabel = report
     ? `${report.studentName} - ${report.term} ${report.academicYear}`
-    : 'Report'
+    : 'Report';
 
   useSetBreadcrumbs([
     { label: 'Reports', href: '/reports' },
     { label: breadcrumbLabel, href: `/reports/${id}` },
-  ])
+  ]);
 
   if (!report) {
     return (
       <main className="mx-auto flex max-w-2xl flex-col gap-8 px-4 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-semibold">Report Not Found</h1>
-          <p className="text-muted-foreground mt-2">
-            The report you're looking for doesn't exist.
-          </p>
+          <p className="mt-2 text-muted-foreground">The report you're looking for doesn't exist.</p>
           <Link to="/reports" className={cn(buttonVariants(), 'mt-4')}>
             Back to Reports
           </Link>
         </div>
       </main>
-    )
+    );
   }
 
-  const { prevId, nextId } = getAdjacentReportIds(id)
-  const isPrimary = schoolLevel === 'primary'
+  const { prevId, nextId } = getAdjacentReportIds(id);
+  const isPrimary = schoolLevel === 'primary';
 
   const handlePreview = () => {
-    setPreviewMode(isPrimary ? 'parent' : 'student')
-    setPreviewOpen(true)
-  }
+    setPreviewMode(isPrimary ? 'parent' : 'student');
+    setPreviewOpen(true);
+  };
 
   const handleSendToStudent = () => {
-    setEmailPreviewOpen(true)
-  }
+    setEmailPreviewOpen(true);
+  };
 
   const handleSendViaPg = () => {
-    setPgPreviewOpen(true)
-  }
+    setPgPreviewOpen(true);
+  };
 
   const handleSaveAsPdf = () => {
-    toast.success('Downloading report as PDF...')
-    window.print()
-  }
+    toast.success('Downloading report as PDF...');
+    window.print();
+  };
 
   const handleConfirmSend = () => {
-    setEmailPreviewOpen(false)
-    toast.success("Report sent to student's email")
-  }
+    setEmailPreviewOpen(false);
+    toast.success("Report sent to student's email");
+  };
 
   const handleConfirmPgSend = () => {
-    setPgPreviewOpen(false)
-    toast.success('Report sent via Parents Gateway')
-  }
+    setPgPreviewOpen(false);
+    toast.success('Report sent via Parents Gateway');
+  };
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-8">
       <div className="flex items-center gap-4">
-        <Link
-          to="/reports"
-          className={buttonVariants({ variant: 'ghost', size: 'icon' })}
-        >
+        <Link to="/reports" className={buttonVariants({ variant: 'ghost', size: 'icon' })}>
           <ArrowLeft className="size-4" />
         </Link>
         <Avatar size="lg">
@@ -135,11 +127,11 @@ function ReportDetailPage() {
         <div className="flex-1">
           <h1 className="text-2xl font-semibold">
             {report.studentName}
-            <span className="text-muted-foreground ml-2 text-base font-normal">
+            <span className="ml-2 text-base font-normal text-muted-foreground">
               {report.studentClass}
             </span>
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Issued{' '}
             {report.generatedAt.toLocaleDateString('en-SG', {
               day: 'numeric',
@@ -154,11 +146,7 @@ function ReportDetailPage() {
             size="icon"
             className="size-10 rounded-full"
             disabled={!prevId}
-            render={
-              prevId ? (
-                <Link to="/reports/$id" params={{ id: prevId }} />
-              ) : undefined
-            }
+            render={prevId ? <Link to="/reports/$id" params={{ id: prevId }} /> : undefined}
           >
             <ChevronLeft className="size-4" />
           </Button>
@@ -167,11 +155,7 @@ function ReportDetailPage() {
             size="icon"
             className="size-10 rounded-full"
             disabled={!nextId}
-            render={
-              nextId ? (
-                <Link to="/reports/$id" params={{ id: nextId }} />
-              ) : undefined
-            }
+            render={nextId ? <Link to="/reports/$id" params={{ id: nextId }} /> : undefined}
           >
             <ChevronRight className="size-4" />
           </Button>
@@ -208,10 +192,7 @@ function ReportDetailPage() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
-          <ReportOverviewTab
-            report={report}
-            onViewHolistic={() => setActiveTab('holistic')}
-          />
+          <ReportOverviewTab report={report} onViewHolistic={() => setActiveTab('holistic')} />
         </TabsContent>
         <TabsContent value="academic">
           <AcademicTab
@@ -221,10 +202,7 @@ function ReportDetailPage() {
           />
         </TabsContent>
         <TabsContent value="holistic">
-          <HolisticTab
-            data={report.holistic}
-            studentFirstName={getFirstName(report.studentName)}
-          />
+          <HolisticTab data={report.holistic} studentFirstName={getFirstName(report.studentName)} />
         </TabsContent>
       </Tabs>
 
@@ -300,5 +278,5 @@ function ReportDetailPage() {
         schoolLevel={schoolLevel}
       />
     </main>
-  )
+  );
 }

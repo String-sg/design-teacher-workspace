@@ -1,35 +1,35 @@
-import type { Student } from '@/types/student'
+import type { Student } from '~/apps/pg/types/student';
 
-export type AccentColor = 'purple' | 'blue' | 'amber' | 'orange' | 'rose'
+export type AccentColor = 'purple' | 'blue' | 'amber' | 'orange' | 'rose';
 
 export interface InterventionAction {
-  text: string
-  cta?: { label: string; href?: string }
+  text: string;
+  cta?: { label: string; href?: string };
 }
 
 export interface InterventionResource {
-  type: 'glow' | 'article' | 'course'
-  title: string
-  duration: string
-  href?: string
+  type: 'glow' | 'article' | 'course';
+  title: string;
+  duration: string;
+  href?: string;
 }
 
 export interface InterventionPackage {
-  id: string
-  color: AccentColor
-  badge: string
-  title: string
-  why: string
-  actions: Array<InterventionAction>
-  resources: Array<InterventionResource>
+  id: string;
+  color: AccentColor;
+  badge: string;
+  title: string;
+  why: string;
+  actions: InterventionAction[];
+  resources: InterventionResource[];
 }
 
 interface InterventionRule {
-  trigger: (student: Student) => boolean
-  buildPackage: (student: Student) => InterventionPackage
+  trigger: (student: Student) => boolean;
+  buildPackage: (student: Student) => InterventionPackage;
 }
 
-export const interventionRules: Array<InterventionRule> = [
+export const interventionRules: InterventionRule[] = [
   // SEN / SwAN
   {
     trigger: (s) => s.attentionTags.includes('SwAN'),
@@ -78,11 +78,10 @@ export const interventionRules: Array<InterventionRule> = [
 
   // Learning Support (LSM / LSP)
   {
-    trigger: (s) =>
-      s.attentionTags.includes('LSM') || s.attentionTags.includes('LSP'),
+    trigger: (s) => s.attentionTags.includes('LSM') || s.attentionTags.includes('LSP'),
     buildPackage: (s) => {
-      const tags = s.attentionTags.filter((t) => t === 'LSM' || t === 'LSP')
-      const tagLabel = tags.join(' & ')
+      const tags = s.attentionTags.filter((t) => t === 'LSM' || t === 'LSP');
+      const tagLabel = tags.join(' & ');
       return {
         id: 'learning-support',
         color: 'blue',
@@ -116,7 +115,7 @@ export const interventionRules: Array<InterventionRule> = [
             href: '#',
           },
         ],
-      }
+      };
     },
   },
 
@@ -169,7 +168,7 @@ export const interventionRules: Array<InterventionRule> = [
           ? 'Severe LTA (40+ days)'
           : s.absences >= 20
             ? 'LTA (20–39 days)'
-            : 'At-risk attendance (10–19 days)'
+            : 'At-risk attendance (10–19 days)';
       return {
         id: 'lta',
         color: 'orange',
@@ -203,13 +202,12 @@ export const interventionRules: Array<InterventionRule> = [
           },
           {
             type: 'article',
-            title:
-              'Having difficult conversations with parents about attendance',
+            title: 'Having difficult conversations with parents about attendance',
             duration: '5 min read',
             href: '#',
           },
         ],
-      }
+      };
     },
   },
 
@@ -292,10 +290,10 @@ export const interventionRules: Array<InterventionRule> = [
       ],
     }),
   },
-]
+];
 
-export function getInterventions(student: Student): Array<InterventionPackage> {
+export function getInterventions(student: Student): InterventionPackage[] {
   return interventionRules
     .filter((rule) => rule.trigger(student))
-    .map((rule) => rule.buildPackage(student))
+    .map((rule) => rule.buildPackage(student));
 }

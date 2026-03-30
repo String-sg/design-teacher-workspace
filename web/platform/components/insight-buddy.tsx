@@ -1,28 +1,28 @@
-import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, ArrowUp, Sparkles, X } from 'lucide-react'
+import { ArrowRight, ArrowUp, Sparkles, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
-import type { Student } from '@/types/student'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import type { Student } from '~/apps/pg/types/student';
+import { Button } from '~/shared/components/ui/button';
+import { Textarea } from '~/shared/components/ui/textarea';
+import { cn } from '~/shared/lib/utils';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-type Message = {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 export interface InsightBuddyProps {
-  examplePrompts?: Array<string>
+  examplePrompts?: string[];
   /** When true, renders as a FAB + fixed overlay (analytics page).
    *  When false (default), renders as a sticky in-flow panel (profile page). */
-  floating?: boolean
+  floating?: boolean;
   /** Optional student context — enables student-specific responses (Student 360). */
-  student?: Student
+  student?: Student;
 }
 
 // ---------------------------------------------------------------------------
@@ -38,13 +38,13 @@ const TERM1_WA_RESPONSE = `Here's a summary for **Sec 4 EL-G3, Term 1 WA**:
 **Compared to the past:**
 • Distinction rate is up from ~30% in the previous year's EOY — a positive trend 📈
 • Pass rate held steady at around 80–83% across terms
-• ~18 students (15%) did not pass — consider targeted support for this group`
+• ~18 students (15%) did not pass — consider targeted support for this group`;
 
 const CHART_QUESTION_RESPONSE = `Happy to help explain! Which chart are you looking at?
 
 You can:
 • **Type the chart name** (e.g. "Scores by class")
-• **Paste a screenshot** directly into the chat`
+• **Paste a screenshot** directly into the chat`;
 
 const SCORES_BY_CLASS_RESPONSE = `Here's what the **Scores by class** chart shows:
 
@@ -59,9 +59,9 @@ const SCORES_BY_CLASS_RESPONSE = `Here's what the **Scores by class** chart show
 • Blue vertical line = median score
 • Whiskers = min / max scores
 
-**Takeaway:** 4A is the strongest cohort for EL-G3 Term 1 WA. 4D would benefit most from targeted intervention.`
+**Takeaway:** 4A is the strongest cohort for EL-G3 Term 1 WA. 4D would benefit most from targeted intervention.`;
 
-const GENERIC_RESPONSE = `I'm here to help with analytics questions. Try asking about student performance, grade distributions, or trends — or paste a chart screenshot for an explanation.`
+const GENERIC_RESPONSE = `I'm here to help with analytics questions. Try asking about student performance, grade distributions, or trends — or paste a chart screenshot for an explanation.`;
 
 // ---------------------------------------------------------------------------
 // Student-specific response generators
@@ -71,22 +71,22 @@ function getWellbeingResponse(student: Student): string {
   const counselling =
     student.counsellingSessions === 0
       ? 'No sessions recorded this term'
-      : `${student.counsellingSessions} session(s) this term`
+      : `${student.counsellingSessions} session(s) this term`;
 
   const mood = student.lowMoodFlagged
     ? `Low mood flagged (${student.lowMoodFlagged})`
-    : 'No concerns flagged'
+    : 'No concerns flagged';
 
   const riskNote =
     student.riskIndicators >= 3
       ? ` — elevated concern`
       : student.riskIndicators === 0
         ? ` — no active concerns`
-        : ''
+        : '';
 
-  const socialNote = student.socialLinks <= 1 ? ` — limited social support` : ''
+  const socialNote = student.socialLinks <= 1 ? ` — limited social support` : '';
 
-  const agencies = student.externalAgencies ?? 'None'
+  const agencies = student.externalAgencies ?? 'None';
 
   return `Here's a wellbeing summary for **${student.name}**:
 
@@ -103,57 +103,49 @@ function getWellbeingResponse(student: Student): string {
 • ${mood}
 
 **External Agencies**
-• ${agencies}`
+• ${agencies}`;
 }
 
 function getRiskFactorsResponse(student: Student): string {
-  const flags: Array<string> = []
+  const flags: string[] = [];
 
-  const attendancePct = Math.round(
-    (student.daysPresent / student.totalSchoolDays) * 100,
-  )
+  const attendancePct = Math.round((student.daysPresent / student.totalSchoolDays) * 100);
   if (attendancePct < 50) {
     flags.push(
       `⚠️ **School attendance is ${attendancePct}%** (below 50%) — ${student.daysPresent}/${student.totalSchoolDays} days present`,
-    )
+    );
   }
 
   if (student.ccaMissed >= 5) {
-    flags.push(
-      `⚠️ **CCA attendance concern** — ${student.ccaMissed} session(s) missed this term`,
-    )
+    flags.push(`⚠️ **CCA attendance concern** — ${student.ccaMissed} session(s) missed this term`);
   }
 
   if (student.conduct === 'Poor' || student.offences >= 3) {
     flags.push(
       `⚠️ **Behavioural risk** — Conduct: ${student.conduct}, ${student.offences} offence(s) recorded`,
-    )
+    );
   }
 
   if (student.riskIndicators >= 3) {
     flags.push(
       `⚠️ **${student.riskIndicators} risk indicator(s) flagged** — multiple concerns active`,
-    )
+    );
   }
 
   if (student.counsellingSessions > 2) {
-    flags.push(
-      `⚠️ **Rise in counselling** — ${student.counsellingSessions} session(s) this term`,
-    )
+    flags.push(`⚠️ **Rise in counselling** — ${student.counsellingSessions} session(s) this term`);
   }
 
   if (student.lowMoodFlagged) {
-    flags.push(`⚠️ **Low mood flagged** — ${student.lowMoodFlagged}`)
+    flags.push(`⚠️ **Low mood flagged** — ${student.lowMoodFlagged}`);
   }
 
   if (student.overallPercentage < 30) {
-    flags.push(
-      `⚠️ **Overall score is ${student.overallPercentage}%** (below 30%)`,
-    )
+    flags.push(`⚠️ **Overall score is ${student.overallPercentage}%** (below 30%)`);
   }
 
   if (student.fas) {
-    flags.push(`ℹ️ **Financial Assistance (FAS)** — ${student.fas}`)
+    flags.push(`ℹ️ **Financial Assistance (FAS)** — ${student.fas}`);
   }
 
   if (flags.length === 0) {
@@ -163,69 +155,51 @@ Key indicators:
 • Attendance: ${attendancePct}%
 • Overall score: ${student.overallPercentage}%
 • Conduct: ${student.conduct}
-• Risk indicators: ${student.riskIndicators}`
+• Risk indicators: ${student.riskIndicators}`;
   }
 
   return `Here are the key risk factors for **${student.name}**:
 
 ${flags.join('\n')}
 
-**Recommended:** Review with HOD and consider targeted intervention.`
+**Recommended:** Review with HOD and consider targeted intervention.`;
 }
 
-function getBotResponse(
-  text: string,
-  history: Array<Message>,
-  student?: Student,
-): string {
-  const lower = text.toLowerCase()
+function getBotResponse(text: string, history: Message[], student?: Student): string {
+  const lower = text.toLowerCase();
 
   // Student-specific responses (Student 360)
   if (student) {
     if (lower.includes('wellbeing')) {
-      return getWellbeingResponse(student)
+      return getWellbeingResponse(student);
     }
     if (lower.includes('risk factor')) {
-      return getRiskFactorsResponse(student)
+      return getRiskFactorsResponse(student);
     }
   }
 
-  const lastAssistant = [...history]
-    .reverse()
-    .find((m) => m.role === 'assistant')
-  const prevAskedAboutChart = lastAssistant?.content.includes(
-    'Which chart are you looking at?',
-  )
+  const lastAssistant = [...history].reverse().find((m) => m.role === 'assistant');
+  const prevAskedAboutChart = lastAssistant?.content.includes('Which chart are you looking at?');
 
   // After asking about the chart, user types the chart name
   if (
     prevAskedAboutChart &&
-    (lower.includes('score') ||
-      lower.includes('class') ||
-      lower.includes('box'))
+    (lower.includes('score') || lower.includes('class') || lower.includes('box'))
   ) {
-    return SCORES_BY_CLASS_RESPONSE
+    return SCORES_BY_CLASS_RESPONSE;
   }
 
   // "How did Sec 4 (EL-G3) do for Term 1 WA?"
-  if (
-    lower.includes('term 1') ||
-    lower.includes('term1') ||
-    lower.includes('term 1 wa')
-  ) {
-    return TERM1_WA_RESPONSE
+  if (lower.includes('term 1') || lower.includes('term1') || lower.includes('term 1 wa')) {
+    return TERM1_WA_RESPONSE;
   }
 
   // "What does this chart mean?"
-  if (
-    lower.includes('chart') ||
-    lower.includes('what does') ||
-    lower.includes('graph')
-  ) {
-    return CHART_QUESTION_RESPONSE
+  if (lower.includes('chart') || lower.includes('what does') || lower.includes('graph')) {
+    return CHART_QUESTION_RESPONSE;
   }
 
-  return GENERIC_RESPONSE
+  return GENERIC_RESPONSE;
 }
 
 // ---------------------------------------------------------------------------
@@ -233,25 +207,25 @@ function getBotResponse(
 // ---------------------------------------------------------------------------
 
 function parseInline(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/)
+  const parts = text.split(/(\*\*[^*]+\*\*)/);
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i}>{part.slice(2, -2)}</strong>
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
     }
-    return <span key={i}>{part}</span>
-  })
+    return <span key={i}>{part}</span>;
+  });
 }
 
 function MessageContent({ content }: { content: string }) {
-  const lines = content.split('\n')
+  const lines = content.split('\n');
   return (
     <div className="space-y-0.5 leading-relaxed">
       {lines.map((line, i) => {
-        if (!line.trim()) return <div key={i} className="h-1.5" />
-        return <div key={i}>{parseInline(line)}</div>
+        if (!line.trim()) return <div key={i} className="h-1.5" />;
+        return <div key={i}>{parseInline(line)}</div>;
       })}
     </div>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -260,7 +234,7 @@ function MessageContent({ content }: { content: string }) {
 
 function TypingIndicator() {
   return (
-    <div className="animate-msg-in flex gap-2 justify-start">
+    <div className="animate-msg-in flex justify-start gap-2">
       <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100">
         <Sparkles className="animate-sparkle-idle h-3 w-3 text-blue-600" />
       </div>
@@ -276,7 +250,7 @@ function TypingIndicator() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -284,14 +258,14 @@ function TypingIndicator() {
 // ---------------------------------------------------------------------------
 
 interface PanelContentProps {
-  messages: Array<Message>
-  examplePrompts: Array<string>
-  input: string
-  setInput: (v: string) => void
-  sendMessage: (text: string) => void
-  onClose?: () => void
-  messagesEndRef: React.RefObject<HTMLDivElement | null>
-  isTyping: boolean
+  messages: Message[];
+  examplePrompts: string[];
+  input: string;
+  setInput: (v: string) => void;
+  sendMessage: (text: string) => void;
+  onClose?: () => void;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  isTyping: boolean;
 }
 
 function PanelContent({
@@ -304,12 +278,12 @@ function PanelContent({
   messagesEndRef,
   isTyping,
 }: PanelContentProps) {
-  const isEmpty = messages.length === 0 && !isTyping
+  const isEmpty = messages.length === 0 && !isTyping;
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage(input.trim())
+      e.preventDefault();
+      sendMessage(input.trim());
     }
   }
 
@@ -322,10 +296,8 @@ function PanelContent({
             <Sparkles className="h-3.5 w-3.5 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm font-semibold leading-tight">Insight Buddy</p>
-            <p className="text-[10px] leading-tight text-muted-foreground">
-              Analytics assistant
-            </p>
+            <p className="text-sm leading-tight font-semibold">Insight Buddy</p>
+            <p className="text-[10px] leading-tight text-muted-foreground">Analytics assistant</p>
           </div>
         </div>
         {onClose && (
@@ -420,7 +392,7 @@ function PanelContent({
         </div>
       </div>
     </>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -432,39 +404,39 @@ export function InsightBuddy({
   floating = false,
   student,
 }: InsightBuddyProps) {
-  const [messages, setMessages] = useState<Array<Message>>([])
-  const [input, setInput] = useState('')
-  const [isOpen, setIsOpen] = useState(false) // only used in floating mode
-  const [isTyping, setIsTyping] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isOpen, setIsOpen] = useState(false); // only used in floating mode
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isTyping])
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
 
   function sendMessage(text: string) {
-    if (!text.trim() || isTyping) return
+    if (!text.trim() || isTyping) return;
 
     const userMsg: Message = {
       id: `${Date.now()}-u`,
       role: 'user',
       content: text,
-    }
+    };
 
-    setMessages((prev) => [...prev, userMsg])
-    setInput('')
-    setIsTyping(true)
+    setMessages((prev) => [...prev, userMsg]);
+    setInput('');
+    setIsTyping(true);
 
     setTimeout(() => {
-      const botResponse = getBotResponse(text, messages, student)
+      const botResponse = getBotResponse(text, messages, student);
       const assistantMsg: Message = {
         id: `${Date.now()}-a`,
         role: 'assistant',
         content: botResponse,
-      }
-      setIsTyping(false)
-      setMessages((prev) => [...prev, assistantMsg])
-    }, 900)
+      };
+      setIsTyping(false);
+      setMessages((prev) => [...prev, assistantMsg]);
+    }, 900);
   }
 
   const panelProps: PanelContentProps = {
@@ -475,7 +447,7 @@ export function InsightBuddy({
     sendMessage,
     messagesEndRef,
     isTyping,
-  }
+  };
 
   // ── Floating mode: FAB + fixed overlay ─────────────────────────────────────
   if (floating) {
@@ -486,7 +458,7 @@ export function InsightBuddy({
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           className={cn(
-            'fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95',
+            'fixed right-6 bottom-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95',
             isOpen
               ? 'bg-gray-700 text-white hover:bg-gray-800'
               : 'bg-blue-600 text-white hover:bg-blue-700',
@@ -502,12 +474,12 @@ export function InsightBuddy({
 
         {/* Overlay panel */}
         {isOpen && (
-          <div className="animate-panel-up fixed bottom-[72px] right-6 z-40 flex h-[min(560px,calc(100vh-6rem))] w-80 flex-col overflow-hidden rounded-2xl border bg-white shadow-2xl">
+          <div className="animate-panel-up fixed right-6 bottom-[72px] z-40 flex h-[min(560px,calc(100vh-6rem))] w-80 flex-col overflow-hidden rounded-2xl border bg-white shadow-2xl">
             <PanelContent {...panelProps} onClose={() => setIsOpen(false)} />
           </div>
         )}
       </>
-    )
+    );
   }
 
   // ── Sticky mode: in-flow panel (student profile) ────────────────────────────
@@ -515,5 +487,5 @@ export function InsightBuddy({
     <div className="sticky top-6 flex h-[calc(100vh-3rem)] w-72 shrink-0 flex-col overflow-hidden rounded-xl border bg-white shadow-sm">
       <PanelContent {...panelProps} />
     </div>
-  )
+  );
 }

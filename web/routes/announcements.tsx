@@ -1,26 +1,22 @@
-import {
-  Outlet,
-  Link,
-  createFileRoute,
-  useLocation,
-} from '@tanstack/react-router'
-import { Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router';
+import { Plus } from 'lucide-react';
+
+import { Button } from '~/shared/components/ui/button';
 
 export const Route = createFileRoute('/announcements')({
   component: AnnouncementsLayout,
-})
+});
 
 function AnnouncementsLayout() {
-  const location = useLocation()
+  const location = useLocation();
   const isSubPage =
     location.pathname.startsWith('/announcements/new') ||
     (location.pathname.startsWith('/announcements/') &&
       location.pathname !== '/announcements/' &&
-      location.pathname !== '/announcements')
+      location.pathname !== '/announcements');
 
   if (isSubPage) {
-    return <Outlet />
+    return <Outlet />;
   }
 
   return (
@@ -34,11 +30,10 @@ function AnnouncementsLayout() {
           </Button>
         </div>
         <p className="mt-1 hidden text-sm text-muted-foreground md:block">
-          Send posts to parents via parents gateway, send a view-only post or
-          collect responses.
+          Send posts to parents via parents gateway, send a view-only post or collect responses.
         </p>
       </div>
       <Outlet />
     </div>
-  )
+  );
 }

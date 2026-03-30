@@ -1,7 +1,9 @@
-import { Award, Info } from 'lucide-react'
-import { RadarChart } from './radar-chart'
-import type { CoreValue, CoreValueLevel } from '@/types/report'
-import { cn } from '@/lib/utils'
+import { Award, Info } from 'lucide-react';
+
+import type { CoreValue, CoreValueLevel } from '~/apps/pg/types/report';
+import { cn } from '~/shared/lib/utils';
+
+import { RadarChart } from './radar-chart';
 
 const levelColors: Record<CoreValueLevel, string> = {
   'Demonstrates Very Strongly': 'bg-[#e8feea] text-[#12b886]',
@@ -9,29 +11,26 @@ const levelColors: Record<CoreValueLevel, string> = {
   Demonstrates: 'bg-[rgba(34,139,230,0.1)] text-[#228be6]',
   'Regularly Shows': 'bg-[#fef9ee] text-[#fac53e]',
   Beginning: 'bg-[#f6f7f8] text-[#a7aab5]',
-}
+};
 
 interface CoreValuesSectionProps {
-  coreValues: Array<CoreValue>
-  studentFirstName: string
+  coreValues: CoreValue[];
+  studentFirstName: string;
 }
 
-export function CoreValuesSection({
-  coreValues,
-  studentFirstName,
-}: CoreValuesSectionProps) {
+export function CoreValuesSection({ coreValues, studentFirstName }: CoreValuesSectionProps) {
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col items-center text-center">
-        <span className="inline-block rounded-full bg-[#fff0ec] px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#f26c47]">
+        <span className="inline-block rounded-full bg-[#fff0ec] px-4 py-1.5 text-xs font-semibold tracking-wider text-[#f26c47] uppercase">
           Core Values Journey
         </span>
         <h2 className="mt-3 text-xl font-bold">
           Celebrating {studentFirstName}&apos;s Personal Growth
         </h2>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Character development is a lifelong journey. We celebrate every step
-          forward in fulfilling our core values.
+        <p className="mt-1 text-sm text-muted-foreground">
+          Character development is a lifelong journey. We celebrate every step forward in fulfilling
+          our core values.
         </p>
       </div>
 
@@ -41,16 +40,14 @@ export function CoreValuesSection({
 
       <div className="flex flex-col gap-4">
         {coreValues.map((value) => (
-          <div key={value.name} className="border-border rounded-lg border p-4">
+          <div key={value.name} className="rounded-lg border border-border p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-1.5">
                   <h3 className="text-sm font-semibold">{value.name}</h3>
-                  <Info className="text-muted-foreground size-3.5" />
+                  <Info className="size-3.5 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground mt-0.5 text-sm">
-                  {value.shortDescription}
-                </p>
+                <p className="mt-0.5 text-sm text-muted-foreground">{value.shortDescription}</p>
               </div>
               <span
                 className={cn(
@@ -68,7 +65,7 @@ export function CoreValuesSection({
                     key={s}
                     className="flex items-center gap-2 rounded-md bg-gray-50 px-3 py-1.5 text-sm"
                   >
-                    <Award className="text-muted-foreground size-3.5 shrink-0" />
+                    <Award className="size-3.5 shrink-0 text-muted-foreground" />
                     <span>
                       Supported by: <span className="font-medium">{s}</span>
                     </span>
@@ -80,5 +77,5 @@ export function CoreValuesSection({
         ))}
       </div>
     </section>
-  )
+  );
 }

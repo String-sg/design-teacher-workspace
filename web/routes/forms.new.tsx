@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import type { LucideIcon } from 'lucide-react';
 import {
   ArrowLeft,
   ArrowUpDown,
@@ -14,36 +14,37 @@ import {
   Trash2,
   Type,
   Upload,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-import { toast } from 'sonner'
-import type { FormQuestion, QuestionType, ReminderType } from '@/types/form'
-import type { SelectedEntity } from '@/components/comms/entity-selector'
-import { StudentRecipientSelector } from '@/components/comms/student-recipient-selector'
-import { StaffSelector } from '@/components/comms/staff-selector'
-import { EnquiryEmailSelector } from '@/components/comms/enquiry-email-selector'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+
+import { EnquiryEmailSelector } from '~/apps/pg/components/comms/enquiry-email-selector';
+import type { SelectedEntity } from '~/apps/pg/components/comms/entity-selector';
+import { StaffSelector } from '~/apps/pg/components/comms/staff-selector';
+import { StudentRecipientSelector } from '~/apps/pg/components/comms/student-recipient-selector';
+import type { FormQuestion, QuestionType, ReminderType } from '~/apps/pg/types/form';
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Button } from '~/shared/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { cn } from '@/lib/utils'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
+} from '~/shared/components/ui/dropdown-menu';
+import { Input } from '~/shared/components/ui/input';
+import { Label } from '~/shared/components/ui/label';
+import { cn } from '~/shared/lib/utils';
 
 // ---------------------------------------------------------------------------
 // Question type config
 // ---------------------------------------------------------------------------
 
-const QUESTION_TYPES: Array<{
-  value: QuestionType
-  label: string
-  icon: LucideIcon
-  description: string
-}> = [
+const QUESTION_TYPES: {
+  value: QuestionType;
+  label: string;
+  icon: LucideIcon;
+  description: string;
+}[] = [
   {
     value: 'yes-no',
     label: 'Yes / No',
@@ -86,17 +87,17 @@ const QUESTION_TYPES: Array<{
     icon: Upload,
     description: 'Upload a file',
   },
-]
+];
 
-const TYPES_WITH_OPTIONS: QuestionType[] = ['mcq', 'checkbox', 'ranking']
+const TYPES_WITH_OPTIONS: QuestionType[] = ['mcq', 'checkbox', 'ranking'];
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-let nextId = 1
+let nextId = 1;
 function makeId() {
-  return `q-${Date.now()}-${nextId++}`
+  return `q-${Date.now()}-${nextId++}`;
 }
 
 function createQuestion(type: QuestionType): FormQuestion {
@@ -104,11 +105,9 @@ function createQuestion(type: QuestionType): FormQuestion {
     id: makeId(),
     text: '',
     type,
-    options: TYPES_WITH_OPTIONS.includes(type)
-      ? ['Option 1', 'Option 2']
-      : undefined,
+    options: TYPES_WITH_OPTIONS.includes(type) ? ['Option 1', 'Option 2'] : undefined,
     required: false,
-  }
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -117,92 +116,89 @@ function createQuestion(type: QuestionType): FormQuestion {
 
 export const Route = createFileRoute('/forms/new')({
   component: NewFormPage,
-})
+});
 
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
 function NewFormPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useSetBreadcrumbs([
     { label: 'Forms', href: '/forms' },
     { label: 'New Form', href: '/forms/new' },
-  ])
+  ]);
 
   // State
-  const [title, setTitle] = useState('')
-  const [instructions, setInstructions] = useState('')
-  const [questions, setQuestions] = useState<FormQuestion[]>([])
-  const [dueDate, setDueDate] = useState('')
-  const [reminderType, setReminderType] = useState<ReminderType>('none')
-  const [recipients, setRecipients] = useState<SelectedEntity[]>([])
-  const [staffInCharge, setStaffInCharge] = useState<SelectedEntity[]>([])
-  const [enquiryEmail, setEnquiryEmail] = useState('')
+  const [title, setTitle] = useState('');
+  const [instructions, setInstructions] = useState('');
+  const [questions, setQuestions] = useState<FormQuestion[]>([]);
+  const [dueDate, setDueDate] = useState('');
+  const [reminderType, setReminderType] = useState<ReminderType>('none');
+  const [recipients, setRecipients] = useState<SelectedEntity[]>([]);
+  const [staffInCharge, setStaffInCharge] = useState<SelectedEntity[]>([]);
+  const [enquiryEmail, setEnquiryEmail] = useState('');
 
   // Validation
-  const canActivate =
-    title.trim().length > 0 && dueDate.length > 0 && questions.length > 0
+  const canActivate = title.trim().length > 0 && dueDate.length > 0 && questions.length > 0;
 
   function handleActivate() {
     if (!canActivate) {
-      const missing: string[] = []
-      if (!title.trim()) missing.push('title')
-      if (!dueDate) missing.push('due date')
-      if (questions.length === 0) missing.push('at least 1 question')
-      toast.error(`Missing required fields: ${missing.join(', ')}`)
-      return
+      const missing: string[] = [];
+      if (!title.trim()) missing.push('title');
+      if (!dueDate) missing.push('due date');
+      if (questions.length === 0) missing.push('at least 1 question');
+      toast.error(`Missing required fields: ${missing.join(', ')}`);
+      return;
     }
-    toast.success('Form activated successfully')
-    navigate({ to: '/forms' })
+    toast.success('Form activated successfully');
+    navigate({ to: '/forms' });
   }
 
   // Question CRUD
   function addQuestion(type: QuestionType) {
-    setQuestions((prev) => [...prev, createQuestion(type)])
+    setQuestions((prev) => [...prev, createQuestion(type)]);
   }
 
   function updateQuestion(id: string, patch: Partial<FormQuestion>) {
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, ...patch } : q)),
-    )
+    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, ...patch } : q)));
   }
 
   function removeQuestion(id: string) {
-    setQuestions((prev) => prev.filter((q) => q.id !== id))
+    setQuestions((prev) => prev.filter((q) => q.id !== id));
   }
 
   function addOption(questionId: string) {
     setQuestions((prev) =>
       prev.map((q) => {
-        if (q.id !== questionId) return q
-        const opts = q.options ?? []
-        if (opts.length >= 6) return q
-        return { ...q, options: [...opts, `Option ${opts.length + 1}`] }
+        if (q.id !== questionId) return q;
+        const opts = q.options ?? [];
+        if (opts.length >= 6) return q;
+        return { ...q, options: [...opts, `Option ${opts.length + 1}`] };
       }),
-    )
+    );
   }
 
   function updateOption(questionId: string, index: number, value: string) {
     setQuestions((prev) =>
       prev.map((q) => {
-        if (q.id !== questionId || !q.options) return q
-        const opts = [...q.options]
-        opts[index] = value
-        return { ...q, options: opts }
+        if (q.id !== questionId || !q.options) return q;
+        const opts = [...q.options];
+        opts[index] = value;
+        return { ...q, options: opts };
       }),
-    )
+    );
   }
 
   function removeOption(questionId: string, index: number) {
     setQuestions((prev) =>
       prev.map((q) => {
-        if (q.id !== questionId || !q.options) return q
-        if (q.options.length <= 2) return q
-        return { ...q, options: q.options.filter((_, i) => i !== index) }
+        if (q.id !== questionId || !q.options) return q;
+        if (q.options.length <= 2) return q;
+        return { ...q, options: q.options.filter((_, i) => i !== index) };
       }),
-    )
+    );
   }
 
   return (
@@ -212,12 +208,7 @@ function NewFormPage() {
       {/* ---------------------------------------------------------------- */}
       <div className="sticky top-0 z-10 bg-white">
         <div className="flex items-center gap-3 border-b px-6 py-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0"
-            render={<Link to="/forms" />}
-          >
+          <Button variant="ghost" size="icon" className="shrink-0" render={<Link to="/forms" />}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
 
@@ -239,7 +230,7 @@ function NewFormPage() {
           {/* Section 1: Content                                              */}
           {/* -------------------------------------------------------------- */}
           <section className="rounded-xl border bg-white p-6">
-            <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <h2 className="mb-5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
               Content
             </h2>
             <div className="space-y-4">
@@ -252,9 +243,7 @@ function NewFormPage() {
                   <span
                     className={cn(
                       'text-xs tabular-nums',
-                      title.length > 120
-                        ? 'text-destructive'
-                        : 'text-muted-foreground',
+                      title.length > 120 ? 'text-destructive' : 'text-muted-foreground',
                     )}
                   >
                     {title.length}/120
@@ -273,7 +262,7 @@ function NewFormPage() {
               <div className="space-y-1.5">
                 <div className="flex items-baseline justify-between">
                   <Label htmlFor="instructions">Instructions</Label>
-                  <span className="text-xs tabular-nums text-muted-foreground">
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     {instructions.length}/2000
                   </span>
                 </div>
@@ -284,7 +273,7 @@ function NewFormPage() {
                   onChange={(e) => setInstructions(e.target.value)}
                   maxLength={2000}
                   rows={5}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-ring resize-none"
+                  className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-ring"
                 />
               </div>
             </div>
@@ -294,25 +283,21 @@ function NewFormPage() {
           {/* Section 2: Questions                                            */}
           {/* -------------------------------------------------------------- */}
           <section className="rounded-xl border bg-white p-6">
-            <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <h2 className="mb-5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
               Questions
             </h2>
 
             {questions.length === 0 ? (
               <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-slate-300 py-10 text-center">
                 <MessageSquare className="h-8 w-8 text-slate-300" />
-                <p className="text-sm text-muted-foreground">
-                  Add your first question
-                </p>
+                <p className="text-sm text-muted-foreground">Add your first question</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {questions.map((question, qIndex) => {
-                  const typeConfig = QUESTION_TYPES.find(
-                    (t) => t.value === question.type,
-                  )
-                  const TypeIcon = typeConfig?.icon ?? Type
-                  const hasOptions = TYPES_WITH_OPTIONS.includes(question.type)
+                  const typeConfig = QUESTION_TYPES.find((t) => t.value === question.type);
+                  const TypeIcon = typeConfig?.icon ?? Type;
+                  const hasOptions = TYPES_WITH_OPTIONS.includes(question.type);
 
                   return (
                     <div
@@ -350,27 +335,22 @@ function NewFormPage() {
                             />
                             <DropdownMenuContent align="start" className="w-56">
                               {QUESTION_TYPES.map((qt) => {
-                                const Icon = qt.icon
+                                const Icon = qt.icon;
                                 return (
                                   <DropdownMenuItem
                                     key={qt.value}
                                     onClick={() => {
                                       const patch: Partial<FormQuestion> = {
                                         type: qt.value,
-                                      }
-                                      if (
-                                        TYPES_WITH_OPTIONS.includes(qt.value)
-                                      ) {
+                                      };
+                                      if (TYPES_WITH_OPTIONS.includes(qt.value)) {
                                         if (!question.options?.length) {
-                                          patch.options = [
-                                            'Option 1',
-                                            'Option 2',
-                                          ]
+                                          patch.options = ['Option 1', 'Option 2'];
                                         }
                                       } else {
-                                        patch.options = undefined
+                                        patch.options = undefined;
                                       }
-                                      updateQuestion(question.id, patch)
+                                      updateQuestion(question.id, patch);
                                     }}
                                   >
                                     <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -381,7 +361,7 @@ function NewFormPage() {
                                       </div>
                                     </div>
                                   </DropdownMenuItem>
-                                )
+                                );
                               })}
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -390,30 +370,21 @@ function NewFormPage() {
                           {hasOptions && question.options && (
                             <div className="space-y-2">
                               {question.options.map((opt, optIndex) => (
-                                <div
-                                  key={optIndex}
-                                  className="flex items-center gap-2"
-                                >
+                                <div key={optIndex} className="flex items-center gap-2">
                                   <span className="w-5 shrink-0 text-center text-xs text-muted-foreground">
                                     {optIndex + 1}.
                                   </span>
                                   <Input
                                     value={opt}
                                     onChange={(e) =>
-                                      updateOption(
-                                        question.id,
-                                        optIndex,
-                                        e.target.value,
-                                      )
+                                      updateOption(question.id, optIndex, e.target.value)
                                     }
                                     className="flex-1"
                                   />
                                   {question.options!.length > 2 && (
                                     <button
                                       type="button"
-                                      onClick={() =>
-                                        removeOption(question.id, optIndex)
-                                      }
+                                      onClick={() => removeOption(question.id, optIndex)}
                                       className="shrink-0 rounded p-1 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"
                                       aria-label={`Remove option ${optIndex + 1}`}
                                     >
@@ -440,7 +411,7 @@ function NewFormPage() {
                         {/* Right side controls */}
                         <div className="flex items-center gap-2">
                           {/* Required toggle */}
-                          <label className="flex items-center gap-1.5 cursor-pointer">
+                          <label className="flex cursor-pointer items-center gap-1.5">
                             <input
                               type="checkbox"
                               checked={question.required ?? false}
@@ -451,9 +422,7 @@ function NewFormPage() {
                               }
                               className="h-3.5 w-3.5 accent-primary"
                             />
-                            <span className="text-xs text-muted-foreground">
-                              Required
-                            </span>
+                            <span className="text-xs text-muted-foreground">Required</span>
                           </label>
 
                           {/* Delete */}
@@ -468,7 +437,7 @@ function NewFormPage() {
                         </div>
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
             )}
@@ -486,21 +455,16 @@ function NewFormPage() {
                 />
                 <DropdownMenuContent align="start" className="w-64">
                   {QUESTION_TYPES.map((qt) => {
-                    const Icon = qt.icon
+                    const Icon = qt.icon;
                     return (
-                      <DropdownMenuItem
-                        key={qt.value}
-                        onClick={() => addQuestion(qt.value)}
-                      >
+                      <DropdownMenuItem key={qt.value} onClick={() => addQuestion(qt.value)}>
                         <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
                         <div>
                           <div className="text-sm">{qt.label}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {qt.description}
-                          </div>
+                          <div className="text-xs text-muted-foreground">{qt.description}</div>
                         </div>
                       </DropdownMenuItem>
-                    )
+                    );
                   })}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -511,7 +475,7 @@ function NewFormPage() {
           {/* Section 3: Settings                                             */}
           {/* -------------------------------------------------------------- */}
           <section className="rounded-xl border bg-white p-6">
-            <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <h2 className="mb-5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
               Settings
             </h2>
             <div className="space-y-5">
@@ -540,10 +504,7 @@ function NewFormPage() {
                       { value: 'daily', label: 'Daily' },
                     ] as const
                   ).map((opt) => (
-                    <label
-                      key={opt.value}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
+                    <label key={opt.value} className="flex cursor-pointer items-center gap-2">
                       <input
                         type="radio"
                         name="reminder"
@@ -564,7 +525,7 @@ function NewFormPage() {
           {/* Section 4: Recipients                                           */}
           {/* -------------------------------------------------------------- */}
           <section className="rounded-xl border bg-white p-6">
-            <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <h2 className="mb-5 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
               Recipients
             </h2>
             <div className="space-y-5">
@@ -573,42 +534,30 @@ function NewFormPage() {
                   Students <span className="text-destructive">*</span>
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Parents of the selected students will receive this form via
-                  Parents Gateway.
+                  Parents of the selected students will receive this form via Parents Gateway.
                 </p>
-                <StudentRecipientSelector
-                  value={recipients}
-                  onChange={setRecipients}
-                />
+                <StudentRecipientSelector value={recipients} onChange={setRecipients} />
               </div>
 
               <div className="space-y-1.5">
                 <Label>Staff in charge</Label>
                 <p className="text-xs text-muted-foreground">
-                  These staff will be able to view responses and manage this
-                  form.
+                  These staff will be able to view responses and manage this form.
                 </p>
-                <StaffSelector
-                  value={staffInCharge}
-                  onChange={setStaffInCharge}
-                />
+                <StaffSelector value={staffInCharge} onChange={setStaffInCharge} />
               </div>
 
               <div className="space-y-1.5">
                 <Label>Enquiry email</Label>
                 <p className="text-xs text-muted-foreground">
-                  Select the preferred email address to receive enquiries from
-                  parents.
+                  Select the preferred email address to receive enquiries from parents.
                 </p>
-                <EnquiryEmailSelector
-                  value={enquiryEmail}
-                  onChange={setEnquiryEmail}
-                />
+                <EnquiryEmailSelector value={enquiryEmail} onChange={setEnquiryEmail} />
               </div>
             </div>
           </section>
         </div>
       </div>
     </div>
-  )
+  );
 }

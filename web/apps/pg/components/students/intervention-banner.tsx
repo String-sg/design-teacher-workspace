@@ -1,16 +1,16 @@
-import { Activity, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router';
+import { Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 
-import type { Student } from '@/types/student'
-import { interventionRules } from '@/data/intervention-config'
-import { Button } from '@/components/ui/button'
+import { interventionRules } from '~/apps/pg/data/intervention-config';
+import type { Student } from '~/apps/pg/types/student';
+import { Button } from '~/shared/components/ui/button';
 
 interface InterventionBannerProps {
-  student: Student
+  student: Student;
 }
 
 export function InterventionBanner({ student }: InterventionBannerProps) {
-  if (student.id !== '3') return null
+  if (student.id !== '3') return null;
 
   return (
     <div className="rounded-3xl border border-twblue-6 bg-twblue-2 px-5 py-4">
@@ -36,8 +36,8 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
           Follow-up areas: bullying incident, missed CCA, low mood
         </h3>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-          Behavioural, social-emotional, and engagement patterns observed across
-          multiple areas — consider a sequenced, differentiated approach.
+          Behavioural, social-emotional, and engagement patterns observed across multiple areas —
+          consider a sequenced, differentiated approach.
         </p>
       </div>
 
@@ -46,13 +46,11 @@ export function InterventionBanner({ student }: InterventionBannerProps) {
         <Button
           variant="outline"
           size="sm"
-          render={
-            <Link to="/glow/$studentId" params={{ studentId: student.id }} />
-          }
+          render={<Link to="/glow/$studentId" params={{ studentId: student.id }} />}
         >
           View guidance
         </Button>
       </div>
     </div>
-  )
+  );
 }

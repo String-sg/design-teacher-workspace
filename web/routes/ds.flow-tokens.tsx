@@ -1,14 +1,14 @@
-import { useState } from 'react'
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useState } from 'react';
 
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { useSetBreadcrumbs } from '~/platform/hooks/use-breadcrumbs';
+import { Button } from '~/shared/components/ui/button';
+import { ScrollArea } from '~/shared/components/ui/scroll-area';
+import { cn } from '~/shared/lib/utils';
 
 export const Route = createFileRoute('/ds/flow-tokens')({
   component: FlowDesignSystemPage,
-})
+});
 
 // --- Nav ---
 
@@ -66,7 +66,7 @@ const NAV_SECTIONS = [
     title: 'Bridge',
     items: [{ id: 'bridge', label: 'Token Bridge' }],
   },
-]
+];
 
 // --- Helpers ---
 
@@ -76,35 +76,33 @@ function Section({
   description,
   children,
 }: {
-  id: string
-  title: string
-  description?: string
-  children: React.ReactNode
+  id: string;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
 }) {
   return (
     <section id={id} className="scroll-mt-8">
-      <h2 className="text-xl font-semibold mb-1">{title}</h2>
-      {description && (
-        <p className="text-sm text-muted-foreground mb-4">{description}</p>
-      )}
+      <h2 className="mb-1 text-xl font-semibold">{title}</h2>
+      {description && <p className="mb-4 text-sm text-muted-foreground">{description}</p>}
       {!description && <div className="mb-4" />}
       {children}
     </section>
-  )
+  );
 }
 
 function Swatch({ cssVar, label }: { cssVar: string; label: string }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 w-12">
+    <div className="flex w-12 flex-col items-center gap-1.5">
       <div
-        className="size-12 rounded-lg border border-border shrink-0"
+        className="size-12 shrink-0 rounded-lg border border-border"
         style={{ backgroundColor: `var(${cssVar})` }}
       />
-      <span className="text-xs text-muted-foreground text-center leading-tight break-words w-full">
+      <span className="w-full text-center text-xs leading-tight break-words text-muted-foreground">
         {label}
       </span>
     </div>
-  )
+  );
 }
 
 function ColorScale({
@@ -112,9 +110,9 @@ function ColorScale({
   prefix,
   steps = STEPS_12,
 }: {
-  name: string
-  prefix: string
-  steps?: Array<number>
+  name: string;
+  prefix: string;
+  steps?: number[];
 }) {
   return (
     <div className="space-y-2">
@@ -125,25 +123,17 @@ function ColorScale({
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-function TokenRow({
-  token,
-  preview,
-}: {
-  token: string
-  preview?: React.ReactNode
-}) {
+function TokenRow({ token, preview }: { token: string; preview?: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-      <code className="text-xs bg-muted px-1.5 py-0.5 rounded shrink-0">
-        {token}
-      </code>
+    <div className="flex items-center gap-3 border-b border-border py-2 last:border-0">
+      <code className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs">{token}</code>
       <div className="flex-1" />
       {preview}
     </div>
-  )
+  );
 }
 
 function ColorTokenRow({ token }: { token: string }) {
@@ -152,15 +142,15 @@ function ColorTokenRow({ token }: { token: string }) {
       token={token}
       preview={
         <div
-          className="size-8 rounded border border-border shrink-0"
+          className="size-8 shrink-0 rounded border border-border"
           style={{ backgroundColor: `var(${token})` }}
         />
       }
     />
-  )
+  );
 }
 
-const STEPS_12 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+const STEPS_12 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 // --- Page ---
 
@@ -168,19 +158,19 @@ function FlowDesignSystemPage() {
   useSetBreadcrumbs([
     { label: 'Design System', href: '/ds' },
     { label: 'Flow DS Tokens', href: '/ds/flow-tokens' },
-  ])
+  ]);
 
-  const [activeSection, setActiveSection] = useState('font')
+  const [activeSection, setActiveSection] = useState('font');
 
   return (
     <div className="flex h-full">
       {/* Left Nav */}
-      <nav className="w-52 shrink-0 border-r border-border sticky top-0 h-[calc(100vh-3.5rem)]">
+      <nav className="sticky top-0 h-[calc(100vh-3.5rem)] w-52 shrink-0 border-r border-border">
         <ScrollArea className="h-full">
-          <div className="p-4 space-y-6">
+          <div className="space-y-6 p-4">
             {NAV_SECTIONS.map((section) => (
               <div key={section.title}>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                <p className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                   {section.title}
                 </p>
                 <ul className="space-y-0.5">
@@ -190,10 +180,10 @@ function FlowDesignSystemPage() {
                         href={`#${item.id}`}
                         onClick={() => setActiveSection(item.id)}
                         className={cn(
-                          'block px-2 py-1.5 text-sm rounded-md transition-colors',
+                          'block rounded-md px-2 py-1.5 text-sm transition-colors',
                           activeSection === item.id
-                            ? 'bg-muted text-foreground font-medium'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                            ? 'bg-muted font-medium text-foreground'
+                            : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
                         )}
                       >
                         {item.label}
@@ -209,15 +199,13 @@ function FlowDesignSystemPage() {
 
       {/* Main Content */}
       <ScrollArea className="flex-1">
-        <div className="max-w-4xl mx-auto p-8 space-y-16">
+        <div className="mx-auto max-w-4xl space-y-16 p-8">
           <div>
             <h1 className="text-2xl font-bold">Flow DS Tokens</h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="mt-1 text-muted-foreground">
               All CSS custom properties from{' '}
-              <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                @flow/design-tokens
-              </code>
-              , rendered live.
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">@flow/design-tokens</code>,
+              rendered live.
             </p>
           </div>
 
@@ -668,7 +656,7 @@ function FlowDesignSystemPage() {
         </div>
       </ScrollArea>
     </div>
-  )
+  );
 }
 
 // ============================================================
@@ -693,29 +681,21 @@ function FontSection() {
     { token: '--font-size-700', value: '3.25rem' },
     { token: '--font-size-750', value: '3.625rem' },
     { token: '--font-size-800', value: '4.125rem' },
-  ]
+  ];
 
   return (
-    <Section
-      id="font"
-      title="Font"
-      description="Font families, sizes, weights, and line heights"
-    >
+    <Section id="font" title="Font" description="Font families, sizes, weights, and line heights">
       <div className="space-y-8">
         {/* Families */}
         <div>
-          <h4 className="text-sm font-medium mb-3">Families</h4>
+          <h4 className="mb-3 text-sm font-medium">Families</h4>
           <div className="space-y-2">
             <div className="flex items-baseline gap-3">
-              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                --font-family-inter
-              </code>
-              <span style={{ fontFamily: 'var(--font-family-inter)' }}>
-                Inter
-              </span>
+              <code className="rounded bg-muted px-1.5 py-0.5 text-xs">--font-family-inter</code>
+              <span style={{ fontFamily: 'var(--font-family-inter)' }}>Inter</span>
             </div>
             <div className="flex items-baseline gap-3">
-              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+              <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                 --font-family-atkinson-hyperlegible
               </code>
               <span
@@ -731,7 +711,7 @@ function FontSection() {
 
         {/* Weights */}
         <div>
-          <h4 className="text-sm font-medium mb-3">Weights</h4>
+          <h4 className="mb-3 text-sm font-medium">Weights</h4>
           <div className="flex flex-wrap gap-6">
             {[
               {
@@ -747,13 +727,10 @@ function FontSection() {
               { token: '--font-weight-bold', value: '700', label: 'Bold' },
             ].map((w) => (
               <div key={w.token} className="space-y-1">
-                <p
-                  className="text-lg"
-                  style={{ fontWeight: `var(${w.token})` }}
-                >
+                <p className="text-lg" style={{ fontWeight: `var(${w.token})` }}>
                   {w.label}
                 </p>
-                <code className="text-xs bg-muted px-1.5 py-0.5 rounded block">
+                <code className="block rounded bg-muted px-1.5 py-0.5 text-xs">
                   {w.token}: {w.value}
                 </code>
               </div>
@@ -763,17 +740,14 @@ function FontSection() {
 
         {/* Line Heights */}
         <div>
-          <h4 className="text-sm font-medium mb-3">Line Heights</h4>
+          <h4 className="mb-3 text-sm font-medium">Line Heights</h4>
           <div className="flex flex-wrap gap-6">
             {[
               { token: '--font-lineheight-sm', value: '1' },
               { token: '--font-lineheight-md', value: '1.2' },
               { token: '--font-lineheight-lg', value: '1.5' },
             ].map((lh) => (
-              <code
-                key={lh.token}
-                className="text-xs bg-muted px-1.5 py-0.5 rounded"
-              >
+              <code key={lh.token} className="rounded bg-muted px-1.5 py-0.5 text-xs">
                 {lh.token}: {lh.value}
               </code>
             ))}
@@ -782,29 +756,24 @@ function FontSection() {
 
         {/* Sizes */}
         <div>
-          <h4 className="text-sm font-medium mb-3">Sizes</h4>
+          <h4 className="mb-3 text-sm font-medium">Sizes</h4>
           <div className="space-y-3">
             {sizes.map((s) => (
               <div key={s.token} className="flex items-baseline gap-3">
-                <code className="text-xs bg-muted px-1.5 py-0.5 rounded shrink-0 w-40">
+                <code className="w-40 shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs">
                   {s.token}
                 </code>
-                <span
-                  className="truncate"
-                  style={{ fontSize: `var(${s.token})`, lineHeight: 1.2 }}
-                >
+                <span className="truncate" style={{ fontSize: `var(${s.token})`, lineHeight: 1.2 }}>
                   Aa
                 </span>
-                <span className="text-xs text-muted-foreground shrink-0">
-                  {s.value}
-                </span>
+                <span className="shrink-0 text-xs text-muted-foreground">{s.value}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
     </Section>
-  )
+  );
 }
 
 function SpacingSection() {
@@ -818,26 +787,21 @@ function SpacingSection() {
     { token: '--spacing-2xl', value: '2.5rem' },
     { token: '--spacing-3xl', value: '3rem' },
     { token: '--spacing-4xl', value: '4rem' },
-  ]
+  ];
 
   return (
     <Section id="spacing" title="Spacing">
       <div className="space-y-3">
         {spacings.map((s) => (
           <div key={s.token} className="flex items-center gap-3">
-            <code className="text-xs bg-muted px-1.5 py-0.5 rounded shrink-0 w-36">
-              {s.token}
-            </code>
-            <div
-              className="h-4 rounded bg-primary/60"
-              style={{ width: `var(${s.token})` }}
-            />
+            <code className="w-36 shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs">{s.token}</code>
+            <div className="h-4 rounded bg-primary/60" style={{ width: `var(${s.token})` }} />
             <span className="text-xs text-muted-foreground">{s.value}</span>
           </div>
         ))}
       </div>
     </Section>
-  )
+  );
 }
 
 function RadiusSection() {
@@ -851,7 +815,7 @@ function RadiusSection() {
     { token: '--radius-3xl', value: '24px' },
     { token: '--radius-4xl', value: '32px' },
     { token: '--radius-full', value: '9999px' },
-  ]
+  ];
 
   return (
     <Section
@@ -866,7 +830,7 @@ function RadiusSection() {
               className="size-16 border-2 border-primary bg-primary/10"
               style={{ borderRadius: `var(${r.token})` }}
             />
-            <code className="text-xs bg-muted px-1 py-0.5 rounded">
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
               {r.token.replace('--radius-', '')}
             </code>
             <span className="text-xs text-muted-foreground">{r.value}</span>
@@ -874,7 +838,7 @@ function RadiusSection() {
         ))}
       </div>
     </Section>
-  )
+  );
 }
 
 function BorderWidthSection() {
@@ -883,7 +847,7 @@ function BorderWidthSection() {
     { token: '--border-width-sm', value: '1.5px' },
     { token: '--border-width-md', value: '2px' },
     { token: '--border-width-lg', value: '3px' },
-  ]
+  ];
 
   return (
     <Section id="border-width" title="Border Width">
@@ -894,7 +858,7 @@ function BorderWidthSection() {
               className="size-16 rounded-lg border-foreground"
               style={{ borderWidth: `var(${b.token})`, borderStyle: 'solid' }}
             />
-            <code className="text-xs bg-muted px-1 py-0.5 rounded">
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
               {b.token.replace('--border-width-', '')}
             </code>
             <span className="text-xs text-muted-foreground">{b.value}</span>
@@ -902,7 +866,7 @@ function BorderWidthSection() {
         ))}
       </div>
     </Section>
-  )
+  );
 }
 
 function ShadowsSection() {
@@ -914,25 +878,20 @@ function ShadowsSection() {
     { token: '--shadow-lg', label: 'lg' },
     { token: '--shadow-xl', label: 'xl' },
     { token: '--shadow-2xl', label: '2xl' },
-  ]
+  ];
 
   return (
     <Section id="shadows" title="Shadows">
       <div className="flex flex-wrap gap-6">
         {shadows.map((s) => (
           <div key={s.token} className="flex flex-col items-center gap-2">
-            <div
-              className="size-20 rounded-lg bg-card"
-              style={{ boxShadow: `var(${s.token})` }}
-            />
-            <code className="text-xs bg-muted px-1 py-0.5 rounded">
-              {s.label}
-            </code>
+            <div className="size-20 rounded-lg bg-card" style={{ boxShadow: `var(${s.token})` }} />
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">{s.label}</code>
           </div>
         ))}
       </div>
     </Section>
-  )
+  );
 }
 
 function TextStylesSection({
@@ -940,20 +899,20 @@ function TextStylesSection({
   title,
   styles,
 }: {
-  id: string
-  title: string
-  styles: Array<{
-    name: string
-    size: string
-    lineHeight: string
-    weight: string
-  }>
+  id: string;
+  title: string;
+  styles: {
+    name: string;
+    size: string;
+    lineHeight: string;
+    weight: string;
+  }[];
 }) {
   const fontWeightMap: Record<string, number> = {
     regular: 400,
     semibold: 600,
     bold: 700,
-  }
+  };
 
   return (
     <Section id={id} title={title}>
@@ -963,7 +922,7 @@ function TextStylesSection({
             key={s.name}
             className="flex items-baseline gap-4 border-b border-border pb-3 last:border-0"
           >
-            <code className="text-xs bg-muted px-1.5 py-0.5 rounded shrink-0 w-52">
+            <code className="w-52 shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs">
               text-style-{s.name}
             </code>
             <span
@@ -976,14 +935,14 @@ function TextStylesSection({
             >
               The quick brown fox
             </span>
-            <span className="text-xs text-muted-foreground shrink-0 ml-auto">
+            <span className="ml-auto shrink-0 text-xs text-muted-foreground">
               {s.size} / {s.lineHeight} / {s.weight}
             </span>
           </div>
         ))}
       </div>
     </Section>
-  )
+  );
 }
 
 function BridgeSection() {
@@ -999,7 +958,7 @@ function BridgeSection() {
     { ours: '--slate-*', flow: '--color-neutral-*' },
     { ours: '--twblue-*', flow: '--color-brand-*' },
     { ours: '--crimson-*', flow: '--color-critical-*' },
-  ]
+  ];
 
   return (
     <Section
@@ -1007,35 +966,28 @@ function BridgeSection() {
       title="Token Bridge"
       description="How our existing tokens map to Flow DS semantic token names. Defined in styles.css :root and .dark."
     >
-      <div className="rounded-lg border border-border overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-border">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-muted/50 border-b border-border">
-              <th className="text-left px-4 py-2 font-medium">Our Token</th>
-              <th className="text-left px-4 py-2 font-medium">Flow DS Token</th>
-              <th className="text-left px-4 py-2 font-medium">Preview</th>
+            <tr className="border-b border-border bg-muted/50">
+              <th className="px-4 py-2 text-left font-medium">Our Token</th>
+              <th className="px-4 py-2 text-left font-medium">Flow DS Token</th>
+              <th className="px-4 py-2 text-left font-medium">Preview</th>
             </tr>
           </thead>
           <tbody>
             {mappings.map((m) => {
-              const isScale = m.ours.endsWith('-*')
+              const isScale = m.ours.endsWith('-*');
               const flowPreviewVar = isScale
                 ? `--${m.flow.replace('--', '').replace('-*', '-9')}`
-                : m.flow
+                : m.flow;
               return (
-                <tr
-                  key={m.flow}
-                  className="border-b border-border last:border-0"
-                >
+                <tr key={m.flow} className="border-b border-border last:border-0">
                   <td className="px-4 py-2">
-                    <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                      {m.ours}
-                    </code>
+                    <code className="rounded bg-muted px-1 py-0.5 text-xs">{m.ours}</code>
                   </td>
                   <td className="px-4 py-2">
-                    <code className="text-xs bg-muted px-1 py-0.5 rounded">
-                      {m.flow}
-                    </code>
+                    <code className="rounded bg-muted px-1 py-0.5 text-xs">{m.flow}</code>
                   </td>
                   <td className="px-4 py-2">
                     <div
@@ -1046,11 +998,11 @@ function BridgeSection() {
                     />
                   </td>
                 </tr>
-              )
+              );
             })}
           </tbody>
         </table>
       </div>
     </Section>
-  )
+  );
 }
