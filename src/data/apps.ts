@@ -58,10 +58,11 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'sls',
         name: 'SLS',
-        description: 'Transforming learning through technology',
+        description:
+          'MOE\u2019s core teaching and learning platform for curriculum aligned resources, digital tools, AI & data',
         icon: '/logos/sls-logo.svg',
         color: 'green',
-        href: '/sls',
+        href: 'https://vle.learning.moe.edu.sg/login',
 
       },
     ],
@@ -89,15 +90,6 @@ export const appCategories: Array<AppCategory> = [
       
       },
       {
-        id: 'mysei',
-        name: 'MySEI',
-        description:
-          'Holistic insights for students\u2019 social-emotional growth & well-being',
-        icon: '/logos/mysei-logo.svg',
-        color: 'blue',
-        href: 'https://mysei.digital.moe.gov.sg',
-      },
-      {
         id: 'allocate',
         name: 'Allocate',
         description: 'Mixed form class allocation based on learner profiles',
@@ -113,6 +105,40 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/sdis-logo.svg',
         color: 'blue',
         href: 'https://www.sdis.moe.gov.sg/oalc/s/login',
+      },
+    ],
+  },
+  {
+    id: 'student-wellbeing',
+    title: 'Student Well-being',
+    description: 'Tools for social-emotional learning and student well-being',
+    apps: [
+      {
+        id: 'mysei',
+        name: 'MySEI',
+        description:
+          'Holistic insights for students\u2019 social-emotional growth & well-being',
+        icon: '/logos/mysei-logo.svg',
+        color: 'blue',
+        href: 'https://mysei.digital.moe.gov.sg',
+      },
+      {
+        id: 'connectogram',
+        name: 'Connecto-gram',
+        description:
+          'Social network analysis for student connectedness and peer relationships',
+        icon: '/logos/connectogram-logo.svg',
+        color: 'blue',
+        href: 'https://forms.moe.edu.sg/sna/manage/forms',
+      },
+      {
+        id: 'termly-checkin',
+        name: 'Termly Check-In',
+        description:
+          'Regular well-being check-ins to support student mental health',
+        icon: '/logos/allears-logo.svg',
+        color: 'blue',
+        href: 'https://forms.moe.edu.sg/dashboards',
       },
     ],
   },
