@@ -357,18 +357,6 @@ export function StudentTable({
           className="min-w-[115px]"
         />
       )}
-      {isVisible('conduct') && (
-        <ColumnHeaderMenu
-          column={columns.find((c) => c.id === 'conduct')!}
-          currentSort={sort}
-          activeFilterFields={activeFilterFields}
-          onSort={onSort}
-          onClearSort={onClearSort}
-          onAddQuickFilter={onAddQuickFilter}
-          onClearFilter={onClearFilter}
-          className="min-w-[115px]"
-        />
-      )}
       {isVisible('counsellingSessions') && (
         <ColumnHeaderMenu
           column={columns.find((c) => c.id === 'counsellingSessions')!}
@@ -391,6 +379,18 @@ export function StudentTable({
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
           className="min-w-[80px]"
+        />
+      )}
+      {isVisible('conduct') && (
+        <ColumnHeaderMenu
+          column={columns.find((c) => c.id === 'conduct')!}
+          currentSort={sort}
+          activeFilterFields={activeFilterFields}
+          onSort={onSort}
+          onClearSort={onClearSort}
+          onAddQuickFilter={onAddQuickFilter}
+          onClearFilter={onClearFilter}
+          className="min-w-[115px]"
         />
       )}
       {isVisible('socialLinks') && (
@@ -691,9 +691,6 @@ export function StudentTable({
                     {isVisible('offences') && (
                       <TableCell>{student.offences}</TableCell>
                     )}
-                    {isVisible('conduct') && (
-                      <TableCell>{student.conduct}</TableCell>
-                    )}
                     {isVisible('counsellingSessions') && (
                       <TableCell>{student.counsellingSessions}</TableCell>
                     )}
@@ -703,6 +700,9 @@ export function StudentTable({
                           <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
+                    )}
+                    {isVisible('conduct') && (
+                      <TableCell>{student.conduct}</TableCell>
                     )}
                     {isVisible('socialLinks') && (
                       <TableCell>{student.socialLinks}</TableCell>

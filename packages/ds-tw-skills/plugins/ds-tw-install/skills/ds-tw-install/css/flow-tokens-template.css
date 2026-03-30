@@ -777,8 +777,12 @@
   /* Tailwind utility-level mappings (third layer of indirection) */
   --background-color-border-brand: var(--color-border-brand);
   --background-color-btn-border-brand: var(--btn-color-border-brand);
-  --background-color-btn-border-brand-strong: var(--btn-color-border-brand-strong);
-  --background-color-btn-fill-brand-enabled: var(--btn-color-fill-brand-enabled);
+  --background-color-btn-border-brand-strong: var(
+    --btn-color-border-brand-strong
+  );
+  --background-color-btn-fill-brand-enabled: var(
+    --btn-color-fill-brand-enabled
+  );
   --background-color-btn-fill-brand-hover: var(--btn-color-fill-brand-hover);
   --background-color-btn-fill-ghost-hover: var(--btn-color-fill-ghost-hover);
   --background-color-btn-fill-hover: var(--btn-color-fill-hover);
@@ -790,13 +794,19 @@
   --border-color-brand: var(--color-border-brand);
   --border-color-btn-brand: var(--btn-color-border-brand);
   --border-color-btn-brand-strong: var(--btn-color-border-brand-strong);
-  --color-btn-foreground-accent-enabled: var(--btn-color-foreground-accent-enabled);
+  --color-btn-foreground-accent-enabled: var(
+    --btn-color-foreground-accent-enabled
+  );
   --color-btn-foreground-accent-hover: var(--btn-color-foreground-accent-hover);
-  --color-btn-foreground-brand-enabled: var(--btn-color-foreground-brand-enabled);
+  --color-btn-foreground-brand-enabled: var(
+    --btn-color-foreground-brand-enabled
+  );
   --color-btn-foreground-brand-hover: var(--btn-color-foreground-brand-hover);
   --color-btn-foreground-ghost: var(--btn-color-foreground-ghost);
   --color-btn-foreground-outline: var(--btn-color-foreground-outline);
-  --color-btn-foreground-outline-hover: var(--btn-color-foreground-outline-hover);
+  --color-btn-foreground-outline-hover: var(
+    --btn-color-foreground-outline-hover
+  );
   --fill-background-section-inverse: var(--color-background-section-inverse);
   --fill-btn-brand-enabled: var(--btn-color-fill-brand-enabled);
   --fill-btn-brand-hover: var(--btn-color-fill-brand-hover);

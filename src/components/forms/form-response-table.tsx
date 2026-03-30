@@ -32,10 +32,10 @@ import { cn } from '@/lib/utils'
 // ---------------------------------------------------------------------------
 
 interface FormResponseTableProps {
-  recipients: FormRecipient[]
+  recipients: Array<FormRecipient>
   formTitle: string
   responseType?: ResponseType
-  questions: FormQuestion[]
+  questions: Array<FormQuestion>
 }
 
 type BaseColumnKey =
@@ -61,10 +61,10 @@ function formatDate(iso: string): string {
 }
 
 function exportCSV(
-  rows: FormRecipient[],
+  rows: Array<FormRecipient>,
   title: string,
   responseType: ResponseType | undefined,
-  questions: FormQuestion[],
+  questions: Array<FormQuestion>,
 ) {
   const headers = [
     'Student',
@@ -134,7 +134,7 @@ export function FormResponseTable({
     'respondedAt',
     'readBy',
     'pgStatus',
-    ...(responseType === 'yes-no' ? (['formResponse'] as ColumnKey[]) : []),
+    ...(responseType === 'yes-no' ? (['formResponse'] as Array<ColumnKey>) : []),
     ...questions.map((_, i) => `q${i}` as ColumnKey),
   ])
   const [visibleCols, setVisibleCols] = useState<Set<ColumnKey>>(defaultCols)
@@ -369,7 +369,7 @@ export function FormResponseTable({
             <p className="mb-1.5 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Show / hide columns
             </p>
-            {(Object.keys(baseColumnLabels) as BaseColumnKey[])
+            {(Object.keys(baseColumnLabels) as Array<BaseColumnKey>)
               .filter(
                 (col) => col !== 'formResponse' || responseType === 'yes-no',
               )

@@ -15,8 +15,8 @@ import {
   Type,
   Upload,
 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import type { LucideIcon } from 'lucide-react'
 import type { FormQuestion, QuestionType, ReminderType } from '@/types/form'
 import type { SelectedEntity } from '@/components/comms/entity-selector'
 import { StudentRecipientSelector } from '@/components/comms/student-recipient-selector'
@@ -88,7 +88,7 @@ const QUESTION_TYPES: Array<{
   },
 ]
 
-const TYPES_WITH_OPTIONS: QuestionType[] = ['mcq', 'checkbox', 'ranking']
+const TYPES_WITH_OPTIONS: Array<QuestionType> = ['mcq', 'checkbox', 'ranking']
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -134,11 +134,11 @@ function NewFormPage() {
   // State
   const [title, setTitle] = useState('')
   const [instructions, setInstructions] = useState('')
-  const [questions, setQuestions] = useState<FormQuestion[]>([])
+  const [questions, setQuestions] = useState<Array<FormQuestion>>([])
   const [dueDate, setDueDate] = useState('')
   const [reminderType, setReminderType] = useState<ReminderType>('none')
-  const [recipients, setRecipients] = useState<SelectedEntity[]>([])
-  const [staffInCharge, setStaffInCharge] = useState<SelectedEntity[]>([])
+  const [recipients, setRecipients] = useState<Array<SelectedEntity>>([])
+  const [staffInCharge, setStaffInCharge] = useState<Array<SelectedEntity>>([])
   const [enquiryEmail, setEnquiryEmail] = useState('')
 
   // Validation
@@ -147,7 +147,7 @@ function NewFormPage() {
 
   function handleActivate() {
     if (!canActivate) {
-      const missing: string[] = []
+      const missing: Array<string> = []
       if (!title.trim()) missing.push('title')
       if (!dueDate) missing.push('due date')
       if (questions.length === 0) missing.push('at least 1 question')

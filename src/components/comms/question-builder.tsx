@@ -9,8 +9,8 @@ const MAX_OPTIONS = 6
 const MIN_OPTIONS = 2
 
 interface QuestionBuilderProps {
-  questions: FormQuestion[]
-  onChange: (questions: FormQuestion[]) => void
+  questions: Array<FormQuestion>
+  onChange: (questions: Array<FormQuestion>) => void
   responseType?: ResponseType
   onEditQuestion?: (id: string | null) => void
 }
@@ -164,7 +164,7 @@ export function QuestionBuilder({
             {/* Type toggle */}
             <div className="mt-2.5 ml-10 flex items-center gap-3">
               <span className="text-xs text-muted-foreground">Type:</span>
-              {(['free-text', 'mcq'] as QuestionType[]).map((t) => (
+              {(['free-text', 'mcq'] as Array<QuestionType>).map((t) => (
                 <button
                   key={t}
                   type="button"

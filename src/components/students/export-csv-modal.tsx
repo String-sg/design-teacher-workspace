@@ -16,7 +16,7 @@ type SenFormat = 'sen-high' | 'sen-norm'
 interface ExportCsvModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onExport: (options: { senFormats: SenFormat[] }) => void
+  onExport: (options: { senFormats: Array<SenFormat> }) => void
 }
 
 interface CheckboxCardProps {

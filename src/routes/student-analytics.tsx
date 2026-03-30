@@ -21,6 +21,7 @@ const ANALYTICS_PROMPTS = [
 
 export const Route = createFileRoute('/student-analytics')({
   beforeLoad: () => {
+    if (typeof window === 'undefined') return
     const stored = localStorage.getItem(FEATURE_FLAGS_STORAGE_KEY)
     const flags = stored
       ? { ...DEFAULT_FEATURE_FLAGS, ...JSON.parse(stored) }

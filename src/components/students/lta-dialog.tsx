@@ -98,7 +98,7 @@ function GlowBotIcon({ size = 28 }: { size?: number }) {
       { delay: 1250, offset: 0, blink: 1 },
     ]
 
-    const timers: ReturnType<typeof setTimeout>[] = []
+    const timers: Array<ReturnType<typeof setTimeout>> = []
 
     function runSequence() {
       for (const step of sequence) {

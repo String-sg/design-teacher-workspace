@@ -1,6 +1,6 @@
 import {
-  Outlet,
   Link,
+  Outlet,
   createFileRoute,
   useLocation,
 } from '@tanstack/react-router'
