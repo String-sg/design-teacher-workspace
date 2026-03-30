@@ -1,0 +1,400 @@
+import { useState } from 'react'
+import { Columns3, RotateCcw } from 'lucide-react'
+
+import type { FilterField } from '@/types/student'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+
+export interface ColumnConfig {
+  id: string
+  label: string
+  visible: boolean
+  sortable?: boolean
+  filterable?: boolean
+  filterField?: FilterField
+  source?: string
+  lastUpdated?: string
+}
+
+export const defaultColumns: Array<ColumnConfig> = [
+  {
+    id: 'index',
+    label: '#',
+    visible: true,
+    sortable: false,
+    filterable: false,
+  },
+  {
+    id: 'name',
+    label: 'Name',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'name',
+    source: 'School Cockpit, RE_SDT_041',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'class',
+    label: 'Class',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'class',
+    source: 'School Cockpit, RE_SDT_041',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'cca',
+    label: 'CCA',
+    visible: true,
+    sortable: true,
+    filterable: false,
+    source: 'School Cockpit, RE_SDT_041',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'attentionTags',
+    label: 'Attention tag',
+    visible: true,
+    sortable: false,
+    filterable: false,
+  },
+  {
+    id: 'attendance',
+    label: 'Attendance(%)',
+    visible: true,
+    sortable: false,
+    filterable: false,
+  },
+  {
+    id: 'lateComing',
+    label: 'Late-coming(%)',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'lateComing',
+    source: 'School Cockpit, RE_AT_002',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'absences',
+    label: 'Non-VR absences(%)',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'absences',
+    source: 'School Cockpit, RE_AT_002',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'ccaMissed',
+    label: 'CCA attendance(%)',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'ccaMissed',
+    source: 'School Cockpit, RE_AT_002',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'offences',
+    label: 'Offences',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'offences',
+    source: 'School Cockpit, RE_DI_003',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'conduct',
+    label: 'Conduct grade',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'conduct',
+    source: 'School Cockpit, RE_DI_003',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'counsellingSessions',
+    label: 'Counselling',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'counsellingSessions',
+    source: 'School Cockpit, RE_WB_004',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'sen',
+    label: 'SEN',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'sen',
+    source: 'School Cockpit, RE_WB_004',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'socialLinks',
+    label: 'Social links',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'socialLinks',
+    source: 'School Cockpit, RE_WB_004',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'riskIndicators',
+    label: 'Risk indicators',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'riskIndicators',
+    source: 'School Cockpit, RE_WB_004',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'lowMoodFlagged',
+    label: 'Low mood flagged 2+ terms',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'lowMoodFlagged',
+    source: 'School Cockpit, RE_WB_004',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'overallPercentage',
+    label: 'Overall % across selected subjects',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'overallPercentage',
+    source: 'School Cockpit, RE_AC_005',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'approvedMtl',
+    label: 'Approved MTL',
+    visible: true,
+    sortable: true,
+    filterable: false,
+    source: 'School Cockpit, RE_AC_005',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'learningSupport',
+    label: 'Learning support',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'learningSupport',
+    source: 'School Cockpit, RE_AC_005',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'postSecEligibility',
+    label: 'Post-Sec Eligibility',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'postSecEligibility',
+    source: 'School Cockpit, RE_AC_005',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'fas',
+    label: 'FAS',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'fas',
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'housing',
+    label: 'Housing',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'housing',
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'housingType',
+    label: 'Housing ownership',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'housingType',
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'custody',
+    label: 'Custody',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'custody',
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'commuterStatus',
+    label: 'Commuter status',
+    visible: true,
+    sortable: true,
+    filterable: false,
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'afterSchoolArrangement',
+    label: 'After-school arrangement',
+    visible: true,
+    sortable: true,
+    filterable: false,
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+  {
+    id: 'siblings',
+    label: 'Siblings',
+    visible: true,
+    sortable: true,
+    filterable: true,
+    filterField: 'siblings',
+    source: 'School Cockpit, RE_FA_006',
+    lastUpdated: '16 Sep 2025 by Ang Wei Pan',
+  },
+]
+
+interface ColumnVisibilityPopoverProps {
+  columns: Array<ColumnConfig>
+  onColumnsChange: (columns: Array<ColumnConfig>) => void
+  className?: string
+}
+
+export function ColumnVisibilityPopover({
+  columns,
+  onColumnsChange,
+  className,
+}: ColumnVisibilityPopoverProps) {
+  const [open, setOpen] = useState(false)
+
+  const visibleCount = columns.filter((c) => c.visible).length
+
+  const handleToggle = (id: string) => {
+    onColumnsChange(
+      columns.map((col) =>
+        col.id === id ? { ...col, visible: !col.visible } : col,
+      ),
+    )
+  }
+
+  const handleReset = () => {
+    onColumnsChange(defaultColumns)
+  }
+
+  const handleShowAll = () => {
+    onColumnsChange(columns.map((col) => ({ ...col, visible: true })))
+  }
+
+  const handleHideAll = () => {
+    // Keep at least name and index visible
+    onColumnsChange(
+      columns.map((col) => ({
+        ...col,
+        visible: col.id === 'name' || col.id === 'index',
+      })),
+    )
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <PopoverTrigger
+              render={
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(className)}
+                />
+              }
+            >
+              <Columns3 className="h-4 w-4" />
+            </PopoverTrigger>
+          }
+        />
+        <TooltipContent>Show/hide columns</TooltipContent>
+      </Tooltip>
+      <PopoverContent className="w-[280px] p-0" align="end">
+        {/* Quick actions */}
+        <div className="flex items-center gap-2 border-b p-3">
+          <Button variant="outline" size="sm" onClick={handleShowAll}>
+            Show all
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleHideAll}>
+            Hide all
+          </Button>
+        </div>
+
+        {/* Column list */}
+        <ScrollArea className="h-[300px]">
+          <div className="p-2">
+            {columns.map((column) => (
+              <label
+                key={column.id}
+                className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 hover:bg-accent"
+              >
+                <Checkbox
+                  checked={column.visible}
+                  onCheckedChange={() => handleToggle(column.id)}
+                  disabled={
+                    column.visible &&
+                    visibleCount <= 2 &&
+                    (column.id === 'name' || column.id === 'index')
+                  }
+                />
+                <span className="text-sm">{column.label}</span>
+              </label>
+            ))}
+          </div>
+        </ScrollArea>
+
+        {/* Reset button */}
+        <div className="border-t p-3">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="flex items-center gap-2 text-sm text-primary hover:underline"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset to default
+          </button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
