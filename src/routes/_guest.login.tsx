@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { AlertCircle, ArrowLeft, Loader2, Settings2, X } from 'lucide-react'
+import { ArrowLeft, Loader2, Settings2, X } from 'lucide-react'
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -157,15 +157,6 @@ function LoginPage() {
                       : 'Sign in with your EduPass account or school email.'}
                   </p>
 
-                  {eduPassState === 'error' && (
-                    <div className="mt-4 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-                      <AlertCircle className="h-4 w-4 shrink-0" />
-                      <span>
-                        EduPass is unavailable. Please try again or use OTP.
-                      </span>
-                    </div>
-                  )}
-
                   <Button
                     className="mt-6 w-full"
                     disabled={eduPassState === 'loading'}
@@ -180,6 +171,11 @@ function LoginPage() {
                       'Sign in with EduPass'
                     )}
                   </Button>
+                  {eduPassState === 'error' && (
+                    <p className="mt-2 text-sm text-red-600">
+                      EduPass is unavailable. Please try again or Sign in with OTP.
+                    </p>
+                  )}
 
                   <div className="my-4 flex items-center gap-3">
                     <div className="h-px flex-1 bg-slate-200" />
@@ -202,23 +198,23 @@ function LoginPage() {
                         showEmailError ? 'border-red-400 ring-red-100' : ''
                       }
                     />
+                    {otpState === 'invalid-email' && (
+                      <p className="-mt-1 text-sm text-red-600">
+                        Use your @schools.gov.sg email
+                      </p>
+                    )}
+                    {otpState === 'network-error' && (
+                      <p className="-mt-1 text-sm text-red-600">
+                        Sign in failed due to network issues, try again.
+                      </p>
+                    )}
                     <Button
                       type="submit"
                       variant="secondary"
                       className="w-full"
                     >
-                      Login with OTP
+                      Sign in with OTP
                     </Button>
-                    {otpState === 'invalid-email' && (
-                      <p className="mt-2 text-sm text-red-600">
-                        Use your @schools.gov.sg email
-                      </p>
-                    )}
-                    {otpState === 'network-error' && (
-                      <p className="mt-2 text-sm text-red-600">
-                        Sign in failed due to network issues, try again.
-                      </p>
-                    )}
                   </form>
                 </>
               )}
