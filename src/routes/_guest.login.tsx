@@ -154,7 +154,7 @@ function LoginPage() {
                   <p className="mt-2 text-sm text-slate-500">
                     {showEmailError
                       ? 'Enter your @schools.gov.sg email to receive a one-time password.'
-                      : 'Sign in with your EduPass account or school email.'}
+                      : 'Sign in with your Edupass account or school email.'}
                   </p>
 
                   <Button
@@ -165,15 +165,15 @@ function LoginPage() {
                     {eduPassState === 'loading' ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Connecting to EduPass…
+                        Connecting to Edupass…
                       </>
                     ) : (
-                      'Sign in with EduPass'
+                      'Sign in with Edupass'
                     )}
                   </Button>
                   {eduPassState === 'error' && (
                     <p className="mt-2 text-sm text-red-600">
-                      EduPass is unavailable. Please try again or Sign in with OTP.
+                      Edupass is unavailable. Please try again or Sign in with OTP.
                     </p>
                   )}
 
@@ -247,7 +247,7 @@ function LoginPage() {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <label className="text-xs font-medium text-slate-500">
-                EduPass State
+                Edupass State
               </label>
               <Select
                 value={eduPassState}
