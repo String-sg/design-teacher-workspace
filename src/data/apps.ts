@@ -92,7 +92,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'allocate',
         name: 'Allocate',
-        description: 'Mixed form class allocation based on learner profiles',
+        description: 'Simplify your Full SBB class allocation',
         icon: '/logos/allocate-logo.svg',
         color: 'blue',
         href: '/allocate',
