@@ -95,7 +95,7 @@ export function AppCard({
       <AppIcon icon={icon} color={color} iconPadding={iconPadding} />
       <div className="flex flex-col gap-2">
         <h3 className="font-semibold text-foreground">{name}</h3>
-        <p className="line-clamp-2 text-sm text-muted-foreground">
+        <p className="line-clamp-3 text-sm text-muted-foreground">
           {description}
         </p>
       </div>
@@ -107,6 +107,19 @@ export function AppCard({
       <button type="button" onClick={onClick} className={cardClassName}>
         {content}
       </button>
+    )
+  }
+
+  if (href.startsWith('http')) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cardClassName}
+      >
+        {content}
+      </a>
     )
   }
 
@@ -138,14 +151,13 @@ export function FeaturedAppCard({
   iconPadding,
   className,
 }: FeaturedAppCardProps) {
-  return (
-    <Link
-      to={href}
-      className={cn(
-        'group flex h-[132px] items-center gap-4 rounded-[14px] border border-[#C8C8C8] bg-white p-4 transition-colors hover:bg-muted/50',
-        className,
-      )}
-    >
+  const featuredClassName = cn(
+    'group flex h-[132px] items-center gap-4 rounded-[14px] border border-[#C8C8C8] bg-white p-4 transition-colors hover:bg-muted/50',
+    className,
+  )
+
+  const featuredContent = (
+    <>
       <AppIcon icon={icon} color={color} iconPadding={iconPadding} />
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex items-center gap-2">
@@ -158,6 +170,25 @@ export function FeaturedAppCard({
         </div>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
+    </>
+  )
+
+  if (href.startsWith('http')) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={featuredClassName}
+      >
+        {featuredContent}
+      </a>
+    )
+  }
+
+  return (
+    <Link to={href} className={featuredClassName}>
+      {featuredContent}
     </Link>
   )
 }

@@ -1,4 +1,3 @@
-import { Briefcase, CircleDollarSign, Gift } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export type AppColor = 'pink' | 'blue' | 'orange' | 'green' | 'purple'
@@ -24,8 +23,7 @@ export interface AppCategory {
 export const featuredApp: App = {
   id: 'featured-students',
   name: 'Students',
-  description:
-    'Key student information from multiple systems in one holistic view.',
+  description: 'Holistic Insights that help every Student thrive',
   icon: '/logos/Student-logo.svg',
   color: 'purple',
   href: '/students',
@@ -51,10 +49,10 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'sc-mobile',
         name: 'SC Mobile',
-        description: 'Streamlined attendance tracking on the go',
+        description: 'Streamlined attendance management on the go',
         icon: '/logos/sc-mobile.png',
         color: 'blue',
-        href: '/sc-mobile',
+        href: 'https://scmobile.moe.edu.sg/login',
         iconPadding: 'md',
       },
       {
@@ -76,20 +74,45 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'all-ears',
         name: 'All Ears',
-        description: 'Personalised surveys for students, staff, and parents',
+        description: 'Personalised forms for students, staff, and parents',
         icon: '/logos/ae-logo.png',
         color: 'pink',
-        href: '/all-ears',
+        href: 'https://forms.moe.edu.sg/',
       },
       {
         id: 'sdt-data-tool',
         name: 'Students',
-        description:
-          'Key student information from multiple systems in one holistic view',
+        description: 'Holistic Insights that help every Student thrive',
         icon: '/logos/Student-logo.svg',
         color: 'blue',
         href: '/students',
         iconPadding: 'sm',
+      },
+      {
+        id: 'mysei',
+        name: 'MySEI',
+        description:
+          'Data-derived holistic insights for students\u2019 social-emotional growth, well-being & sense of connectedness',
+        icon: '/logos/seconnect-mysei.png',
+        color: 'blue',
+        href: 'https://mysei.digital.moe.gov.sg',
+      },
+      {
+        id: 'allocate',
+        name: 'Allocate',
+        description: 'Mixed form class allocation based on learner profiles',
+        icon: '/logos/allocate-logo.svg',
+        color: 'blue',
+        href: '/allocate',
+      },
+      {
+        id: 'sdis',
+        name: 'SDIS',
+        description:
+          'One-Stop Platform for MOE student development programmes',
+        icon: '/logos/sdis-logo.png',
+        color: 'blue',
+        href: 'https://www.sdis.moe.gov.sg/oalc/s/login',
       },
     ],
   },
@@ -102,10 +125,18 @@ export const appCategories: Array<AppCategory> = [
         id: 'heytalia',
         name: 'HeyTalia',
         description:
-          'AI assistant for clear, parent-friendly school communications',
+          'AI-assistant for drafting clear, parent-friendly school communications',
         icon: '/logos/heytalia-icon.png',
         color: 'purple',
-        href: '/heytalia',
+        href: 'https://pg.moe.edu.sg',
+      },
+      {
+        id: 'appraiser',
+        name: 'Appraiser',
+        description: 'AI-generated draft student testimonials in seconds',
+        icon: '/logos/appraiser-logo.svg',
+        color: 'blue',
+        href: 'https://compose.gov.sg',
       },
     ],
   },
@@ -117,29 +148,12 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'langbuddy',
         name: 'LangBuddy',
-        description: 'AI-powered language learning companion',
+        description:
+          'AI conversational chatbot for Mother Tongue Language learning',
         icon: '/logos/langbuddy-square-with-text-blue.png',
         color: 'blue',
-        href: '/langbuddy',
+        href: 'https://langbuddy.moe.edu.sg/',
         iconPadding: 'none',
-      },
-      {
-        id: 'markly',
-        name: 'Mark.ly',
-        description:
-          'AI-driven rubric-based marking for Humanities and Languages',
-        icon: '/logos/Markly.svg',
-        color: 'blue',
-        href: '/markly',
-        iconPadding: 'none',
-      },
-      {
-        id: 'appraiser',
-        name: 'Appraiser',
-        description: 'AI-generated draft student testimonials in minutes',
-        icon: '/logos/appraiser-logo.svg',
-        color: 'blue',
-        href: '/appraiser',
       },
     ],
   },
@@ -152,32 +166,9 @@ export const appCategories: Array<AppCategory> = [
         id: 'workpal',
         name: 'Workpal',
         description: 'Your workplace management companion',
-        icon: Briefcase,
+        icon: '/logos/workpal-logo.svg',
         color: 'blue',
-        href: '/workpal',
-      },
-    ],
-  },
-  {
-    id: 'finance',
-    title: 'Finance',
-    description: 'Financial management and staff benefits',
-    apps: [
-      {
-        id: 'ifaas',
-        name: 'iFAAS',
-        description: 'Streamlined financial operations',
-        icon: CircleDollarSign,
-        color: 'green',
-        href: '/ifaas',
-      },
-      {
-        id: 'ibens',
-        name: 'iBENS',
-        description: 'Managing staff benefits efficiently',
-        icon: Gift,
-        color: 'orange',
-        href: '/ibens',
+        href: 'https://app.workpal.gov.sg/',
       },
     ],
   },
@@ -192,7 +183,7 @@ export const appCategories: Array<AppCategory> = [
         description: 'One-stop portal for professional learning',
         icon: '/logos/Opal.svg',
         color: 'blue',
-        href: '/opal',
+        href: 'https://idm.opal2.moe.edu.sg',
         iconPadding: 'none',
       },
       {
@@ -201,7 +192,7 @@ export const appCategories: Array<AppCategory> = [
         description: 'Bite-sized daily learning in just 5 minutes',
         icon: '/logos/glow-logo.svg',
         color: 'blue',
-        href: '/glow',
+        href: 'https://glow.digital.moe.gov.sg/home',
       },
     ],
   },
