@@ -25,7 +25,6 @@ export function AppSection({ title, description, apps }: AppSectionProps) {
             icon={app.icon}
             color={app.color}
             href={app.href}
-            iconPadding={app.iconPadding}
           />
         ))}
       </div>

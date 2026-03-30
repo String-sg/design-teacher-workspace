@@ -10,7 +10,7 @@ export interface App {
   color: AppColor
   href: string
   badge?: string
-  iconPadding?: 'none' | 'sm' | 'md'
+
 }
 
 export interface AppCategory {
@@ -28,7 +28,7 @@ export const featuredApp: App = {
   color: 'purple',
   href: '/students',
   badge: 'Beta',
-  iconPadding: 'sm',
+
 }
 
 export const appCategories: Array<AppCategory> = [
@@ -53,7 +53,7 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/scmobile-logo.svg',
         color: 'blue',
         href: 'https://scmobile.moe.edu.sg/login',
-        iconPadding: 'md',
+
       },
       {
         id: 'sls',
@@ -62,7 +62,7 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/sls-logo.svg',
         color: 'green',
         href: '/sls',
-        iconPadding: 'none',
+
       },
     ],
   },
@@ -86,13 +86,13 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/students-logo.svg',
         color: 'blue',
         href: '/students',
-        iconPadding: 'sm',
+      
       },
       {
         id: 'mysei',
         name: 'MySEI',
         description:
-          'Data-derived holistic insights for students\u2019 social-emotional growth, well-being & sense of connectedness',
+          'Holistic insights for students\u2019 social-emotional growth & well-being',
         icon: '/logos/mysei-logo.svg',
         color: 'blue',
         href: 'https://mysei.digital.moe.gov.sg',
@@ -153,7 +153,7 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/langbuddy-logo.svg',
         color: 'blue',
         href: 'https://langbuddy.moe.edu.sg/',
-        iconPadding: 'none',
+
       },
     ],
   },
@@ -184,7 +184,7 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/opal-logo.svg',
         color: 'blue',
         href: 'https://idm.opal2.moe.edu.sg',
-        iconPadding: 'none',
+
       },
       {
         id: 'glow',
