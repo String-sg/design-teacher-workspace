@@ -64,8 +64,8 @@ export const mockStudents: Array<Student> = [
     afterSchoolArrangement: null,
     siblings: 2,
     siblingDetails: [
-      { name: 'Chen Jun Hao', class: '1A' },
-      { name: 'Chen Mei Ling', class: '5B' },
+      { name: 'Chen Jun Hao', class: '1A', relationship: 'Same father and mother' },
+      { name: 'Chen Mei Ling', class: '5B', relationship: 'Same father' },
     ],
     externalAgencies: null,
     birthday: '4 Jan 2010',

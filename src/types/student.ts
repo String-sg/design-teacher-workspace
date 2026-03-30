@@ -73,7 +73,7 @@ export interface Student {
   commuterStatus: string | null
   afterSchoolArrangement: string | null
   siblings: number
-  siblingDetails?: Array<{ name: string; class: string }>
+  siblingDetails?: Array<{ name: string; class: string; relationship?: string }>
   externalAgencies: string | null
   // Personal
   birthday?: string
