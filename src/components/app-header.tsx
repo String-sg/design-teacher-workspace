@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { MessageCircle } from 'lucide-react'
 
 import { NotificationPopover } from '@/components/notifications/notification-popover'
@@ -31,6 +31,7 @@ export function AppHeader() {
   const breadcrumbs = useBreadcrumbs()
   const showNotifications = useFeatureFlag('notifications')
   const { isLoggedIn, logout } = useAuth()
+  const navigate = useNavigate()
   const { setView } = useHeyTalia()
 
   return (
@@ -83,7 +84,14 @@ export function AppHeader() {
               <DropdownMenuItem render={<Link to="/settings" />}>
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={logout}>Sign out</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  logout()
+                  navigate({ to: '/login' })
+                }}
+              >
+                Sign out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
