@@ -178,7 +178,7 @@ function PreviewMenu() {
                     }}
                   >
                     <img
-                      src="/logos/heytalia-icon.png"
+                      src="/logos/heytalia-logo.svg"
                       alt="HeyTalia"
                       style={{ width: 20, height: 20 }}
                     />
@@ -330,7 +330,7 @@ function PreviewMenu() {
                       }}
                     >
                       <img
-                        src="/logos/heytalia-icon.png"
+                        src="/logos/heytalia-logo.svg"
                         alt=""
                         style={{ width: 14, height: 14 }}
                       />
@@ -435,7 +435,7 @@ function PreviewMenu() {
                   }}
                 >
                   <img
-                    src="/logos/heytalia-icon.png"
+                    src="/logos/heytalia-logo.svg"
                     alt=""
                     style={{ width: 13, height: 13, borderRadius: 3 }}
                   />
@@ -543,7 +543,7 @@ function PreviewMenu() {
                 }}
               >
                 <img
-                  src="/logos/heytalia-icon.png"
+                  src="/logos/heytalia-logo.svg"
                   alt=""
                   style={{ width: 14, height: 14, borderRadius: 3 }}
                 />
@@ -574,7 +574,7 @@ function PreviewMenu() {
                 }}
               >
                 <img
-                  src="/logos/heytalia-icon.png"
+                  src="/logos/heytalia-logo.svg"
                   alt=""
                   style={{
                     width: 14,
@@ -702,7 +702,7 @@ function AgentIcon() {
       }}
     >
       <img
-        src="/logos/heytalia-icon.png"
+        src="/logos/heytalia-logo.svg"
         alt="HeyTalia"
         style={{ width: 18, height: 18 }}
       />
@@ -764,7 +764,7 @@ function ChatBubble() {
           }}
         >
           <img
-            src="/logos/heytalia-icon.png"
+            src="/logos/heytalia-logo.svg"
             style={{ width: 16, height: 16 }}
           />
         </div>

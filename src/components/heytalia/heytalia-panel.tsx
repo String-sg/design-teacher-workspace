@@ -281,7 +281,7 @@ export const AGENTS: Array<AgentDef> = [
     id: 'heytalia',
     name: 'HeyTalia',
     description: 'Draft announcements, forms, and parent communications',
-    icon: '/logos/heytalia-icon.png',
+    icon: '/logos/heytalia-logo.svg',
     color: '#9575CD',
     tag: 'Beta',
   },
@@ -476,7 +476,7 @@ export function HeyTaliaPanel() {
           >
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
               <img
-                src="/logos/heytalia-icon.png"
+                src="/logos/heytalia-logo.svg"
                 alt="HeyTalia"
                 className="h-5 w-5"
               />
@@ -739,7 +739,7 @@ function MessageBubble({
       {isAI && (
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twpurple-3">
           <img
-            src="/logos/heytalia-icon.png"
+            src="/logos/heytalia-logo.svg"
             alt="HeyTalia"
             className="h-4 w-4"
           />
@@ -990,7 +990,7 @@ function TypingIndicator() {
     <div className="flex items-center gap-2">
       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-twpurple-3">
         <img
-          src="/logos/heytalia-icon.png"
+          src="/logos/heytalia-logo.svg"
           alt="HeyTalia"
           className="h-4 w-4"
         />
