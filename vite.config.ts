@@ -1,34 +1,26 @@
-import { createRequire } from 'node:module'
-import { defineConfig } from 'vite'
-import { tanstackStart } from '@tanstack/react-start/plugin/vite'
-import viteReact from '@vitejs/plugin-react'
-import viteTsConfigPaths from 'vite-tsconfig-paths'
-import tailwindcss from '@tailwindcss/vite'
-import { nitro } from 'nitro/vite'
-import { madeRefine } from 'made-refine/vite'
+import path from 'node:path';
 
-const require = createRequire(import.meta.url)
+import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import viteTsConfigPaths from 'vite-tsconfig-paths';
 
-const config = defineConfig({
-  server: {
-    host: '127.0.0.1',
-  },
+export default defineConfig({
+  root: 'web',
   plugins: [
-    // devtools disabled to avoid port conflict with other worktree
-    // devtools({ port: 42070 }),
-    nitro(),
-    viteTsConfigPaths({
-      projects: ['./tsconfig.json'],
-    }),
+    TanStackRouterVite({ routesDirectory: './routes', generatedRouteTree: './routeTree.gen.ts' }),
+    react(),
     tailwindcss(),
-    tanstackStart(),
-    viteReact({
-      babel: {
-        plugins: [require.resolve('made-refine/babel')],
-      },
-    }),
-    madeRefine(),
+    viteTsConfigPaths({ projects: ['../tsconfig.json'] }),
   ],
-})
-
-export default config
+  resolve: {
+    alias: {
+      '~': path.resolve(import.meta.dirname, 'web'),
+    },
+  },
+  build: {
+    outDir: '../dist',
+    emptyOutDir: true,
+  },
+});
