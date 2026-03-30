@@ -955,18 +955,56 @@ export function StudentProfile({
                 </div>
               }
             />
-            <Field
-              label="Siblings"
-              value={
-                student.siblingDetails && student.siblingDetails.length > 0
-                  ? student.siblingDetails
-                      .map((s) => `${s.name} (${s.class})`)
-                      .join(', ')
-                  : student.siblings > 0
-                    ? student.siblings
-                    : '-'
-              }
-            />
+            {student.siblingDetails && student.siblingDetails.length > 0 ? (
+              <FieldWithDetails
+                label="Siblings"
+                value={student.siblings}
+                tooltip="Sibling details"
+                sideSheetTitle="Siblings"
+                sideSheetContent={
+                  <div className="space-y-5">
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Siblings</p>
+                      <div className="rounded-lg bg-muted px-4 py-3">
+                        <ul className="space-y-1 text-sm">
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            {student.siblings}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Remarks</p>
+                      <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                        {student.siblingDetails.map((s, i) => (
+                          <div key={i}>
+                            <p className="font-medium mb-1.5">
+                              {s.name} ({s.class})
+                            </p>
+                            {s.relationship ? (
+                              <ul className="space-y-1.5">
+                                <li className="flex items-start gap-2">
+                                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                  {s.relationship}
+                                </li>
+                              </ul>
+                            ) : (
+                              <p className="text-muted-foreground">None</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                }
+              />
+            ) : (
+              <Field
+                label="Siblings"
+                value={student.siblings > 0 ? student.siblings : '-'}
+              />
+            )}
           </dl>
         </Section>
 
