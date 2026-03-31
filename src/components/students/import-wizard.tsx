@@ -351,7 +351,9 @@ function Step2({
             <Table>
               <TableHeader className="sticky top-0 bg-white">
                 <TableRow>
-                  <TableHead className="w-10 pl-4 text-right text-xs">#</TableHead>
+                  <TableHead className="w-10 pl-4 text-right text-xs">
+                    #
+                  </TableHead>
                   <TableHead className="text-xs">Name</TableHead>
                   <TableHead className="text-xs">Class</TableHead>
                   <TableHead className="text-xs">VIA missed</TableHead>
@@ -363,7 +365,9 @@ function Step2({
                 {MOCK_REVIEW_ROWS.map((r) => (
                   <TableRow
                     key={r.row}
-                    className={cn(hasIssues && issueRows.has(r.row) && 'bg-red-50/50')}
+                    className={cn(
+                      hasIssues && issueRows.has(r.row) && 'bg-red-50/50',
+                    )}
                   >
                     <TableCell className="pl-4 text-right text-xs tabular-nums text-slate-400">
                       {r.row}
@@ -376,10 +380,18 @@ function Step2({
                     >
                       {r.name}
                     </TableCell>
-                    <TableCell className="text-sm text-slate-500">{r.class}</TableCell>
-                    <TableCell className="text-sm text-slate-500">{r.viaMissed}</TableCell>
-                    <TableCell className="max-w-[140px] truncate text-sm text-slate-500">{r.nextSteps}</TableCell>
-                    <TableCell className="max-w-[140px] truncate text-sm text-slate-500">{r.teacherRemarks}</TableCell>
+                    <TableCell className="text-sm text-slate-500">
+                      {r.class}
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500">
+                      {r.viaMissed}
+                    </TableCell>
+                    <TableCell className="max-w-[140px] truncate text-sm text-slate-500">
+                      {r.nextSteps}
+                    </TableCell>
+                    <TableCell className="max-w-[140px] truncate text-sm text-slate-500">
+                      {r.teacherRemarks}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -701,7 +713,8 @@ function Step3({
     () =>
       Object.fromEntries(INCOMING_FIELDS.map((f) => [f.id, makeFieldState()])),
   )
-  const [categories, setCategories] = useState<Array<string>>(DEFAULT_CATEGORIES)
+  const [categories, setCategories] =
+    useState<Array<string>>(DEFAULT_CATEGORIES)
   const [bannerDismissed, setBannerDismissed] = useState(false)
 
   function updateField(id: string, patch: Partial<FieldState>) {
@@ -727,7 +740,10 @@ function Step3({
     return Object.fromEntries(
       INCOMING_FIELDS.map((f) => {
         const s = fieldStates[f.id]
-        return [f.id, s.mode === 'selected' && s.selected ? s.selected : 'Others']
+        return [
+          f.id,
+          s.mode === 'selected' && s.selected ? s.selected : 'Others',
+        ]
       }),
     )
   }
@@ -834,7 +850,7 @@ function ConfirmationPage({
   fieldsByCategory,
   onExplore,
 }: {
-  fieldsByCategory: Record<string, string[]>
+  fieldsByCategory: Record<string, Array<string>>
   onExplore: () => void
 }) {
   const [accordionOpen, setAccordionOpen] = useState(true)
@@ -901,10 +917,7 @@ function ConfirmationPage({
                 )}
               >
                 {categories.map((cat) => (
-                  <div
-                    key={cat}
-                    className="rounded-lg bg-slate-50 p-4"
-                  >
+                  <div key={cat} className="rounded-lg bg-slate-50 p-4">
                     <p className="mb-2 text-sm font-semibold text-slate-800">
                       {cat}
                     </p>
@@ -945,7 +958,7 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
   const [uploadError, setUploadError] = useState(false)
   const [hasIssues, setHasIssues] = useState(true)
   const [fieldsByCategory, setFieldsByCategory] = useState<
-    Record<string, string[]>
+    Record<string, Array<string>>
   >({})
 
   function handleFileAccepted(file: File) {
@@ -964,8 +977,8 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
 
   function buildFieldsByCategory(
     mappings: Record<string, string>,
-  ): Record<string, string[]> {
-    const result: Record<string, string[]> = {}
+  ): Record<string, Array<string>> {
+    const result: Record<string, Array<string>> = {}
     for (const field of INCOMING_FIELDS) {
       const category = mappings[field.id] ?? 'Others'
       if (!result[category]) result[category] = []
@@ -1052,7 +1065,12 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
               </button>
             }
           />
-          <PopoverContent side="top" sideOffset={8} align="end" className="w-64">
+          <PopoverContent
+            side="top"
+            sideOffset={8}
+            align="end"
+            className="w-64"
+          >
             <PopoverHeader>
               <PopoverTitle>Design Tools</PopoverTitle>
             </PopoverHeader>

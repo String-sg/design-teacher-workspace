@@ -10,7 +10,6 @@ export interface App {
   color: AppColor
   href: string
   badge?: string
-
 }
 
 export interface AppCategory {
@@ -28,7 +27,6 @@ export const featuredApp: App = {
   color: 'purple',
   href: '/students',
   badge: 'Beta',
-
 }
 
 export const appCategories: Array<AppCategory> = [
@@ -53,7 +51,6 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/scmobile-logo.svg',
         color: 'blue',
         href: 'https://scmobile.moe.edu.sg/login',
-
       },
       {
         id: 'sls',
@@ -63,7 +60,6 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/sls-logo.svg',
         color: 'green',
         href: 'https://vle.learning.moe.edu.sg/login',
-
       },
     ],
   },
@@ -87,7 +83,6 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/students-logo.svg',
         color: 'blue',
         href: '/students',
-      
       },
       {
         id: 'allocate',
@@ -100,8 +95,7 @@ export const appCategories: Array<AppCategory> = [
       {
         id: 'sdis',
         name: 'SDIS',
-        description:
-          'One-Stop Platform for MOE student development programmes',
+        description: 'One-Stop Platform for MOE student development programmes',
         icon: '/logos/sdis-logo.svg',
         color: 'blue',
         href: 'https://www.sdis.moe.gov.sg/oalc/s/login',
@@ -179,7 +173,6 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/langbuddy-logo.svg',
         color: 'blue',
         href: 'https://langbuddy.moe.edu.sg/',
-
       },
     ],
   },
@@ -210,7 +203,6 @@ export const appCategories: Array<AppCategory> = [
         icon: '/logos/opal-logo.svg',
         color: 'blue',
         href: 'https://idm.opal2.moe.edu.sg',
-
       },
       {
         id: 'glow',
