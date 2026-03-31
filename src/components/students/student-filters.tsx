@@ -7,6 +7,7 @@ import { ExportCsvModal } from './export-csv-modal'
 import { ImportWizard } from './import-wizard'
 import type { ColumnConfig } from './column-visibility-popover'
 import type { FilterCriterion } from '@/types/student'
+import { useFeatureFlags } from '@/lib/feature-flags'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -40,6 +41,7 @@ export function StudentFilters({
   totalCount,
   className,
 }: StudentFiltersProps) {
+  const { flags } = useFeatureFlags()
   const [exportModalOpen, setExportModalOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
 
@@ -90,16 +92,18 @@ export function StudentFilters({
                 <Download className="mr-2 size-4" />
                 Export view
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setImportDialogOpen(true)}>
-                <Upload className="mr-2 size-4" />
-                Import data
-              </DropdownMenuItem>
+              {flags['import-data'] && (
+                <DropdownMenuItem onClick={() => setImportDialogOpen(true)}>
+                  <Upload className="mr-2 size-4" />
+                  Import data
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
 
-      {importDialogOpen && (
+      {flags['import-data'] && importDialogOpen && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background">
           <ImportWizard onClose={() => setImportDialogOpen(false)} />
         </div>
