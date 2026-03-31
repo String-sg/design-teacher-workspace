@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Copy, MoreHorizontal, Search, Trash2, Users } from 'lucide-react'
 
 import type { FormStatus } from '@/types/form'
-import type {FormsFilters} from '@/components/forms/forms-filter-bar';
+import type { FormsFilters } from '@/components/forms/forms-filter-bar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,8 +25,7 @@ import {
 import { EmptyState } from '@/components/empty-state'
 import {
   EMPTY_FORMS_FILTERS,
-  FormsFilterBar
-  
+  FormsFilterBar,
 } from '@/components/forms/forms-filter-bar'
 import { ReadRate } from '@/components/comms/read-rate'
 import { mockForms } from '@/data/mock-forms'

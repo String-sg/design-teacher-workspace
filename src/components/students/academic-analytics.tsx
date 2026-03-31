@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CATEGORICAL_6 } from '@/lib/chart-colors'
 import {
   Bar,
   BarChart,
@@ -24,6 +23,7 @@ import {
   X,
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
+import { CATEGORICAL_6 } from '@/lib/chart-colors'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'

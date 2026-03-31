@@ -586,10 +586,7 @@ function GroupDetailPage() {
                 </TableHeader>
                 <TableBody>
                   {pagedMembers.map((member, i) => (
-                    <TableRow
-                      key={member.id}
-                      className="group/row"
-                    >
+                    <TableRow key={member.id} className="group/row">
                       <TableCell className="text-muted-foreground text-xs">
                         {(page - 1) * PAGE_SIZE + i + 1}
                       </TableCell>

@@ -134,7 +134,9 @@ export function FormResponseTable({
     'respondedAt',
     'readBy',
     'pgStatus',
-    ...(responseType === 'yes-no' ? (['formResponse'] as Array<ColumnKey>) : []),
+    ...(responseType === 'yes-no'
+      ? (['formResponse'] as Array<ColumnKey>)
+      : []),
     ...questions.map((_, i) => `q${i}` as ColumnKey),
   ])
   const [visibleCols, setVisibleCols] = useState<Set<ColumnKey>>(defaultCols)

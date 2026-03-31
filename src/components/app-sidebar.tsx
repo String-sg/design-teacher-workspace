@@ -73,7 +73,7 @@ const mainNavItems: Array<MenuItem> = [
   },
 ]
 
-const studentInsightItems: Array<MenuItem> = [
+const studentInsightItemsWithAnalytics: Array<MenuItem> = [
   {
     title: 'Analytics',
     url: '/student-analytics',
@@ -92,6 +92,14 @@ const studentInsightItems: Array<MenuItem> = [
     icon: Bot,
     stage: 'Experiment',
     featureFlag: 'student-analytics',
+  },
+]
+
+const studentInsightItemsWithoutAnalytics: Array<MenuItem> = [
+  {
+    title: 'Student Insights',
+    url: '/students',
+    icon: Users,
   },
 ]
 
@@ -237,9 +245,11 @@ export function AppSidebar() {
   const filteredMainItems = filterItems(mainNavItems)
   const filteredParentsItems = filterItems(parentsCommItems)
   const filteredManageItems = filterItems(manageItems)
-  const filteredStudentItems = studentInsightItems.filter((item) =>
-    item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
-  )
+  const filteredStudentItems = studentAnalyticsEnabled
+    ? studentInsightItemsWithAnalytics.filter((item) =>
+        item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
+      )
+    : studentInsightItemsWithoutAnalytics
 
   return (
     <Sidebar collapsible="icon">
@@ -263,9 +273,11 @@ export function AppSidebar() {
             />
           </SidebarGroupContent>
           <>
-            <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
-              Student Insights
-            </SidebarGroupLabel>
+            {studentAnalyticsEnabled && (
+              <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:pointer-events-none">
+                Student Insights
+              </SidebarGroupLabel>
+            )}
             <SidebarGroupContent>
               <SidebarMenuItems
                 items={filteredStudentItems}

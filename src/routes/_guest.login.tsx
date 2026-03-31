@@ -26,7 +26,7 @@ export const Route = createFileRoute('/_guest/login')({
 
 type EduPassState = 'idle' | 'loading' | 'error'
 
-const EDUPASS_STATES: { label: string; value: EduPassState }[] = [
+const EDUPASS_STATES: Array<{ label: string; value: EduPassState }> = [
   { label: 'Idle', value: 'idle' },
   { label: 'Loading', value: 'loading' },
   { label: 'Error', value: 'error' },
@@ -40,7 +40,7 @@ type OtpState =
   | 'otp-verify-no-countdown'
   | 'invalid-otp'
 
-const OTP_STATES: { label: string; value: OtpState }[] = [
+const OTP_STATES: Array<{ label: string; value: OtpState }> = [
   { label: 'Email input', value: 'email-input' },
   { label: 'Invalid email', value: 'invalid-email' },
   { label: 'Network error', value: 'network-error' },
@@ -173,7 +173,8 @@ function LoginPage() {
                   </Button>
                   {eduPassState === 'error' && (
                     <p className="mt-2 text-sm text-red-600">
-                      Edupass is unavailable. Please try again or Sign in with OTP.
+                      Edupass is unavailable. Please try again or Sign in with
+                      OTP.
                     </p>
                   )}
 
@@ -183,10 +184,7 @@ function LoginPage() {
                     <div className="h-px flex-1 bg-slate-200" />
                   </div>
 
-                  <form
-                    onSubmit={handleSubmit}
-                    className="flex flex-col gap-3"
-                  >
+                  <form onSubmit={handleSubmit} className="flex flex-col gap-3">
                     <Input
                       type="email"
                       placeholder="e.g. name@schools.gov.sg"
@@ -313,17 +311,11 @@ function OtpVerifyCard({
 }) {
   const showInvalidOtp = otpState === 'invalid-otp'
   const showCountdown = otpState === 'otp-verify' && countdown > 0
-  const otpPrefix =
-    otpState === 'otp-verify' ? 'e3myWwd5-' : 'E3MYWWD5-'
+  const otpPrefix = otpState === 'otp-verify' ? 'e3myWwd5-' : 'E3MYWWD5-'
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onBack}
-        className="mb-4 -ml-2"
-      >
+      <Button variant="ghost" size="sm" onClick={onBack} className="mb-4 -ml-2">
         <ArrowLeft className="h-3.5 w-3.5" />
         Back
       </Button>
@@ -334,8 +326,8 @@ function OtpVerifyCard({
       </h1>
       <p className="mt-2 text-sm text-slate-500">
         We sent a one-time password to{' '}
-        <span className="font-semibold text-slate-900">{email}</span>. Enter
-        the characters that follow the prefix shown.
+        <span className="font-semibold text-slate-900">{email}</span>. Enter the
+        characters that follow the prefix shown.
       </p>
 
       <form onSubmit={onSignIn} className="mt-6">
