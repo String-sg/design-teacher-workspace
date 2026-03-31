@@ -17,8 +17,8 @@ import {
 
 import type {
   GroupTypeFilterOption,
-  StudentGroup,
   StructuredGroup,
+  StudentGroup,
 } from '@/types/student-group'
 import { getStructuredTypeLabel } from '@/types/student-group'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
@@ -69,7 +69,7 @@ const CURRENT_USER_EMAIL = 'tanml@school.edu.sg'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getUniqueClasses(members: StudentGroup['members']): string[] {
+function getUniqueClasses(members: StudentGroup['members']): Array<string> {
   const seen = new Set<string>()
   for (const m of members) seen.add(m.class)
   return [...seen].sort()
@@ -284,7 +284,7 @@ function ClassPills({
 }: {
   members: StudentGroup['members'] | StructuredGroup['members']
 }) {
-  const classes = getUniqueClasses(members as StudentGroup['members'])
+  const classes = getUniqueClasses(members)
   const visible = classes.slice(0, 3)
   const hidden = classes.length - 3
   return (

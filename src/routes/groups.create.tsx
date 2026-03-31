@@ -95,9 +95,7 @@ function GroupsCreate() {
                   {opt.mockup}
                 </div>
                 <div className="p-4">
-                  <p className="text-sm font-semibold">
-                    {opt.title}
-                  </p>
+                  <p className="text-sm font-semibold">{opt.title}</p>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     {opt.description}
                   </p>

@@ -2212,7 +2212,7 @@ export function AttendanceAnalytics() {
                   Math.abs(p - detailsPage) <= 1,
               )
               .reduce<Array<number | '…'>>((acc, p, i, arr) => {
-                if (i > 0 && p - (arr[i - 1]) > 1) acc.push('…')
+                if (i > 0 && p - arr[i - 1] > 1) acc.push('…')
                 acc.push(p)
                 return acc
               }, [])

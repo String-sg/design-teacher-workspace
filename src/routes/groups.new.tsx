@@ -2,14 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, ChevronDown, ChevronRight, Search, X } from 'lucide-react'
 
-import type { StudentGroup } from '@/types/student-group'
 import { toast } from 'sonner'
+import type { StudentGroup } from '@/types/student-group'
 
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { MOCK_GROUPS } from '@/data/mock-groups'
 import {
-  CLASS_GROUPS,
   CCA_GROUPS,
+  CLASS_GROUPS,
   TEACHING_GROUPS,
 } from '@/data/mock-student-groups'
 import { Button } from '@/components/ui/button'
@@ -39,7 +39,7 @@ type PickerStudent = {
 type PickerGroup = {
   id: string
   label: string
-  students: PickerStudent[]
+  students: Array<PickerStudent>
 }
 
 // ─── Build student registry ───────────────────────────────────────────────────
@@ -132,7 +132,7 @@ function GroupsNew() {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   // Undo state
-  const [undoIds, setUndoIds] = useState<string[]>([])
+  const [undoIds, setUndoIds] = useState<Array<string>>([])
   const [showUndo, setShowUndo] = useState(false)
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -151,7 +151,7 @@ function GroupsNew() {
 
   // Group selected students by class for the review panel
   const selectedByClass = useMemo(() => {
-    const map = new Map<string, PickerStudent[]>()
+    const map = new Map<string, Array<PickerStudent>>()
     for (const s of selectedStudents) {
       if (!map.has(s.class)) map.set(s.class, [])
       map.get(s.class)!.push(s)
@@ -208,7 +208,7 @@ function GroupsNew() {
     }
   }, [])
 
-  function triggerUndo(removedIds: string[]) {
+  function triggerUndo(removedIds: Array<string>) {
     if (removedIds.length === 0) return
     setUndoIds(removedIds)
     setShowUndo(true)

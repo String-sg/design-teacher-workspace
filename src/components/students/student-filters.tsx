@@ -1,16 +1,10 @@
 import { useState } from 'react'
-import {
-  Clock,
-  Download,
-  MoreHorizontal,
-  Search,
-  Upload,
-  X,
-} from 'lucide-react'
+import { Download, MoreHorizontal, Search, Upload } from 'lucide-react'
 
 import { MultiFilterPopover } from './multi-filter-popover'
 import { ColumnVisibilityPopover } from './column-visibility-popover'
 import { ExportCsvModal } from './export-csv-modal'
+import { ImportWizard } from './import-wizard'
 import type { ColumnConfig } from './column-visibility-popover'
 import type { FilterCriterion } from '@/types/student'
 import { cn } from '@/lib/utils'
@@ -107,33 +101,7 @@ export function StudentFilters({
 
       {importDialogOpen && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background">
-          {/* Header */}
-          <div className="flex shrink-0 items-center justify-between border-b px-6 py-4">
-            <h1 className="text-base font-semibold">Import data</h1>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setImportDialogOpen(false)}
-            >
-              <X className="size-4" />
-            </Button>
-          </div>
-
-          {/* Content */}
-          <div className="flex flex-1 items-center justify-center p-6">
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed px-16 py-20 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <Clock className="size-5 text-muted-foreground" />
-              </div>
-              <p className="mt-4 text-xl font-medium text-foreground">
-                Coming soon
-              </p>
-              <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                Field import is being prepared. It'll be available here once
-                ready.
-              </p>
-            </div>
-          </div>
+          <ImportWizard onClose={() => setImportDialogOpen(false)} />
         </div>
       )}
 

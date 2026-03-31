@@ -15,7 +15,6 @@ import {
   CardContent,
   CardFooter,
 } from '@flow/core'
-
 ;<Card>
   <CardHeader>
     <CardTitle>Title</CardTitle>
@@ -32,7 +31,6 @@ Shadcn equivalent: `Card`
 
 ```tsx
 import { Grid } from '@flow/core'
-
 ;<Grid columns={3} gap="md">
   <div>Column 1</div>
   <div>Column 2</div>
@@ -66,7 +64,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@flow/core'
-
 ;<Breadcrumb>
   <BreadcrumbList>
     <BreadcrumbItem>
@@ -86,7 +83,6 @@ Shadcn equivalent: `Breadcrumb`
 
 ```tsx
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@flow/core'
-
 ;<Tabs defaultValue="tab1">
   <TabsList>
     <TabsTrigger value="tab1">Tab 1</TabsTrigger>
@@ -111,7 +107,6 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from '@flow/core'
-
 ;<Pagination>
   <PaginationContent>
     <PaginationItem>
@@ -147,7 +142,6 @@ import {
   TableHead,
   TableCell,
 } from '@flow/core'
-
 ;<Table>
   <TableHeader>
     <TableRow>
@@ -184,7 +178,6 @@ Shadcn equivalent: `Badge`
 
 ```tsx
 import { Avatar, AvatarImage, AvatarFallback } from '@flow/core'
-
 ;<Avatar>
   <AvatarImage src="/avatar.png" alt="User" />
   <AvatarFallback>JD</AvatarFallback>
@@ -197,7 +190,6 @@ Shadcn equivalent: `Avatar`
 
 ```tsx
 import { Skeleton } from '@flow/core'
-
 ;<Skeleton className="h-4 w-[200px]" />
 ```
 
@@ -207,7 +199,6 @@ Shadcn equivalent: `Skeleton`
 
 ```tsx
 import { Progress } from '@flow/core'
-
 ;<Progress value={60} />
 ```
 
@@ -248,7 +239,6 @@ Shadcn equivalent: `Input`
 
 ```tsx
 import { Textarea } from '@flow/core'
-
 ;<Textarea placeholder="Enter description..." />
 ```
 
@@ -258,7 +248,6 @@ Shadcn equivalent: `Textarea`
 
 ```tsx
 import { Label } from '@flow/core'
-
 ;<Label htmlFor="email">Email</Label>
 ```
 
@@ -268,7 +257,6 @@ Shadcn equivalent: `Label`
 
 ```tsx
 import { Checkbox } from '@flow/core'
-
 ;<Checkbox id="terms" />
 ```
 
@@ -278,7 +266,6 @@ Shadcn equivalent: `Checkbox`
 
 ```tsx
 import { RadioGroup, RadioGroupItem } from '@flow/core'
-
 ;<RadioGroup defaultValue="option-1">
   <RadioGroupItem value="option-1" id="r1" />
   <RadioGroupItem value="option-2" id="r2" />
@@ -297,7 +284,6 @@ import {
   SelectContent,
   SelectItem,
 } from '@flow/core'
-
 ;<Select>
   <SelectTrigger>
     <SelectValue placeholder="Choose..." />
@@ -315,7 +301,6 @@ Shadcn equivalent: `Select`
 
 ```tsx
 import { Slider } from '@flow/core'
-
 ;<Slider defaultValue={[50]} max={100} step={1} />
 ```
 
@@ -325,7 +310,6 @@ Shadcn equivalent: `Slider`
 
 ```tsx
 import { Switch } from '@flow/core'
-
 ;<Switch id="airplane-mode" />
 ```
 
@@ -354,7 +338,6 @@ Shadcn equivalent: `Toggle`
 
 ```tsx
 import { Alert, AlertTitle, AlertDescription } from '@flow/core'
-
 ;<Alert>
   <AlertTitle>Heads up!</AlertTitle>
   <AlertDescription>Something happened.</AlertDescription>
@@ -377,7 +360,6 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@flow/core'
-
 ;<AlertDialog>
   <AlertDialogTrigger asChild>
     <Button variant="critical">Delete</Button>
@@ -410,7 +392,6 @@ import {
   DialogFooter,
   DialogClose,
 } from '@flow/core'
-
 ;<Dialog>
   <DialogTrigger asChild>
     <Button>Open</Button>
@@ -443,7 +424,6 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@flow/core'
-
 ;<Sheet>
   <SheetTrigger asChild>
     <Button>Open Sheet</Button>
@@ -463,7 +443,6 @@ Shadcn equivalent: `Sheet`
 
 ```tsx
 import { Popover, PopoverTrigger, PopoverContent } from '@flow/core'
-
 ;<Popover>
   <PopoverTrigger asChild>
     <Button variant="outline">Info</Button>
@@ -483,7 +462,6 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@flow/core'
-
 ;<TooltipProvider>
   <Tooltip>
     <TooltipTrigger asChild>
@@ -508,7 +486,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@flow/core'
-
 ;<DropdownMenu>
   <DropdownMenuTrigger asChild>
     <Button variant="outline">Menu</Button>
@@ -537,7 +514,6 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@flow/core'
-
 ;<Accordion type="single" collapsible>
   <AccordionItem value="item-1">
     <AccordionTrigger>Section 1</AccordionTrigger>
@@ -552,7 +528,6 @@ Shadcn equivalent: `Accordion`
 
 ```tsx
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@flow/core'
-
 ;<Collapsible>
   <CollapsibleTrigger>Toggle</CollapsibleTrigger>
   <CollapsibleContent>Hidden content</CollapsibleContent>
