@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { useFeatureFlag } from '@/hooks/use-feature-flag'
 
 import type {
   FilterCriterion,
@@ -121,7 +122,9 @@ function matchesCondition(
 }
 
 function StudentsPage() {
-  useSetBreadcrumbs([{ label: 'Profile', href: '/students' }])
+  const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
+  const pageTitle = studentAnalyticsEnabled ? 'Profiles' : 'Student Insights'
+  useSetBreadcrumbs([{ label: pageTitle, href: '/students' }])
 
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [searchQuery, setSearchQuery] = useState('')
@@ -286,7 +289,7 @@ function StudentsPage() {
       <div className="shrink-0 space-y-6 pt-6">
         {/* Page Header */}
         <div className="px-6">
-          <h1 className="text-2xl font-semibold">Profiles</h1>
+          <h1 className="text-2xl font-semibold">{pageTitle}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Key data to understand your students holistically
           </p>

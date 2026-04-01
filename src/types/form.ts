@@ -18,7 +18,7 @@ export interface FormQuestion {
   id: string
   text: string
   type: QuestionType
-  options?: string[] // for mcq, checkbox, ranking
+  options?: Array<string> // for mcq, checkbox, ranking
   required?: boolean
 }
 
@@ -31,12 +31,12 @@ export interface Form {
   recipientCount: number
   completedCount: number
   ownership: FormOwnership
-  targetClasses: string[]
+  targetClasses: Array<string>
   formType?: FormType
   source?: FormSource
   linkedAnnouncementId?: string
   responseType?: ResponseType
-  questions?: FormQuestion[]
+  questions?: Array<FormQuestion>
   eventStart?: string
   eventEnd?: string
   venue?: string
@@ -60,5 +60,5 @@ export interface FormRecipient {
   responseStatus: 'responded' | 'pending'
   respondedAt?: string
   formResponse?: 'yes' | 'no'
-  questionAnswers?: string[]
+  questionAnswers?: Array<string>
 }

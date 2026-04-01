@@ -71,6 +71,13 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
       'Show the Groups page in the sidebar for organising students into reusable groups',
     stage: 'Experiment',
   },
+  {
+    key: 'import-data',
+    label: 'Import Data',
+    description:
+      'Show the Import Data option in the student list to upload custom fields via a guided wizard',
+    stage: 'Experiment',
+  },
 ]
 
 function FeatureFlagsPage() {

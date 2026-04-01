@@ -7,7 +7,7 @@ export interface PGQuestion {
   id: string
   text: string
   type: 'free-text' | 'mcq'
-  options?: string[]
+  options?: Array<string>
   showAfter?: 'yes' | 'no' | 'both'
 }
 

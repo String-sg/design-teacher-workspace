@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState } from 'react'
 import {
   ArrowLeft,
   Plus,
@@ -11,7 +11,7 @@ import {
   Eye,
   Send,
   FileText,
-} from "lucide-react"
+} from 'lucide-react'
 import {
   Button,
   Input,
@@ -30,9 +30,9 @@ import {
   Separator,
   Badge,
   Switch,
-} from "@flow/core"
+} from '@flow/core'
 
-type FieldType = "text" | "multiple_choice" | "checkbox" | "date"
+type FieldType = 'text' | 'multiple_choice' | 'checkbox' | 'date'
 
 interface FormField {
   id: string
@@ -42,11 +42,18 @@ interface FormField {
   options?: string[]
 }
 
-const fieldTypeConfig: Record<FieldType, { label: string; icon: typeof Type; description: string }> = {
-  text: { label: "Text", icon: Type, description: "Short or long answer" },
-  multiple_choice: { label: "Multiple Choice", icon: ListChecks, description: "Pick one option" },
-  checkbox: { label: "Checkbox", icon: CheckSquare, description: "Yes or no" },
-  date: { label: "Date", icon: CalendarDays, description: "Pick a date" },
+const fieldTypeConfig: Record<
+  FieldType,
+  { label: string; icon: typeof Type; description: string }
+> = {
+  text: { label: 'Text', icon: Type, description: 'Short or long answer' },
+  multiple_choice: {
+    label: 'Multiple Choice',
+    icon: ListChecks,
+    description: 'Pick one option',
+  },
+  checkbox: { label: 'Checkbox', icon: CheckSquare, description: 'Yes or no' },
+  date: { label: 'Date', icon: CalendarDays, description: 'Pick a date' },
 }
 
 let nextId = 1
@@ -55,17 +62,17 @@ function genId() {
 }
 
 export default function CreateFormPage({ onBack }: { onBack: () => void }) {
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [recipients, setRecipients] = useState("all_parents")
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [recipients, setRecipients] = useState('all_parents')
   const [fields, setFields] = useState<FormField[]>([
-    { id: genId(), type: "text", label: "Full Name", required: true },
+    { id: genId(), type: 'text', label: 'Full Name', required: true },
     {
       id: genId(),
-      type: "multiple_choice",
-      label: "Which day works best?",
+      type: 'multiple_choice',
+      label: 'Which day works best?',
       required: true,
-      options: ["Monday", "Wednesday", "Friday"],
+      options: ['Monday', 'Wednesday', 'Friday'],
     },
   ])
   const [showPreview, setShowPreview] = useState(false)
@@ -76,9 +83,9 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
       {
         id: genId(),
         type,
-        label: "",
+        label: '',
         required: false,
-        options: type === "multiple_choice" ? ["Option 1"] : undefined,
+        options: type === 'multiple_choice' ? ['Option 1'] : undefined,
       },
     ])
   }
@@ -95,9 +102,15 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
     setFields(
       fields.map((f) =>
         f.id === fieldId
-          ? { ...f, options: [...(f.options || []), `Option ${(f.options?.length || 0) + 1}`] }
-          : f
-      )
+          ? {
+              ...f,
+              options: [
+                ...(f.options || []),
+                `Option ${(f.options?.length || 0) + 1}`,
+              ],
+            }
+          : f,
+      ),
     )
   }
 
@@ -106,8 +119,8 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
       fields.map((f) =>
         f.id === fieldId
           ? { ...f, options: f.options?.map((o, i) => (i === idx ? value : o)) }
-          : f
-      )
+          : f,
+      ),
     )
   }
 
@@ -116,8 +129,8 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
       fields.map((f) =>
         f.id === fieldId
           ? { ...f, options: f.options?.filter((_, i) => i !== idx) }
-          : f
-      )
+          : f,
+      ),
     )
   }
 
@@ -127,19 +140,29 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
         <div className="mx-auto max-w-2xl px-6 py-8">
           {/* Preview toolbar */}
           <div className="mb-8 flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => setShowPreview(false)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowPreview(false)}
+            >
               <ArrowLeft />
             </Button>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-semibold tracking-tight">Preview</h1>
+                <h1 className="text-lg font-semibold tracking-tight">
+                  Preview
+                </h1>
                 <Badge variant="secondary">Draft</Badge>
               </div>
               <p className="text-xs text-muted-foreground">
                 How recipients will see your form
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => setShowPreview(false)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPreview(false)}
+            >
               Back to Editor
             </Button>
             <Button size="sm">
@@ -152,10 +175,12 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
           <Card className="shadow-sm">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl leading-tight">
-                {title || "Untitled Form"}
+                {title || 'Untitled Form'}
               </CardTitle>
               {description && (
-                <CardDescription className="mt-1.5">{description}</CardDescription>
+                <CardDescription className="mt-1.5">
+                  {description}
+                </CardDescription>
               )}
               <Separator className="mt-4" />
             </CardHeader>
@@ -163,19 +188,25 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
               {fields.map((field, index) => (
                 <div key={field.id} className="space-y-2">
                   <Label className="text-sm font-medium">
-                    <span className="mr-1 text-muted-foreground">{index + 1}.</span>
-                    {field.label || "Untitled Question"}
+                    <span className="mr-1 text-muted-foreground">
+                      {index + 1}.
+                    </span>
+                    {field.label || 'Untitled Question'}
                     {field.required && (
                       <span className="ml-0.5 text-destructive">*</span>
                     )}
                   </Label>
-                  {field.type === "text" && (
-                    <Input placeholder="Type your answer..." disabled className="bg-muted/30" />
+                  {field.type === 'text' && (
+                    <Input
+                      placeholder="Type your answer..."
+                      disabled
+                      className="bg-muted/30"
+                    />
                   )}
-                  {field.type === "date" && (
+                  {field.type === 'date' && (
                     <Input type="date" disabled className="bg-muted/30" />
                   )}
-                  {field.type === "multiple_choice" && (
+                  {field.type === 'multiple_choice' && (
                     <div className="space-y-2.5 pt-1">
                       {field.options?.map((opt, i) => (
                         <label
@@ -188,10 +219,10 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
                       ))}
                     </div>
                   )}
-                  {field.type === "checkbox" && (
+                  {field.type === 'checkbox' && (
                     <label className="flex cursor-pointer items-center gap-2.5 pt-1 text-sm text-foreground">
                       <div className="size-4 shrink-0 rounded border-2 border-input" />
-                      {field.label || "Untitled"}
+                      {field.label || 'Untitled'}
                     </label>
                   )}
                 </div>
@@ -199,7 +230,9 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
               {fields.length === 0 && (
                 <div className="flex flex-col items-center gap-2 py-12">
                   <FileText className="size-8 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">No questions added yet.</p>
+                  <p className="text-sm text-muted-foreground">
+                    No questions added yet.
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -218,10 +251,16 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
             <ArrowLeft />
           </Button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-semibold tracking-tight">Create Form</h1>
+            <h1 className="text-lg font-semibold tracking-tight">
+              Create Form
+            </h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowPreview(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPreview(true)}
+            >
               <Eye className="size-3.5" />
               Preview
             </Button>
@@ -261,7 +300,8 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
             <div>
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-sm font-medium text-muted-foreground">
-                  {fields.length} {fields.length === 1 ? "question" : "questions"}
+                  {fields.length}{' '}
+                  {fields.length === 1 ? 'question' : 'questions'}
                 </p>
               </div>
 
@@ -317,7 +357,7 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
                         className="font-medium"
                       />
 
-                      {field.type === "multiple_choice" && (
+                      {field.type === 'multiple_choice' && (
                         <div className="mt-3 space-y-2 pl-1">
                           {field.options?.map((opt, i) => (
                             <div key={i} className="flex items-center gap-2">
@@ -362,7 +402,9 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
                       <FileText className="size-6 text-muted-foreground" />
                     </div>
                     <div className="text-center">
-                      <p className="text-sm font-medium text-foreground">No questions yet</p>
+                      <p className="text-sm font-medium text-foreground">
+                        No questions yet
+                      </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         Add your first question from the panel on the right.
                       </p>
@@ -382,21 +424,26 @@ export default function CreateFormPage({ onBack }: { onBack: () => void }) {
                   Add Question
                 </p>
                 <div className="grid grid-cols-2 gap-1.5">
-                  {(Object.entries(fieldTypeConfig) as [FieldType, typeof fieldTypeConfig.text][]).map(
-                    ([type, config]) => {
-                      const Icon = config.icon
-                      return (
-                        <button
-                          key={type}
-                          className="flex flex-col items-center gap-1 rounded-md border border-border bg-card px-2 py-2.5 text-center transition-colors hover:bg-accent hover:text-accent-foreground"
-                          onClick={() => addField(type)}
-                        >
-                          <Icon className="size-4" />
-                          <span className="text-[11px] font-medium leading-tight">{config.label}</span>
-                        </button>
-                      )
-                    }
-                  )}
+                  {(
+                    Object.entries(fieldTypeConfig) as [
+                      FieldType,
+                      typeof fieldTypeConfig.text,
+                    ][]
+                  ).map(([type, config]) => {
+                    const Icon = config.icon
+                    return (
+                      <button
+                        key={type}
+                        className="flex flex-col items-center gap-1 rounded-md border border-border bg-card px-2 py-2.5 text-center transition-colors hover:bg-accent hover:text-accent-foreground"
+                        onClick={() => addField(type)}
+                      >
+                        <Icon className="size-4" />
+                        <span className="text-[11px] font-medium leading-tight">
+                          {config.label}
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 

@@ -6,10 +6,10 @@ The Flow Design System uses a 3-layer token bridge that maps raw color primitive
 
 The token bridge is split across two CSS files:
 
-| File | Contents | Portable? |
-|------|----------|-----------|
+| File                | Contents                                                                                                                                                            | Portable?                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
 | `flow-ds-theme.css` | Sections A–F: color scale mappings, semantic overrides, spacing/typography wiring, dark mode formula changes, selector radius overrides, `.flow-theme` escape hatch | **Yes** — copy to any project |
-| `styles.css` | Brand scale hex values, Shadcn tokens, Tier 1 `--_` primitives, dark mode Radix swaps + brand dark values, `@theme inline`, `@layer base` | **No** — per-project |
+| `styles.css`        | Brand scale hex values, Shadcn tokens, Tier 1 `--_` primitives, dark mode Radix swaps + brand dark values, `@theme inline`, `@layer base`                           | **No** — per-project          |
 
 ## Token Resolution Chain
 
@@ -41,6 +41,7 @@ Layer 1: Radix/Custom Primitives  Layer 2: Flow DS Semantic         Layer 3: App
 Source: `@radix-ui/colors` (imported as CSS files)
 
 Radix provides 12-step color scales following a specific purpose pattern:
+
 - **Steps 1–2**: Backgrounds (app bg, subtle bg)
 - **Steps 3–5**: Interactive states (hover, active, selected)
 - **Steps 6–8**: Borders (subtle, default, strong)
@@ -67,17 +68,18 @@ Source: `@flow/design-tokens` (base tokens) + custom overrides in `flow-ds-theme
 
 Flow DS ships its own internal primitives. Our override layer remaps the semantic scales:
 
-| Semantic Scale | Flow DS Default | Our Override (Radix/Custom) | Purpose |
-|---------------|-----------------|---------------------------|---------|
-| `--color-brand-*` | Indigo (hard-coded hex) | `var(--twblue-*)` | Primary brand, buttons, links |
-| `--color-neutral-*` | `--color-slate-*` (Flow) | `var(--slate-*)` (Radix) | Grays, borders, text |
-| `--color-critical-*` | `--color-ruby-*` (Flow) | `var(--crimson-*)` (Radix) | Errors, destructive actions |
-| `--color-success-*` | `--color-green-*` (Flow) | `var(--lime-*)` (Radix) | Success states |
-| `--color-caution-*` | `--color-orange-*` (Flow) | `var(--orange-*)` (Radix) | Warnings |
-| `--color-info-*` | `--color-blue-*` (Flow) | `var(--twblue-*)` | Informational (same as brand) |
-| `--color-accent-*` | `--color-mint-*` (Flow) | `var(--slate-*)` (Radix) | Secondary emphasis (neutral) |
+| Semantic Scale       | Flow DS Default           | Our Override (Radix/Custom) | Purpose                       |
+| -------------------- | ------------------------- | --------------------------- | ----------------------------- |
+| `--color-brand-*`    | Indigo (hard-coded hex)   | `var(--twblue-*)`           | Primary brand, buttons, links |
+| `--color-neutral-*`  | `--color-slate-*` (Flow)  | `var(--slate-*)` (Radix)    | Grays, borders, text          |
+| `--color-critical-*` | `--color-ruby-*` (Flow)   | `var(--crimson-*)` (Radix)  | Errors, destructive actions   |
+| `--color-success-*`  | `--color-green-*` (Flow)  | `var(--lime-*)` (Radix)     | Success states                |
+| `--color-caution-*`  | `--color-orange-*` (Flow) | `var(--orange-*)` (Radix)   | Warnings                      |
+| `--color-info-*`     | `--color-blue-*` (Flow)   | `var(--twblue-*)`           | Informational (same as brand) |
+| `--color-accent-*`   | `--color-mint-*` (Flow)   | `var(--slate-*)` (Radix)    | Secondary emphasis (neutral)  |
 
 Flow DS also defines **surface tokens** that control component backgrounds, text, and borders:
+
 - `--color-background-page`, `--color-background-section`, `--color-background-popover`
 - `--color-foreground-default`, `--color-foreground-section`, `--color-foreground-link`
 - `--color-border-default`, `--color-border-focus`
@@ -87,19 +89,20 @@ Flow DS also defines **surface tokens** that control component backgrounds, text
 
 These are the tokens that Shadcn UI components and Tailwind utilities read:
 
-| App Token | Resolves To | Flow DS Equivalent |
-|-----------|-------------|-------------------|
-| `--background` | `var(--slate-1)` | `--color-background-page` |
-| `--foreground` | `var(--slate-12)` | `--color-foreground-default` |
-| `--card` | `white` | `--color-background-section` |
-| `--primary` | `var(--twblue-9)` | `--color-fill-contrast` |
-| `--destructive` | `var(--crimson-9)` | `--color-fill-critical` |
-| `--border` | `var(--slate-6)` | `--color-border-default` |
-| `--ring` | `var(--twblue-8)` | `--color-border-focus` |
-| `--muted` | `var(--slate-3)` | `--color-background-overlay` |
-| `--accent` | `var(--slate-3)` | `--btn-color-fill-hover` |
+| App Token       | Resolves To        | Flow DS Equivalent           |
+| --------------- | ------------------ | ---------------------------- |
+| `--background`  | `var(--slate-1)`   | `--color-background-page`    |
+| `--foreground`  | `var(--slate-12)`  | `--color-foreground-default` |
+| `--card`        | `white`            | `--color-background-section` |
+| `--primary`     | `var(--twblue-9)`  | `--color-fill-contrast`      |
+| `--destructive` | `var(--crimson-9)` | `--color-fill-critical`      |
+| `--border`      | `var(--slate-6)`   | `--color-border-default`     |
+| `--ring`        | `var(--twblue-8)`  | `--color-border-focus`       |
+| `--muted`       | `var(--slate-3)`   | `--color-background-overlay` |
+| `--accent`      | `var(--slate-3)`   | `--btn-color-fill-hover`     |
 
 The bidirectional arrows in the chain mean:
+
 - Shadcn components read `--primary`, `--border`, etc.
 - Flow components read `--color-fill-contrast`, `--color-border-default`, etc.
 - Both resolve to the same underlying Radix values.
@@ -110,11 +113,11 @@ When your app overrides Flow's default brand (e.g., TWBlue instead of Flow's ind
 
 ```html
 <!-- App brand (TWBlue) -->
-<Button>App-branded button</Button>
+<button>App-branded button</button>
 
 <!-- Flow DS canonical (indigo) -->
 <div class="flow-theme">
-  <Button>Flow-branded button</Button>
+  <button>Flow-branded button</button>
 </div>
 ```
 
@@ -123,6 +126,7 @@ When your app overrides Flow's default brand (e.g., TWBlue instead of Flow's ind
 CSS custom properties resolve `var()` at computed-value time on the **declaring element**. Children inherit the already-resolved value from `:root`, not the variable reference. So overriding `--color-brand-9` in `.flow-theme` alone won't affect tokens like `--btn-color-fill-brand-enabled` that were already resolved at `:root`.
 
 The `.flow-theme` block must re-declare ALL tokens that transitively depend on `--color-brand-*`:
+
 - Button fills/borders/foregrounds (`--btn-color-*`)
 - Selection fills (`--color-fill-selected-*`)
 - Section inverse backgrounds
@@ -133,19 +137,19 @@ The `.flow-theme` block must re-declare ALL tokens that transitively depend on `
 
 The `--_` prefixed tokens allow the app to tune radius, spacing, and typography without forking the design system:
 
-| Primitive | TW Value | Flow Default | Purpose |
-|-----------|----------|-------------|---------|
-| `--_radius-sm` | 6px | 6px | Small corners |
-| `--_radius-md` | 8px | 8px | Medium corners |
-| `--_radius-lg` | 10px | 10px | Large corners |
-| `--_radius-xl` | 14px | 14px | Extra large corners |
-| `--_radius-2xl` | 24px | 16px | Cards (TW uses more rounding) |
-| `--_spacing-xs` | 0.375rem | 0.5rem | Tight spacing |
-| `--_spacing-md` | 0.75rem | 1rem | Standard spacing |
-| `--_spacing-2xl` | 2.25rem | 2.5rem | Large spacing |
-| `--_text-body-md` | 0.875rem | 1rem | Body text size |
-| `--_text-label-sm` | 0.75rem | 0.875rem | Label text size |
-| `--_weight-body-md-strong` | 500 | 600 | Bold body weight |
+| Primitive                  | TW Value | Flow Default | Purpose                       |
+| -------------------------- | -------- | ------------ | ----------------------------- |
+| `--_radius-sm`             | 6px      | 6px          | Small corners                 |
+| `--_radius-md`             | 8px      | 8px          | Medium corners                |
+| `--_radius-lg`             | 10px     | 10px         | Large corners                 |
+| `--_radius-xl`             | 14px     | 14px         | Extra large corners           |
+| `--_radius-2xl`            | 24px     | 16px         | Cards (TW uses more rounding) |
+| `--_spacing-xs`            | 0.375rem | 0.5rem       | Tight spacing                 |
+| `--_spacing-md`            | 0.75rem  | 1rem         | Standard spacing              |
+| `--_spacing-2xl`           | 2.25rem  | 2.5rem       | Large spacing                 |
+| `--_text-body-md`          | 0.875rem | 1rem         | Body text size                |
+| `--_text-label-sm`         | 0.75rem  | 0.875rem     | Label text size               |
+| `--_weight-body-md-strong` | 500      | 600          | Bold body weight              |
 
 The underscore prefix distinguishes these from Flow's internal tokens. `.flow-theme` reverts all `--_*` primitives back to Flow DS defaults.
 
