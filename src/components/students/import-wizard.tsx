@@ -3,18 +3,28 @@ import {
   AlertCircle,
   ArrowLeft,
   ArrowRight,
+  Award,
   Check,
   CheckCircle2,
   ChevronDown,
+  ExternalLink,
   Lightbulb,
+  List,
+  MessageSquareText,
   Plus,
   Settings2,
+  ShieldCheck,
   Upload,
   X,
 } from 'lucide-react'
 
 import { toast } from 'sonner'
 
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -49,34 +59,47 @@ const INCOMING_FIELDS = [
   { id: 'teacher_remarks', name: "Teacher's remarks" },
 ]
 
-const MOCK_REVIEW_ROWS = Array.from({ length: 10 }, (_, i) => ({
-  row: i + 1,
-  name: 'Alice Lee Jia Min Lim...',
-  class: 'S1-INTELLIGENCE rff...',
-  viaMissed: '2',
-  nextSteps: 'Follow up with...',
-  teacherRemarks: 'Needs support in...',
-}))
+const MOCK_REVIEW_ROWS = [
+  { row: 1, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '2', nextSteps: 'Schedule a one-...', teacherRemarks: 'Abse...' },
+  { row: 2, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '3', nextSteps: 'Watch the record...', teacherRemarks: 'No vi...' },
+  { row: 3, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '7', nextSteps: 'Join the upcomin...', teacherRemarks: 'Miss...' },
+  { row: 4, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '5', nextSteps: 'Review the VIA s...', teacherRemarks: 'Abse...' },
+  { row: 5, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '6', nextSteps: 'Attend the supp...', teacherRemarks: 'No sl...' },
+  { row: 6, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '1', nextSteps: 'Complete an onli...', teacherRemarks: 'Medi...' },
+  { row: 7, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '5', nextSteps: 'Arrange a peer t...', teacherRemarks: 'No vi...' },
+  { row: 8, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '3', nextSteps: 'Participate in a f...', teacherRemarks: 'Miss...' },
+  { row: 9, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '2', nextSteps: 'Submit a set of q...', teacherRemarks: 'Abse...' },
+  { row: 10, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '1', nextSteps: 'Access additiona...', teacherRemarks: 'Abse...' },
+]
 
 const REVIEW_ISSUES = [
   {
     id: 'not-found',
     title: 'Names not found in MOE records',
-    description:
-      'Check names match the School Cockpit format or upload MOE data first',
-    rows: [5, 6, 8],
+    description: 'Check names match the School Cockpit format.',
+    ref: 'Row 5, 6, 8',
+    highlightRows: [5, 6, 8],
   },
   {
     id: 'duplicate',
     title: 'Duplicate records',
     description: 'Remove repeated records',
-    rows: [3, 200, 5, 6],
+    ref: 'Row 3 and 100, 5 and 8',
+    highlightRows: [3, 5, 8],
   },
   {
     id: 'dup-cols',
     title: 'Duplicate columns',
     description: 'Remove or rename repeated columns',
-    rows: [3, 200, 5, 6],
+    ref: 'Column 0 and H, I and J',
+    highlightRows: [],
+  },
+  {
+    id: 'col-exists',
+    title: 'Column header already exist',
+    description: 'Rename the column',
+    ref: 'Column F',
+    highlightRows: [],
   },
 ]
 
@@ -127,13 +150,54 @@ function makeFieldState(): FieldState {
   return { mode: 'unset', selected: null, newValue: '', newError: '' }
 }
 
-// ─── Step indicator ─────────────────────────────────────────────────────────
+// ─── Wizard stepper ──────────────────────────────────────────────────────────
 
-function StepIndicator({ current, total }: { current: number; total: number }) {
+const WIZARD_STEPS = ['Upload', 'Review', 'Organise'] as const
+
+function WizardStepper({ current }: { current: number }) {
   return (
-    <p className="text-sm text-muted-foreground">
-      Step {current} of {total}
-    </p>
+    <div className="flex items-center gap-2.5">
+      {WIZARD_STEPS.map((label, i) => {
+        const stepNum = i + 1
+        const isActive = stepNum === current
+        const isCompleted = stepNum < current
+        const isDimmed = stepNum > current
+
+        return (
+          <div key={label} className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5">
+              <div
+                className={cn(
+                  'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors',
+                  (isActive || isCompleted) &&
+                    'bg-primary text-primary-foreground',
+                  isDimmed && 'border border-slate-300 text-slate-400',
+                )}
+              >
+                {isCompleted ? (
+                  <Check className="h-3 w-3" strokeWidth={2.5} />
+                ) : (
+                  stepNum
+                )}
+              </div>
+              <span
+                className={cn(
+                  'text-xs',
+                  isActive && 'font-medium text-slate-700',
+                  isCompleted && 'font-medium text-slate-500',
+                  isDimmed && 'text-slate-400',
+                )}
+              >
+                {label}
+              </span>
+            </div>
+            {i < WIZARD_STEPS.length - 1 && (
+              <div className="h-px w-6 bg-slate-200" />
+            )}
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
@@ -164,27 +228,17 @@ function DropZone({
       onDrop={handleDrop}
       onClick={() => inputRef.current?.click()}
       className={cn(
-        'flex h-full min-h-[320px] w-full cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed transition-colors',
+        'flex h-full min-h-[320px] w-full cursor-pointer flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed transition-colors',
         isDragging
-          ? 'border-primary bg-primary/5'
-          : 'border-slate-300 bg-slate-50/50 hover:border-slate-400 hover:bg-slate-50',
+          ? 'border-blue-400 bg-blue-100/60'
+          : 'border-blue-300 bg-blue-50/60 hover:border-blue-400 hover:bg-blue-50',
       )}
     >
-      <div
-        className={cn(
-          'flex h-14 w-14 items-center justify-center rounded-full transition-colors',
-          isDragging ? 'bg-primary/10' : 'bg-slate-100',
-        )}
-      >
-        <Upload
-          className={cn(
-            'h-6 w-6 transition-colors',
-            isDragging ? 'text-primary' : 'text-slate-400',
-          )}
-        />
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
+        <Upload className="h-5 w-5 text-primary" />
       </div>
       <div className="text-center">
-        <p className="text-sm font-medium text-slate-700">
+        <p className="text-sm font-semibold text-slate-800">
           Drop your files here or{' '}
           <span className="text-primary underline underline-offset-2">
             browse
@@ -220,86 +274,111 @@ function Step1({
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="px-8 pb-6 pt-8">
-        <StepIndicator current={1} total={3} />
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">
-          Upload any spreadsheet
+        <h1 className="text-2xl font-semibold text-slate-900">
+          Upload student data
         </h1>
         <p className="mt-1 text-sm text-slate-500">
           Add your own data for a more complete student view
         </p>
       </div>
 
-      {hasError && (
-        <div className="mx-8 mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
-            <div>
-              <p className="text-sm font-semibold text-red-800">
-                File upload failed
-              </p>
-              <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-xs text-red-700">
-                {STEP1_UPLOAD_ERRORS.map((err, i) => (
-                  <li key={i}>{err}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="flex flex-1 gap-6 overflow-hidden px-8 pb-8">
         {/* Left panel */}
-        <div className="flex w-[340px] shrink-0 flex-col gap-4">
-          <div className="rounded-xl border bg-white p-5">
-            <p className="mb-3 font-semibold text-slate-900">
-              Prepare your custom file
-            </p>
-            <ul className="space-y-2.5">
-              {[
-                <>
-                  Check that your{' '}
-                  <span className="cursor-pointer text-primary underline underline-offset-2">
-                    file is ready
-                  </span>
-                </>,
-                'Upload .csv, .xls, or .xlsx file',
-                'Ensure files are not password-protected',
-              ].map((text, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                    <Check className="h-3 w-3 text-emerald-600" />
-                  </div>
-                  <span className="text-slate-600">{text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-xl border bg-white p-5">
-            <p className="mb-3 font-semibold text-slate-900">
-              Frequently added files
+        <div className="flex w-[340px] shrink-0 flex-col gap-4 overflow-y-auto">
+          {hasError && (
+            <Alert className="rounded-3xl border-[var(--slate-6)] bg-white [&>svg]:text-[var(--crimson-11)]">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle className="font-semibold text-[var(--crimson-11)]">
+                File upload failed
+              </AlertTitle>
+              <AlertDescription className="text-[var(--slate-12)]">
+                <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                  {STEP1_UPLOAD_ERRORS.map((err, i) => (
+                    <li key={i}>{err}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+          {/* Prepare your file */}
+          <div className="rounded-3xl border border-slate-200 bg-white px-6 py-4">
+            <p className="mb-3 text-base font-semibold text-slate-600">
+              Prepare your file
             </p>
             <ul className="space-y-3">
+              <li className="flex items-center gap-3 text-sm text-slate-600">
+                <Check className="h-4 w-4 shrink-0 text-slate-400" />
+                <span>
+                  Check that your{' '}
+                  <a className="inline-flex items-center gap-0.5 text-primary underline underline-offset-2">
+                    file is ready
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </span>
+              </li>
+              <li className="flex items-center gap-3 text-sm text-slate-600">
+                <Check className="h-4 w-4 shrink-0 text-slate-400" />
+                File is a spreadsheet (.csv, .xls, .xlsx)
+              </li>
+              <li className="flex items-center gap-3 text-sm text-slate-600">
+                <Check className="h-4 w-4 shrink-0 text-slate-400" />
+                File is not password-protected
+              </li>
+            </ul>
+            <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-3">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+              <p className="text-xs text-slate-400">
+                We'll check your file before importing
+              </p>
+            </div>
+          </div>
+
+          {/* Required columns */}
+          <div className="rounded-3xl border border-slate-200 bg-white px-6 py-4">
+            <p className="mb-3 text-base font-semibold text-slate-600">
+              Required columns
+            </p>
+            <div className="flex items-start gap-3">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+              <div>
+                <p className="text-sm font-semibold text-slate-600">Name</p>
+                <p className="text-xs text-slate-500">
+                  Student's full name shown in School Cockpit
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Frequently uploaded */}
+          <div className="px-2">
+            <p className="mb-3 text-sm text-slate-500">Frequently uploaded</p>
+            <ul className="space-y-2">
               {[
                 {
+                  icon: MessageSquareText,
                   label: "Teacher's remarks",
-                  desc: 'Add insights from observations and interactions',
+                  desc: 'Observations and interactions',
                 },
                 {
+                  icon: List,
                   label: 'Follow-up notes',
-                  desc: 'Track next steps and conversations for continuity',
+                  desc: 'Next steps and actions',
                 },
                 {
-                  label: 'Other aspects of student life',
-                  desc: 'Include LEAPS, awards, or enrichment details',
+                  icon: Award,
+                  label: 'Awards and enrichment',
+                  desc: 'Programmes, enrichment activities, awards',
                 },
-              ].map(({ label, desc }) => (
-                <li key={label} className="flex items-start gap-2.5">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-slate-100">
-                    <div className="h-2 w-2 rounded-full bg-slate-400" />
+              ].map(({ icon: Icon, label, desc }) => (
+                <li
+                  key={label}
+                  className="flex items-center gap-3 rounded-2xl bg-slate-100 p-3"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-200">
+                    <Icon className="h-4 w-4 text-slate-500" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-700">
+                    <p className="text-sm font-semibold text-slate-600">
                       {label}
                     </p>
                     <p className="text-xs text-slate-500">{desc}</p>
@@ -330,52 +409,42 @@ function Step2({
   onBack: () => void
   onNext: () => void
 }) {
-  const issueRows = new Set(REVIEW_ISSUES.flatMap((i) => i.rows))
+  const issueRows = new Set(REVIEW_ISSUES.flatMap((i) => i.highlightRows))
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="px-8 pb-4 pt-8">
-        <StepIndicator current={2} total={3} />
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">
-          Review and Clean
-        </h1>
-        <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-slate-400">
-          UPLOADED 1023 RECORDS · 3 FIELDS
-        </p>
+        <h1 className="text-2xl font-semibold text-slate-900">Review</h1>
+        <p className="mt-0.5 text-sm text-slate-400">1023 records, 8 columns</p>
       </div>
 
-      <div className="flex flex-1 gap-6 overflow-hidden px-8 pb-6">
+      <div className="flex flex-1 gap-4 overflow-hidden px-8 pb-6">
         {/* Table */}
-        <div className="flex flex-1 flex-col overflow-hidden rounded-xl border bg-white">
+        <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border bg-white">
           <div className="overflow-y-auto">
             <Table>
               <TableHeader className="sticky top-0 bg-white">
                 <TableRow>
-                  <TableHead className="w-10 pl-4 text-right text-xs">
+                  <TableHead className="w-10 pl-4 text-right text-xs text-slate-400">
                     #
                   </TableHead>
-                  <TableHead className="text-xs">Name</TableHead>
-                  <TableHead className="text-xs">Class</TableHead>
-                  <TableHead className="text-xs">VIA missed</TableHead>
-                  <TableHead className="text-xs">Next steps</TableHead>
-                  <TableHead className="text-xs">Teacher's remarks</TableHead>
+                  <TableHead className="text-xs text-slate-400">Name</TableHead>
+                  <TableHead className="text-xs text-slate-400">Class</TableHead>
+                  <TableHead className="text-xs text-slate-400">VIA missed</TableHead>
+                  <TableHead className="text-xs text-slate-400">Next steps</TableHead>
+                  <TableHead className="text-xs text-slate-400">Teacher's remarks</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {MOCK_REVIEW_ROWS.map((r) => (
-                  <TableRow
-                    key={r.row}
-                    className={cn(
-                      hasIssues && issueRows.has(r.row) && 'bg-red-50/50',
-                    )}
-                  >
+                  <TableRow key={r.row}>
                     <TableCell className="pl-4 text-right text-xs tabular-nums text-slate-400">
                       {r.row}
                     </TableCell>
                     <TableCell
                       className={cn(
-                        'text-sm',
-                        hasIssues && issueRows.has(r.row) && 'text-red-600',
+                        'max-w-[160px] truncate text-sm text-slate-700',
+                        hasIssues && issueRows.has(r.row) && 'text-[var(--crimson-11)]',
                       )}
                     >
                       {r.name}
@@ -400,54 +469,42 @@ function Step2({
         </div>
 
         {/* Validation panel */}
-        <div className="flex w-[300px] shrink-0 flex-col">
+        <div className="flex w-[280px] shrink-0 flex-col">
           {hasIssues ? (
-            <div className="flex flex-1 flex-col rounded-xl border bg-white p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <p className="font-semibold text-slate-900">Few issues found</p>
+            <div className="flex flex-1 flex-col rounded-2xl border bg-white p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <p className="text-sm font-semibold text-slate-900">
+                  Few issues found
+                </p>
                 <Button
                   variant="outline"
                   size="sm"
                   className="gap-1.5"
                   onClick={onBack}
                 >
-                  <Upload className="h-3.5 w-3.5" />
                   Upload again
+                  <Upload className="h-3.5 w-3.5" />
                 </Button>
               </div>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 {REVIEW_ISSUES.map((iss) => (
-                  <li
-                    key={iss.id}
-                    className="rounded-lg border border-red-100 bg-red-50/50 p-3"
-                  >
-                    <div className="flex items-start gap-2">
-                      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-900">
-                          {iss.title}
-                        </p>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          {iss.description}
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {iss.rows.map((row) => (
-                            <span
-                              key={row}
-                              className="rounded bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-600 ring-1 ring-slate-200"
-                            >
-                              ROW {row}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                  <li key={iss.id} className="flex items-start gap-2.5">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--crimson-11)]" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-[var(--crimson-11)]">
+                        {iss.title}
+                      </p>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {iss.description}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">{iss.ref}</p>
                     </div>
                   </li>
                 ))}
               </ul>
             </div>
           ) : (
-            <div className="flex flex-1 items-center justify-center rounded-xl border bg-emerald-50/40 p-8">
+            <div className="flex flex-1 items-center justify-center rounded-2xl border bg-emerald-50/40 p-8">
               <div className="text-center">
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
                   <CheckCircle2 className="h-6 w-6 text-emerald-600" />
@@ -753,8 +810,7 @@ function Step3({
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-8 pt-8">
-          <StepIndicator current={3} total={3} />
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-slate-900">
             Organise your new fields
           </h1>
         </div>
@@ -1015,9 +1071,17 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
     <>
       {/* Header */}
       <div className="flex shrink-0 items-center justify-between px-6 py-4">
-        <span className="text-sm font-medium text-slate-700">
-          {isConfirmation ? 'Add custom fields' : 'Import data'}
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="text-base font-semibold text-slate-900">
+            {isConfirmation ? 'Add custom fields' : 'Import data'}
+          </span>
+          {!isConfirmation && (
+            <>
+              <div className="h-4 w-px bg-slate-200" />
+              <WizardStepper current={step} />
+            </>
+          )}
+        </div>
         {!isConfirmation && (
           <Button
             variant="outline"
