@@ -5,7 +5,6 @@ import {
   ArrowRight,
   Award,
   Check,
-  CheckCircle2,
   ChevronDown,
   ExternalLink,
   Lightbulb,
@@ -25,6 +24,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -60,16 +60,16 @@ const INCOMING_FIELDS = [
 ]
 
 const MOCK_REVIEW_ROWS = [
-  { row: 1, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '2', nextSteps: 'Schedule a one-...', teacherRemarks: 'Abse...' },
-  { row: 2, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '3', nextSteps: 'Watch the record...', teacherRemarks: 'No vi...' },
-  { row: 3, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '7', nextSteps: 'Join the upcomin...', teacherRemarks: 'Miss...' },
-  { row: 4, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '5', nextSteps: 'Review the VIA s...', teacherRemarks: 'Abse...' },
-  { row: 5, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '6', nextSteps: 'Attend the supp...', teacherRemarks: 'No sl...' },
-  { row: 6, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '1', nextSteps: 'Complete an onli...', teacherRemarks: 'Medi...' },
-  { row: 7, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '5', nextSteps: 'Arrange a peer t...', teacherRemarks: 'No vi...' },
-  { row: 8, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '3', nextSteps: 'Participate in a f...', teacherRemarks: 'Miss...' },
-  { row: 9, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '2', nextSteps: 'Submit a set of q...', teacherRemarks: 'Abse...' },
-  { row: 10, name: 'Alice Lee Jia Min Lim Xrggr', class: '3A', viaMissed: '1', nextSteps: 'Access additiona...', teacherRemarks: 'Abse...' },
+  { row: 1, name: 'Chan Jun Kai', class: '3A', viaMissed: '2', nextSteps: 'Schedule a one-on-one session', teacherRemarks: 'Absent for 3 consecutive VIA sessions without valid reason' },
+  { row: 2, name: 'Vincent Koh Kin Yi', class: '3A', viaMissed: '3', nextSteps: 'Watch the recorded session', teacherRemarks: 'No visible effort to make up missed sessions' },
+  { row: 3, name: 'Lam Wei Jie', class: '3A', viaMissed: '7', nextSteps: 'Join the upcoming cohort', teacherRemarks: 'Missing most sessions, needs immediate intervention' },
+  { row: 4, name: 'Sarah Chan Jun Kai', class: '3A', viaMissed: '5', nextSteps: 'Review the VIA schedule', teacherRemarks: 'Absent without prior notice on multiple occasions' },
+  { row: 5, name: 'Kenneth Koh Kin Yi', class: '3A', viaMissed: '6', nextSteps: 'Attend the supplementary class', teacherRemarks: 'No sign of engagement in VIA activities this term' },
+  { row: 6, name: 'Liang Mei Jie', class: '3A', viaMissed: '1', nextSteps: 'Complete an online module', teacherRemarks: 'Medical leave accounted for; follow up on make-up session' },
+  { row: 7, name: 'Diana Tan Hui Lin', class: '3A', viaMissed: '5', nextSteps: 'Arrange a peer tutoring session', teacherRemarks: 'No valid reasons provided for absences' },
+  { row: 8, name: 'Samuel Tan Jun Kai', class: '3A', viaMissed: '3', nextSteps: 'Participate in a future cohort', teacherRemarks: 'Missing sessions due to CCA clashes; monitor closely' },
+  { row: 9, name: 'Priya Nair', class: '3A', viaMissed: '2', nextSteps: 'Submit a set of reflection notes', teacherRemarks: 'Absent on days with no prior communication' },
+  { row: 10, name: 'Ethan Ong Wei Ming', class: '3A', viaMissed: '1', nextSteps: 'Access additional resources', teacherRemarks: 'Absent once; parent informed and acknowledged' },
 ]
 
 const REVIEW_ISSUES = [
@@ -86,6 +86,13 @@ const REVIEW_ISSUES = [
     description: 'Remove repeated records',
     ref: 'Row 3 and 100, 5 and 8',
     highlightRows: [3, 5, 8],
+  },
+  {
+    id: 'same-name-class',
+    title: 'Same name and class',
+    description: 'If these are different students, add their NRIC in a separate column',
+    ref: 'Row 2 and 3',
+    highlightRows: [2, 3],
   },
   {
     id: 'dup-cols',
@@ -182,7 +189,7 @@ function WizardStepper({ current }: { current: number }) {
               </div>
               <span
                 className={cn(
-                  'text-xs',
+                  'text-sm',
                   isActive && 'font-medium text-slate-700',
                   isCompleted && 'font-medium text-slate-500',
                   isDimmed && 'text-slate-400',
@@ -272,7 +279,7 @@ function Step1({
   onFileAccepted: (file: File) => void
 }) {
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex flex-1 flex-col overflow-y-auto">
       <div className="px-8 pb-6 pt-8">
         <h1 className="text-2xl font-semibold text-slate-900">
           Upload student data
@@ -282,9 +289,9 @@ function Step1({
         </p>
       </div>
 
-      <div className="flex flex-1 gap-6 overflow-hidden px-8 pb-8">
+      <div className="flex flex-1 gap-6 px-8 pb-8">
         {/* Left panel */}
-        <div className="flex w-[340px] shrink-0 flex-col gap-4 overflow-y-auto">
+        <div className="flex w-[340px] shrink-0 flex-col gap-4">
           {hasError && (
             <Alert className="rounded-3xl border-[var(--slate-6)] bg-white [&>svg]:text-[var(--crimson-11)]">
               <AlertCircle className="h-4 w-4" />
@@ -309,10 +316,13 @@ function Step1({
               <li className="flex items-center gap-3 text-sm text-slate-600">
                 <Check className="h-4 w-4 shrink-0 text-slate-400" />
                 <span>
-                  Check that your{' '}
-                  <a className="inline-flex items-center gap-0.5 text-primary underline underline-offset-2">
+                  Use our{' '}
+                  <a className="cursor-pointer text-twblue-9 underline underline-offset-2">
+                    template
+                  </a>
+                  , or check your{' '}
+                  <a className="cursor-pointer text-twblue-9 underline underline-offset-2">
                     file is ready
-                    <ExternalLink className="h-3 w-3" />
                   </a>
                 </span>
               </li>
@@ -325,9 +335,9 @@ function Step1({
                 File is not password-protected
               </li>
             </ul>
-            <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-3">
-              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-              <p className="text-xs text-slate-400">
+            <div className="mt-4 flex items-center gap-2 border-t border-[var(--color-slate-4)] pt-3">
+              <ShieldCheck className="h-4 w-4 shrink-0 text-slate-400" />
+              <p className="text-sm text-slate-400">
                 We'll check your file before importing
               </p>
             </div>
@@ -338,13 +348,24 @@ function Step1({
             <p className="mb-3 text-base font-semibold text-slate-600">
               Required columns
             </p>
-            <div className="flex items-start gap-3">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-              <div>
-                <p className="text-sm font-semibold text-slate-600">Name</p>
-                <p className="text-xs text-slate-500">
-                  Student's full name shown in School Cockpit
-                </p>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-600">Name and Class</p>
+                  <p className="text-xs text-slate-500">
+                    As shown in School Cockpit
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-600">Or NRIC</p>
+                  <p className="text-xs text-slate-500">
+                    As shown in School Cockpit
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -413,71 +434,70 @@ function Step2({
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="px-8 pb-4 pt-8">
-        <h1 className="text-2xl font-semibold text-slate-900">Review</h1>
-        <p className="mt-0.5 text-sm text-slate-400">1023 records, 8 columns</p>
-      </div>
-
-      <div className="flex flex-1 gap-4 overflow-hidden px-8 pb-6">
-        {/* Table */}
-        <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border bg-white">
-          <div className="overflow-y-auto">
-            <Table>
-              <TableHeader className="sticky top-0 bg-white">
-                <TableRow>
-                  <TableHead className="w-10 pl-4 text-right text-xs text-slate-400">
-                    #
-                  </TableHead>
-                  <TableHead className="text-xs text-slate-400">Name</TableHead>
-                  <TableHead className="text-xs text-slate-400">Class</TableHead>
-                  <TableHead className="text-xs text-slate-400">VIA missed</TableHead>
-                  <TableHead className="text-xs text-slate-400">Next steps</TableHead>
-                  <TableHead className="text-xs text-slate-400">Teacher's remarks</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {MOCK_REVIEW_ROWS.map((r) => (
-                  <TableRow key={r.row}>
-                    <TableCell className="pl-4 text-right text-xs tabular-nums text-slate-400">
-                      {r.row}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        'max-w-[160px] truncate text-sm text-slate-700',
-                        hasIssues && issueRows.has(r.row) && 'text-[var(--crimson-11)]',
-                      )}
-                    >
-                      {r.name}
-                    </TableCell>
-                    <TableCell className="text-sm text-slate-500">
-                      {r.class}
-                    </TableCell>
-                    <TableCell className="text-sm text-slate-500">
-                      {r.viaMissed}
-                    </TableCell>
-                    <TableCell className="max-w-[140px] truncate text-sm text-slate-500">
-                      {r.nextSteps}
-                    </TableCell>
-                    <TableCell className="max-w-[140px] truncate text-sm text-slate-500">
-                      {r.teacherRemarks}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-8 pb-2 pt-8">
+          <h1 className="text-2xl font-semibold text-slate-900">Review</h1>
+          <Badge variant="outline" className="mt-6 border-transparent bg-[var(--color-slate-3)] text-[var(--color-slate-11)] text-sm">1023 records, 5 columns</Badge>
         </div>
 
-        {/* Validation panel */}
-        <div className="flex w-[280px] shrink-0 flex-col">
-          {hasIssues ? (
-            <div className="flex flex-1 flex-col rounded-2xl border bg-white p-5">
+        <div className="flex items-start gap-4 px-8 pb-6">
+          {/* Table — horizontal scroll only, shows all 10 rows */}
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <div className="overflow-hidden rounded-2xl border bg-white">
+              <div className="overflow-x-auto [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:border-t [&::-webkit-scrollbar]:border-[var(--color-slate-6)] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--color-slate-5)] [&::-webkit-scrollbar-track]:ml-4 [&::-webkit-scrollbar-track]:mr-4 [&::-webkit-scrollbar-track]:rounded-full">
+                <Table>
+                  <TableHeader className="bg-[var(--color-slate-2)]">
+                    <TableRow className="hover:bg-[var(--color-slate-2)]">
+                      <TableHead className="w-10 text-center text-base font-semibold text-[var(--color-slate-11)]">#</TableHead>
+                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">Name</TableHead>
+                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">Class</TableHead>
+                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">VIA missed</TableHead>
+                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">Next steps</TableHead>
+                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">Teacher's remarks</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {MOCK_REVIEW_ROWS.map((r) => (
+                      <TableRow key={r.row} className="hover:bg-transparent">
+                        <TableCell className="text-center text-base tabular-nums text-slate-400">
+                          {r.row}
+                        </TableCell>
+                        <TableCell
+                          className="text-base text-slate-700"
+                        >
+                          {r.name}
+                        </TableCell>
+                        <TableCell className="text-base text-slate-500">
+                          {r.class}
+                        </TableCell>
+                        <TableCell className="text-base text-slate-500">
+                          {r.viaMissed}
+                        </TableCell>
+                        <TableCell className="max-w-0 text-base text-slate-500">
+                          <span className="block truncate">{r.nextSteps}</span>
+                        </TableCell>
+                        <TableCell className="max-w-0 text-base text-slate-500">
+                          <span className="block truncate">{r.teacherRemarks}</span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+            <p className="text-sm text-[var(--color-slate-11)]">Preview of first 10 rows</p>
+          </div>
+
+          {/* Validation panel */}
+          <div className="w-[412px] shrink-0">
+            {hasIssues ? (
+              <div className="flex min-h-[620px] flex-col rounded-2xl border bg-white p-6">
               <div className="mb-5 flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-900">
+                <p className="text-lg font-semibold text-[var(--color-slate-11)]">
                   Few issues found
                 </p>
                 <Button
-                  variant="outline"
                   size="sm"
                   className="gap-1.5"
                   onClick={onBack}
@@ -486,36 +506,48 @@ function Step2({
                   <Upload className="h-3.5 w-3.5" />
                 </Button>
               </div>
-              <ul className="space-y-4">
+              <ul className="flex flex-col gap-3">
                 {REVIEW_ISSUES.map((iss) => (
-                  <li key={iss.id} className="flex items-start gap-2.5">
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--crimson-11)]" />
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[var(--crimson-11)]">
-                        {iss.title}
-                      </p>
-                      <p className="mt-0.5 text-xs text-slate-500">
-                        {iss.description}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-400">{iss.ref}</p>
+                  <li
+                    key={iss.id}
+                    className="flex items-start gap-3 rounded-xl border border-[var(--color-slate-3)] bg-slate-50 p-3"
+                  >
+                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--crimson-11)]" />
+                    <div className="flex min-w-0 flex-col gap-2">
+                      <div className="flex flex-col gap-1">
+                        <p className="text-base font-semibold text-[var(--crimson-11)]">
+                          {iss.title}
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          {iss.description}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="border-transparent bg-[var(--color-slate-3)] text-[var(--color-slate-11)] text-sm">{iss.ref}</Badge>
                     </div>
                   </li>
                 ))}
               </ul>
             </div>
           ) : (
-            <div className="flex flex-1 items-center justify-center rounded-2xl border bg-emerald-50/40 p-8">
-              <div className="text-center">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
-                  <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+            <div className="flex h-full flex-col items-center justify-center rounded-[var(--radius-3xl,24px)] border border-[var(--color-slate-6)] bg-white px-6 py-5">
+              <div className="flex flex-col items-center">
+                <img
+                  src="/no-issues-illustration.png"
+                  alt="No issues found"
+                  className="size-[200px] object-cover"
+                />
+                <div className="mt-3 flex flex-col items-center gap-3 text-center">
+                  <p className="text-[23px] font-semibold leading-7 text-[var(--color-slate-12)]">
+                    No issues found
+                  </p>
+                  <p className="text-base text-[var(--color-slate-11)]">
+                    Your file is good to go!
+                  </p>
                 </div>
-                <p className="font-semibold text-slate-900">No issues found</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  Your file is good to go!
-                </p>
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
 
@@ -525,7 +557,7 @@ function Step2({
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        <Button onClick={onNext} className="gap-2">
+        <Button onClick={onNext} disabled={hasIssues} className="gap-2">
           Next
           <ArrowRight className="h-4 w-4" />
         </Button>
