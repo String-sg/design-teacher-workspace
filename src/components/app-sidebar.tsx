@@ -247,7 +247,9 @@ export function AppSidebar() {
   const filteredManageItems = filterItems(manageItems)
   const filteredStudentItems = studentAnalyticsEnabled
     ? studentInsightItemsWithAnalytics.filter((item) =>
-        item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
+        item.featureFlag === 'student-analytics'
+          ? studentAnalyticsEnabled
+          : true,
       )
     : studentInsightItemsWithoutAnalytics
 
@@ -314,8 +316,8 @@ export function AppSidebar() {
                       New! Parents Gateway posts are here
                     </PopoverTitle>
                     <PopoverDescription>
-                      Send announcements, collect responses, and manage all
-                      parent communications in one place.
+                      Send posts, collect responses, and manage all parent
+                      communications in one place.
                     </PopoverDescription>
                   </PopoverHeader>
                   <div className="flex justify-end">

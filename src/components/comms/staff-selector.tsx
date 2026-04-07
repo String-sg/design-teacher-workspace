@@ -7,6 +7,7 @@ import type {
   SelectedEntity,
 } from './entity-selector'
 import { MOCK_STAFF, MOCK_STAFF_GROUPS } from '@/data/mock-staff'
+import { stripSalutation } from '@/lib/utils'
 
 // Backward-compatible type alias
 export type { SelectedEntity as SelectedStaff }
@@ -16,9 +17,17 @@ interface StaffSelectorProps {
   onChange: (staff: Array<SelectedEntity>) => void
 }
 
+/** "Sec 3A" → "3A", consistent with student class labels */
+function formatFormClass(cls: string | undefined): string | undefined {
+  return cls?.replace(/^Sec\s+/i, '')
+}
+
 function makeMemberNames(ids: Array<string>): Array<string> {
   return ids
-    .map((id) => MOCK_STAFF.find((s) => s.id === id)?.name)
+    .map((id) => {
+      const s = MOCK_STAFF.find((m) => m.id === id)
+      return s ? stripSalutation(s.name) : undefined
+    })
     .filter((n): n is string => Boolean(n))
 }
 
@@ -28,8 +37,10 @@ function makeMemberDetails(ids: Array<string>): Array<MemberDetail> {
     if (!s) return []
     return [
       {
-        name: s.name,
-        sublabel: [s.formClass, s.email].filter(Boolean).join(' · '),
+        name: stripSalutation(s.name),
+        sublabel: [formatFormClass(s.formClass), s.email]
+          .filter(Boolean)
+          .join(' · '),
       },
     ]
   })
@@ -38,8 +49,8 @@ function makeMemberDetails(ids: Array<string>): Array<MemberDetail> {
 // Individual staff — sublabel shows form class (if any) + email
 const STAFF_INDIVIDUAL_ITEMS: Array<EntityItem> = MOCK_STAFF.map((s) => ({
   id: s.id,
-  label: s.name,
-  sublabel: [s.formClass, s.email].filter(Boolean).join(' · '),
+  label: stripSalutation(s.name),
+  sublabel: [formatFormClass(s.formClass), s.email].filter(Boolean).join(' · '),
   type: 'individual' as const,
   count: 1,
 }))

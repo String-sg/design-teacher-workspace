@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   ArrowUp,
   CalendarClock,
+  CalendarDays,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -14,6 +15,7 @@ import {
   EyeOff,
   FileText,
   ImagePlus,
+  MapPin,
   MoreHorizontal,
   Paperclip,
   Send,
@@ -144,6 +146,12 @@ interface AnnouncementPreviewProps {
   dueDate?: string
   questions?: Array<FormQuestion>
   editingQuestionId?: string | null
+  venue?: string
+  eventStart?: string
+  eventStartTime?: string
+  eventEnd?: string
+  eventEndTime?: string
+  uploadedFiles?: Array<File>
 }
 
 function AnnouncementPreview({
@@ -157,6 +165,12 @@ function AnnouncementPreview({
   dueDate,
   questions = [],
   editingQuestionId,
+  venue = '',
+  eventStart = '',
+  eventStartTime = '',
+  eventEnd = '',
+  eventEndTime = '',
+  uploadedFiles = [],
 }: AnnouncementPreviewProps) {
   const totalCount = recipients.reduce((s, r) => s + r.count, 0)
   const [screen, setScreen] = useState<AnnouncementPreviewScreen>('main')
@@ -195,6 +209,43 @@ function AnnouncementPreview({
         year: 'numeric',
       })
     : 'DD Mmm YYYY'
+
+  const formattedEventDate = (() => {
+    if (!eventStart) return ''
+    const startDate = new Date(`${eventStart}T${eventStartTime || '00:00'}`)
+    const dateOpts: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }
+    const startDateStr = startDate.toLocaleDateString('en-SG', dateOpts)
+    const startTimeStr = eventStartTime
+      ? startDate
+          .toLocaleTimeString('en-SG', { hour: 'numeric', minute: '2-digit', hour12: true })
+          .toUpperCase()
+      : ''
+
+    if (!eventEnd) {
+      return startTimeStr ? `${startDateStr}, ${startTimeStr}` : startDateStr
+    }
+
+    const endDate = new Date(`${eventEnd}T${eventEndTime || '00:00'}`)
+    const sameDay = eventStart === eventEnd
+    if (sameDay) {
+      const endTimeStr = eventEndTime
+        ? endDate
+            .toLocaleTimeString('en-SG', { hour: 'numeric', minute: '2-digit', hour12: true })
+            .toUpperCase()
+        : ''
+      return startTimeStr && endTimeStr
+        ? `${startDateStr}, ${startTimeStr} – ${endTimeStr}`
+        : startDateStr
+    }
+
+    const endDateStr = endDate.toLocaleDateString('en-SG', dateOpts)
+    return `${startDateStr} – ${endDateStr}`
+  })()
 
   // Question screen helpers
   const isMainScreen = screen === 'main'
@@ -256,7 +307,7 @@ function AnnouncementPreview({
           </h3>
         ) : (
           <h3 className="text-sm font-bold leading-snug text-slate-300">
-            Announcement title
+            Post title
           </h3>
         )}
         <p className="mt-1 text-[10px] text-slate-400">
@@ -269,6 +320,20 @@ function AnnouncementPreview({
             STUDENT NAME
           </p>
         </div>
+        {responseType !== 'view-only' && venue && (
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
+            <p className="text-[11px] text-slate-600">{venue}</p>
+          </div>
+        )}
+        {responseType !== 'view-only' && eventStart && (
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <CalendarDays className="h-3 w-3 shrink-0 text-blue-500" />
+            <p className="text-[11px] font-medium text-blue-600">
+              {formattedEventDate}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Details */}
@@ -283,7 +348,7 @@ function AnnouncementPreview({
           />
         ) : (
           <p className="text-xs leading-relaxed text-slate-300">
-            Your announcement details will appear here.
+            Your post details will appear here.
           </p>
         )}
       </div>
@@ -315,6 +380,33 @@ function AnnouncementPreview({
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Attachments */}
+      {uploadedFiles.length > 0 && (
+        <div className="px-4 py-4">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Attachments
+          </p>
+          <div className="space-y-2">
+            {uploadedFiles.map((file, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2.5"
+              >
+                <FileText className="h-4 w-4 shrink-0 text-slate-400" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-slate-800">
+                    {file.name}
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    {formatFileSize(file.size)}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -521,8 +613,7 @@ function AnnouncementPreview({
 
       <div className="p-4">
         <p className="mb-3 text-xs text-muted-foreground">
-          This is how parents will see your announcement on the Parents Gateway
-          App.
+          This is how parents will see your post on the Parents Gateway App.
         </p>
 
         {/* Phone mockup */}
@@ -573,13 +664,23 @@ function getValidationHint(
   title: string,
   recipients: Array<SelectedEntity>,
   scheduledDate: string,
+  responseType: string,
+  dueDate: string,
 ): string | null {
   const noTitle = !title.trim()
   const noRecipients = recipients.length === 0
+  const noDueDate = responseType !== 'view-only' && !dueDate
+
+  if (noTitle && noRecipients && noDueDate)
+    return 'Add a title, select recipients, and set a due date to continue'
+  if (noTitle && noDueDate) return 'Add a title and set a due date to continue'
+  if (noRecipients && noDueDate)
+    return 'Select recipients and set a due date to continue'
   if (noTitle && noRecipients)
     return 'Add a title and select recipients to continue'
   if (noTitle) return 'Add a title to continue'
   if (noRecipients) return 'Select recipients to continue'
+  if (noDueDate) return 'Set a due date to continue'
   if (sendOption === 'scheduled' && !scheduledDate)
     return 'Select a send date to continue'
   return null
@@ -670,7 +771,7 @@ function NewAnnouncementPage() {
 
   // UI state
   const [showConfirmSheet, setShowConfirmSheet] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
+  const [showPreview, setShowPreview] = useState(true)
   const [savedAt, setSavedAt] = useState<Date | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const autosaveTimer = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -759,7 +860,31 @@ function NewAnnouncementPage() {
   // Attachment handlers
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const incoming = Array.from(e.target.files ?? [])
-    setUploadedFiles((prev) => [...prev, ...incoming].slice(0, 3))
+    const MAX_SIZE = 5 * 1024 * 1024 // 5 MB
+
+    // 1. Reject oversized files
+    const oversized = incoming.filter((f) => f.size > MAX_SIZE)
+    const valid = incoming.filter((f) => f.size <= MAX_SIZE)
+    if (oversized.length === 1) {
+      toast.error(`"${oversized[0].name}" exceeds the 5 MB file size limit.`)
+    } else if (oversized.length > 1) {
+      toast.error(
+        `${oversized.length} files exceed the 5 MB limit and were not added.`,
+      )
+    }
+
+    // 2. Warn if valid files would still exceed the 3-file cap
+    setUploadedFiles((prev) => {
+      const available = 3 - prev.length
+      const dropped = Math.max(0, valid.length - available)
+      if (dropped > 0) {
+        toast.warning(
+          `${dropped} file${dropped > 1 ? 's' : ''} not added — maximum 3 files allowed.`,
+        )
+      }
+      return [...prev, ...valid].slice(0, 3)
+    })
+
     e.target.value = '' // reset so same file can be re-selected after removal
   }
 
@@ -792,7 +917,10 @@ function NewAnnouncementPage() {
 
   // Validation
   const totalRecipientCount = recipients.reduce((s, r) => s + r.count, 0)
-  const canPost = title.trim().length > 0 && recipients.length > 0
+  const canPost =
+    title.trim().length > 0 &&
+    recipients.length > 0 &&
+    (responseType === 'view-only' || dueDate.length > 0)
   const canSchedule =
     canPost && scheduledDate.length > 0 && scheduledTime.length > 0
   const canSubmit = sendOption === 'scheduled' ? canSchedule : canPost
@@ -801,6 +929,8 @@ function NewAnnouncementPage() {
     title,
     recipients,
     scheduledDate,
+    responseType,
+    dueDate,
   )
 
   // Show a toast when user clicks the disabled submit button
@@ -907,14 +1037,14 @@ function NewAnnouncementPage() {
       }
       setShowConfirmSheet(false)
       toast.success(
-        isScheduled ? 'Schedule updated' : 'Announcement sent to parents',
+        isScheduled ? 'Schedule updated' : 'Post sent to parents',
       )
       navigate({ to: '/announcements/$id', params: { id: editId } })
     } else {
       mockPGAnnouncements.unshift(newAnnouncement)
       setShowConfirmSheet(false)
       toast.success(
-        isScheduled ? 'Announcement scheduled' : 'Announcement sent to parents',
+        isScheduled ? 'Post scheduled' : 'Post sent to parents',
       )
       navigate({
         to: '/announcements/$id',
@@ -1131,7 +1261,7 @@ function NewAnnouncementPage() {
 
                 {/* Staff in charge */}
                 <div className="space-y-1.5">
-                  <Label>Staff in charge</Label>
+                  <Label>Staff-in-charge</Label>
                   <p className="text-xs text-muted-foreground">
                     These staff will be able to view read status, and delete the
                     post.
@@ -1208,9 +1338,10 @@ function NewAnnouncementPage() {
                   <RichTextArea
                     value={description}
                     onChange={setDescription}
-                    placeholder="Write your announcement here. Use the toolbar to format text and insert inline links."
+                    placeholder="Write your post here. Use the toolbar to format text and insert inline links."
                     onBlur={triggerAutosave}
                     minHeight="160px"
+                    toolbar="simple"
                   />
                 </div>
 
@@ -1468,7 +1599,7 @@ function NewAnnouncementPage() {
                   Event Details
                 </h2>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
                     <div className="space-y-1.5">
                       <Label>Event start (optional)</Label>
                       <div className="flex gap-2">
@@ -1482,7 +1613,7 @@ function NewAnnouncementPage() {
                           type="time"
                           value={eventStartTime}
                           onChange={(e) => setEventStartTime(e.target.value)}
-                          className="w-24 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
+                          className="w-32 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
                         />
                       </div>
                     </div>
@@ -1499,7 +1630,7 @@ function NewAnnouncementPage() {
                           type="time"
                           value={eventEndTime}
                           onChange={(e) => setEventEndTime(e.target.value)}
-                          className="w-24 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
+                          className="w-32 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
                         />
                       </div>
                     </div>
@@ -1617,6 +1748,12 @@ function NewAnnouncementPage() {
                 dueDate={dueDate}
                 questions={questions}
                 editingQuestionId={editingQuestionId}
+                venue={venue}
+                eventStart={eventStart}
+                eventStartTime={eventStartTime}
+                eventEnd={eventEnd}
+                eventEndTime={eventEndTime}
+                uploadedFiles={uploadedFiles}
               />
             </div>
           )}
@@ -1631,6 +1768,8 @@ function NewAnnouncementPage() {
         totalRecipients={totalRecipientCount}
         scheduledAt={getScheduledAt()}
         onConfirm={handleConfirmPost}
+        responseType={responseType}
+        dueDate={dueDate}
       />
     </div>
   )

@@ -32,6 +32,7 @@ export interface MemberDetail {
   name: string
   sublabel?: string // e.g. "3A · tanml@school.edu.sg" for staff
   badge?: string // right-aligned label (e.g. NRIC for students)
+  isNew?: boolean // recently added by a criteria update (live groups only)
 }
 
 export interface EntityItem {
@@ -44,6 +45,8 @@ export interface EntityItem {
   memberNames?: Array<string> // plain names for chip tooltips
   memberDetails?: Array<MemberDetail> // richer per-member info for expanded list
   groupType?: GroupType
+  listType?: 'static' | 'live' // criteria-based groups auto-update membership
+  criteria?: string // human-readable criteria label (live groups only)
 }
 
 export interface SelectedEntity {
@@ -264,7 +267,14 @@ function ResultRow({
             )}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold">{item.label}</p>
+            <p className="flex items-center gap-1.5 truncate font-semibold">
+              <span className="truncate">{item.label}</span>
+              {item.listType === 'live' && (
+                <span className="shrink-0 rounded border border-primary/30 bg-primary/10 px-1.5 py-px text-[9px] font-semibold text-primary">
+                  Criteria
+                </span>
+              )}
+            </p>
             {item.sublabel && (
               <p className="truncate text-xs text-muted-foreground">
                 {item.sublabel}
@@ -273,9 +283,16 @@ function ResultRow({
           </div>
           {item.type === 'group' && item.count !== undefined && (
             <span className="shrink-0 text-xs text-muted-foreground">
-              {isSelected && excludedMemberNames.size > 0
-                ? `${item.count - excludedMemberNames.size}/${item.count}`
-                : item.count - excludedMemberNames.size}{' '}
+              {isSelected && excludedMemberNames.size > 0 ? (
+                <>
+                  <span className="font-medium text-blue-600">
+                    {item.count - excludedMemberNames.size}
+                  </span>
+                  /{item.count}
+                </>
+              ) : (
+                item.count - excludedMemberNames.size
+              )}{' '}
               {getCountUnit(
                 item.groupType,
                 item.count - excludedMemberNames.size,
@@ -314,12 +331,19 @@ function ResultRow({
       {/* Expanded member list */}
       {isExpanded && hasMembers && (
         <div className="border-b border-slate-100 bg-slate-50/60 px-4 pb-3 pt-2.5">
-          {/* Header: member count */}
+          {/* Header: member count + criteria note */}
           {(() => {
             const total = item.memberDetails?.length ?? item.memberNames!.length
+            const newCount =
+              item.memberDetails?.filter((d) => d.isNew).length ?? 0
             return (
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                 {`${total} ${getCountUnit(item.groupType, total)}`}
+                {newCount > 0 && (
+                  <span className="ml-1.5 normal-case font-normal text-emerald-600">
+                    · {newCount} new
+                  </span>
+                )}
               </p>
             )
           })()}
@@ -371,8 +395,13 @@ function ResultRow({
                       {detail.name}
                     </span>
                     {detail.sublabel && detail.sublabel !== item.label && (
-                      <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                      <span className="ml-1 shrink-0 rounded bg-slate-200 px-1 py-px text-[9px] font-medium text-slate-500">
                         {detail.sublabel}
+                      </span>
+                    )}
+                    {detail.isNew && (
+                      <span className="ml-1 shrink-0 rounded bg-emerald-100 px-1 py-px text-[9px] font-semibold text-emerald-700">
+                        New
                       </span>
                     )}
                   </span>

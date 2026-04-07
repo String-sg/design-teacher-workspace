@@ -20,8 +20,11 @@ import { CLASS_GROUPS } from '@/data/mock-student-groups'
 import { PG_SHORTCUT_PRESETS } from '@/data/pg-shortcuts'
 import { StatusBadge } from '@/components/comms/status-badge'
 import { ReadRate } from '@/components/comms/read-rate'
-
 import { RecipientReadTable } from '@/components/comms/recipient-read-table'
+import { StaffSelector } from '@/components/comms/staff-selector'
+import { EnquiryEmailSelector } from '@/components/comms/enquiry-email-selector'
+import type { SelectedEntity } from '@/components/comms/entity-selector'
+import { MOCK_STAFF } from '@/data/mock-staff'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -39,7 +42,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
+import { cn, stripSalutation } from '@/lib/utils'
 
 export const Route = createFileRoute('/announcements/$id')({
   loader: ({ params }) => {
@@ -89,7 +92,7 @@ function AnnouncementDetailPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editDescription, setEditDescription] = useState('')
-  const [editStaffInCharge, setEditStaffInCharge] = useState('')
+  const [editStaffInCharge, setEditStaffInCharge] = useState<Array<SelectedEntity>>([])
   const [editEnquiryEmail, setEditEnquiryEmail] = useState('')
   const [editClasses, setEditClasses] = useState<Array<string>>([])
 
@@ -152,7 +155,7 @@ function AnnouncementDetailPage() {
   const contentLocked = announcement.status === 'posted'
 
   useSetBreadcrumbs([
-    { label: 'Announcements', href: '/announcements' },
+    { label: 'Posts', href: '/announcements' },
     { label: announcement.title, href: `/announcements/${announcement.id}` },
   ])
 
@@ -162,7 +165,21 @@ function AnnouncementDetailPage() {
   function startEditing() {
     setEditTitle(savedData.title)
     setEditDescription(stripHtml(savedData.description))
-    setEditStaffInCharge(savedData.staffInCharge)
+    const matchedStaff = MOCK_STAFF.find(
+      (s) => s.name === savedData.staffInCharge,
+    )
+    setEditStaffInCharge(
+      matchedStaff
+        ? [
+            {
+              id: matchedStaff.id,
+              label: stripSalutation(matchedStaff.name),
+              type: 'individual',
+              count: 1,
+            },
+          ]
+        : [],
+    )
     setEditEnquiryEmail(savedData.enquiryEmail)
     setEditClasses([...uniqueClasses])
     setIsEditing(true)
@@ -217,7 +234,7 @@ function AnnouncementDetailPage() {
               : prev.description,
           }
         : {}),
-      staffInCharge: editStaffInCharge.trim(),
+      staffInCharge: editStaffInCharge[0]?.label ?? savedData.staffInCharge,
       enquiryEmail: editEnquiryEmail.trim(),
       recipients: updatedRecipients,
     }))
@@ -371,7 +388,7 @@ function AnnouncementDetailPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Read by parents
+                    Overview
                   </p>
                   <p className="mt-1 text-3xl font-bold">
                     {readCount}
@@ -446,7 +463,7 @@ function AnnouncementDetailPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Responses received
+                    Overview
                   </p>
                   <p className="mt-1 text-3xl font-bold">
                     {respondedCount}
@@ -455,13 +472,6 @@ function AnnouncementDetailPage() {
                       / {totalCount}
                     </span>
                   </p>
-                  {pendingResponseCount > 0 ? (
-                    <p className="mt-1 text-sm text-amber-600">
-                      {pendingResponseCount} no response
-                    </p>
-                  ) : (
-                    <p className="mt-1 text-sm text-green-700">All responded</p>
-                  )}
                 </div>
                 <div className="flex items-center gap-6 text-center">
                   <div className="text-center">
@@ -507,11 +517,7 @@ function AnnouncementDetailPage() {
           {announcement.status === 'posted' && totalCount > 0 && (
             <div className="rounded-lg border bg-white p-6">
               <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {responseType === 'acknowledge'
-                  ? 'Acknowledgement status'
-                  : responseType === 'yes-no'
-                    ? 'Response status'
-                    : 'Recipient read status'}
+                {'Status'}
               </h2>
               <RecipientReadTable
                 recipients={savedData.recipients}
@@ -533,10 +539,10 @@ function AnnouncementDetailPage() {
 
         {/* ── Right: announcement content (1/3) ── */}
         <div className="space-y-4">
-          {/* Announcement card */}
+          {/* Post card */}
           <div className="rounded-lg border bg-white p-6">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Announcement
+              Post
             </h2>
             <div className="space-y-3">
               {/* Title */}
@@ -645,21 +651,23 @@ function AnnouncementDetailPage() {
               {/* Attachments */}
               {announcement.attachments &&
                 announcement.attachments.length > 0 && (
-                  <div className="space-y-1.5 border-t pt-3">
-                    <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+                  <div className="border-t pt-3">
+                    <p className="text-xs text-muted-foreground">
                       Attachments
                     </p>
-                    {announcement.attachments.map((att, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm">
-                        <Paperclip className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                        <span className="min-w-0 truncate text-sm">
-                          {att.name}
-                        </span>
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          {att.size}
-                        </span>
-                      </div>
-                    ))}
+                    <div className="mt-1 space-y-1.5">
+                      {announcement.attachments.map((att, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm">
+                          <Paperclip className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                          <span className="min-w-0 truncate text-sm">
+                            {att.name}
+                          </span>
+                          <span className="shrink-0 text-xs text-muted-foreground">
+                            {att.size}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -727,16 +735,10 @@ function AnnouncementDetailPage() {
                   <p className="text-xs font-medium text-muted-foreground">
                     Enquiry email
                   </p>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      type="email"
-                      value={editEnquiryEmail}
-                      onChange={(e) => setEditEnquiryEmail(e.target.value)}
-                      placeholder="enquiry@school.edu.sg"
-                      className="pl-8 text-sm"
-                    />
-                  </div>
+                  <EnquiryEmailSelector
+                    value={editEnquiryEmail}
+                    onChange={setEditEnquiryEmail}
+                  />
                 </div>
               ) : (
                 announcement.enquiryEmail && (
@@ -746,7 +748,7 @@ function AnnouncementDetailPage() {
                     </p>
                     <a
                       href={`mailto:${announcement.enquiryEmail}`}
-                      className="truncate text-sm font-medium hover:text-primary hover:underline"
+                      className="mt-1 block truncate text-sm font-medium hover:text-primary hover:underline"
                     >
                       {announcement.enquiryEmail}
                     </a>
@@ -754,31 +756,33 @@ function AnnouncementDetailPage() {
                 )
               )}
 
-              {/* Staff in charge — always editable */}
+              {/* Staff-in-charge — always editable */}
               <div className="border-t pt-3">
                 {isEditing ? (
                   <div className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground">
-                      Staff in charge
+                      Staff-in-charge
                     </p>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        value={editStaffInCharge}
-                        onChange={(e) => setEditStaffInCharge(e.target.value)}
-                        placeholder="Staff in charge…"
-                        className="pl-8 text-sm"
-                      />
-                    </div>
+                    <StaffSelector
+                      value={editStaffInCharge}
+                      onChange={(staff) =>
+                        setEditStaffInCharge(
+                          staff.map((s) => ({
+                            ...s,
+                            label: stripSalutation(s.label),
+                          })),
+                        )
+                      }
+                    />
                   </div>
                 ) : (
                   announcement.staffInCharge && (
                     <div className="min-w-0">
                       <p className="text-xs text-muted-foreground">
-                        Staff in charge
+                        Staff-in-charge
                       </p>
-                      <p className="truncate text-sm font-medium">
-                        {announcement.staffInCharge}
+                      <p className="mt-1 truncate text-sm font-medium">
+                        {stripSalutation(announcement.staffInCharge)}
                       </p>
                     </div>
                   )

@@ -9,12 +9,17 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  Copy,
+  Download,
   Edit2,
+  ExternalLink,
+  Info,
   MoreHorizontal,
   Search,
   Share2,
   Trash2,
   UserMinus,
+  UserPlus,
   X,
 } from 'lucide-react'
 
@@ -41,6 +46,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -473,17 +479,19 @@ function GroupDetailPage() {
                   <h1 className="text-2xl font-semibold truncate">
                     {group.name}
                   </h1>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 text-muted-foreground hover:text-foreground"
-                    onClick={() => {
-                      setNameInput(group.name)
-                      setEditingName(true)
-                    }}
-                  >
-                    <Edit2 className="size-4" />
-                  </Button>
+                  {canEdit && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        setNameInput(group.name)
+                        setEditingName(true)
+                      }}
+                    >
+                      <Edit2 className="size-4" />
+                    </Button>
+                  )}
                 </>
               )}
             </div>
@@ -521,7 +529,32 @@ function GroupDetailPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem render={<Link to="/groups/new" />}>
+                  <Copy className="mr-2 size-4" />
                   Duplicate group
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    const headers = ['#', 'Name', 'Class', 'NRIC']
+                    const rows = group.members.map((m, i) => [
+                      String(i + 1),
+                      m.name,
+                      m.class,
+                      m.nric ?? '',
+                    ])
+                    const csv = [headers, ...rows]
+                      .map((r) => r.map((c) => `"${c}"`).join(','))
+                      .join('\n')
+                    const blob = new Blob([csv], { type: 'text/csv' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `${group.name}.csv`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  }}
+                >
+                  <Download className="mr-2 size-4" />
+                  Export as CSV
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -543,44 +576,78 @@ function GroupDetailPage() {
 
       <Separator />
 
+      {/* Live group criteria banner */}
+      {group.listType === 'live' && (
+        <Alert className="border-blue-200 bg-blue-50/60 text-blue-900">
+          <Info className="size-4 text-blue-500" />
+          <AlertDescription className="text-blue-800">
+            Membership updates automatically based on selected criteria.{' '}
+            {group.criteriaSourceHref && (
+              <Link
+                to={group.criteriaSourceHref as '/students'}
+                className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-blue-700"
+              >
+                Manage in source
+                <ExternalLink className="size-3" />
+              </Link>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Members section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold">
-            Members{' '}
+            Students{' '}
             <span className="text-muted-foreground font-normal">
               ({group.members.length})
             </span>
           </h2>
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search members..."
-              value={memberSearch}
-              onChange={(e) => {
-                setMemberSearch(e.target.value)
-                setPage(1)
-              }}
-              className="pl-9"
-            />
+          <div className="flex items-center gap-2">
+            {canEdit && group.listType !== 'live' && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                render={
+                  <Link to="/groups/new" search={{ editGroupId: group.id }} />
+                }
+              >
+                <UserPlus className="size-4" />
+                Add students
+              </Button>
+            )}
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search students..."
+                value={memberSearch}
+                onChange={(e) => {
+                  setMemberSearch(e.target.value)
+                  setPage(1)
+                }}
+                className="pl-9"
+              />
+            </div>
           </div>
         </div>
 
         {filteredMembers.length === 0 ? (
           <EmptyState
-            title="No members found"
+            title="No students found"
             description="Try a different search term."
           />
         ) : (
           <>
             <div className="rounded-lg border overflow-hidden">
-              <Table>
+              <Table tableClassName="table-fixed w-full">
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="w-12">#</TableHead>
                     <TableHead>Name</TableHead>
-                    <TableHead>Class</TableHead>
-                    <TableHead>NRIC</TableHead>
+                    <TableHead className="w-24">Class</TableHead>
+                    <TableHead className="w-36">NRIC</TableHead>
                     <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
@@ -608,7 +675,7 @@ function GroupDetailPage() {
                         {member.nric ?? '—'}
                       </TableCell>
                       <TableCell>
-                        {canEdit && (
+                        {canEdit && group.listType !== 'live' && (
                           <Button
                             variant="ghost"
                             size="icon"

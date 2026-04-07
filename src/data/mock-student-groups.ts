@@ -340,7 +340,7 @@ const CCA_LABELS: Array<string> = [
   'Choir',
   'Drama',
   'Badminton',
-  'Robotics Club',
+  'Robotics',
 ]
 
 export const CCA_GROUPS: Array<EntityItem> = CCA_LABELS.map((ccaLabel) => {
@@ -458,11 +458,14 @@ function groupToEntityItem(g: (typeof MOCK_GROUPS)[number]): EntityItem {
     type: 'group',
     count: g.members.length,
     groupType: 'custom',
+    listType: g.listType,
+    criteria: g.criteria,
     memberNames: g.members.map((m) => m.name),
     memberDetails: g.members.map((m) => ({
       name: m.name,
       sublabel: m.class,
       badge: m.nric,
+      isNew: m.isNew,
     })),
   }
 }
@@ -493,14 +496,34 @@ export const STUDENT_INDIVIDUAL_ITEMS: Array<EntityItem> = bandungStudents.map(
   }),
 )
 
+/** All students across Sec 1–4 (incl. hardcoded Sec 1/2) for the Groups picker. */
+export const ALL_PICKER_STUDENTS: Array<{
+  id: string
+  name: string
+  class: string
+  level: number
+  nric: string
+  indexNumber: number
+}> = CLASS_GROUPS.flatMap((group) =>
+  (group.memberDetails ?? []).map((d, i) => ({
+    id: `${group.id}::${i}::${d.name}`,
+    name: d.name,
+    class: group.label,
+    level: Number(group.label.match(/^(\d+)/)?.[1] ?? 0),
+    nric: d.badge ?? '',
+    indexNumber: i + 1,
+  })),
+)
+
 // ─── Teacher profile (simulated) ─────────────────────────────────────────────
-const MY_CLASS_ID = 'class:2 Courage'
+const MY_CLASS_ID = 'class:3A'
 const MY_CCA_ID = 'cca:badminton'
 
-const myClass = CLASS_GROUPS.find((g) => g.id === MY_CLASS_ID)!
-const otherClasses = CLASS_GROUPS.filter((g) => g.id !== MY_CLASS_ID)
-const myCCA = CCA_GROUPS.find((g) => g.id === MY_CCA_ID)!
-const otherCCAs = CCA_GROUPS.filter((g) => g.id !== MY_CCA_ID)
+const myClass =
+  CLASS_GROUPS.find((g) => g.id === MY_CLASS_ID) ?? CLASS_GROUPS[0]
+const otherClasses = CLASS_GROUPS.filter((g) => g.id !== myClass?.id)
+const myCCA = CCA_GROUPS.find((g) => g.id === MY_CCA_ID) ?? CCA_GROUPS[0]
+const otherCCAs = CCA_GROUPS.filter((g) => g.id !== myCCA?.id)
 
 // ─── Browse scopes ────────────────────────────────────────────────────────────
 // 5 tabs: Class · Level/School · CCA · Teaching Group · Custom Group

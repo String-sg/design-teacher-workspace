@@ -24,7 +24,7 @@ import { getStructuredTypeLabel } from '@/types/student-group'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { MOCK_GROUPS, MOCK_SHARED_GROUPS } from '@/data/mock-groups'
 import { TEACHER_STRUCTURED_GROUPS } from '@/data/mock-structured-groups'
-import { cn } from '@/lib/utils'
+import { cn, stripSalutation } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -74,6 +74,7 @@ function getUniqueClasses(members: StudentGroup['members']): Array<string> {
   for (const m of members) seen.add(m.class)
   return [...seen].sort()
 }
+
 
 function formatRelativeDate(dateStr: string): string {
   const date = new Date(dateStr)
@@ -338,9 +339,13 @@ function GroupsIndex() {
         : ownershipFilter.size === 1 && ownershipFilter.has('shared')
           ? shared
           : [...mine, ...shared]
-    if (!mySearch) return combined
+    const sorted = [...combined].sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    )
+    if (!mySearch) return sorted
     const q = mySearch.toLowerCase()
-    return combined.filter((g) => g.name.toLowerCase().includes(q))
+    return sorted.filter((g) => g.name.toLowerCase().includes(q))
   }, [groups, mySearch, ownershipFilter])
 
   const filteredAssignedGroups = useMemo(
@@ -469,8 +474,9 @@ function GroupsIndex() {
                 <TableHeader className="border-b bg-white">
                   <TableRow className="border-0 hover:bg-transparent">
                     <TableHead className="pl-6">Name</TableHead>
-                    <TableHead className="w-24">Members</TableHead>
+                    <TableHead className="w-24">Students</TableHead>
                     <TableHead className="w-[160px]">Classes</TableHead>
+                    <TableHead className="w-24">Type</TableHead>
                     <TableHead className="w-32">Last updated</TableHead>
                     <TableHead className="w-36">Created by</TableHead>
                     <TableHead className="w-[48px] pr-2" />
@@ -520,6 +526,11 @@ function GroupsIndex() {
                                 </Badge>
                               )}
                             </div>
+                            {group.listType === 'live' && group.criteria && (
+                              <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                                {group.criteria}
+                              </p>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -531,11 +542,18 @@ function GroupsIndex() {
                         <TableCell>
                           <ClassPills members={group.members} />
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {formatRelativeDate(group.updatedAt)}
+                        <TableCell>
+                          <Badge variant="outline" className="py-0 text-xs">
+                            {group.listType === 'live' ? 'Criteria' : 'Custom'}
+                          </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {group.createdBy.name}
+                          {group.listType === 'live'
+                            ? 'Auto-updated'
+                            : formatRelativeDate(group.updatedAt)}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {stripSalutation(group.createdBy.name)}
                         </TableCell>
                         <TableCell
                           className="w-[48px] pr-2 text-right"
@@ -679,32 +697,34 @@ function GroupsIndex() {
               <Alert className="border-blue-200 bg-blue-50/60 text-blue-900">
                 <Info className="h-4 w-4 text-blue-500" />
                 <AlertDescription className="text-blue-800">
-                  These groups are managed in School Cockpit. Changes to
-                  membership must be made by your school administrator.
+                  Membership updates automatically based on selected criteria.
+                  Contact your school administrator to make changes.
                 </AlertDescription>
               </Alert>
             </div>
 
             <div className="max-w-full overflow-x-auto bg-white">
               {filteredAssignedGroups.length === 0 ? (
-                <EmptyState
-                  title={
-                    assignedSearch || typeFilter.size > 0
-                      ? 'No groups found'
-                      : 'No groups assigned'
-                  }
-                  description={
-                    assignedSearch || typeFilter.size > 0
-                      ? 'Try adjusting your search or filters.'
-                      : 'Your school administrator assigns groups in School Cockpit.'
-                  }
-                />
+                <div className="py-16">
+                  <EmptyState
+                    title={
+                      assignedSearch || typeFilter.size > 0
+                        ? 'No groups found'
+                        : 'No groups assigned'
+                    }
+                    description={
+                      assignedSearch || typeFilter.size > 0
+                        ? 'Try adjusting your search or filters.'
+                        : 'Your school administrator assigns groups in School Cockpit.'
+                    }
+                  />
+                </div>
               ) : (
                 <Table tableClassName="table-fixed w-full">
                   <TableHeader className="border-b bg-white">
                     <TableRow className="border-0 hover:bg-transparent">
                       <TableHead className="pl-6">Name</TableHead>
-                      <TableHead className="w-24">Members</TableHead>
+                      <TableHead className="w-24">Students</TableHead>
                       <TableHead className="w-[160px]">Classes</TableHead>
                       <TableHead className="w-28">Type</TableHead>
                       <TableHead className="w-[48px] pr-2" />

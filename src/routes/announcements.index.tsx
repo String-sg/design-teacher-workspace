@@ -252,7 +252,7 @@ function ParentsGatewayPage() {
                 aria-label={
                   tab === 'custom-forms'
                     ? 'Search forms'
-                    : 'Search announcements'
+                    : 'Search posts'
                 }
               />
             </div>
@@ -264,10 +264,12 @@ function ParentsGatewayPage() {
         {tab === 'custom-forms' ? (
           <div className="max-w-full overflow-x-auto bg-white">
             {filteredForms.length === 0 ? (
-              <EmptyState
-                title="No forms found"
-                description="Try adjusting your search, or create a new form."
-              />
+              <div className="py-16">
+                <EmptyState
+                  title="No forms found"
+                  description="Try adjusting your search, or create a new form."
+                />
+              </div>
             ) : (
               <Table tableClassName="table-fixed w-full">
                 <TableHeader className="border-b bg-white">
@@ -275,7 +277,7 @@ function ParentsGatewayPage() {
                     <TableHead className="w-[500px] pl-6">Title</TableHead>
                     <TableHead className="w-[110px]">Date</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>
-                    <TableHead className="w-[90px]">Owner</TableHead>
+                    <TableHead className="w-[90px]">Created by</TableHead>
                     <TableHead className="w-[150px]">Read / Response</TableHead>
                     <TableHead className="w-[48px] pr-2" />
                   </TableRow>
@@ -377,10 +379,12 @@ function ParentsGatewayPage() {
         ) : (
           <div className="max-w-full overflow-x-auto bg-white">
             {filtered.length === 0 ? (
-              <EmptyState
-                title="No announcements found"
-                description="Try adjusting your search or filter, or create a new announcement."
-              />
+              <div className="py-16">
+                <EmptyState
+                  title="No posts found"
+                  description="Try adjusting your search or filter, or create a new post."
+                />
+              </div>
             ) : (
               <Table tableClassName="table-fixed w-full">
                 <TableHeader className="border-b bg-white">
@@ -388,7 +392,7 @@ function ParentsGatewayPage() {
                     <TableHead className="w-[500px] pl-6">Title</TableHead>
                     <TableHead className="w-[110px]">Date</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>
-                    <TableHead className="w-[90px]">Owner</TableHead>
+                    <TableHead className="w-[90px]">Created by</TableHead>
                     <TableHead className="w-[150px]">Read / Response</TableHead>
                     <TableHead className="w-[48px] pr-2" />
                   </TableRow>
@@ -502,23 +506,10 @@ function ParentsGatewayPage() {
                               —
                             </span>
                           ) : hasResponseType ? (
-                            <div className="space-y-0.5">
-                              <ReadRate
-                                readCount={responseCount}
-                                totalCount={totalCount}
-                              />
-                              {announcement.responseType === 'yes-no' &&
-                                totalCount > 0 && (
-                                  <p className="text-[11px] text-muted-foreground">
-                                    {yesCount} yes · {noCount} no
-                                  </p>
-                                )}
-                              {announcement.responseType === 'acknowledge' && (
-                                <p className="text-[11px] text-muted-foreground">
-                                  Acknowledged
-                                </p>
-                              )}
-                            </div>
+                            <ReadRate
+                              readCount={responseCount}
+                              totalCount={totalCount}
+                            />
                           ) : (
                             <ReadRate
                               readCount={readCount}
