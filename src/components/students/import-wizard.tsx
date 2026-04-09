@@ -7,10 +7,8 @@ import {
   Check,
   ChevronDown,
   ExternalLink,
-  Lightbulb,
   List,
   MessageSquareText,
-  Plus,
   Settings2,
   ShieldCheck,
   Upload,
@@ -26,7 +24,6 @@ import {
 } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Popover,
   PopoverContent,
@@ -490,7 +487,7 @@ function Step2({
           </div>
 
           {/* Validation panel */}
-          <div className="w-[412px] shrink-0">
+          <div className="h-[620px] w-[412px] shrink-0">
             {hasIssues ? (
               <div className="flex min-h-[620px] flex-col rounded-2xl border bg-white p-6">
               <div className="mb-5 flex items-center justify-between">
@@ -573,216 +570,44 @@ function CategorySelectRow({
   state,
   categories,
   onChange,
-  onCreateCategory,
 }: {
   fieldName: string
   state: FieldState
   categories: Array<string>
   onChange: (next: Partial<FieldState>) => void
-  onCreateCategory: (name: string) => void
 }) {
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    if (!dropdownOpen) return
-    function handleClick(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setDropdownOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [dropdownOpen])
-
-  const existingFields =
-    state.selected && state.mode === 'selected'
-      ? (EXISTING_FIELDS_MAP[state.selected] ?? [])
-      : []
-
-  function handleSelectCategory(cat: string) {
-    setDropdownOpen(false)
-    onChange({ mode: 'selected', selected: cat, newValue: '', newError: '' })
-  }
-
-  function handleSkipForNow() {
-    setDropdownOpen(false)
-    onChange({ mode: 'skipped', selected: null })
-  }
-
-  function handleCreateCategory() {
-    setDropdownOpen(false)
-    onChange({ mode: 'creating', newValue: '', newError: '' })
-  }
-
-  function handleConfirmNewCategory() {
-    const trimmed = state.newValue.trim()
-    if (trimmed.toLowerCase() === 'others') {
-      onChange({ newError: 'Please select "Skip for now" instead' })
-      return
-    }
-    if (!trimmed) return
-    onCreateCategory(trimmed)
-    onChange({
-      mode: 'selected',
-      selected: trimmed,
-      newValue: '',
-      newError: '',
-    })
-  }
-
-  function handleCancelNew() {
-    onChange({ mode: 'unset', newValue: '', newError: '' })
-  }
-
-  // ── Render the "CATEGORISE UNDER" cell content
-  function renderSelectCell() {
-    if (state.mode === 'creating') {
-      return (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <Input
-              autoFocus
-              value={state.newValue}
-              onChange={(e) =>
-                onChange({ newValue: e.target.value, newError: '' })
-              }
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleConfirmNewCategory()
-                if (e.key === 'Escape') handleCancelNew()
-              }}
-              placeholder="New category"
-              className={cn(
-                'h-8 text-sm',
-                state.newError && 'border-red-400 focus-visible:ring-red-300',
-              )}
-            />
-            <Button
-              size="icon"
-              className="h-8 w-8 shrink-0 bg-emerald-600 hover:bg-emerald-700"
-              onClick={handleConfirmNewCategory}
-            >
-              <Check className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-8 w-8 shrink-0"
-              onClick={handleCancelNew}
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-          {state.newError && (
-            <p className="flex items-center gap-1 text-xs text-red-500">
-              <AlertCircle className="h-3 w-3 shrink-0" />
-              {state.newError}
-            </p>
+  return (
+    <TableRow className="hover:bg-transparent">
+      <TableCell className="py-4 pl-5">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-slate-800">{fieldName}</span>
+          {state.mode === 'selected' && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700">
+              <Check className="h-3 w-3" />
+              Categorised
+            </span>
           )}
         </div>
-      )
-    }
-
-    const label =
-      state.mode === 'selected'
-        ? (state.selected ?? '')
-        : state.mode === 'skipped'
-          ? 'Skip for now'
-          : 'Select'
-
-    const isPlaceholder = state.mode === 'unset'
-    const isSkipped = state.mode === 'skipped'
-
-    return (
-      <div ref={containerRef} className="relative">
-        <button
-          type="button"
-          onClick={() => setDropdownOpen((v) => !v)}
-          className={cn(
-            'flex h-9 w-full items-center justify-between gap-2 rounded-md border bg-white px-3 text-left text-sm transition-colors hover:bg-slate-50',
-            dropdownOpen && 'border-primary ring-1 ring-primary/30',
-            isPlaceholder && 'text-slate-400',
-            isSkipped && 'text-slate-500 italic',
-          )}
-        >
-          <span className="truncate">{label}</span>
-          <ChevronDown
-            className={cn(
-              'h-4 w-4 shrink-0 text-slate-400 transition-transform',
-              dropdownOpen && 'rotate-180',
-            )}
-          />
-        </button>
-
-        {dropdownOpen && (
-          <div className="absolute left-0 top-full z-20 mt-1 w-full min-w-[220px] overflow-hidden rounded-lg border bg-white py-1 shadow-lg">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => handleSelectCategory(cat)}
-                className={cn(
-                  'flex w-full items-center px-3 py-2 text-left text-sm hover:bg-slate-50',
-                  state.selected === cat && 'font-medium text-primary',
-                )}
-              >
-                {cat}
-              </button>
-            ))}
-            <div className="my-1 border-t" />
-            <button
-              type="button"
-              onClick={handleCreateCategory}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-primary hover:bg-slate-50"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Create new category
-            </button>
-            <button
-              type="button"
-              onClick={handleSkipForNow}
-              className="flex w-full items-center gap-1 px-3 py-2 text-left text-sm text-slate-500 hover:bg-slate-50"
-            >
-              <ArrowRight className="h-3.5 w-3.5" />
-              Skip for now
-            </button>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  // ── Render the "EXISTING FIELDS PREVIEW" cell
-  function renderPreviewCell() {
-    if (state.mode !== 'selected' || existingFields.length === 0) {
-      return <span className="text-sm text-slate-400">–</span>
-    }
-    return (
-      <ul className="space-y-1">
-        {existingFields.slice(0, 3).map((f) => (
-          <li
-            key={f}
-            className="flex items-center gap-1.5 text-sm text-slate-700"
-          >
-            <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-            {f}
-          </li>
-        ))}
-      </ul>
-    )
-  }
-
-  return (
-    <TableRow>
-      <TableCell className="py-4 pl-5 text-sm font-medium text-slate-800">
-        {fieldName}
       </TableCell>
-      <TableCell className="py-4 pr-4">{renderSelectCell()}</TableCell>
-      <TableCell className="py-4 pl-2 pr-5">{renderPreviewCell()}</TableCell>
+      <TableCell className="py-4 pr-5">
+        <Select
+          value={state.selected ?? ''}
+          onValueChange={(value) =>
+            onChange({ mode: 'selected', selected: value })
+          }
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </TableCell>
     </TableRow>
   )
 }
@@ -802,9 +627,7 @@ function Step3({
     () =>
       Object.fromEntries(INCOMING_FIELDS.map((f) => [f.id, makeFieldState()])),
   )
-  const [categories, setCategories] =
-    useState<Array<string>>(DEFAULT_CATEGORIES)
-  const [bannerDismissed, setBannerDismissed] = useState(false)
+  const [categories] = useState<Array<string>>(DEFAULT_CATEGORIES)
 
   function updateField(id: string, patch: Partial<FieldState>) {
     setFieldStates((prev) => ({
@@ -813,16 +636,8 @@ function Step3({
     }))
   }
 
-  function addCategory(name: string) {
-    if (!categories.includes(name)) {
-      setCategories((prev) => [...prev, name])
-    }
-  }
-
   const allResolved = INCOMING_FIELDS.every(
-    (f) =>
-      fieldStates[f.id].mode === 'selected' ||
-      fieldStates[f.id].mode === 'skipped',
+    (f) => fieldStates[f.id].mode === 'selected',
   )
 
   function buildMappings(): Record<string, string> {
@@ -841,59 +656,37 @@ function Step3({
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="px-8 pt-8">
-          <h1 className="text-2xl font-bold text-slate-900">
-            Organise your new fields
+        <div className="mx-auto w-[632px] pt-8">
+          <h1 className="text-2xl font-semibold text-slate-900">
+            Choose where new fields appear
           </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Pick the section where each field should appear in the student
+            profile
+          </p>
         </div>
 
-        {/* Banner */}
-        {!bannerDismissed && (
-          <div className="mx-8 mt-4 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-              <Lightbulb className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-emerald-900">
-                Keep your student view tidy
-              </p>
-              <p className="text-xs text-emerald-700">
-                Categorise each field to bring related details together. Make
-                patterns clearer and decisions easier.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="shrink-0 border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50"
-              onClick={() => onSkipAll(buildMappings())}
-            >
-              Skip for now
-            </Button>
-            <button
-              type="button"
-              onClick={() => setBannerDismissed(true)}
-              className="ml-1 text-emerald-500 hover:text-emerald-700"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
+        {/* Hint note */}
+        <div className="mx-auto mb-4 mt-12 w-[632px] border-l-2 border-slate-300 pl-3">
+          <p className="text-sm text-slate-500">
+            If a field fits more than one section, pick the best match. You can
+            edit it later
+          </p>
+        </div>
 
         {/* Table */}
-        <div className="mx-8 mt-4 mb-6 rounded-xl border bg-white">
+        <div className="mx-auto mb-6 w-[632px] overflow-hidden rounded-xl border bg-white">
           <Table>
-            <TableHeader className="bg-white">
-              <TableRow>
-                <TableHead className="pl-5 text-xs uppercase tracking-wide text-slate-400">
-                  Incoming fields
-                  <span className="mx-2 text-slate-300">→</span>
+            <TableHeader className="bg-[var(--color-slate-2)]">
+              <TableRow className="hover:bg-[var(--color-slate-2)]">
+                <TableHead className="pl-5 pr-0 typography-label-md-strong text-[var(--color-slate-11)]">
+                  <span className="flex items-center justify-between">
+                    New fields
+                    <ArrowRight className="h-3.5 w-3.5 text-[var(--color-slate-9)]" />
+                  </span>
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-slate-400">
-                  Categorise under
-                </TableHead>
-                <TableHead className="pl-2 pr-5 text-xs uppercase tracking-wide text-slate-400">
-                  Existing fields preview
+                <TableHead className="pr-5 typography-label-md-strong text-[var(--color-slate-11)]">
+                  Place under
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -905,7 +698,6 @@ function Step3({
                   state={fieldStates[field.id]}
                   categories={categories}
                   onChange={(patch) => updateField(field.id, patch)}
-                  onCreateCategory={addCategory}
                 />
               ))}
             </TableBody>
@@ -919,14 +711,19 @@ function Step3({
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        <Button
-          onClick={() => onComplete(buildMappings())}
-          disabled={!allResolved}
-          className="gap-2"
-        >
-          Complete
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={() => onSkipAll(buildMappings())}>
+            Skip for now
+          </Button>
+          <Button
+            onClick={() => onComplete(buildMappings())}
+            disabled={!allResolved}
+            className="gap-2"
+          >
+            Complete
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   )
@@ -1044,7 +841,7 @@ function ConfirmationPage({
 export function ImportWizard({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<WizardStep>(1)
   const [uploadError, setUploadError] = useState(false)
-  const [hasIssues, setHasIssues] = useState(true)
+  const [hasIssues, setHasIssues] = useState(false)
   const [fieldsByCategory, setFieldsByCategory] = useState<
     Record<string, Array<string>>
   >({})
