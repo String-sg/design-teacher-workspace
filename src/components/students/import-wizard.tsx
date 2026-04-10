@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   AlertCircle,
   ArrowLeft,
@@ -9,6 +9,7 @@ import {
   ExternalLink,
   List,
   MessageSquareText,
+  Plus,
   Settings2,
   ShieldCheck,
   Upload,
@@ -31,6 +32,12 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { Separator } from '@/components/ui/separator'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import {
   Select,
   SelectContent,
@@ -38,6 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+
 import {
   Table,
   TableBody,
@@ -116,6 +124,15 @@ const DEFAULT_CATEGORIES = [
   'Personal',
 ]
 
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  Academics: 'Overall percentage, Learning support...',
+  Attendance: 'Attendance, Late-coming...',
+  Behaviour: 'Conduct grade, Offences...',
+  Wellbeing: 'Social links, Low mood...',
+  Family: 'Housing, FAS...',
+  Personal: 'Health alerts, Citizenship...',
+}
+
 const EXISTING_FIELDS_MAP: Record<string, Array<string>> = {
   Academics: [
     'Overall % across selected subjects',
@@ -160,7 +177,7 @@ const WIZARD_STEPS = ['Upload', 'Review', 'Organise'] as const
 
 function WizardStepper({ current }: { current: number }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex h-fit items-center">
       {WIZARD_STEPS.map((label, i) => {
         const stepNum = i + 1
         const isActive = stepNum === current
@@ -168,37 +185,35 @@ function WizardStepper({ current }: { current: number }) {
         const isDimmed = stepNum > current
 
         return (
-          <div key={label} className="flex items-center gap-2.5">
-            <div className="flex items-center gap-1.5">
+          <React.Fragment key={label}>
+            <div className="flex items-center gap-2">
               <div
                 className={cn(
-                  'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors',
-                  (isActive || isCompleted) &&
-                    'bg-primary text-primary-foreground',
-                  isDimmed && 'border border-slate-300 text-slate-400',
+                  'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white transition-colors',
+                  (isActive || isCompleted) && 'bg-[var(--color-twblue-9,#0064ff)]',
+                  isDimmed && 'bg-[var(--btn-color-fill-disabled,#b9bbc6)]',
                 )}
               >
                 {isCompleted ? (
                   <Check className="h-3 w-3" strokeWidth={2.5} />
                 ) : (
-                  stepNum
+                  <span className="text-[11px]">{stepNum}</span>
                 )}
               </div>
               <span
                 className={cn(
                   'text-sm',
-                  isActive && 'font-medium text-slate-700',
-                  isCompleted && 'font-medium text-slate-500',
-                  isDimmed && 'text-slate-400',
+                  (isActive || isCompleted) && 'text-[var(--color-slate-12,#1c2024)]',
+                  isDimmed && 'text-[var(--btn-color-foreground-disabled,#b9bbc6)]',
                 )}
               >
                 {label}
               </span>
             </div>
             {i < WIZARD_STEPS.length - 1 && (
-              <div className="h-px w-6 bg-slate-200" />
+              <Separator className="mx-3 data-[orientation=horizontal]:w-[24px]" />
             )}
-          </div>
+          </React.Fragment>
         )
       })}
     </div>
@@ -313,7 +328,7 @@ function Step1({
               <li className="flex items-center gap-3 text-sm text-slate-600">
                 <Check className="h-4 w-4 shrink-0 text-slate-400" />
                 <span>
-                  Use our{' '}
+                  Use the{' '}
                   <a className="cursor-pointer text-twblue-9 underline underline-offset-2">
                     template
                   </a>
@@ -570,43 +585,191 @@ function CategorySelectRow({
   state,
   categories,
   onChange,
+  onAddCategory,
 }: {
   fieldName: string
   state: FieldState
   categories: Array<string>
   onChange: (next: Partial<FieldState>) => void
+  onAddCategory: (name: string) => void
 }) {
+  const [open, setOpen] = useState(false)
+
+  function handleConfirmNew() {
+    const trimmed = state.newValue.trim()
+    if (!trimmed) return
+    const exists = categories.some(
+      (c) => c.toLowerCase() === trimmed.toLowerCase(),
+    )
+    if (exists) {
+      onChange({ newError: 'This section already exist' })
+      return
+    }
+    onAddCategory(trimmed)
+    onChange({ mode: 'selected', selected: trimmed, newValue: '', newError: '' })
+  }
+
+  // "creating" mode: show inline input + confirm button
+  if (state.mode === 'creating') {
+    return (
+      <TableRow className="hover:bg-transparent">
+        <TableCell className="w-1/2 py-4 pl-5">
+          <span className="text-sm font-medium text-slate-800">{fieldName}</span>
+        </TableCell>
+        <TableCell className="w-1/2 py-4 pr-5">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <input
+                autoFocus
+                type="text"
+                value={state.newValue}
+                placeholder="Name this section"
+                onChange={(e) =>
+                  onChange({ newValue: e.target.value, newError: '' })
+                }
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleConfirmNew()
+                  if (e.key === 'Escape')
+                    onChange({ mode: 'unset', newValue: '', newError: '' })
+                }}
+                className={cn(
+                  'h-9 flex-1 rounded-lg border bg-white px-3 text-sm outline-none transition-colors',
+                  state.newError
+                    ? 'border-[var(--crimson-9)] ring-1 ring-[var(--crimson-9)]'
+                    : 'border-blue-400 ring-1 ring-blue-300',
+                )}
+              />
+              <button
+                type="button"
+                onClick={handleConfirmNew}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-slate-400 hover:text-slate-600"
+              >
+                <Check className="h-4 w-4" />
+              </button>
+            </div>
+            {state.newError && (
+              <p className="text-xs text-[var(--crimson-11)]">
+                {state.newError}
+              </p>
+            )}
+          </div>
+        </TableCell>
+      </TableRow>
+    )
+  }
+
   return (
     <TableRow className="hover:bg-transparent">
-      <TableCell className="py-4 pl-5">
+      <TableCell className="w-1/2 py-4 pl-5">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-slate-800">{fieldName}</span>
           {state.mode === 'selected' && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#E0F8F3] px-2 py-0.5 text-xs font-medium text-[#008573]">
               <Check className="h-3 w-3" />
-              Categorised
+              Done
             </span>
           )}
         </div>
       </TableCell>
-      <TableCell className="py-4 pr-5">
-        <Select
-          value={state.selected ?? ''}
-          onValueChange={(value) =>
-            onChange({ mode: 'selected', selected: value })
-          }
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <TableCell className="w-1/2 py-4 pr-5">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger
+            className={cn(
+              'flex h-9 w-full items-center justify-between rounded-lg border border-[var(--color-slate-6)] px-3 text-sm',
+              state.mode === 'skipped' ? 'bg-[var(--color-slate-2)]' : 'bg-white',
+            )}
+          >
+            <span
+              className={
+                state.selected || state.mode === 'skipped'
+                  ? 'text-[var(--color-slate-12)]'
+                  : 'text-[var(--color-slate-11)]'
+              }
+            >
+              {state.mode === 'skipped'
+                ? 'Skip for now'
+                : (state.selected ?? 'Select')}
+            </span>
+            <ChevronDown className="h-4 w-4 shrink-0 text-[var(--color-slate-11)]" />
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-[280px] rounded-3xl border-[var(--color-slate-6)] p-3 shadow-[0px_4px_6px_0px_rgba(0,0,45,0.09),0px_2px_4px_0px_rgba(0,0,45,0.09)]"
+            align="start"
+            sideOffset={4}
+          >
+            <div className="flex flex-col gap-1">
+              {categories.slice().sort().map((cat) => {
+                const isSelected = state.selected === cat
+                const description = CATEGORY_DESCRIPTIONS[cat]
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => {
+                      onChange({ mode: 'selected', selected: cat })
+                      setOpen(false)
+                    }}
+                    className={cn(
+                      'flex w-full items-center gap-2 rounded-xl p-2 text-left transition-colors',
+                      isSelected
+                        ? 'bg-[var(--color-slate-5)]'
+                        : 'hover:bg-[var(--color-slate-4)]',
+                    )}
+                  >
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
+                      <span
+                        className={cn(
+                          'text-base text-[var(--color-slate-12)]',
+                          isSelected && 'font-semibold',
+                        )}
+                      >
+                        {cat}
+                      </span>
+                      {description && (
+                        <span className="truncate text-sm text-[var(--color-slate-11)]">
+                          {description}
+                        </span>
+                      )}
+                    </div>
+                    {isSelected && (
+                      <Check className="h-4 w-4 shrink-0 text-[var(--color-slate-11)]" />
+                    )}
+                  </button>
+                )
+              })}
+
+              <div className="my-1 h-px bg-[var(--color-slate-6)]" />
+
+              <button
+                type="button"
+                onClick={() => {
+                  onChange({ mode: 'creating', newValue: '', newError: '' })
+                  setOpen(false)
+                }}
+                className="flex w-full items-center gap-2 rounded-xl p-2 text-left hover:bg-[var(--color-slate-4)]"
+              >
+                <Plus className="h-4 w-4 shrink-0 text-[var(--color-slate-12)]" />
+                <span className="text-base text-[var(--color-slate-12)]">
+                  Create new section
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  onChange({ mode: 'skipped', selected: null })
+                  setOpen(false)
+                }}
+                className="flex w-full items-center gap-2 rounded-xl p-2 text-left hover:bg-[var(--color-slate-4)]"
+              >
+                <ArrowRight className="h-4 w-4 shrink-0 text-[var(--color-slate-12)]" />
+                <span className="text-base text-[var(--color-slate-12)]">
+                  Skip for now
+                </span>
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </TableCell>
     </TableRow>
   )
@@ -627,7 +790,7 @@ function Step3({
     () =>
       Object.fromEntries(INCOMING_FIELDS.map((f) => [f.id, makeFieldState()])),
   )
-  const [categories] = useState<Array<string>>(DEFAULT_CATEGORIES)
+  const [categories, setCategories] = useState<Array<string>>(DEFAULT_CATEGORIES)
 
   function updateField(id: string, patch: Partial<FieldState>) {
     setFieldStates((prev) => ({
@@ -636,8 +799,14 @@ function Step3({
     }))
   }
 
+  function addCategory(name: string) {
+    setCategories((prev) => [...prev, name])
+  }
+
   const allResolved = INCOMING_FIELDS.every(
-    (f) => fieldStates[f.id].mode === 'selected',
+    (f) =>
+      fieldStates[f.id].mode === 'selected' ||
+      fieldStates[f.id].mode === 'skipped',
   )
 
   function buildMappings(): Record<string, string> {
@@ -679,13 +848,13 @@ function Step3({
           <Table>
             <TableHeader className="bg-[var(--color-slate-2)]">
               <TableRow className="hover:bg-[var(--color-slate-2)]">
-                <TableHead className="pl-5 pr-0 typography-label-md-strong text-[var(--color-slate-11)]">
+                <TableHead className="w-1/2 pl-5 pr-0 typography-label-md-strong text-[var(--color-slate-11)]">
                   <span className="flex items-center justify-between">
                     New fields
                     <ArrowRight className="h-3.5 w-3.5 text-[var(--color-slate-9)]" />
                   </span>
                 </TableHead>
-                <TableHead className="pr-5 typography-label-md-strong text-[var(--color-slate-11)]">
+                <TableHead className="w-1/2 pr-5 typography-label-md-strong text-[var(--color-slate-11)]">
                   Place under
                 </TableHead>
               </TableRow>
@@ -698,6 +867,7 @@ function Step3({
                   state={fieldStates[field.id]}
                   categories={categories}
                   onChange={(patch) => updateField(field.id, patch)}
+                  onAddCategory={addCategory}
                 />
               ))}
             </TableBody>
@@ -712,9 +882,16 @@ function Step3({
           Back
         </Button>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={() => onSkipAll(buildMappings())}>
-            Skip for now
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" onClick={() => onSkipAll(buildMappings())}>
+                Skip for now
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              New fields go under "Others" for now
+            </TooltipContent>
+          </Tooltip>
           <Button
             onClick={() => onComplete(buildMappings())}
             disabled={!allResolved}
@@ -731,6 +908,9 @@ function Step3({
 
 // ─── Confirmation page ───────────────────────────────────────────────────────
 
+const CONFIRMATION_ILLUSTRATION =
+  'https://www.figma.com/api/mcp/asset/81a60440-2f7c-4dce-ac01-8e5e7e8517ea'
+
 function ConfirmationPage({
   fieldsByCategory,
   onExplore,
@@ -738,99 +918,90 @@ function ConfirmationPage({
   fieldsByCategory: Record<string, Array<string>>
   onExplore: () => void
 }) {
-  const [accordionOpen, setAccordionOpen] = useState(true)
+  const [expanded, setExpanded] = useState(false)
+  const [overflows, setOverflows] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
   const categories = Object.keys(fieldsByCategory)
   const totalFields = Object.values(fieldsByCategory).flat().length
-  const isSingleCategory = categories.length === 1
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setOverflows(contentRef.current.scrollHeight > 238)
+    }
+  }, [fieldsByCategory])
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      {/* Center content */}
-      <div className="flex flex-1 flex-col items-center overflow-y-auto px-8 py-12">
-        {/* Success icon */}
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-          <CheckCircle2 className="h-7 w-7 text-emerald-600" />
-        </div>
-
-        {/* Title */}
-        <h1 className="mt-4 text-2xl font-bold text-slate-900">
-          Import done! 🎉
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">Custom fields added</p>
-
-        {/* Stats */}
-        <div className="mt-6 w-full max-w-xl">
-          <div className="grid grid-cols-2 divide-x overflow-hidden rounded-xl border bg-white">
-            <div className="px-8 py-5 text-center">
-              <p className="text-3xl font-bold text-primary">1023</p>
-              <p className="mt-1 text-sm text-slate-500">Student records</p>
-            </div>
-            <div className="px-8 py-5 text-center">
-              <p className="text-3xl font-bold text-primary">{totalFields}</p>
-              <p className="mt-1 text-sm text-slate-500">Data fields</p>
-            </div>
+    <div className="relative flex flex-1 overflow-hidden bg-[var(--color-slate-1,#fcfcfd)]">
+      {/* Left: content centered vertically */}
+      <div className="flex flex-1 items-start justify-end px-8">
+        <div className="flex w-[412px] flex-col gap-8 pt-[140px]">
+          {/* Heading */}
+          <div className="flex flex-col gap-3">
+            <h1 className="text-[26px] font-semibold leading-8 text-[var(--color-slate-12,#1c2024)]">
+              You're all set, import done!
+            </h1>
+            <p className="text-lg font-semibold leading-7 text-[var(--color-twblue-9,#0064ff)]">
+              1023 records updated, {totalFields} fields added
+            </p>
           </div>
-        </div>
 
-        {/* Data fields accordion */}
-        <div className="mt-4 w-full max-w-xl overflow-hidden rounded-xl border bg-white">
-          <button
-            type="button"
-            onClick={() => setAccordionOpen((v) => !v)}
-            className="flex w-full items-center justify-between px-5 py-4 text-left"
+          {/* Category card */}
+          <div
+            className={cn(
+              'relative overflow-hidden rounded-3xl bg-[var(--color-slate-3,#f0f0f3)] p-6',
+              overflows && !expanded && 'h-[238px]',
+            )}
           >
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              <span className="text-sm font-semibold text-slate-800">
-                Data fields imported
-              </span>
-            </div>
-            <ChevronDown
-              className={cn(
-                'h-4 w-4 text-slate-400 transition-transform',
-                accordionOpen && 'rotate-180',
-              )}
-            />
-          </button>
-
-          {accordionOpen && (
-            <div className="border-t px-4 pb-4 pt-3">
-              <div
-                className={cn(
-                  'grid gap-3',
-                  isSingleCategory ? 'grid-cols-1' : 'grid-cols-2',
-                )}
-              >
-                {categories.map((cat) => (
-                  <div key={cat} className="rounded-lg bg-slate-50 p-4">
-                    <p className="mb-2 text-sm font-semibold text-slate-800">
-                      {cat}
-                    </p>
-                    <ul className="space-y-1.5">
-                      {fieldsByCategory[cat].map((fieldName, i) => (
-                        <li
-                          key={`${fieldName}-${i}`}
-                          className="flex items-center gap-2 text-sm text-slate-600"
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                          {fieldName}
-                        </li>
-                      ))}
-                    </ul>
+            <div ref={contentRef} className="flex flex-col gap-4">
+              {categories.map((cat) => (
+                <div key={cat} className="flex flex-col gap-1">
+                  <p className="text-sm font-semibold leading-5 text-[var(--color-slate-11,#60646c)]">
+                    {cat}
+                  </p>
+                  <div className="flex flex-col gap-0.5">
+                    {fieldsByCategory[cat].map((field, i) => (
+                      <div key={i} className="flex items-center gap-2 py-1">
+                        <Check className="h-4 w-4 shrink-0 text-[var(--color-slate-11,#60646c)]" />
+                        <p className="text-sm leading-5 text-[var(--color-slate-11,#60646c)]">
+                          {field}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
+
+            {/* Show all overlay */}
+            {overflows && !expanded && (
+              <div className="absolute bottom-0 left-0 right-0 flex h-[60px] items-center justify-end bg-[rgba(240,240,243,0.85)] px-6">
+                <button
+                  type="button"
+                  onClick={() => setExpanded(true)}
+                  className="flex items-center gap-1 text-sm font-medium text-[var(--color-slate-12,#1c2024)]"
+                >
+                  Show all
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* CTA */}
+          <Button onClick={onExplore} className="w-fit gap-2 rounded-full px-6">
+            View student data
+            <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      {/* Bottom CTA */}
-      <div className="shrink-0 border-t bg-white px-8 py-4 text-center">
-        <Button onClick={onExplore} size="lg" className="gap-2 px-8">
-          Explore your holistic view
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+      {/* Right: illustration */}
+      <div className="flex flex-1 items-start justify-start pt-[380px]">
+        <img
+          src={CONFIRMATION_ILLUSTRATION}
+          alt=""
+          className="pointer-events-none h-[360px] w-[360px] object-cover ml-[48px]"
+        />
       </div>
     </div>
   )
@@ -902,7 +1073,7 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
       <div className="flex shrink-0 items-center justify-between px-6 py-4">
         <div className="flex items-center gap-4">
           <span className="text-base font-semibold text-slate-900">
-            {isConfirmation ? 'Add custom fields' : 'Import data'}
+            Import data
           </span>
           {!isConfirmation && (
             <>
@@ -911,16 +1082,14 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
             </>
           )}
         </div>
-        {!isConfirmation && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full"
+          onClick={onClose}
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Step content */}
