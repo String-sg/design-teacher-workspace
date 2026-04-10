@@ -64,6 +64,29 @@ const INCOMING_FIELDS = [
   { id: 'teacher_remarks', name: "Teacher's remarks" },
 ]
 
+const MOCK_MANY_FIELDS_BY_CATEGORY: Record<string, Array<string>> = {
+  Others: [
+    'Math Score',
+    'Science Score',
+    'English Score',
+    'Mother Tongue Score',
+    'Humanities Score',
+    'Overall GPA',
+    'Next steps',
+    'Parent contact notes',
+    'Counsellor notes',
+  ],
+  Attendance: [
+    'VIA missed',
+    'Days absent',
+    'Late arrivals',
+    'Medical leave',
+    'Excused absences',
+  ],
+  Behaviour: ["Teacher's remarks", 'Conduct grade', 'Detention records', 'Commendations'],
+  CCA: ['CCA name', 'CCA attendance', 'CCA achievement level'],
+}
+
 const MOCK_REVIEW_ROWS = [
   { row: 1, name: 'Chan Jun Kai', class: '3A', viaMissed: '2', nextSteps: 'Schedule a one-on-one session', teacherRemarks: 'Absent for 3 consecutive VIA sessions without valid reason' },
   { row: 2, name: 'Vincent Koh Kin Yi', class: '3A', viaMissed: '3', nextSteps: 'Watch the recorded session', teacherRemarks: 'No visible effort to make up missed sessions' },
@@ -925,6 +948,7 @@ function ConfirmationPage({
   const totalFields = Object.values(fieldsByCategory).flat().length
 
   useEffect(() => {
+    setExpanded(false)
     if (contentRef.current) {
       setOverflows(contentRef.current.scrollHeight > 238)
     }
@@ -974,7 +998,7 @@ function ConfirmationPage({
 
             {/* Show all overlay */}
             {overflows && !expanded && (
-              <div className="absolute bottom-0 left-0 right-0 flex h-[60px] items-center justify-end bg-[rgba(240,240,243,0.85)] px-6">
+              <div className="absolute bottom-0 left-0 right-0 flex h-[64px] items-center justify-end bg-[rgba(240,240,243,0.85)] px-6">
                 <button
                   type="button"
                   onClick={() => setExpanded(true)}
@@ -1013,6 +1037,7 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<WizardStep>(1)
   const [uploadError, setUploadError] = useState(false)
   const [hasIssues, setHasIssues] = useState(false)
+  const [confirmationShowAll, setConfirmationShowAll] = useState(false)
   const [fieldsByCategory, setFieldsByCategory] = useState<
     Record<string, Array<string>>
   >({})
@@ -1112,69 +1137,89 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
       )}
       {step === 4 && (
         <ConfirmationPage
-          fieldsByCategory={fieldsByCategory}
+          fieldsByCategory={
+            confirmationShowAll ? MOCK_MANY_FIELDS_BY_CATEGORY : fieldsByCategory
+          }
           onExplore={onClose}
         />
       )}
 
       {/* Floating design tools — dev only */}
-      {!isConfirmation && (
-        <Popover>
-          <PopoverTrigger
-            render={
-              <button className="fixed bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full border bg-white shadow-lg transition-shadow hover:shadow-xl">
-                <Settings2 className="h-4 w-4 text-slate-500" />
-              </button>
-            }
-          />
-          <PopoverContent
-            side="top"
-            sideOffset={8}
-            align="end"
-            className="w-64"
-          >
-            <PopoverHeader>
-              <PopoverTitle>Design Tools</PopoverTitle>
-            </PopoverHeader>
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-medium text-slate-500">
-                  Step 1 — Upload state
-                </label>
-                <Select
-                  value={uploadError ? 'error' : 'idle'}
-                  onValueChange={(val) => setUploadError(val === 'error')}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="idle">Idle</SelectItem>
-                    <SelectItem value="error">Upload error</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-medium text-slate-500">
-                  Step 2 — Review state
-                </label>
-                <Select
-                  value={hasIssues ? 'issues' : 'clean'}
-                  onValueChange={(val) => setHasIssues(val === 'issues')}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="clean">No issues</SelectItem>
-                    <SelectItem value="issues">Few issues found</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+      <Popover>
+        <PopoverTrigger
+          render={
+            <button className="fixed bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full border bg-white shadow-lg transition-shadow hover:shadow-xl">
+              <Settings2 className="h-4 w-4 text-slate-500" />
+            </button>
+          }
+        />
+        <PopoverContent
+          side="top"
+          sideOffset={8}
+          align="end"
+          className="w-64"
+        >
+          <PopoverHeader>
+            <PopoverTitle>Design Tools</PopoverTitle>
+          </PopoverHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-medium text-slate-500">
+                Step 1 — Upload state
+              </label>
+              <Select
+                value={uploadError ? 'error' : 'idle'}
+                onValueChange={(val) => setUploadError(val === 'error')}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="idle">Idle</SelectItem>
+                  <SelectItem value="error">Upload error</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </PopoverContent>
-        </Popover>
-      )}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-medium text-slate-500">
+                Step 2 — Review state
+              </label>
+              <Select
+                value={hasIssues ? 'issues' : 'clean'}
+                onValueChange={(val) => setHasIssues(val === 'issues')}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="clean">No issues</SelectItem>
+                  <SelectItem value="issues">Few issues found</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium text-slate-500">
+                Step 4 — Overflow state
+              </label>
+              <button
+                type="button"
+                onClick={() => setConfirmationShowAll((v) => !v)}
+                className={cn(
+                  'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none',
+                  confirmationShowAll ? 'bg-slate-900' : 'bg-slate-200',
+                )}
+              >
+                <span
+                  className={cn(
+                    'pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition-transform',
+                    confirmationShowAll ? 'translate-x-4' : 'translate-x-0',
+                  )}
+                />
+              </button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </>
   )
 }
