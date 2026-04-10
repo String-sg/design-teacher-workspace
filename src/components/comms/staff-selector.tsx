@@ -46,7 +46,7 @@ function makeMemberDetails(ids: Array<string>): Array<MemberDetail> {
   })
 }
 
-// Individual staff — sublabel shows form class (if any) + email
+// Individual staff — label has salutation stripped; sublabel shows form class (if any) + email
 const STAFF_INDIVIDUAL_ITEMS: Array<EntityItem> = MOCK_STAFF.map((s) => ({
   id: s.id,
   label: stripSalutation(s.name),
