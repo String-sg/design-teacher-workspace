@@ -90,7 +90,7 @@ export function StudentFilters({
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setExportModalOpen(true)}>
                 <Download className="mr-2 size-4" />
-                Export view
+                Export data
               </DropdownMenuItem>
               {flags['import-data'] && (
                 <DropdownMenuItem onClick={() => setImportDialogOpen(true)}>

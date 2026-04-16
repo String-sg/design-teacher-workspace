@@ -51,10 +51,25 @@ interface StudentTableProps {
   selectedSubjects?: Array<string> | null
   /** Opens the subject selector dialog */
   onConfigureSubjects?: () => void
+  /** When true, show "..." in Overall % cells while recalculating */
+  isRecalculating?: boolean
 }
 
 const tagVariantMap: Record<AttentionTag, 'default' | 'secondary' | 'outline'> =
   tagColors
+
+function AnimatedDots() {
+  const [frame, setFrame] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setFrame((f) => (f + 1) % 3), 150)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <span className="text-muted-foreground inline-block w-6">
+      {'.' .repeat(frame + 1)}
+    </span>
+  )
+}
 
 function computeOverallPct(
   student: Student,
@@ -87,6 +102,7 @@ export function StudentTable({
   onClearFilter,
   selectedSubjects,
   onConfigureSubjects,
+  isRecalculating,
 }: StudentTableProps) {
   const navigate = useNavigate()
   const { isEnabled } = useFeatureFlags()
@@ -719,7 +735,11 @@ export function StudentTable({
                     )}
                     {isVisible('overallPercentage') && (
                       <TableCell>
-                        {computeOverallPct(student, selectedSubjects)}%
+                        {isRecalculating ? (
+                          <AnimatedDots />
+                        ) : (
+                          `${computeOverallPct(student, selectedSubjects)}%`
+                        )}
                       </TableCell>
                     )}
                     {isVisible('approvedMtl') && (
