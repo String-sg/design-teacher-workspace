@@ -58,8 +58,15 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
     stage: 'Experiment',
   },
   {
+    key: 'student-analytics-basic',
+    label: 'Student Analytics',
+    description:
+      'Show Analytics and Profiles pages in the sidebar — attendance cohort analytics, academic analytics, and export CSV. Insight Buddy is not included.',
+    stage: 'Experiment',
+  },
+  {
     key: 'student-analytics',
-    label: 'Student Analytics (Research)',
+    label: 'Student Analytics with Insight buddy',
     description:
       'Show Student Analytics and Insight Buddy in the sidebar — attendance cohort analytics, academic analytics, export CSV, and AI-powered student insights',
     stage: 'Experiment',
