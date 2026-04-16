@@ -17,7 +17,7 @@ import { StudentFilters } from '@/components/students/student-filters'
 import { StudentTable } from '@/components/students/student-table'
 import { ClassSelector } from '@/components/students/class-selector'
 import { defaultColumns } from '@/components/students/column-visibility-popover'
-import { SubjectSelectorDialog } from '@/components/students/subject-selector-dialog'
+import { SubjectSelectorDialog, ALL_SUBJECTS } from '@/components/students/subject-selector-dialog'
 
 import { getMetrics, mockStudents } from '@/data/mock-students'
 
@@ -28,7 +28,16 @@ function loadSelectedSubjects(): Array<string> | null {
     const raw = localStorage.getItem(SUBJECT_SELECTION_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : null
+    if (!Array.isArray(parsed)) return null
+    // If any current subject is missing from the saved list, the list is stale
+    // (subjects were added after the user last saved) — reset to all selected
+    const hasNewSubjects = ALL_SUBJECTS.some(s => !parsed.includes(s))
+    if (hasNewSubjects) {
+      localStorage.removeItem(SUBJECT_SELECTION_KEY)
+      return null
+    }
+    const isAll = ALL_SUBJECTS.every(s => parsed.includes(s))
+    return isAll ? null : parsed
   } catch {
     return null
   }
@@ -134,10 +143,13 @@ function StudentsPage() {
   const [selectedSubjects, setSelectedSubjects] =
     useState<Array<string> | null>(() => loadSelectedSubjects())
   const [subjectDialogOpen, setSubjectDialogOpen] = useState(false)
+  const [isRecalculating, setIsRecalculating] = useState(false)
 
   const handleSubjectsApply = useCallback((subjects: Array<string> | null) => {
     setSelectedSubjects(subjects)
     saveSelectedSubjects(subjects)
+    setIsRecalculating(true)
+    setTimeout(() => setIsRecalculating(false), 1000)
   }, [])
 
   // Get students for the selected class/level (this determines the base list)
@@ -354,6 +366,7 @@ function StudentsPage() {
         onClearFilter={handleClearFilter}
         selectedSubjects={selectedSubjects}
         onConfigureSubjects={() => setSubjectDialogOpen(true)}
+        isRecalculating={isRecalculating}
       />
 
       <SubjectSelectorDialog
