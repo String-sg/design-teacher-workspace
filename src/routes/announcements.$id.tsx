@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  useNavigate,
+} from '@tanstack/react-router'
 import {
   ArrowLeft,
   CalendarClock,
@@ -9,6 +14,7 @@ import {
   MessageSquare,
   Paperclip,
   Plus,
+  Trash2,
   User,
   Users,
   X,
@@ -111,6 +117,14 @@ function AnnouncementDetailPage() {
   const [editScheduleTime, setEditScheduleTime] = useState('')
 
   // ---------------------------------------------------------------------------
+  // Delete state
+  // ---------------------------------------------------------------------------
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteMode, setDeleteMode] = useState<
+    'remove-from-list' | 'delete-for-everyone'
+  >('remove-from-list')
+
+  // ---------------------------------------------------------------------------
   // Derived values
   // ---------------------------------------------------------------------------
   const responseType = announcement.responseType ?? 'view-only'
@@ -161,10 +175,25 @@ function AnnouncementDetailPage() {
   // Posted announcements lock content; only metadata fields are editable
   const contentLocked = announcement.status === 'posted'
 
+  const navigate = useNavigate()
+
   useSetBreadcrumbs([
     { label: 'Posts', href: '/announcements' },
     { label: announcement.title, href: `/announcements/${announcement.id}` },
   ])
+
+  // ---------------------------------------------------------------------------
+  // Delete handler
+  // ---------------------------------------------------------------------------
+  function handleDelete() {
+    const toastMsg =
+      announcement.status !== 'posted' || deleteMode === 'delete-for-everyone'
+        ? 'Post deleted'
+        : 'Post removed from your list'
+    setShowDeleteDialog(false)
+    toast.success(toastMsg)
+    navigate({ to: '/announcements' })
+  }
 
   // ---------------------------------------------------------------------------
   // Edit handlers
@@ -267,7 +296,18 @@ function AnnouncementDetailPage() {
               variant="ghost"
               size="icon"
               className="mt-0.5 shrink-0"
-              render={<Link to="/announcements" />}
+              render={
+                <Link
+                  to="/announcements"
+                  search={{
+                    tab:
+                      responseType === 'acknowledge' ||
+                      responseType === 'yes-no'
+                        ? 'with-responses'
+                        : 'view-only',
+                  }}
+                />
+              }
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -350,35 +390,52 @@ function AnnouncementDetailPage() {
             </div>
           </div>
 
-          {/* Edit / Save / Cancel */}
-          {isViewer ? (
-            <Button variant="outline" size="sm" disabled>
-              <Lock className="h-3.5 w-3.5" />
-              View only
-            </Button>
-          ) : isEditing ? (
-            <div className="flex shrink-0 items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={cancelEditing}>
-                Cancel
+          {/* Edit / Save / Cancel + Delete */}
+          <div className="flex shrink-0 items-center gap-2">
+            {isViewer ? (
+              <Button variant="outline" size="sm" disabled>
+                <Lock className="h-3.5 w-3.5" />
+                View only
               </Button>
-              <Button size="sm" onClick={saveEditing}>
-                Save changes
+            ) : isEditing ? (
+              <>
+                <Button variant="ghost" size="sm" onClick={cancelEditing}>
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={saveEditing}>
+                  Save changes
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant={announcement.status === 'draft' ? 'default' : 'outline'}
+                size="sm"
+                render={
+                  <Link
+                    to="/announcements/new"
+                    search={{ edit: announcement.id }}
+                  />
+                }
+              >
+                Edit
               </Button>
-            </div>
-          ) : (
-            <Button
-              variant={announcement.status === 'draft' ? 'default' : 'outline'}
-              size="sm"
-              render={
-                <Link
-                  to="/announcements/new"
-                  search={{ edit: announcement.id }}
-                />
-              }
-            >
-              Edit
-            </Button>
-          )}
+            )}
+
+            {/* Delete button — hidden while in editing mode */}
+            {!isEditing && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => {
+                  setDeleteMode('remove-from-list')
+                  setShowDeleteDialog(true)
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -842,6 +899,116 @@ function AnnouncementDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Delete dialog ── */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete post?</DialogTitle>
+            <DialogDescription>
+              {announcement.status === 'posted'
+                ? 'This post has already been sent to parents. What would you like to do?'
+                : 'This will permanently delete the post. This cannot be undone.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {announcement.status === 'posted' && (
+            <div className="space-y-2 py-1">
+              {/* Option: Remove from my list */}
+              <button
+                type="button"
+                onClick={() => setDeleteMode('remove-from-list')}
+                className={cn(
+                  'w-full rounded-md border p-3.5 text-left transition-colors',
+                  deleteMode === 'remove-from-list'
+                    ? 'border-primary bg-primary/[0.04]'
+                    : 'border-border hover:bg-slate-50',
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={cn(
+                      'mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
+                      deleteMode === 'remove-from-list'
+                        ? 'border-primary bg-primary'
+                        : 'border-slate-300',
+                    )}
+                  >
+                    {deleteMode === 'remove-from-list' && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                    )}
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium">Remove from my list</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Parents can still see this post. It will only be removed
+                      from your view.
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Option: Delete for everyone */}
+              <button
+                type="button"
+                onClick={() => setDeleteMode('delete-for-everyone')}
+                className={cn(
+                  'w-full rounded-md border p-3.5 text-left transition-colors',
+                  deleteMode === 'delete-for-everyone'
+                    ? 'border-destructive bg-destructive/[0.04]'
+                    : 'border-border hover:bg-slate-50',
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={cn(
+                      'mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
+                      deleteMode === 'delete-for-everyone'
+                        ? 'border-destructive bg-destructive'
+                        : 'border-slate-300',
+                    )}
+                  >
+                    {deleteMode === 'delete-for-everyone' && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                    )}
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-destructive">
+                      Delete for everyone
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      This post will be removed from the Parents Gateway app.
+                      Parents will no longer be able to see it. This cannot be
+                      undone.
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant={
+                announcement.status !== 'posted' ||
+                deleteMode === 'delete-for-everyone'
+                  ? 'destructive'
+                  : 'default'
+              }
+              onClick={handleDelete}
+            >
+              {announcement.status !== 'posted'
+                ? 'Delete post'
+                : deleteMode === 'remove-from-list'
+                  ? 'Remove from my list'
+                  : 'Delete for everyone'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

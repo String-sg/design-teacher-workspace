@@ -285,6 +285,21 @@ export const mockPGAnnouncements: Array<PGAnnouncement> = [
     enquiryEmail: 'tanml@bandungsec.edu.sg',
     responseType: 'yes-no',
     dueDate: daysFromNow(7),
+    questions: [
+      {
+        id: 'q1',
+        text: 'Which meal package do you prefer?',
+        type: 'mcq',
+        options: ['Standard', 'Vegetarian', 'Halal'],
+        showAfter: 'yes',
+      },
+      {
+        id: 'q2',
+        text: 'Any dietary restrictions or special requests?',
+        type: 'free-text',
+        showAfter: 'yes',
+      },
+    ],
     createdAt: daysAgo(2),
     postedAt: daysAgo(1),
     recipients: [
@@ -300,6 +315,10 @@ export const mockPGAnnouncements: Array<PGAnnouncement> = [
         readAt: hoursAgo(20),
         formResponse: 'yes',
         respondedAt: hoursAgo(20),
+        questionAnswers: {
+          q1: 'Halal',
+          q2: 'No pork or lard please.',
+        },
       },
       {
         studentId: '2',
@@ -313,6 +332,7 @@ export const mockPGAnnouncements: Array<PGAnnouncement> = [
         readAt: hoursAgo(18),
         formResponse: 'no',
         respondedAt: hoursAgo(18),
+        // Questions only apply to 'yes' responses — no answers needed
       },
       {
         studentId: '4',

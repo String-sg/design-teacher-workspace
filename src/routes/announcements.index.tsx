@@ -759,8 +759,8 @@ function ParentsGatewayPage() {
                   </span>
                 )}
                 {nonPostedSelected.length > 0
-                  ? `For the ${postedSelected.length} posted ${postedSelected.length > 1 ? 'posts' : 'post'}, choose what to do:`
-                  : `Choose what to do with ${postedSelected.length > 1 ? 'these posted posts' : 'this posted post'}:`}
+                  ? `For the ${postedSelected.length} published ${postedSelected.length > 1 ? 'posts' : 'post'}, choose what to do:`
+                  : `This post has already been sent to parents. What would you like to do?`}
               </DialogDescription>
             )}
           </DialogHeader>
@@ -830,8 +830,9 @@ function ParentsGatewayPage() {
                       Delete for everyone
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      This post will be retracted from Parents Gateway. Parents
-                      will no longer be able to see it. This cannot be undone.
+                      This post will be removed from the Parents Gateway app.
+                      Parents will no longer be able to see it. This cannot be
+                      undone.
                     </p>
                   </div>
                 </div>

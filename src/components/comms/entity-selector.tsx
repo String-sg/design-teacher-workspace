@@ -445,11 +445,13 @@ function EntityChip({
   onRemove,
   extra,
   large = false,
+  onChipClick,
 }: {
   entity: SelectedEntity
   onRemove: () => void
   extra?: React.ReactNode
   large?: boolean
+  onChipClick?: () => void
 }) {
   const names = entity.memberNames ?? []
   const tooltipTitle =
@@ -462,6 +464,20 @@ function EntityChip({
   return (
     <span
       title={tooltipTitle}
+      role={onChipClick ? 'button' : undefined}
+      tabIndex={onChipClick ? 0 : undefined}
+      onMouseDown={onChipClick ? (e) => e.preventDefault() : undefined}
+      onClick={onChipClick}
+      onKeyDown={
+        onChipClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onChipClick()
+              }
+            }
+          : undefined
+      }
       className={cn(
         'inline-flex shrink-0 items-center rounded-md font-medium',
         large
@@ -470,6 +486,7 @@ function EntityChip({
               'gap-1 bg-twblue-2 px-2 py-0.5 text-xs text-twblue-9',
               extra ? 'max-w-[260px]' : 'max-w-[180px]',
             ),
+        onChipClick && 'cursor-pointer hover:bg-slate-50',
       )}
     >
       {entity.type === 'group' ? (
@@ -657,6 +674,23 @@ export function EntitySelector({
   function closePanel() {
     setIsOpen(false)
     setQuery('')
+  }
+
+  /** Open the dropdown and expand the given group so the user can (de)select members. */
+  function openGroup(entity: SelectedEntity) {
+    // Find which scope contains this group and switch to it
+    const owningScope = scopes?.find(
+      (s) =>
+        s.items?.some((item) => item.id === entity.id) ||
+        s.sections?.some((sec) =>
+          sec.items.some((item) => item.id === entity.id),
+        ),
+    )
+    if (owningScope) setActiveScope(owningScope.id)
+    setExpandedGroupId(entity.id)
+    setQuery('') // switch to browse mode, not search
+    setIsOpen(true)
+    setTimeout(() => inputRef.current?.focus(), 50)
   }
 
   // When no scopes (staff/search-only mode): always call searchFn so staff panel
@@ -1045,6 +1079,9 @@ export function EntitySelector({
             onRemove={() => handleRemove(entity)}
             extra={renderChipExtra?.(entity)}
             large
+            onChipClick={
+              entity.type === 'group' ? () => openGroup(entity) : undefined
+            }
           />
         ))}
         <button
