@@ -89,6 +89,12 @@ export interface EntitySelectorProps {
   noResultsText?: string
   emptyTabText?: string
   maxScrollHeight?: string
+  /** When set, collapses chips beyond this count behind a "+N more" badge. */
+  maxVisibleTokens?: number
+  /** Optional slot rendered inside each selected chip, after the label. */
+  renderChipExtra?: (entity: SelectedEntity) => React.ReactNode
+  /** When true, selected chips render below the search input instead of inline. */
+  chipsBelow?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -437,9 +443,13 @@ function ResultRow({
 function EntityChip({
   entity,
   onRemove,
+  extra,
+  large = false,
 }: {
   entity: SelectedEntity
   onRemove: () => void
+  extra?: React.ReactNode
+  large?: boolean
 }) {
   const names = entity.memberNames ?? []
   const tooltipTitle =
@@ -452,25 +462,65 @@ function EntityChip({
   return (
     <span
       title={tooltipTitle}
-      className="inline-flex max-w-[180px] shrink-0 items-center gap-1 rounded-md bg-twblue-2 px-2 py-0.5 text-xs font-medium text-twblue-9"
+      className={cn(
+        'inline-flex shrink-0 items-center rounded-md font-medium',
+        large
+          ? 'gap-2 border border-input bg-background px-3 py-1.5 text-sm text-slate-700'
+          : cn(
+              'gap-1 bg-twblue-2 px-2 py-0.5 text-xs text-twblue-9',
+              extra ? 'max-w-[260px]' : 'max-w-[180px]',
+            ),
+      )}
     >
       {entity.type === 'group' ? (
-        <Users className="h-3 w-3 shrink-0" />
+        <Users
+          className={cn(
+            'shrink-0',
+            large ? 'h-3.5 w-3.5 text-slate-400' : 'h-3 w-3',
+          )}
+        />
       ) : (
-        <User className="h-3 w-3 shrink-0" />
+        <User
+          className={cn(
+            'shrink-0',
+            large ? 'h-3.5 w-3.5 text-slate-400' : 'h-3 w-3',
+          )}
+        />
       )}
       <span className="truncate">{entity.label}</span>
       {entity.type === 'group' && (
-        <span className="shrink-0 opacity-60">· {entity.count}</span>
+        <span
+          className={cn(
+            'shrink-0',
+            large ? 'text-slate-400' : 'opacity-60',
+          )}
+        >
+          · {entity.count}
+        </span>
+      )}
+      {extra != null && (
+        <span
+          className={cn(
+            'flex shrink-0 items-center',
+            large ? 'ml-2' : 'ml-1',
+          )}
+        >
+          {extra}
+        </span>
       )}
       <button
         type="button"
         aria-label={`Remove ${entity.label}`}
         onMouseDown={(e) => e.preventDefault()}
         onClick={onRemove}
-        className="ml-0.5 shrink-0 rounded-full p-0.5 hover:bg-twblue-4 hover:text-twblue-9"
+        className={cn(
+          'shrink-0 rounded-full',
+          large
+            ? 'ml-1 p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+            : 'ml-0.5 p-0.5 hover:bg-twblue-4 hover:text-twblue-9',
+        )}
       >
-        <X className="h-2.5 w-2.5" />
+        <X className={cn(large ? 'h-3 w-3' : 'h-2.5 w-2.5')} />
       </button>
     </span>
   )
@@ -491,6 +541,9 @@ export function EntitySelector({
   noResultsText = 'No results found',
   emptyTabText = 'No items in this category',
   maxScrollHeight = '240px',
+  maxVisibleTokens,
+  renderChipExtra,
+  chipsBelow = false,
 }: EntitySelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -499,6 +552,14 @@ export function EntitySelector({
   const [groupExclusions, setGroupExclusions] = useState<
     Map<string, Set<string>>
   >(new Map())
+  const [chipsExpanded, setChipsExpanded] = useState(false)
+
+  // Auto-collapse when enough chips have been removed
+  useEffect(() => {
+    if (maxVisibleTokens != null && value.length <= maxVisibleTokens) {
+      setChipsExpanded(false)
+    }
+  }, [value.length, maxVisibleTokens])
 
   const wrapperRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -799,14 +860,39 @@ export function EntitySelector({
         isOpen && 'border-ring ring-[3px] ring-ring/50',
       )}
     >
-      {/* Selected chips */}
-      {value.map((entity) => (
-        <EntityChip
-          key={entity.id}
-          entity={entity}
-          onRemove={() => handleRemove(entity)}
-        />
-      ))}
+      {/* Selected chips (inline mode only — skipped when chipsBelow) */}
+      {!chipsBelow &&
+        (maxVisibleTokens != null &&
+        !chipsExpanded &&
+        value.length > maxVisibleTokens
+          ? value.slice(0, maxVisibleTokens)
+          : value
+        ).map((entity) => (
+          <EntityChip
+            key={entity.id}
+            entity={entity}
+            onRemove={() => handleRemove(entity)}
+            extra={renderChipExtra?.(entity)}
+          />
+        ))}
+
+      {/* "+N more" overflow badge (inline mode only) */}
+      {!chipsBelow &&
+        maxVisibleTokens != null &&
+        !chipsExpanded &&
+        value.length > maxVisibleTokens && (
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.stopPropagation()
+              setChipsExpanded(true)
+            }}
+            className="inline-flex shrink-0 cursor-pointer items-center rounded-md border border-dashed border-slate-300 px-2 py-0.5 text-xs text-slate-500 hover:bg-slate-50"
+          >
+            +{value.length - maxVisibleTokens} more
+          </button>
+        )}
 
       {/* Desktop: inline search input (always present, flex-1 expands to fill row) */}
       {!isMobile && (
@@ -814,7 +900,7 @@ export function EntitySelector({
           ref={inputRef}
           type="text"
           value={query}
-          placeholder={value.length === 0 ? placeholder : undefined}
+          placeholder={value.length === 0 || chipsBelow ? placeholder : undefined}
           onChange={(e) => {
             setQuery(e.target.value)
             if (!isOpen) setIsOpen(true)
@@ -825,8 +911,8 @@ export function EntitySelector({
               if (query) setQuery('')
               else closePanel()
             }
-            // Backspace on empty input removes the last chip
-            if (e.key === 'Backspace' && !query && value.length > 0) {
+            // Backspace on empty input removes the last chip (inline mode only)
+            if (!chipsBelow && e.key === 'Backspace' && !query && value.length > 0) {
               handleRemove(value[value.length - 1])
             }
           }}
@@ -834,8 +920,8 @@ export function EntitySelector({
         />
       )}
 
-      {/* Clear all — visible when ≥1 chip is selected */}
-      {value.length > 0 && (
+      {/* Clear all — visible when ≥1 chip is selected (inline mode only) */}
+      {!chipsBelow && value.length > 0 && (
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
@@ -866,6 +952,7 @@ export function EntitySelector({
   )
 
   return (
+    <>
     <div ref={wrapperRef} className="relative">
       {tokenContainer}
 
@@ -947,5 +1034,29 @@ export function EntitySelector({
         </Sheet>
       )}
     </div>
+
+    {/* Chips below area — rendered outside the relative wrapper so it's never clipped */}
+    {chipsBelow && value.length > 0 && (
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {value.map((entity) => (
+          <EntityChip
+            key={entity.id}
+            entity={entity}
+            onRemove={() => handleRemove(entity)}
+            extra={renderChipExtra?.(entity)}
+            large
+          />
+        ))}
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => onChange([])}
+          className="ml-auto shrink-0 text-xs text-muted-foreground transition-colors hover:text-rose-500"
+        >
+          Clear all
+        </button>
+      </div>
+    )}
+    </>
   )
 }

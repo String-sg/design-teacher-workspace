@@ -9,7 +9,9 @@ import {
   Trash2,
   Users,
 } from 'lucide-react'
-import type { PGStatus } from '@/types/pg-announcement'
+import { toast } from 'sonner'
+import type { PGAnnouncement, PGStatus } from '@/types/pg-announcement'
+import { clearDraft, loadDraft } from '@/lib/draft-storage'
 import type { FormStatus } from '@/types/form'
 import type { AnnouncementFilters } from '@/components/comms/announcement-filter-bar'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
@@ -23,6 +25,15 @@ import {
 } from '@/components/comms/announcement-filter-bar'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Table,
   TableBody,
@@ -44,6 +55,9 @@ import { cn } from '@/lib/utils'
 import { useFeatureFlag } from '@/hooks/use-feature-flag'
 
 export const Route = createFileRoute('/announcements/')({
+  validateSearch: (search) => ({
+    tab: (search.tab as PostTab) ?? 'view-only',
+  }),
   component: ParentsGatewayPage,
 })
 
@@ -123,18 +137,50 @@ function getFormStatusBadge(status: FormStatus) {
 type PostTab = 'view-only' | 'with-responses' | 'custom-forms'
 
 function ParentsGatewayPage() {
+  const { tab: initialTab } = Route.useSearch()
   const [searchQuery, setSearchQuery] = useState('')
-  const [tab, setTab] = useState<PostTab>('view-only')
+  const [tab, setTab] = useState<PostTab>(initialTab)
   const [filters, setFilters] = useState<AnnouncementFilters>(
     EMPTY_ANNOUNCEMENT_FILTERS,
   )
   const formsEnabled = useFeatureFlag('forms')
 
+  // Multi-select + delete state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteMode, setDeleteMode] = useState<
+    'remove-from-list' | 'delete-for-everyone'
+  >('remove-from-list')
+  // Incrementing this key forces allAnnouncements to re-read mockPGAnnouncements after a deletion
+  const [refreshKey, setRefreshKey] = useState(0)
+
   useSetBreadcrumbs([{ label: 'Posts', href: '/announcements' }])
   const navigate = useNavigate()
 
+  // Include any in-progress localStorage draft as a synthetic row at the top
+  const allAnnouncements = useMemo<Array<PGAnnouncement>>(() => {
+    const draft = loadDraft()
+    if (!draft) return mockPGAnnouncements
+    const draftRow: PGAnnouncement = {
+      id: '__draft__',
+      title: draft.title.trim() || 'Untitled post',
+      description: draft.description,
+      shortcuts: draft.shortcuts ?? [],
+      websiteLinks: draft.websiteLinks ?? [],
+      status: 'draft',
+      recipients: [],
+      staffInCharge: [],
+      enquiryEmail: draft.enquiryEmail ?? '',
+      ownership: 'mine',
+      role: 'editor',
+      createdAt: draft.savedAt,
+      responseType: draft.responseType ?? 'view-only',
+    }
+    return [draftRow, ...mockPGAnnouncements]
+  }, [refreshKey])
+
   const filtered = useMemo(() => {
-    return mockPGAnnouncements
+    return allAnnouncements
       .filter((a) => {
         // Tab filter
         const hasResponse =
@@ -186,6 +232,11 @@ function ParentsGatewayPage() {
         return true
       })
       .sort((a, b) => {
+        // Drafts always float to the top
+        const aDraft = a.status === 'draft' ? 0 : 1
+        const bDraft = b.status === 'draft' ? 0 : 1
+        if (aDraft !== bDraft) return aDraft - bDraft
+
         const dateA =
           getRelevantDate(a.status, a.postedAt, a.scheduledAt, a.createdAt) ??
           ''
@@ -194,7 +245,7 @@ function ParentsGatewayPage() {
           ''
         return new Date(dateB).getTime() - new Date(dateA).getTime()
       })
-  }, [searchQuery, filters, tab])
+  }, [searchQuery, filters, tab, allAnnouncements])
 
   const filteredForms = useMemo(() => {
     return mockForms
@@ -221,6 +272,65 @@ function ParentsGatewayPage() {
     { value: 'custom-forms', label: 'Custom forms', hidden: !formsEnabled },
   ]
   const visibleTabs = tabs.filter((t) => !t.hidden)
+
+  // Selection helpers
+  const filteredIds = filtered.map((a) => a.id)
+  const selectedInView = filteredIds.filter((id) => selectedIds.has(id))
+  const allSelectedInView =
+    filteredIds.length > 0 && selectedInView.length === filteredIds.length
+  const someSelectedInView = selectedInView.length > 0 && !allSelectedInView
+
+  const selectedItems = allAnnouncements.filter((a) => selectedIds.has(a.id))
+  const postedSelected = selectedItems.filter((a) => a.status === 'posted')
+  const nonPostedSelected = selectedItems.filter((a) => a.status !== 'posted')
+  const hasPostedSelected = postedSelected.length > 0
+
+  function toggleSelectAll() {
+    if (allSelectedInView) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev)
+        filteredIds.forEach((id) => next.delete(id))
+        return next
+      })
+    } else {
+      setSelectedIds((prev) => new Set([...prev, ...filteredIds]))
+    }
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function openDeleteDialog(id?: string) {
+    if (id) setSelectedIds(new Set([id]))
+    setDeleteMode('remove-from-list')
+    setShowDeleteDialog(true)
+  }
+
+  function handleDelete() {
+    const count = selectedIds.size
+    for (const id of selectedIds) {
+      if (id === '__draft__') {
+        clearDraft()
+        continue
+      }
+      const idx = mockPGAnnouncements.findIndex((a) => a.id === id)
+      if (idx !== -1) mockPGAnnouncements.splice(idx, 1)
+    }
+    setSelectedIds(new Set())
+    setShowDeleteDialog(false)
+    setRefreshKey((k) => k + 1)
+
+    const msg =
+      hasPostedSelected && deleteMode === 'remove-from-list'
+        ? `${count} post${count > 1 ? 's' : ''} removed from your list`
+        : `${count} post${count > 1 ? 's' : ''} deleted`
+    toast.success(msg)
+  }
 
   return (
     <div className="flex flex-col">
@@ -250,9 +360,7 @@ function ParentsGatewayPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-[240px] pl-9"
                 aria-label={
-                  tab === 'custom-forms'
-                    ? 'Search forms'
-                    : 'Search posts'
+                  tab === 'custom-forms' ? 'Search forms' : 'Search posts'
                 }
               />
             </div>
@@ -325,7 +433,7 @@ function ParentsGatewayPage() {
                                 <span>Shared</span>
                               </>
                             ) : (
-                              <span>Mine</span>
+                              <span>Me</span>
                             )}
                           </div>
                         </TableCell>
@@ -389,11 +497,21 @@ function ParentsGatewayPage() {
               <Table tableClassName="table-fixed w-full">
                 <TableHeader className="border-b bg-white">
                   <TableRow className="border-0 hover:bg-transparent">
-                    <TableHead className="w-[500px] pl-6">Title</TableHead>
+                    <TableHead className="w-[44px] pl-5">
+                      <Checkbox
+                        checked={allSelectedInView}
+                        indeterminate={someSelectedInView}
+                        onCheckedChange={toggleSelectAll}
+                        aria-label="Select all"
+                      />
+                    </TableHead>
+                    <TableHead className="w-[456px] pl-2">Title</TableHead>
                     <TableHead className="w-[110px]">Date</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>
                     <TableHead className="w-[90px]">Created by</TableHead>
-                    <TableHead className="w-[150px]">Read / Response</TableHead>
+                    <TableHead className="w-[150px]">
+                      {tab === 'with-responses' ? 'Response' : 'Read'}
+                    </TableHead>
                     <TableHead className="w-[48px] pr-2" />
                   </TableRow>
                 </TableHeader>
@@ -429,18 +547,46 @@ function ParentsGatewayPage() {
                     const isViewer = announcement.role === 'viewer'
                     const isShared = announcement.ownership === 'shared'
 
+                    const isSelected = selectedIds.has(announcement.id)
+
                     return (
                       <TableRow
                         key={announcement.id}
-                        className="cursor-pointer"
+                        className={cn(
+                          'cursor-pointer',
+                          isSelected &&
+                            'bg-primary/[0.04] hover:bg-primary/[0.06]',
+                        )}
                         onClick={() =>
-                          navigate({
-                            to: '/announcements/$id',
-                            params: { id: announcement.id },
-                          })
+                          announcement.id === '__draft__'
+                            ? navigate({
+                                to: '/announcements/new',
+                                search: { resume: 'true' },
+                              })
+                            : announcement.status === 'draft'
+                              ? navigate({
+                                  to: '/announcements/new',
+                                  search: { edit: announcement.id },
+                                })
+                              : navigate({
+                                  to: '/announcements/$id',
+                                  params: { id: announcement.id },
+                                })
                         }
                       >
-                        <TableCell className="overflow-hidden whitespace-normal pl-6">
+                        <TableCell
+                          className="pl-5 w-[44px]"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() =>
+                              toggleSelect(announcement.id)
+                            }
+                            aria-label={`Select ${announcement.title}`}
+                          />
+                        </TableCell>
+                        <TableCell className="overflow-hidden whitespace-normal pl-2">
                           <div className="flex items-start gap-2">
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5">
@@ -472,15 +618,17 @@ function ParentsGatewayPage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          <span
-                            className={
-                              announcement.status === 'scheduled'
-                                ? 'text-amber-600'
-                                : undefined
-                            }
-                          >
-                            {formatDate(relevantDate)}
-                          </span>
+                          {announcement.status !== 'draft' && (
+                            <span
+                              className={
+                                announcement.status === 'scheduled'
+                                  ? 'text-amber-600'
+                                  : undefined
+                              }
+                            >
+                              {formatDate(relevantDate)}
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell>
                           <StatusBadge status={announcement.status} />
@@ -496,7 +644,7 @@ function ParentsGatewayPage() {
                                 )}
                               </>
                             ) : (
-                              <span>Mine</span>
+                              <span>Me</span>
                             )}
                           </div>
                         </TableCell>
@@ -538,7 +686,12 @@ function ParentsGatewayPage() {
                                 Duplicate
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() =>
+                                  openDeleteDialog(announcement.id)
+                                }
+                              >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete
                               </DropdownMenuItem>
@@ -551,9 +704,162 @@ function ParentsGatewayPage() {
                 </TableBody>
               </Table>
             )}
+
+            {/* Floating selection action bar */}
+            {selectedIds.size > 0 && tab !== 'custom-forms' && (
+              <div className="flex items-center gap-3 border-t bg-white px-6 py-3">
+                <span className="text-sm font-medium text-foreground">
+                  {selectedIds.size} selected
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds(new Set())}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </button>
+                <div className="flex-1" />
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    setDeleteMode('remove-from-list')
+                    setShowDeleteDialog(true)
+                  }}
+                >
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                  Delete{' '}
+                  {selectedIds.size > 1 ? `${selectedIds.size} posts` : 'post'}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              Delete{' '}
+              {selectedIds.size > 1 ? `${selectedIds.size} posts` : 'post'}?
+            </DialogTitle>
+            {!hasPostedSelected ? (
+              <DialogDescription>
+                This action cannot be undone.
+              </DialogDescription>
+            ) : (
+              <DialogDescription>
+                {nonPostedSelected.length > 0 && (
+                  <span>
+                    {nonPostedSelected.length}{' '}
+                    {nonPostedSelected.length > 1 ? 'posts' : 'post'} (draft /
+                    scheduled) will be permanently deleted.{' '}
+                  </span>
+                )}
+                {nonPostedSelected.length > 0
+                  ? `For the ${postedSelected.length} posted ${postedSelected.length > 1 ? 'posts' : 'post'}, choose what to do:`
+                  : `Choose what to do with ${postedSelected.length > 1 ? 'these posted posts' : 'this posted post'}:`}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+
+          {hasPostedSelected && (
+            <div className="space-y-2 py-1">
+              {/* Option: Remove from my list */}
+              <button
+                type="button"
+                onClick={() => setDeleteMode('remove-from-list')}
+                className={cn(
+                  'w-full rounded-md border p-3.5 text-left transition-colors',
+                  deleteMode === 'remove-from-list'
+                    ? 'border-primary bg-primary/[0.04]'
+                    : 'border-border hover:bg-slate-50',
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={cn(
+                      'mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
+                      deleteMode === 'remove-from-list'
+                        ? 'border-primary bg-primary'
+                        : 'border-slate-300',
+                    )}
+                  >
+                    {deleteMode === 'remove-from-list' && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                    )}
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium">Remove from my list</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Parents can still see this post. It will only be removed
+                      from your view.
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Option: Delete for everyone */}
+              <button
+                type="button"
+                onClick={() => setDeleteMode('delete-for-everyone')}
+                className={cn(
+                  'w-full rounded-md border p-3.5 text-left transition-colors',
+                  deleteMode === 'delete-for-everyone'
+                    ? 'border-destructive bg-destructive/[0.04]'
+                    : 'border-border hover:bg-slate-50',
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={cn(
+                      'mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border',
+                      deleteMode === 'delete-for-everyone'
+                        ? 'border-destructive bg-destructive'
+                        : 'border-slate-300',
+                    )}
+                  >
+                    {deleteMode === 'delete-for-everyone' && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                    )}
+                  </span>
+                  <div>
+                    <p className="text-sm font-medium text-destructive">
+                      Delete for everyone
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      This post will be retracted from Parents Gateway. Parents
+                      will no longer be able to see it. This cannot be undone.
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant={
+                !hasPostedSelected || deleteMode === 'delete-for-everyone'
+                  ? 'destructive'
+                  : 'default'
+              }
+              onClick={handleDelete}
+            >
+              {!hasPostedSelected
+                ? `Delete ${selectedIds.size > 1 ? `${selectedIds.size} posts` : 'post'}`
+                : deleteMode === 'remove-from-list'
+                  ? 'Remove from my list'
+                  : 'Delete for everyone'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

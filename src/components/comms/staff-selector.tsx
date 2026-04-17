@@ -1,3 +1,4 @@
+import type React from 'react'
 import { EntitySelector } from './entity-selector'
 import type {
   EntityItem,
@@ -15,6 +16,7 @@ export type { SelectedEntity as SelectedStaff }
 interface StaffSelectorProps {
   value: Array<SelectedEntity>
   onChange: (staff: Array<SelectedEntity>) => void
+  renderChipExtra?: (entity: SelectedEntity) => React.ReactNode
 }
 
 /** "Sec 3A" → "3A", consistent with student class labels */
@@ -69,9 +71,9 @@ const LEVEL_GROUP_ITEMS: Array<EntityItem> = MOCK_STAFF_GROUPS.filter(
   groupType: 'staff-group' as const,
 }))
 
-// School scope — departments + school-wide groups
+// School scope — school-wide groups only (departments are kept for search but not surfaced here)
 const SCHOOL_GROUP_ITEMS: Array<EntityItem> = MOCK_STAFF_GROUPS.filter(
-  (g) => g.groupType === 'department' || g.groupType === 'staff-group',
+  (g) => g.groupType === 'staff-group',
 ).map((g) => ({
   id: g.id,
   label: g.label,
@@ -115,7 +117,11 @@ function staffSearchFn(query: string): SearchResults {
   }
 }
 
-export function StaffSelector({ value, onChange }: StaffSelectorProps) {
+export function StaffSelector({
+  value,
+  onChange,
+  renderChipExtra,
+}: StaffSelectorProps) {
   return (
     <EntitySelector
       value={value}
@@ -125,6 +131,8 @@ export function StaffSelector({ value, onChange }: StaffSelectorProps) {
       placeholder="Search staff by name or group…"
       searchPlaceholder="Search staff…"
       noResultsText="No staff found"
+      chipsBelow
+      renderChipExtra={renderChipExtra}
     />
   )
 }

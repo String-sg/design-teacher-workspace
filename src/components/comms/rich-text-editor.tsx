@@ -160,7 +160,7 @@ export const RichTextEditor = memo(function RichTextEditor({
   // all hooks, before any editor.* access, so it is safe.
   if (!editor) return null
 
-  const showPlaceholder = editor.isEmpty && Boolean(placeholder)
+  const showPlaceholder = editor.isEmpty && !value && Boolean(placeholder)
 
   // Pre-compute active states for toolbar buttons
   const active = {
@@ -198,15 +198,27 @@ export const RichTextEditor = memo(function RichTextEditor({
         {toolbar === 'simple' ? (
           <>
             {/* Bold */}
-            <ToolbarButton onClick={() => cmd.toggleBold().run()} isActive={active.bold} title="Bold (Ctrl+B)">
+            <ToolbarButton
+              onClick={() => cmd.toggleBold().run()}
+              isActive={active.bold}
+              title="Bold (Ctrl+B)"
+            >
               <Bold className="h-3.5 w-3.5" />
             </ToolbarButton>
             {/* Italic */}
-            <ToolbarButton onClick={() => cmd.toggleItalic().run()} isActive={active.italic} title="Italic (Ctrl+I)">
+            <ToolbarButton
+              onClick={() => cmd.toggleItalic().run()}
+              isActive={active.italic}
+              title="Italic (Ctrl+I)"
+            >
               <Italic className="h-3.5 w-3.5" />
             </ToolbarButton>
             {/* Underline */}
-            <ToolbarButton onClick={() => cmd.toggleUnderline().run()} isActive={active.underline} title="Underline (Ctrl+U)">
+            <ToolbarButton
+              onClick={() => cmd.toggleUnderline().run()}
+              isActive={active.underline}
+              title="Underline (Ctrl+U)"
+            >
               <UnderlineIcon className="h-3.5 w-3.5" />
             </ToolbarButton>
 
@@ -216,22 +228,56 @@ export const RichTextEditor = memo(function RichTextEditor({
             <div className="relative" ref={alignRef}>
               <button
                 type="button"
-                onMouseDown={(e) => { e.preventDefault(); setAlignOpen((o) => !o); setListOpen(false) }}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  setAlignOpen((o) => !o)
+                  setListOpen(false)
+                }}
                 title="Text alignment"
                 className="flex h-7 items-center gap-0.5 rounded px-1 text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
               >
-                {active.alignCenter ? <AlignCenter className="h-3.5 w-3.5" /> : active.alignRight ? <AlignRight className="h-3.5 w-3.5" /> : <AlignLeft className="h-3.5 w-3.5" />}
+                {active.alignCenter ? (
+                  <AlignCenter className="h-3.5 w-3.5" />
+                ) : active.alignRight ? (
+                  <AlignRight className="h-3.5 w-3.5" />
+                ) : (
+                  <AlignLeft className="h-3.5 w-3.5" />
+                )}
                 <ChevronDown className="h-3 w-3" />
               </button>
               {alignOpen && (
                 <div className="absolute left-0 top-full z-20 mt-0.5 flex flex-col rounded-md border bg-background shadow-md">
-                  <button type="button" onMouseDown={(e) => { e.preventDefault(); cmd.setTextAlign('left').run(); setAlignOpen(false) }} className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      cmd.setTextAlign('left').run()
+                      setAlignOpen(false)
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100"
+                  >
                     <AlignLeft className="h-3.5 w-3.5" /> Left
                   </button>
-                  <button type="button" onMouseDown={(e) => { e.preventDefault(); cmd.setTextAlign('center').run(); setAlignOpen(false) }} className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      cmd.setTextAlign('center').run()
+                      setAlignOpen(false)
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100"
+                  >
                     <AlignCenter className="h-3.5 w-3.5" /> Centre
                   </button>
-                  <button type="button" onMouseDown={(e) => { e.preventDefault(); cmd.setTextAlign('right').run(); setAlignOpen(false) }} className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      cmd.setTextAlign('right').run()
+                      setAlignOpen(false)
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100"
+                  >
                     <AlignRight className="h-3.5 w-3.5" /> Right
                   </button>
                 </div>
@@ -242,22 +288,56 @@ export const RichTextEditor = memo(function RichTextEditor({
             <div className="relative" ref={listRef}>
               <button
                 type="button"
-                onMouseDown={(e) => { e.preventDefault(); setListOpen((o) => !o); setAlignOpen(false) }}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  setListOpen((o) => !o)
+                  setAlignOpen(false)
+                }}
                 title="Lists"
                 className="flex h-7 items-center gap-0.5 rounded px-1 text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground"
               >
-                {active.orderedList ? <ListOrdered className="h-3.5 w-3.5" /> : active.taskList ? <ListChecks className="h-3.5 w-3.5" /> : <List className="h-3.5 w-3.5" />}
+                {active.orderedList ? (
+                  <ListOrdered className="h-3.5 w-3.5" />
+                ) : active.taskList ? (
+                  <ListChecks className="h-3.5 w-3.5" />
+                ) : (
+                  <List className="h-3.5 w-3.5" />
+                )}
                 <ChevronDown className="h-3 w-3" />
               </button>
               {listOpen && (
                 <div className="absolute left-0 top-full z-20 mt-0.5 flex flex-col rounded-md border bg-background shadow-md">
-                  <button type="button" onMouseDown={(e) => { e.preventDefault(); cmd.toggleBulletList().run(); setListOpen(false) }} className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      cmd.toggleBulletList().run()
+                      setListOpen(false)
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100"
+                  >
                     <List className="h-3.5 w-3.5" /> Bullet list
                   </button>
-                  <button type="button" onMouseDown={(e) => { e.preventDefault(); cmd.toggleOrderedList().run(); setListOpen(false) }} className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      cmd.toggleOrderedList().run()
+                      setListOpen(false)
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100"
+                  >
                     <ListOrdered className="h-3.5 w-3.5" /> Numbered list
                   </button>
-                  <button type="button" onMouseDown={(e) => { e.preventDefault(); cmd.toggleTaskList().run(); setListOpen(false) }} className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      cmd.toggleTaskList().run()
+                      setListOpen(false)
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-100"
+                  >
                     <ListChecks className="h-3.5 w-3.5" /> Checklist
                   </button>
                 </div>

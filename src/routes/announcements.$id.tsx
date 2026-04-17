@@ -3,6 +3,7 @@ import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import {
   ArrowLeft,
   CalendarClock,
+  ChevronDown,
   Lock,
   Mail,
   MessageSquare,
@@ -25,6 +26,7 @@ import { StaffSelector } from '@/components/comms/staff-selector'
 import { EnquiryEmailSelector } from '@/components/comms/enquiry-email-selector'
 import type { SelectedEntity } from '@/components/comms/entity-selector'
 import { MOCK_STAFF } from '@/data/mock-staff'
+import type { PGRole } from '@/types/pg-announcement'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -92,7 +94,12 @@ function AnnouncementDetailPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editDescription, setEditDescription] = useState('')
-  const [editStaffInCharge, setEditStaffInCharge] = useState<Array<SelectedEntity>>([])
+  const [editStaffInCharge, setEditStaffInCharge] = useState<
+    Array<SelectedEntity>
+  >([])
+  const [editStaffRoles, setEditStaffRoles] = useState<Record<string, PGRole>>(
+    {},
+  )
   const [editEnquiryEmail, setEditEnquiryEmail] = useState('')
   const [editClasses, setEditClasses] = useState<Array<string>>([])
 
@@ -165,21 +172,17 @@ function AnnouncementDetailPage() {
   function startEditing() {
     setEditTitle(savedData.title)
     setEditDescription(stripHtml(savedData.description))
-    const matchedStaff = MOCK_STAFF.find(
-      (s) => s.name === savedData.staffInCharge,
-    )
     setEditStaffInCharge(
-      matchedStaff
-        ? [
-            {
-              id: matchedStaff.id,
-              label: stripSalutation(matchedStaff.name),
-              type: 'individual',
-              count: 1,
-            },
-          ]
-        : [],
+      savedData.staffInCharge.map((m) => ({
+        id: m.id,
+        label: m.name,
+        type: 'individual' as const,
+        count: 1,
+      })),
     )
+    const roleMap: Record<string, PGRole> = {}
+    for (const m of savedData.staffInCharge) roleMap[m.id] = m.role
+    setEditStaffRoles(roleMap)
     setEditEnquiryEmail(savedData.enquiryEmail)
     setEditClasses([...uniqueClasses])
     setIsEditing(true)
@@ -234,7 +237,11 @@ function AnnouncementDetailPage() {
               : prev.description,
           }
         : {}),
-      staffInCharge: editStaffInCharge[0]?.label ?? savedData.staffInCharge,
+      staffInCharge: editStaffInCharge.map((s) => ({
+        id: s.id,
+        name: s.label,
+        role: editStaffRoles[s.id] ?? 'viewer',
+      })),
       enquiryEmail: editEnquiryEmail.trim(),
       recipients: updatedRecipients,
     }))
@@ -358,10 +365,9 @@ function AnnouncementDetailPage() {
                 Save changes
               </Button>
             </div>
-          ) : announcement.status === 'draft' ||
-            announcement.status === 'scheduled' ? (
+          ) : (
             <Button
-              variant="default"
+              variant={announcement.status === 'draft' ? 'default' : 'outline'}
               size="sm"
               render={
                 <Link
@@ -370,10 +376,6 @@ function AnnouncementDetailPage() {
                 />
               }
             >
-              Edit
-            </Button>
-          ) : (
-            <Button variant="outline" size="sm" onClick={startEditing}>
               Edit
             </Button>
           )}
@@ -652,12 +654,13 @@ function AnnouncementDetailPage() {
               {announcement.attachments &&
                 announcement.attachments.length > 0 && (
                   <div className="border-t pt-3">
-                    <p className="text-xs text-muted-foreground">
-                      Attachments
-                    </p>
+                    <p className="text-xs text-muted-foreground">Attachments</p>
                     <div className="mt-1 space-y-1.5">
                       {announcement.attachments.map((att, i) => (
-                        <div key={i} className="flex items-center gap-2 text-sm">
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 text-sm"
+                        >
                           <Paperclip className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                           <span className="min-w-0 truncate text-sm">
                             {att.name}
@@ -759,7 +762,7 @@ function AnnouncementDetailPage() {
               {/* Staff-in-charge — always editable */}
               <div className="border-t pt-3">
                 {isEditing ? (
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <p className="text-xs font-medium text-muted-foreground">
                       Staff-in-charge
                     </p>
@@ -773,17 +776,64 @@ function AnnouncementDetailPage() {
                           })),
                         )
                       }
+                      renderChipExtra={(entity) => {
+                        const isEditor =
+                          (editStaffRoles[entity.id] ?? 'viewer') === 'editor'
+                        return (
+                          <button
+                            type="button"
+                            title={
+                              isEditor ? 'Switch to Viewer' : 'Switch to Editor'
+                            }
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setEditStaffRoles((prev) => ({
+                                ...prev,
+                                [entity.id]: isEditor ? 'viewer' : 'editor',
+                              }))
+                            }}
+                            className={cn(
+                              'flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-[10px] font-semibold transition-colors',
+                              isEditor
+                                ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
+                                : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50',
+                            )}
+                          >
+                            {isEditor ? 'Editor' : 'Viewer'}
+                            <ChevronDown className="h-2.5 w-2.5 opacity-50" />
+                          </button>
+                        )
+                      }}
                     />
                   </div>
                 ) : (
-                  announcement.staffInCharge && (
-                    <div className="min-w-0">
+                  announcement.staffInCharge.length > 0 && (
+                    <div className="space-y-1.5">
                       <p className="text-xs text-muted-foreground">
                         Staff-in-charge
                       </p>
-                      <p className="mt-1 truncate text-sm font-medium">
-                        {stripSalutation(announcement.staffInCharge)}
-                      </p>
+                      <div className="flex flex-col gap-1.5">
+                        {announcement.staffInCharge.map((m) => (
+                          <span
+                            key={m.id}
+                            className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-slate-700"
+                          >
+                            <User className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                            <span className="flex-1 truncate">{m.name}</span>
+                            <span
+                              className={cn(
+                                'ml-2 shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-semibold',
+                                m.role === 'editor'
+                                  ? 'border-blue-200 bg-blue-50 text-blue-700'
+                                  : 'border-slate-200 bg-slate-50 text-slate-500',
+                              )}
+                            >
+                              {m.role === 'editor' ? 'Editor' : 'Viewer'}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )
                 )}
