@@ -105,6 +105,22 @@ export type AttentionTag =
 
 export type ConductGrade = 'Excellent' | 'Very Good' | 'Good' | 'Fair' | 'Poor'
 
+export type TemporalType =
+  | 'accumulating'
+  | 'event-based'
+  | 'fixed'
+  | 'cross-term'
+
+export interface TermlyAccumulatingData {
+  offences: number
+  counsellingSessions: number
+  daysPresent: number
+  totalSchoolDays: number
+  lateComing: number
+  absences: number
+  ccaMissed: number
+}
+
 export interface ClassOption {
   value: string
   label: string
