@@ -12,4 +12,5 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   'lta-intervention': false,
   'student-groups': false,
   'import-data': false,
+  'agency-reports': true,
 }

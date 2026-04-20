@@ -11,6 +11,7 @@ import {
   Home,
   Info,
   Languages,
+  Lock,
   PanelRight,
   Phone,
   Plus,
@@ -29,6 +30,7 @@ import {
   filterReports,
   getStudentGradeCounts,
 } from '@/data/mock-reports'
+import { getAgencyReportsByStudent, type AgencyReport } from '@/data/mock-agency-reports'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -262,6 +264,41 @@ function ReportRow({ report }: { report: HolisticReport }) {
   )
 }
 
+const AGENCY_STATUS_CONFIG: Record<
+  AgencyReport['status'],
+  { label: string; className: string }
+> = {
+  draft: { label: 'Draft', className: 'bg-slate-100 text-slate-700 hover:bg-slate-100' },
+  pending_review: { label: 'Pending Review', className: 'bg-amber-100 text-amber-700 hover:bg-amber-100' },
+  approved: { label: 'Approved', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
+  sent: { label: 'Sent', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
+}
+
+function AgencyReportRow({ report }: { report: AgencyReport }) {
+  const { label, className } = AGENCY_STATUS_CONFIG[report.status]
+  const createdDate = report.createdAt.toLocaleDateString('en-SG', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+  return (
+    <div className="flex items-center gap-3 rounded-lg border px-4 py-3">
+      <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" />
+      <div className="flex-1">
+        <p className="text-sm font-medium">{report.templateName}</p>
+        <p className="text-xs text-muted-foreground">{createdDate}</p>
+      </div>
+      <Badge className={className}>{label}</Badge>
+      {report.passwordSaved && (
+        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Lock className="h-3 w-3" />
+          Password saved
+        </span>
+      )}
+    </div>
+  )
+}
+
 function formatTermList(terms: Array<string>): string {
   if (terms.length === 0) return 'None'
   const sorted = [...terms].sort(
@@ -282,11 +319,13 @@ export function StudentProfile({
   const { isEnabled } = useFeatureFlags()
 
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
+  const agencyReportsEnabled = useFeatureFlag('agency-reports')
 
   const gradeCounts = getStudentGradeCounts(student)
   const studentReports = filterReports({ studentId: student.id })
   const existingTerms = new Set(studentReports.map((r) => r.term))
   const missingTerms = TERMS.filter((t): t is Term => !existingTerms.has(t))
+  const agencyReports = getAgencyReportsByStudent(student.id)
 
   const sections = [
     { id: 'attendance', label: 'Attendance' },
@@ -1111,6 +1150,39 @@ export function StudentProfile({
                 >
                   <Eye className="mr-1 h-4 w-4" />
                   View all in Reports
+                </Button>
+              </div>
+            )}
+
+            {/* Agency Reports subsection */}
+            {agencyReportsEnabled && (
+              <div className="mt-6 border-t pt-5">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Agency Reports
+                </p>
+                {agencyReports.length > 0 ? (
+                  <div className="mb-3 space-y-2">
+                    {agencyReports.map((report) => (
+                      <AgencyReportRow key={report.id} report={report} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mb-3 text-xs text-muted-foreground">
+                    No agency reports yet.
+                  </p>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  render={
+                    <Link
+                      to="/students/$id/agency-report/new"
+                      params={{ id: student.id }}
+                    />
+                  }
+                >
+                  <Plus className="mr-1 h-4 w-4" />
+                  New Agency Report
                 </Button>
               </div>
             )}
