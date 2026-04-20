@@ -4,6 +4,8 @@ import {
   ArrowUp,
   Check,
   ChevronDown,
+  ChevronRight,
+  Clock,
   Filter,
   Settings2,
   X,
@@ -11,6 +13,12 @@ import {
 
 import type { FilterField, SortConfig, SortDirection } from '@/types/student'
 import type { ColumnConfig } from './column-visibility-popover'
+import {
+  CURRENT_TERM_KEY,
+  CURRENT_TERM_LABEL,
+  PREV_TERM_KEY,
+  PREV_TERM_LABEL,
+} from './column-visibility-popover'
 import { cn } from '@/lib/utils'
 import {
   Popover,
@@ -41,6 +49,10 @@ interface ColumnHeaderMenuProps {
   onConfigureSubjects?: () => void
   /** Whether a custom subject selection is currently active */
   hasCustomSubjects?: boolean
+  /** Selected term key for accumulating columns */
+  selectedTerm?: string
+  /** Called when user picks a different term for this column */
+  onTermChange?: (term: string) => void
 }
 
 export function ColumnHeaderMenu({
@@ -57,18 +69,41 @@ export function ColumnHeaderMenu({
   showStickyShadow,
   onConfigureSubjects,
   hasCustomSubjects,
+  selectedTerm,
+  onTermChange,
 }: ColumnHeaderMenuProps) {
   const [open, setOpen] = useState(false)
+  const [termSubOpen, setTermSubOpen] = useState(false)
 
   const isSortedBy = currentSort?.field === column.id
   const sortDirection = isSortedBy ? currentSort.direction : null
   const hasActiveFilter =
     column.filterField && activeFilterFields.has(column.filterField)
 
-  // All column headers need border shadows (thead has none). Last sticky column also gets drop shadow.
   const stickyShadow = showStickyShadow
     ? 'shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border),2px_0_5px_-2px_rgba(0,0,0,0.1)]'
     : 'shadow-[inset_0_1px_0_var(--color-border),inset_0_-1px_0_var(--color-border)]'
+
+  const handleTermSelect = (term: string) => {
+    onTermChange?.(term)
+    setTermSubOpen(false)
+    setOpen(false)
+  }
+
+  const activeTermLabel =
+    selectedTerm === CURRENT_TERM_KEY || selectedTerm === undefined
+      ? CURRENT_TERM_LABEL
+      : PREV_TERM_LABEL
+
+  const showTermSelector =
+    column.temporalType === 'accumulating' &&
+    selectedTerm !== undefined &&
+    onTermChange !== undefined
+
+  const displaySource =
+    showTermSelector && column.source
+      ? `${column.source}, ${activeTermLabel}`
+      : column.source
 
   // Non-interactive columns render as plain TableHead
   if (!column.sortable && !column.filterable) {
@@ -95,7 +130,13 @@ export function ColumnHeaderMenu({
       )}
       style={stickyLeft ? { left: stickyLeft } : undefined}
     >
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next)
+          if (!next) setTermSubOpen(false)
+        }}
+      >
         <Tooltip>
           <TooltipTrigger
             render={
@@ -183,6 +224,60 @@ export function ColumnHeaderMenu({
               )}
             </>
           )}
+
+          {/* Show data from — term selector submenu */}
+          {showTermSelector && (
+            <>
+              <div className="my-1 h-px bg-border" />
+              <Popover open={termSubOpen} onOpenChange={setTermSubOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]"
+                  >
+                    <Clock className="h-4 w-4 text-[var(--slate-11)]" />
+                    Show data from
+                    <ChevronRight className="ml-auto h-4 w-4 text-[var(--slate-11)]" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="right" align="start" className="w-56 gap-1 p-3">
+                  <button
+                    type="button"
+                    onClick={() => handleTermSelect(CURRENT_TERM_KEY)}
+                    className={cn(
+                      'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]',
+                      (selectedTerm === CURRENT_TERM_KEY ||
+                        selectedTerm === undefined) &&
+                        'bg-[var(--slate-5)]',
+                    )}
+                  >
+                    <span className="flex-1 text-left">{CURRENT_TERM_LABEL}</span>
+                    {(selectedTerm === CURRENT_TERM_KEY ||
+                      selectedTerm === undefined) && (
+                      <Check className="shrink-0 h-3.5 w-3.5" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleTermSelect(PREV_TERM_KEY)}
+                    className={cn(
+                      'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-[var(--slate-5)]',
+                      selectedTerm === PREV_TERM_KEY && 'bg-[var(--slate-5)]',
+                    )}
+                  >
+                    <span className="flex-1 text-left">
+                      Previous term
+                      <span className="block text-xs text-[var(--slate-11)]">(Term 4, 2025)</span>
+                    </span>
+                    {selectedTerm === PREV_TERM_KEY && (
+                      <Check className="shrink-0 h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </PopoverContent>
+              </Popover>
+            </>
+          )}
+
           {/* Configure subjects (only for overallPercentage column) */}
           {onConfigureSubjects && (
             <>
@@ -200,25 +295,26 @@ export function ColumnHeaderMenu({
               </button>
             </>
           )}
+
           {/* Source / last updated footer */}
-          {(column.source || column.lastUpdated) && (
+          {(displaySource || column.lastUpdated) && (
             <>
               <div className="my-1 h-px bg-border" />
               <div className="px-3 py-1 space-y-1.5">
-                {column.source && (
+                {displaySource && (
                   <div>
                     <p className="text-xs font-medium text-foreground">
                       Source:
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {column.source}
+                      {displaySource}
                     </p>
                   </div>
                 )}
                 {column.lastUpdated && (
                   <div>
                     <p className="text-xs font-medium text-foreground">
-                      Last updated:
+                      Last synced:
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {column.lastUpdated}

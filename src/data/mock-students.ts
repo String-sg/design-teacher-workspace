@@ -1,5 +1,10 @@
 import type { SchoolLevel } from '@/types/report'
-import type { AttentionTag, ClassOption, Student } from '@/types/student'
+import type {
+  AttentionTag,
+  ClassOption,
+  Student,
+  TermlyAccumulatingData,
+} from '@/types/student'
 
 export const mockStudents: Array<Student> = [
   {
@@ -5386,4 +5391,65 @@ export function getStudentById(id: string): Student | undefined {
 
 export function getSchoolLevel(studentClass: string): SchoolLevel {
   return studentClass.startsWith('P') ? 'primary' : 'secondary'
+}
+
+export function getTermlyData(
+  student: Student,
+  termKey: string,
+): TermlyAccumulatingData {
+  const base: TermlyAccumulatingData = {
+    offences: student.offences,
+    counsellingSessions: student.counsellingSessions,
+    daysPresent: student.daysPresent,
+    totalSchoolDays: student.totalSchoolDays,
+    lateComing: student.lateComing,
+    absences: student.absences,
+    ccaMissed: student.ccaMissed,
+  }
+  switch (termKey) {
+    case 'T1 2026':
+      return {
+        offences: 0,
+        counsellingSessions: 0,
+        daysPresent: Math.min(5, student.daysPresent),
+        totalSchoolDays: 12,
+        lateComing: 0,
+        absences: 0,
+        ccaMissed: 0,
+      }
+    case 'T4 2025':
+      return base
+    case 'T3 2025':
+      return {
+        offences: Math.max(0, student.offences - 1),
+        counsellingSessions: Math.max(0, student.counsellingSessions - 1),
+        daysPresent: Math.round(student.daysPresent * 0.9),
+        totalSchoolDays: student.totalSchoolDays,
+        lateComing: Math.max(0, student.lateComing - 2),
+        absences: Math.max(0, student.absences - 2),
+        ccaMissed: Math.max(0, student.ccaMissed - 1),
+      }
+    case 'T2 2025':
+      return {
+        offences: Math.max(0, student.offences - 2),
+        counsellingSessions: student.counsellingSessions,
+        daysPresent: Math.round(student.daysPresent * 0.85),
+        totalSchoolDays: student.totalSchoolDays,
+        lateComing: Math.max(0, student.lateComing - 3),
+        absences: Math.max(0, student.absences - 1),
+        ccaMissed: student.ccaMissed,
+      }
+    case 'T1 2025':
+      return {
+        offences: Math.max(0, student.offences - 2),
+        counsellingSessions: Math.max(0, student.counsellingSessions - 1),
+        daysPresent: Math.round(student.daysPresent * 0.95),
+        totalSchoolDays: student.totalSchoolDays,
+        lateComing: Math.max(0, student.lateComing - 1),
+        absences: Math.max(0, student.absences - 1),
+        ccaMissed: Math.max(0, student.ccaMissed - 1),
+      }
+    default:
+      return base
+  }
 }

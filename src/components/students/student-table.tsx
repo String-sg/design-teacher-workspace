@@ -23,8 +23,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { usePagination } from '@/hooks/use-pagination'
-import { tagColors } from '@/data/mock-students'
+import { getTermlyData, tagColors } from '@/data/mock-students'
 import { useFeatureFlags } from '@/lib/feature-flags'
+import { CURRENT_TERM_KEY } from './column-visibility-popover'
 
 interface StudentTableProps {
   students: Array<Student>
@@ -106,6 +107,17 @@ export function StudentTable({
 }: StudentTableProps) {
   const navigate = useNavigate()
   const { isEnabled } = useFeatureFlags()
+
+  const [columnTermSelections, setColumnTermSelections] = useState<
+    Record<string, string>
+  >({})
+
+  const getSelectedTerm = (columnId: string) =>
+    columnTermSelections[columnId] ?? CURRENT_TERM_KEY
+
+  const handleTermChange = (columnId: string, term: string) =>
+    setColumnTermSelections((prev) => ({ ...prev, [columnId]: term }))
+
   // Sticky header state
   const tableContainerRef = useRef<HTMLDivElement>(null)
   const stickyHeaderRef = useRef<HTMLDivElement>(null)
@@ -323,6 +335,8 @@ export function StudentTable({
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
           className="min-w-[120px]"
+          selectedTerm={getSelectedTerm('attendance')}
+          onTermChange={(t) => handleTermChange('attendance', t)}
         />
       )}
       {isVisible('lateComing') && (
@@ -335,6 +349,8 @@ export function StudentTable({
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
           className="min-w-[135px]"
+          selectedTerm={getSelectedTerm('lateComing')}
+          onTermChange={(t) => handleTermChange('lateComing', t)}
         />
       )}
       {isVisible('absences') && (
@@ -347,6 +363,8 @@ export function StudentTable({
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
           className="min-w-[115px]"
+          selectedTerm={getSelectedTerm('absences')}
+          onTermChange={(t) => handleTermChange('absences', t)}
         />
       )}
       {isVisible('ccaMissed') && (
@@ -359,6 +377,8 @@ export function StudentTable({
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
           className="min-w-[130px]"
+          selectedTerm={getSelectedTerm('ccaMissed')}
+          onTermChange={(t) => handleTermChange('ccaMissed', t)}
         />
       )}
       {isVisible('offences') && (
@@ -371,6 +391,8 @@ export function StudentTable({
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
           className="min-w-[115px]"
+          selectedTerm={getSelectedTerm('offences')}
+          onTermChange={(t) => handleTermChange('offences', t)}
         />
       )}
       {isVisible('counsellingSessions') && (
@@ -383,6 +405,8 @@ export function StudentTable({
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
           className="min-w-[135px]"
+          selectedTerm={getSelectedTerm('counsellingSessions')}
+          onTermChange={(t) => handleTermChange('counsellingSessions', t)}
         />
       )}
       {isVisible('sen') && (
@@ -684,31 +708,41 @@ export function StudentTable({
                         )}
                       </TableCell>
                     )}
-                    {isVisible('attendance') && (
+                    {isVisible('attendance') && (() => {
+                      const d = getTermlyData(student, getSelectedTerm('attendance'))
+                      return (
+                        <TableCell>
+                          {d.totalSchoolDays > 0
+                            ? Math.round((d.daysPresent / d.totalSchoolDays) * 100)
+                            : 0}
+                          %
+                        </TableCell>
+                      )
+                    })()}
+                    {isVisible('lateComing') && (
                       <TableCell>
-                        {student.totalSchoolDays > 0
-                          ? Math.round(
-                              (student.daysPresent / student.totalSchoolDays) *
-                                100,
-                            )
-                          : 0}
-                        %
+                        {getTermlyData(student, getSelectedTerm('lateComing')).lateComing}
                       </TableCell>
                     )}
-                    {isVisible('lateComing') && (
-                      <TableCell>{student.lateComing}</TableCell>
-                    )}
                     {isVisible('absences') && (
-                      <TableCell>{student.absences}</TableCell>
+                      <TableCell>
+                        {getTermlyData(student, getSelectedTerm('absences')).absences}
+                      </TableCell>
                     )}
                     {isVisible('ccaMissed') && (
-                      <TableCell>{student.ccaMissed}</TableCell>
+                      <TableCell>
+                        {getTermlyData(student, getSelectedTerm('ccaMissed')).ccaMissed}
+                      </TableCell>
                     )}
                     {isVisible('offences') && (
-                      <TableCell>{student.offences}</TableCell>
+                      <TableCell>
+                        {getTermlyData(student, getSelectedTerm('offences')).offences}
+                      </TableCell>
                     )}
                     {isVisible('counsellingSessions') && (
-                      <TableCell>{student.counsellingSessions}</TableCell>
+                      <TableCell>
+                        {getTermlyData(student, getSelectedTerm('counsellingSessions')).counsellingSessions}
+                      </TableCell>
                     )}
                     {isVisible('sen') && (
                       <TableCell>

@@ -246,14 +246,13 @@ function StudentsPage() {
     // Apply column sort first
     if (sort) {
       result.sort((a, b) => {
-        const aVal =
-          sort.field === 'overallPercentage'
-            ? computeStudentOverall(a, selectedSubjects)
-            : a[sort.field as keyof Student]
-        const bVal =
-          sort.field === 'overallPercentage'
-            ? computeStudentOverall(b, selectedSubjects)
-            : b[sort.field as keyof Student]
+        const getSortVal = (s: Student) => {
+          if (sort.field === 'overallPercentage') return computeStudentOverall(s, selectedSubjects)
+          if (sort.field === 'attendance') return s.totalSchoolDays > 0 ? s.daysPresent / s.totalSchoolDays : null
+          return s[sort.field as keyof Student]
+        }
+        const aVal = getSortVal(a)
+        const bVal = getSortVal(b)
 
         // Handle null/undefined
         if (aVal == null && bVal == null) return 0
