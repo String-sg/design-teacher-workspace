@@ -607,7 +607,6 @@ function NewFormPage() {
               </div>
             </div>
           </section>
-
         </div>
       </div>
     </div>

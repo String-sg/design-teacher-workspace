@@ -61,6 +61,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Popover, PopoverContent } from '@/components/ui/popover'
 import { cn, stripSalutation } from '@/lib/utils'
 import {
   clearDraft,
@@ -884,33 +885,45 @@ function AnnouncementPreview({
 }
 
 // ---------------------------------------------------------------------------
-// Validation helper
+// Validation helpers
 // ---------------------------------------------------------------------------
-function getValidationHint(
+function isDescriptionEmpty(html: string): boolean {
+  // Treat empty string or a bare empty-paragraph as empty
+  return !html.trim() || html.trim() === '<p></p>'
+}
+
+interface MissingField {
+  field: string
+  hint: string
+}
+
+function getMissingFields(
   sendOption: SendOption,
   title: string,
+  description: string,
   recipients: Array<SelectedEntity>,
-  scheduledDate: string,
+  enquiryEmail: string,
   responseType: string,
   dueDate: string,
-): string | null {
-  const noTitle = !title.trim()
-  const noRecipients = recipients.length === 0
-  const noDueDate = responseType !== 'view-only' && !dueDate
-
-  if (noTitle && noRecipients && noDueDate)
-    return 'Add a title, select recipients, and set a due date to continue'
-  if (noTitle && noDueDate) return 'Add a title and set a due date to continue'
-  if (noRecipients && noDueDate)
-    return 'Select recipients and set a due date to continue'
-  if (noTitle && noRecipients)
-    return 'Add a title and select recipients to continue'
-  if (noTitle) return 'Add a title to continue'
-  if (noRecipients) return 'Select recipients to continue'
-  if (noDueDate) return 'Set a due date to continue'
-  if (sendOption === 'scheduled' && !scheduledDate)
-    return 'Select a send date to continue'
-  return null
+  scheduledDate: string,
+  scheduledTime: string,
+): Array<MissingField> {
+  const missing: Array<MissingField> = []
+  if (!title.trim()) missing.push({ field: 'Title', hint: 'Add a title' })
+  if (isDescriptionEmpty(description))
+    missing.push({ field: 'Details', hint: 'Write the post details' })
+  if (recipients.length === 0)
+    missing.push({ field: 'Recipients', hint: 'Select at least one recipient' })
+  if (!enquiryEmail.trim())
+    missing.push({ field: 'Enquiry email', hint: 'Select an enquiry email' })
+  if (responseType !== 'view-only' && !dueDate)
+    missing.push({ field: 'Due date', hint: 'Set a due date for responses' })
+  if (sendOption === 'scheduled' && (!scheduledDate || !scheduledTime))
+    missing.push({
+      field: 'Send date & time',
+      hint: 'Choose when to send this post',
+    })
+  return missing
 }
 
 // ---------------------------------------------------------------------------
@@ -980,7 +993,8 @@ function NewAnnouncementPage() {
   const photoInputRef = useRef<HTMLInputElement>(null)
 
   // Response type — seeded from resolvedResponseType so editing a draft with responses shows the right section immediately
-  const [responseType, setResponseType] = useState<ResponseType>(resolvedResponseType)
+  const [responseType, setResponseType] =
+    useState<ResponseType>(resolvedResponseType)
   const [dueDate, setDueDate] = useState(() => {
     if (!existingAnnouncement?.dueDate) return ''
     const d = new Date(existingAnnouncement.dueDate)
@@ -1385,32 +1399,42 @@ function NewAnnouncementPage() {
   )
   const canPost =
     title.trim().length > 0 &&
+    !isDescriptionEmpty(description) &&
     recipients.length > 0 &&
+    enquiryEmail.trim().length > 0 &&
     (responseType === 'view-only' || dueDate.length > 0) &&
     !hasIncompleteLinks
   const canSchedule =
     canPost && scheduledDate.length > 0 && scheduledTime.length > 0
   const canSubmit = sendOption === 'scheduled' ? canSchedule : canPost
-  const validationHint = getValidationHint(
+  const missingFields = getMissingFields(
     sendOption,
     title,
+    description,
     recipients,
-    scheduledDate,
+    enquiryEmail,
     responseType,
     dueDate,
+    scheduledDate,
+    scheduledTime,
   )
 
-  // Show a toast when user clicks the disabled submit button
+  // Validation popover state
+  const [showValidationPopover, setShowValidationPopover] = useState(false)
+  const postBtnWrapRef = useRef<HTMLDivElement>(null)
+
+  // Auto-close validation popover once all required fields are filled
+  useEffect(() => {
+    if (missingFields.length === 0) setShowValidationPopover(false)
+  }, [missingFields.length])
+
+  // Open validation popover when user clicks disabled Post button
   function handlePostClick() {
     if (!canSubmit) {
-      toast.error(
-        validationHint ?? 'Complete the required fields to continue',
-        {
-          duration: 3000,
-        },
-      )
+      setShowValidationPopover(true)
       return
     }
+    setShowValidationPopover(false)
     setShowConfirmSheet(true)
   }
 
@@ -1661,62 +1685,92 @@ function NewAnnouncementPage() {
                 Save changes
               </Button>
             ) : (
-              <div className="flex overflow-hidden rounded-md">
-                <Button
-                  size="sm"
-                  className={cn(
-                    'rounded-r-none',
-                    !canSubmit && 'cursor-not-allowed opacity-50',
-                  )}
-                  onClick={handlePostClick}
+              <Popover
+                open={showValidationPopover}
+                onOpenChange={setShowValidationPopover}
+              >
+                <div
+                  ref={postBtnWrapRef}
+                  className="flex overflow-hidden rounded-md"
                 >
-                  {sendOption === 'scheduled' ? (
-                    <>
-                      <CalendarClock className="mr-2 h-3.5 w-3.5" />
-                      Schedule
-                    </>
-                  ) : (
-                    <>
-                      <Send className="mr-2 h-3.5 w-3.5" />
-                      Post
-                    </>
-                  )}
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        size="sm"
-                        className={cn(
-                          'rounded-l-none border-l border-primary-foreground/25 px-2',
-                          !canSubmit && 'cursor-not-allowed opacity-50',
-                        )}
-                        aria-label="Choose send option"
-                      />
-                    }
+                  <Button
+                    size="sm"
+                    className={cn(
+                      'rounded-r-none',
+                      !canSubmit && 'cursor-not-allowed opacity-50',
+                    )}
+                    onClick={handlePostClick}
                   >
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => setSendOption('now')}>
-                      <Send className="h-4 w-4" />
-                      Post now
-                      {sendOption === 'now' && (
-                        <Check className="ml-auto h-3.5 w-3.5 text-primary" />
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setSendOption('scheduled')}
+                    {sendOption === 'scheduled' ? (
+                      <>
+                        <CalendarClock className="mr-2 h-3.5 w-3.5" />
+                        Schedule
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-3.5 w-3.5" />
+                        Post
+                      </>
+                    )}
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button
+                          size="sm"
+                          className={cn(
+                            'rounded-l-none border-l border-primary-foreground/25 px-2',
+                            !canSubmit && 'cursor-not-allowed opacity-50',
+                          )}
+                          aria-label="Choose send option"
+                        />
+                      }
                     >
-                      <CalendarClock className="h-4 w-4" />
-                      Schedule for later
-                      {sendOption === 'scheduled' && (
-                        <Check className="ml-auto h-3.5 w-3.5 text-primary" />
-                      )}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => setSendOption('now')}>
+                        <Send className="h-4 w-4" />
+                        Post now
+                        {sendOption === 'now' && (
+                          <Check className="ml-auto h-3.5 w-3.5 text-primary" />
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setSendOption('scheduled')}
+                      >
+                        <CalendarClock className="h-4 w-4" />
+                        Schedule for later
+                        {sendOption === 'scheduled' && (
+                          <Check className="ml-auto h-3.5 w-3.5 text-primary" />
+                        )}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                {/* Validation popover — shown when Post is clicked but form is incomplete */}
+                <PopoverContent
+                  anchor={postBtnWrapRef}
+                  side="bottom"
+                  align="end"
+                  className="w-64 gap-2 p-3"
+                >
+                  <p className="text-sm font-medium text-slate-800">
+                    Complete these fields before posting
+                  </p>
+                  <ul className="mt-1.5 space-y-1">
+                    {missingFields.map((f) => (
+                      <li
+                        key={f.field}
+                        className="flex items-start gap-1.5 text-xs text-slate-600"
+                      >
+                        <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-destructive" />
+                        {f.hint}
+                      </li>
+                    ))}
+                  </ul>
+                </PopoverContent>
+              </Popover>
             )}
           </div>
         </div>
@@ -1905,7 +1959,9 @@ function NewAnnouncementPage() {
 
                 {/* Enquiry email */}
                 <div className="space-y-1.5">
-                  <Label>Enquiry email</Label>
+                  <Label>
+                    Enquiry email <span className="text-destructive">*</span>
+                  </Label>
                   <p className="text-xs text-muted-foreground">
                     Select the preferred email address to receive enquiries from
                     parents.
@@ -1960,7 +2016,9 @@ function NewAnnouncementPage() {
                 {/* Description — Tiptap rich text */}
                 <div className="space-y-1.5">
                   <div className="flex items-baseline justify-between">
-                    <Label>Details</Label>
+                    <Label>
+                      Details <span className="text-destructive">*</span>
+                    </Label>
                     <span
                       className={cn(
                         'text-xs tabular-nums',

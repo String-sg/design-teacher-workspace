@@ -370,13 +370,8 @@ function ResultRow({
                   key={detail.name}
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => isSelected && onMemberToggle?.(detail.name)}
-                  className={cn(
-                    'flex w-full items-center gap-2 rounded px-1.5 py-1 text-xs',
-                    isSelected
-                      ? 'cursor-pointer hover:bg-blue-50'
-                      : 'cursor-default',
-                  )}
+                  onClick={() => onMemberToggle?.(detail.name)}
+                  className="flex w-full cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-xs hover:bg-blue-50"
                 >
                   <span
                     className={cn(
@@ -507,20 +502,14 @@ function EntityChip({
       <span className="truncate">{entity.label}</span>
       {entity.type === 'group' && (
         <span
-          className={cn(
-            'shrink-0',
-            large ? 'text-slate-400' : 'opacity-60',
-          )}
+          className={cn('shrink-0', large ? 'text-slate-400' : 'opacity-60')}
         >
           · {entity.count}
         </span>
       )}
       {extra != null && (
         <span
-          className={cn(
-            'flex shrink-0 items-center',
-            large ? 'ml-2' : 'ml-1',
-          )}
+          className={cn('flex shrink-0 items-center', large ? 'ml-2' : 'ml-1')}
         >
           {extra}
         </span>
@@ -640,16 +629,49 @@ export function EntitySelector({
     }
   }
 
-  function handleMemberToggle(groupId: string, memberName: string) {
+  function handleMemberToggle(item: EntityItem, memberName: string) {
+    const groupId = item.id
+    const allNames = item.memberNames ?? []
+    const isGroupSelected = value.some((e) => e.id === groupId)
+
+    if (!isGroupSelected) {
+      // Group not yet selected: add it, excluding all members except the clicked one
+      const exclusions = new Set(allNames.filter((n) => n !== memberName))
+      const next = new Map(groupExclusions)
+      if (exclusions.size > 0) next.set(groupId, exclusions)
+      setGroupExclusions(next)
+      const entity = toSelectedEntity(item)
+      onChange([
+        ...value,
+        {
+          ...entity,
+          excludedMemberNames:
+            exclusions.size > 0 ? [...exclusions] : undefined,
+        },
+      ])
+      return
+    }
+
+    // Group already selected: toggle this individual member
     const currentExcl = groupExclusions.get(groupId) ?? new Set<string>()
     const newExcl = new Set(currentExcl)
-    if (newExcl.has(memberName)) newExcl.delete(memberName)
-    else newExcl.add(memberName)
+    if (newExcl.has(memberName))
+      newExcl.delete(memberName) // re-include
+    else newExcl.add(memberName) // exclude
+
+    // If all members are now excluded, remove the group entirely
+    if (allNames.length > 0 && newExcl.size >= allNames.length) {
+      onChange(value.filter((e) => e.id !== groupId))
+      const next = new Map(groupExclusions)
+      next.delete(groupId)
+      setGroupExclusions(next)
+      return
+    }
+
     const next = new Map(groupExclusions)
     if (newExcl.size === 0) next.delete(groupId)
     else next.set(groupId, newExcl)
     setGroupExclusions(next)
-    // Propagate exclusions to parent value
     const updatedValue = value.map((e) =>
       e.id === groupId
         ? {
@@ -725,7 +747,7 @@ export function EntitySelector({
           }
           selectedIndividualNames={selectedIndividualNames}
           excludedMemberNames={groupExclusions.get(item.id)}
-          onMemberToggle={(name) => handleMemberToggle(item.id, name)}
+          onMemberToggle={(name) => handleMemberToggle(item, name)}
         />
       ))
 
@@ -794,7 +816,7 @@ export function EntitySelector({
                 }
                 selectedIndividualNames={selectedIndividualNames}
                 excludedMemberNames={groupExclusions.get(item.id)}
-                onMemberToggle={(name) => handleMemberToggle(item.id, name)}
+                onMemberToggle={(name) => handleMemberToggle(item, name)}
               />
             ))}
           </>
@@ -819,7 +841,7 @@ export function EntitySelector({
                 }
                 selectedIndividualNames={selectedIndividualNames}
                 excludedMemberNames={groupExclusions.get(item.id)}
-                onMemberToggle={(name) => handleMemberToggle(item.id, name)}
+                onMemberToggle={(name) => handleMemberToggle(item, name)}
               />
             ))}
           </>
@@ -934,7 +956,9 @@ export function EntitySelector({
           ref={inputRef}
           type="text"
           value={query}
-          placeholder={value.length === 0 || chipsBelow ? placeholder : undefined}
+          placeholder={
+            value.length === 0 || chipsBelow ? placeholder : undefined
+          }
           onChange={(e) => {
             setQuery(e.target.value)
             if (!isOpen) setIsOpen(true)
@@ -946,7 +970,12 @@ export function EntitySelector({
               else closePanel()
             }
             // Backspace on empty input removes the last chip (inline mode only)
-            if (!chipsBelow && e.key === 'Backspace' && !query && value.length > 0) {
+            if (
+              !chipsBelow &&
+              e.key === 'Backspace' &&
+              !query &&
+              value.length > 0
+            ) {
               handleRemove(value[value.length - 1])
             }
           }}
@@ -987,113 +1016,113 @@ export function EntitySelector({
 
   return (
     <>
-    <div ref={wrapperRef} className="relative">
-      {tokenContainer}
+      <div ref={wrapperRef} className="relative">
+        {tokenContainer}
 
-      {/* Desktop: inline dropdown panel */}
-      {!isMobile && isOpen && (
-        <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border bg-white shadow-md">
-          {panelBody}
-        </div>
-      )}
+        {/* Desktop: inline dropdown panel */}
+        {!isMobile && isOpen && (
+          <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border bg-white shadow-md">
+            {panelBody}
+          </div>
+        )}
 
-      {/* Mobile: bottom Sheet */}
-      {isMobile && (
-        <Sheet
-          open={isOpen}
-          onOpenChange={(open) => {
-            setIsOpen(open)
-            if (!open) setQuery('')
-          }}
-        >
-          <SheetContent
-            side="bottom"
-            showCloseButton={false}
-            className="max-h-[85vh] rounded-t-xl px-0 pt-0"
+        {/* Mobile: bottom Sheet */}
+        {isMobile && (
+          <Sheet
+            open={isOpen}
+            onOpenChange={(open) => {
+              setIsOpen(open)
+              if (!open) setQuery('')
+            }}
           >
-            {/* Drag handle + title bar */}
-            <div className="flex items-center justify-between border-b px-4 py-3">
-              <div className="flex flex-col gap-1">
-                <div className="mx-auto h-1 w-12 rounded-full bg-slate-200" />
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">
-                {placeholder}
-              </span>
-              <button
-                type="button"
-                onClick={closePanel}
-                className="rounded-md p-1 hover:bg-slate-100"
-              >
-                <X className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </div>
-
-            {/* Search input inside Sheet */}
-            <div className="relative border-b">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder={searchPlaceholder}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    if (query) setQuery('')
-                    else closePanel()
-                  }
-                }}
-                autoFocus
-                className="w-full border-0 bg-transparent py-2.5 pl-9 pr-8 text-sm outline-none placeholder:text-muted-foreground"
-              />
-              {query && (
+            <SheetContent
+              side="bottom"
+              showCloseButton={false}
+              className="max-h-[85vh] rounded-t-xl px-0 pt-0"
+            >
+              {/* Drag handle + title bar */}
+              <div className="flex items-center justify-between border-b px-4 py-3">
+                <div className="flex flex-col gap-1">
+                  <div className="mx-auto h-1 w-12 rounded-full bg-slate-200" />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground">
+                  {placeholder}
+                </span>
                 <button
                   type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => setQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-0.5 hover:bg-slate-100"
+                  onClick={closePanel}
+                  className="rounded-md p-1 hover:bg-slate-100"
                 >
-                  <X className="h-3.5 w-3.5 text-muted-foreground" />
+                  <X className="h-4 w-4 text-muted-foreground" />
                 </button>
-              )}
-            </div>
+              </div>
 
-            {/* Panel body (tabs + results) */}
-            <div
-              className="overflow-y-auto"
-              style={{ maxHeight: 'calc(85vh - 108px)' }}
-            >
-              {panelBody}
-            </div>
-          </SheetContent>
-        </Sheet>
-      )}
-    </div>
+              {/* Search input inside Sheet */}
+              <div className="relative border-b">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder={searchPlaceholder}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      if (query) setQuery('')
+                      else closePanel()
+                    }
+                  }}
+                  autoFocus
+                  className="w-full border-0 bg-transparent py-2.5 pl-9 pr-8 text-sm outline-none placeholder:text-muted-foreground"
+                />
+                {query && (
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => setQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-0.5 hover:bg-slate-100"
+                  >
+                    <X className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
 
-    {/* Chips below area — rendered outside the relative wrapper so it's never clipped */}
-    {chipsBelow && value.length > 0 && (
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        {value.map((entity) => (
-          <EntityChip
-            key={entity.id}
-            entity={entity}
-            onRemove={() => handleRemove(entity)}
-            extra={renderChipExtra?.(entity)}
-            large
-            onChipClick={
-              entity.type === 'group' ? () => openGroup(entity) : undefined
-            }
-          />
-        ))}
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => onChange([])}
-          className="ml-auto shrink-0 text-xs text-muted-foreground transition-colors hover:text-rose-500"
-        >
-          Clear all
-        </button>
+              {/* Panel body (tabs + results) */}
+              <div
+                className="overflow-y-auto"
+                style={{ maxHeight: 'calc(85vh - 108px)' }}
+              >
+                {panelBody}
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
       </div>
-    )}
+
+      {/* Chips below area — rendered outside the relative wrapper so it's never clipped */}
+      {chipsBelow && value.length > 0 && (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          {value.map((entity) => (
+            <EntityChip
+              key={entity.id}
+              entity={entity}
+              onRemove={() => handleRemove(entity)}
+              extra={renderChipExtra?.(entity)}
+              large
+              onChipClick={
+                entity.type === 'group' ? () => openGroup(entity) : undefined
+              }
+            />
+          ))}
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => onChange([])}
+            className="ml-auto shrink-0 text-xs text-muted-foreground transition-colors hover:text-rose-500"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
     </>
   )
 }

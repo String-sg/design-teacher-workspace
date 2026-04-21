@@ -408,7 +408,9 @@ function AnnouncementDetailPage() {
               </>
             ) : (
               <Button
-                variant={announcement.status === 'draft' ? 'default' : 'outline'}
+                variant={
+                  announcement.status === 'draft' ? 'default' : 'outline'
+                }
                 size="sm"
                 render={
                   <Link

@@ -439,7 +439,9 @@ export function RecipientReadTable({
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  setVisibleCols(new Set(Object.keys(COLUMN_LABELS) as Array<ColumnKey>))
+                  setVisibleCols(
+                    new Set(Object.keys(COLUMN_LABELS) as Array<ColumnKey>),
+                  )
                 }
               >
                 Show all
@@ -465,7 +467,9 @@ export function RecipientReadTable({
                       onCheckedChange={() => toggleCol(col)}
                     />
                     <span className="text-sm">
-                      {col === 'readAt' ? timestampColLabel : COLUMN_LABELS[col]}
+                      {col === 'readAt'
+                        ? timestampColLabel
+                        : COLUMN_LABELS[col]}
                     </span>
                   </label>
                 ))}
@@ -476,7 +480,9 @@ export function RecipientReadTable({
               <button
                 type="button"
                 onClick={() =>
-                  setVisibleCols(new Set(['indexNo', 'readAt', 'readBy', 'pgStatus']))
+                  setVisibleCols(
+                    new Set(['indexNo', 'readAt', 'readBy', 'pgStatus']),
+                  )
                 }
                 className="flex items-center gap-2 text-sm text-primary hover:underline"
               >
@@ -612,22 +618,36 @@ export function RecipientReadTable({
                     <TableCell>
                       {responseType === 'acknowledge' ? (
                         status === 'acknowledged' ? (
-                          <span className="text-sm font-medium text-green-700">Acknowledged</span>
+                          <span className="text-sm font-medium text-green-700">
+                            Acknowledged
+                          </span>
                         ) : (
-                          <span className="text-sm font-medium text-foreground">Pending</span>
+                          <span className="text-sm font-medium text-foreground">
+                            Pending
+                          </span>
                         )
                       ) : responseType === 'yes-no' ? (
                         status === 'yes' ? (
-                          <span className="text-sm font-medium text-green-700">Yes</span>
+                          <span className="text-sm font-medium text-green-700">
+                            Yes
+                          </span>
                         ) : status === 'no' ? (
-                          <span className="text-sm font-medium text-rose-600">No</span>
+                          <span className="text-sm font-medium text-rose-600">
+                            No
+                          </span>
                         ) : (
-                          <span className="text-sm font-medium text-foreground">No Response</span>
+                          <span className="text-sm font-medium text-foreground">
+                            No Response
+                          </span>
                         )
                       ) : r.readStatus === 'read' ? (
-                        <span className="text-sm font-medium text-green-700">Read</span>
+                        <span className="text-sm font-medium text-green-700">
+                          Read
+                        </span>
                       ) : (
-                        <span className="text-sm font-medium text-foreground">Unread</span>
+                        <span className="text-sm font-medium text-foreground">
+                          Unread
+                        </span>
                       )}
                     </TableCell>
 

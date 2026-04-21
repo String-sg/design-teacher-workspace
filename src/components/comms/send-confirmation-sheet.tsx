@@ -123,7 +123,9 @@ export function SendConfirmationSheet({
               </p>
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">
-                  {responseType === 'acknowledge' ? 'Acknowledgement' : 'Yes / No'}
+                  {responseType === 'acknowledge'
+                    ? 'Acknowledgement'
+                    : 'Yes / No'}
                 </Badge>
                 {dueDate && (
                   <span className="text-sm text-muted-foreground">
