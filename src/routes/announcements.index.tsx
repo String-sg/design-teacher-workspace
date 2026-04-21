@@ -151,6 +151,7 @@ function ParentsGatewayPage() {
   const [deleteMode, setDeleteMode] = useState<
     'remove-from-list' | 'delete-for-everyone'
   >('remove-from-list')
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
   // Incrementing this key forces allAnnouncements to re-read mockPGAnnouncements after a deletion
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -323,6 +324,7 @@ function ParentsGatewayPage() {
     }
     setSelectedIds(new Set())
     setShowDeleteDialog(false)
+    setDeleteConfirmText('')
     setRefreshKey((k) => k + 1)
 
     const msg =
@@ -738,7 +740,13 @@ function ParentsGatewayPage() {
       </div>
 
       {/* Delete confirmation dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <Dialog
+        open={showDeleteDialog}
+        onOpenChange={(open) => {
+          setShowDeleteDialog(open)
+          if (!open) setDeleteConfirmText('')
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
@@ -770,7 +778,10 @@ function ParentsGatewayPage() {
               {/* Option: Remove from my list */}
               <button
                 type="button"
-                onClick={() => setDeleteMode('remove-from-list')}
+                onClick={() => {
+                  setDeleteMode('remove-from-list')
+                  setDeleteConfirmText('')
+                }}
                 className={cn(
                   'w-full rounded-md border p-3.5 text-left transition-colors',
                   deleteMode === 'remove-from-list'
@@ -840,8 +851,34 @@ function ParentsGatewayPage() {
             </div>
           )}
 
+          {/* Type DELETE confirmation — only for "Delete for everyone" */}
+          {hasPostedSelected && deleteMode === 'delete-for-everyone' && (
+            <div className="space-y-1.5 pt-1">
+              <p className="text-xs text-muted-foreground">
+                Type{' '}
+                <span className="font-mono font-semibold text-destructive">
+                  DELETE
+                </span>{' '}
+                to confirm.
+              </p>
+              <Input
+                placeholder="DELETE"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                className="font-mono uppercase"
+                autoComplete="off"
+              />
+            </div>
+          )}
+
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowDeleteDialog(false)}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setShowDeleteDialog(false)
+                setDeleteConfirmText('')
+              }}
+            >
               Cancel
             </Button>
             <Button
@@ -849,6 +886,11 @@ function ParentsGatewayPage() {
                 !hasPostedSelected || deleteMode === 'delete-for-everyone'
                   ? 'destructive'
                   : 'default'
+              }
+              disabled={
+                hasPostedSelected &&
+                deleteMode === 'delete-for-everyone' &&
+                deleteConfirmText.trim().toUpperCase() !== 'DELETE'
               }
               onClick={handleDelete}
             >

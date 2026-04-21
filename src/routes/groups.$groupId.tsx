@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   Link,
   createFileRoute,
@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-router'
 import {
   ArrowLeft,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -26,11 +27,10 @@ import {
 import type { GroupSharedWith, StudentGroup } from '@/types/student-group'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { MOCK_GROUPS, getGroupById } from '@/data/mock-groups'
-import { MOCK_STAFF } from '@/data/mock-staff'
+import { MOCK_STAFF, MOCK_STAFF_GROUPS } from '@/data/mock-staff'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import {
   Table,
@@ -41,11 +41,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   DropdownMenu,
@@ -87,7 +88,26 @@ export const Route = createFileRoute('/groups/$groupId')({
 
 const PAGE_SIZE = 10
 
-function SharingSheet({
+/** Initials avatar for a staff name */
+function StaffAvatar({ name, size = 8 }: { name: string; size?: number }) {
+  const initials = name
+    .split(' ')
+    .slice(-2)
+    .map((n) => n[0])
+    .join('')
+  return (
+    <div
+      className={cn(
+        'shrink-0 flex items-center justify-center rounded-full bg-muted text-xs font-medium',
+        `size-${size}`,
+      )}
+    >
+      {initials}
+    </div>
+  )
+}
+
+function SharingDialog({
   group,
   open,
   onOpenChange,
@@ -101,62 +121,43 @@ function SharingSheet({
     sharedWith: Array<GroupSharedWith>,
   ) => void
 }) {
-  const [visibility, setVisibility] = useState<'private' | 'school'>(
-    group.visibility,
-  )
   const [sharedWith, setSharedWith] = useState<Array<GroupSharedWith>>(
     group.sharedWith,
   )
-  const [addSearch, setAddSearch] = useState('')
-  const [drawerWidth, setDrawerWidth] = useState(480)
-  const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
+  const [query, setQuery] = useState('')
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
-  const onDragStart = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault()
-      dragRef.current = { startX: e.clientX, startWidth: drawerWidth }
+  // Filter results for the dropdown
+  const { dropGroups, dropIndividuals } = useMemo(() => {
+    const q = query.toLowerCase().trim()
+    const alreadyIds = new Set(sharedWith.map((sw) => sw.staffId))
 
-      function onMouseMove(ev: MouseEvent) {
-        if (!dragRef.current) return
-        const delta = dragRef.current.startX - ev.clientX
-        setDrawerWidth(
-          Math.min(Math.max(dragRef.current.startWidth + delta, 360), 800),
-        )
-      }
-      function onMouseUp() {
-        dragRef.current = null
-        document.removeEventListener('mousemove', onMouseMove)
-        document.removeEventListener('mouseup', onMouseUp)
-      }
-      document.addEventListener('mousemove', onMouseMove)
-      document.addEventListener('mouseup', onMouseUp)
-    },
-    [drawerWidth],
-  )
-
-  const staffResults = useMemo(() => {
-    if (!addSearch) return []
-    const q = addSearch.toLowerCase().trim()
-    // Match "sec 3" / "level 3" / "3" to formClass like "3A"
-    const levelMatch = q.match(
-      /(?:sec\s*|level\s*)?^(\d)$|(?:sec\s*|level\s*)(\d)/i,
+    const matchedGroups = MOCK_STAFF_GROUPS.filter(
+      (g) => !q || g.label.toLowerCase().includes(q),
     )
-    const levelDigit = levelMatch?.[1] ?? levelMatch?.[2]
-    return MOCK_STAFF.filter((s) => {
-      if (sharedWith.some((sw) => sw.staffId === s.id)) return false
-      const fc = (s.formClass ?? '').toLowerCase()
-      return (
-        s.name.toLowerCase().includes(q) ||
-        s.email.toLowerCase().includes(q) ||
-        fc.includes(q) ||
-        (levelDigit !== undefined && fc.startsWith(levelDigit))
-      )
-    })
-  }, [addSearch, sharedWith])
+
+    const matchedIndividuals = q
+      ? MOCK_STAFF.filter((s) => {
+          if (alreadyIds.has(s.id)) return false
+          if (matchedGroups.some((g) => g.memberIds.includes(s.id)))
+            return false
+          const fc = (s.formClass ?? '').toLowerCase()
+          return (
+            s.name.toLowerCase().includes(q) ||
+            s.email.toLowerCase().includes(q) ||
+            fc.includes(q)
+          )
+        })
+      : []
+
+    return { dropGroups: matchedGroups, dropIndividuals: matchedIndividuals }
+  }, [query, sharedWith])
 
   function addStaff(staffId: string) {
     const staff = MOCK_STAFF.find((s) => s.id === staffId)
-    if (!staff) return
+    if (!staff || sharedWith.some((sw) => sw.staffId === staffId)) return
     setSharedWith((prev) => [
       ...prev,
       {
@@ -166,7 +167,6 @@ function SharingSheet({
         role: 'viewer',
       },
     ])
-    setAddSearch('')
   }
 
   function updateRole(staffId: string, role: 'viewer' | 'editor') {
@@ -179,182 +179,270 @@ function SharingSheet({
     setSharedWith((prev) => prev.filter((sw) => sw.staffId !== staffId))
   }
 
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="flex flex-col p-0"
-        style={{ width: drawerWidth, maxWidth: 'none' }}
-      >
-        {/* Resize handle */}
-        <div
-          className="absolute left-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-border/60 transition-colors z-10"
-          onMouseDown={onDragStart}
-        />
-        <SheetHeader className="px-6 py-4 border-b">
-          <SheetTitle>Share this group</SheetTitle>
-        </SheetHeader>
+  // Render a group row (used in dropdown for both search and browse)
+  function renderGroupRow(grp: (typeof MOCK_STAFF_GROUPS)[0]) {
+    const isExpanded = expandedGroupId === grp.id
+    const members = grp.memberIds
+      .map((id) => MOCK_STAFF.find((s) => s.id === id))
+      .filter(Boolean) as typeof MOCK_STAFF
+    const addedCount = members.filter((s) =>
+      sharedWith.some((sw) => sw.staffId === s.id),
+    ).length
 
-        <div className="flex-1 overflow-y-auto space-y-6 px-6 pb-6 pt-4">
-          {/* Visibility toggle */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Visibility</Label>
-            <div className="inline-flex overflow-hidden rounded-md border">
-              <button
-                type="button"
-                onClick={() => setVisibility('private')}
-                className={cn(
-                  'px-4 py-1.5 text-sm font-medium transition-colors',
-                  visibility === 'private'
-                    ? 'bg-foreground text-background'
-                    : 'bg-background text-muted-foreground hover:bg-muted',
-                )}
-              >
-                Private
-              </button>
-              <div className="w-px bg-border" />
-              <button
-                type="button"
-                onClick={() => setVisibility('school')}
-                className={cn(
-                  'px-4 py-1.5 text-sm font-medium transition-colors',
-                  visibility === 'school'
-                    ? 'bg-foreground text-background'
-                    : 'bg-background text-muted-foreground hover:bg-muted',
-                )}
-              >
-                School-wide
-              </button>
+    return (
+      <div key={grp.id}>
+        <div className="flex items-center">
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => members.forEach((s) => addStaff(s.id))}
+            className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2 text-left hover:bg-slate-50 transition-colors"
+          >
+            <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+              {grp.label.slice(0, 2).toUpperCase()}
             </div>
-          </div>
-
-          <Separator />
-
-          {/* People with access */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">People with access</Label>
-            {sharedWith.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No one else has access.
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{grp.label}</p>
+              <p className="text-xs text-muted-foreground">
+                {addedCount > 0
+                  ? `${addedCount}/${members.length} added`
+                  : `${members.length} member${members.length !== 1 ? 's' : ''}`}
               </p>
-            ) : (
-              <div className="space-y-2">
-                {sharedWith.map((sw) => {
-                  const staffMeta = MOCK_STAFF.find((s) => s.id === sw.staffId)
-                  const sublabel = [
-                    staffMeta?.formClass && `Form ${staffMeta.formClass}`,
-                    sw.email,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')
-                  return (
-                    <div
-                      key={sw.staffId}
-                      className="flex items-center gap-3 rounded-lg border px-3 py-2"
-                    >
-                      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                        {sw.name
-                          .split(' ')
-                          .slice(-2)
-                          .map((n) => n[0])
-                          .join('')}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {sw.name}
+            </div>
+          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() =>
+              setExpandedGroupId((prev) => (prev === grp.id ? null : grp.id))
+            }
+            className="flex shrink-0 items-center px-2.5 py-2 hover:bg-slate-50 transition-colors"
+            aria-label={isExpanded ? 'Collapse' : 'Expand'}
+          >
+            <ChevronDown
+              className={cn(
+                'size-3.5 text-muted-foreground transition-transform duration-150',
+                isExpanded && 'rotate-180',
+              )}
+            />
+          </button>
+        </div>
+        {isExpanded && (
+          <div className="border-y border-slate-100 bg-slate-50/70 px-4 pb-2 pt-1.5">
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {members.length} member{members.length !== 1 ? 's' : ''}
+            </p>
+            {members.map((s) => {
+              const alreadyAdded = sharedWith.some((sw) => sw.staffId === s.id)
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => addStaff(s.id)}
+                  disabled={alreadyAdded}
+                  className="flex w-full items-center gap-2 rounded px-1.5 py-1.5 text-left text-xs hover:bg-blue-50 disabled:opacity-40 disabled:cursor-default transition-colors"
+                >
+                  <StaffAvatar name={s.name} size={6} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium text-slate-700">
+                      {s.name}
+                    </span>
+                    <span className="block truncate text-muted-foreground">
+                      {[s.formClass && `Form ${s.formClass}`, s.email]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  </span>
+                  {alreadyAdded && (
+                    <span className="shrink-0 text-[10px] text-muted-foreground">
+                      Added
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex max-h-[80vh] max-w-md flex-col gap-0 p-0">
+        <DialogHeader className="border-b px-5 py-4">
+          <DialogTitle>Share this group</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* Search with dropdown */}
+          <div ref={wrapperRef} className="relative px-5 pt-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <Input
+                placeholder="Search by name, email or group…"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value)
+                  setDropdownOpen(true)
+                }}
+                onFocus={() => setDropdownOpen(true)}
+                onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
+                className="pl-9 h-9"
+                autoComplete="off"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    setQuery('')
+                    setExpandedGroupId(null)
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Dropdown panel */}
+            {dropdownOpen && (
+              <div className="absolute left-5 right-5 top-[calc(100%+4px)] z-50 max-h-56 overflow-y-auto rounded-md border bg-background shadow-lg">
+                {dropGroups.length === 0 && dropIndividuals.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-muted-foreground">
+                    No staff found
+                  </p>
+                ) : (
+                  <>
+                    {dropGroups.length > 0 && (
+                      <>
+                        <p className="px-3 pb-0.5 pt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          Groups
                         </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {sublabel}
+                        {dropGroups.map(renderGroupRow)}
+                      </>
+                    )}
+                    {dropGroups.length > 0 && dropIndividuals.length > 0 && (
+                      <div className="mx-3 border-t" />
+                    )}
+                    {dropIndividuals.length > 0 && (
+                      <>
+                        <p className="px-3 pb-0.5 pt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          Individuals
                         </p>
-                      </div>
-                      <Select
-                        value={sw.role}
-                        onValueChange={(val) =>
-                          updateRole(sw.staffId, val as 'viewer' | 'editor')
-                        }
-                      >
-                        <SelectTrigger className="w-24 h-7 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="viewer">Viewer</SelectItem>
-                          <SelectItem value="editor">Editor</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7 text-muted-foreground hover:text-destructive"
-                        onClick={() => removeStaff(sw.staffId)}
-                      >
-                        <X className="size-3.5" />
-                      </Button>
-                    </div>
-                  )
-                })}
+                        {dropIndividuals.map((s) => (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => addStaff(s.id)}
+                            className="flex w-full items-center gap-2.5 px-3 py-2 text-left hover:bg-slate-50 transition-colors"
+                          >
+                            <StaffAvatar name={s.name} size={7} />
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium">
+                                {s.name}
+                              </p>
+                              <p className="truncate text-xs text-muted-foreground">
+                                {[s.formClass && `Form ${s.formClass}`, s.email]
+                                  .filter(Boolean)
+                                  .join(' · ')}
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </>
+                )}
               </div>
             )}
           </div>
 
-          {/* Add people */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Add people</Label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by name, email or class…"
-                value={addSearch}
-                onChange={(e) => setAddSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            {staffResults.length > 0 && (
-              <div className="rounded-lg border divide-y">
-                {staffResults.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => addStaff(s.id)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                      {s.name
-                        .split(' ')
-                        .slice(-2)
-                        .map((n) => n[0])
-                        .join('')}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">{s.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {[s.formClass && `Form ${s.formClass}`, s.email]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </p>
-                    </div>
-                  </button>
-                ))}
-              </div>
+          {/* People with access */}
+          <div className="flex-1 overflow-y-auto px-5 pb-2 pt-4">
+            {sharedWith.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No one else has access yet. Search above to add people.
+              </p>
+            ) : (
+              <>
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  People with access
+                </p>
+                <div className="space-y-0.5">
+                  {sharedWith.map((sw) => {
+                    const staffMeta = MOCK_STAFF.find(
+                      (s) => s.id === sw.staffId,
+                    )
+                    const sublabel = [
+                      staffMeta?.formClass && `Form ${staffMeta.formClass}`,
+                      sw.email,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')
+                    return (
+                      <div
+                        key={sw.staffId}
+                        className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/30"
+                      >
+                        <StaffAvatar name={sw.name} size={7} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {sw.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {sublabel}
+                          </p>
+                        </div>
+                        <Select
+                          value={sw.role}
+                          onValueChange={(val) =>
+                            updateRole(sw.staffId, val as 'viewer' | 'editor')
+                          }
+                        >
+                          <SelectTrigger className="w-24 h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="viewer">Viewer</SelectItem>
+                            <SelectItem value="editor">Editor</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 shrink-0 text-muted-foreground hover:text-destructive"
+                          onClick={() => removeStaff(sw.staffId)}
+                        >
+                          <X className="size-3.5" />
+                        </Button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
             )}
           </div>
         </div>
 
-        <div className="border-t p-6 flex gap-2">
+        <DialogFooter className="border-t px-5 py-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           <Button
-            className="flex-1"
             onClick={() => {
-              onSave(visibility, sharedWith)
+              onSave(group.visibility, sharedWith)
               onOpenChange(false)
             }}
           >
             Save
           </Button>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-        </div>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -735,8 +823,8 @@ function GroupDetailPage() {
         )}
       </div>
 
-      {/* Sharing sheet */}
-      <SharingSheet
+      {/* Sharing dialog */}
+      <SharingDialog
         group={group}
         open={shareOpen}
         onOpenChange={setShareOpen}

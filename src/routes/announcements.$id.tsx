@@ -123,6 +123,7 @@ function AnnouncementDetailPage() {
   const [deleteMode, setDeleteMode] = useState<
     'remove-from-list' | 'delete-for-everyone'
   >('remove-from-list')
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
 
   // ---------------------------------------------------------------------------
   // Derived values
@@ -191,6 +192,7 @@ function AnnouncementDetailPage() {
         ? 'Post deleted'
         : 'Post removed from your list'
     setShowDeleteDialog(false)
+    setDeleteConfirmText('')
     toast.success(toastMsg)
     navigate({ to: '/announcements' })
   }
@@ -903,7 +905,13 @@ function AnnouncementDetailPage() {
       </div>
 
       {/* ── Delete dialog ── */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <Dialog
+        open={showDeleteDialog}
+        onOpenChange={(open) => {
+          setShowDeleteDialog(open)
+          if (!open) setDeleteConfirmText('')
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Delete post?</DialogTitle>
@@ -919,7 +927,10 @@ function AnnouncementDetailPage() {
               {/* Option: Remove from my list */}
               <button
                 type="button"
-                onClick={() => setDeleteMode('remove-from-list')}
+                onClick={() => {
+                  setDeleteMode('remove-from-list')
+                  setDeleteConfirmText('')
+                }}
                 className={cn(
                   'w-full rounded-md border p-3.5 text-left transition-colors',
                   deleteMode === 'remove-from-list'
@@ -989,8 +1000,35 @@ function AnnouncementDetailPage() {
             </div>
           )}
 
+          {/* Type DELETE confirmation — only for "Delete for everyone" on posted posts */}
+          {announcement.status === 'posted' &&
+            deleteMode === 'delete-for-everyone' && (
+              <div className="space-y-1.5 pt-1">
+                <p className="text-xs text-muted-foreground">
+                  Type{' '}
+                  <span className="font-mono font-semibold text-destructive">
+                    DELETE
+                  </span>{' '}
+                  to confirm.
+                </p>
+                <Input
+                  placeholder="DELETE"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  className="font-mono uppercase"
+                  autoComplete="off"
+                />
+              </div>
+            )}
+
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowDeleteDialog(false)}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setShowDeleteDialog(false)
+                setDeleteConfirmText('')
+              }}
+            >
               Cancel
             </Button>
             <Button
@@ -999,6 +1037,11 @@ function AnnouncementDetailPage() {
                 deleteMode === 'delete-for-everyone'
                   ? 'destructive'
                   : 'default'
+              }
+              disabled={
+                announcement.status === 'posted' &&
+                deleteMode === 'delete-for-everyone' &&
+                deleteConfirmText.trim().toUpperCase() !== 'DELETE'
               }
               onClick={handleDelete}
             >
