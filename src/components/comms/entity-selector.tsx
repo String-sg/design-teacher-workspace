@@ -95,6 +95,12 @@ export interface EntitySelectorProps {
   renderChipExtra?: (entity: SelectedEntity) => React.ReactNode
   /** When true, selected chips render below the search input instead of inline. */
   chipsBelow?: boolean
+  /** When true, suppresses chip rendering entirely (use when the parent already shows selections elsewhere). */
+  hideChips?: boolean
+  /** When false, focusing the input won't open the dropdown — the user must type first. Defaults to true. */
+  openOnFocus?: boolean
+  /** When true, the dropdown opens immediately on mount (e.g. empty dialog). */
+  autoOpen?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -550,8 +556,11 @@ export function EntitySelector({
   maxVisibleTokens,
   renderChipExtra,
   chipsBelow = false,
+  hideChips = false,
+  openOnFocus = true,
+  autoOpen = false,
 }: EntitySelectorProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(autoOpen)
   const [query, setQuery] = useState('')
   const [activeScope, setActiveScope] = useState(scopes?.[0]?.id ?? '')
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null)
@@ -905,6 +914,7 @@ export function EntitySelector({
       aria-haspopup="listbox"
       onClick={() => {
         if (!isMobile) {
+          setIsOpen(true)
           inputRef.current?.focus()
         } else {
           setIsOpen(true)
@@ -963,7 +973,7 @@ export function EntitySelector({
             setQuery(e.target.value)
             if (!isOpen) setIsOpen(true)
           }}
-          onFocus={() => setIsOpen(true)}
+          onFocus={() => { if (openOnFocus) setIsOpen(true) }}
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
               if (query) setQuery('')
@@ -1099,7 +1109,7 @@ export function EntitySelector({
       </div>
 
       {/* Chips below area — rendered outside the relative wrapper so it's never clipped */}
-      {chipsBelow && value.length > 0 && (
+      {chipsBelow && !hideChips && value.length > 0 && (
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {value.map((entity) => (
             <EntityChip

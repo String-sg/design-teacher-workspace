@@ -20,6 +20,8 @@ import {
   Trash2,
   UserMinus,
   UserPlus,
+  Users,
+  X,
 } from 'lucide-react'
 
 import type { GroupSharedWith, StudentGroup } from '@/types/student-group'
@@ -173,6 +175,36 @@ function SharingDialog({
     setStaffRoles((prev) => ({ ...prev, [staffId]: role }))
   }
 
+  /** Remove an individual from the selection, even if they came from a group entity. */
+  function removeStaff(staffId: string) {
+    const member = MOCK_STAFF.find((s) => s.id === staffId)
+    if (!member) return
+    const memberName = stripSalutation(member.name)
+    setSelectedStaff((prev) =>
+      prev.flatMap((entity) => {
+        if (entity.type === 'individual' && entity.id === staffId) {
+          return [] // drop this individual
+        }
+        if (entity.type === 'group') {
+          const grp = MOCK_STAFF_GROUPS.find((g) => g.id === entity.id)
+          if (grp?.memberIds.includes(staffId)) {
+            // Exclude this member from the group entity
+            return [
+              {
+                ...entity,
+                excludedMemberNames: [
+                  ...(entity.excludedMemberNames ?? []),
+                  memberName,
+                ],
+              },
+            ]
+          }
+        }
+        return [entity]
+      }),
+    )
+  }
+
   // Derive final sharedWith for saving
   const derivedSharedWith: Array<GroupSharedWith> = expandedStaffIds.flatMap(
     (staffId) => {
@@ -189,6 +221,13 @@ function SharingDialog({
     },
   )
 
+  // Detect whether any changes have been made vs the saved state
+  const hasChanges = useMemo(() => {
+    if (derivedSharedWith.length !== group.sharedWith.length) return true
+    const origMap = new Map(group.sharedWith.map((sw) => [sw.staffId, sw.role]))
+    return derivedSharedWith.some((sw) => origMap.get(sw.staffId) !== sw.role)
+  }, [derivedSharedWith, group.sharedWith])
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[85vh] max-w-md flex-col gap-0 p-0">
@@ -196,18 +235,30 @@ function SharingDialog({
           <DialogTitle>Share this group</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-1 flex-col overflow-y-auto">
-          {/* Staff selector — same component as new post staff-in-charge */}
+        <div className="flex flex-1 flex-col">
+          {/* Staff selector — only auto-opens dropdown when list is empty */}
           <div className="px-5 pt-4">
-            <StaffSelector value={selectedStaff} onChange={setSelectedStaff} />
+            <StaffSelector
+              key={String(open)}
+              value={selectedStaff}
+              onChange={setSelectedStaff}
+              hideChips
+              autoOpen={expandedStaffIds.length === 0}
+            />
           </div>
 
           {/* People with access — role management for each expanded individual */}
-          <div className="px-5 pb-4 pt-4">
+          <div className="max-h-72 overflow-y-auto px-5 pb-4 pt-4">
             {expandedStaffIds.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No one added yet. Search above to add people.
-              </p>
+              <div className="flex flex-col items-center gap-2 py-10 text-center">
+                <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+                  <Users className="size-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">No one added yet</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">Search above to add staff</p>
+                </div>
+              </div>
             ) : (
               <>
                 <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -252,6 +303,13 @@ function SharingDialog({
                             <SelectItem value="editor">Editor</SelectItem>
                           </SelectContent>
                         </Select>
+                        <button
+                          type="button"
+                          onClick={() => removeStaff(sw.staffId)}
+                          className="shrink-0 rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <X className="size-3.5" />
+                        </button>
                       </div>
                     )
                   })}
@@ -262,16 +320,18 @@ function SharingDialog({
         </div>
 
         <DialogFooter className="border-t px-5 py-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
+          {hasChanges && (
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+          )}
           <Button
             onClick={() => {
-              onSave(group.visibility, derivedSharedWith)
+              if (hasChanges) onSave(group.visibility, derivedSharedWith)
               onOpenChange(false)
             }}
           >
-            Save
+            {hasChanges ? 'Save' : 'Done'}
           </Button>
         </DialogFooter>
       </DialogContent>

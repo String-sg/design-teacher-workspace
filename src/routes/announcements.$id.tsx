@@ -447,7 +447,7 @@ function AnnouncementDetailPage() {
         {/* ── Left: read tracking (2/3) ── */}
         <div className="space-y-6 lg:col-span-2">
           {announcement.status === 'posted' && responseType === 'view-only' && (
-            <div className="rounded-lg border bg-white p-6">
+            <div className="rounded-lg border bg-background p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -484,7 +484,7 @@ function AnnouncementDetailPage() {
 
           {announcement.status === 'posted' &&
             responseType === 'acknowledge' && (
-              <div className="rounded-lg border bg-white p-6">
+              <div className="rounded-lg border bg-background p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -522,7 +522,7 @@ function AnnouncementDetailPage() {
             )}
 
           {announcement.status === 'posted' && responseType === 'yes-no' && (
-            <div className="rounded-lg border bg-white p-6">
+            <div className="rounded-lg border bg-background p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -566,7 +566,7 @@ function AnnouncementDetailPage() {
           )}
 
           {announcement.status === 'scheduled' && (
-            <div className="flex h-40 items-center justify-center rounded-lg border bg-white">
+            <div className="flex h-40 items-center justify-center rounded-lg border bg-background">
               <div className="flex flex-col items-center gap-2 text-center">
                 <CalendarClock className="h-8 w-8 text-blue-400" />
                 <p className="text-sm text-muted-foreground">
@@ -578,7 +578,7 @@ function AnnouncementDetailPage() {
           )}
 
           {announcement.status === 'posted' && totalCount > 0 && (
-            <div className="rounded-lg border bg-white p-6">
+            <div className="rounded-lg border bg-background p-6">
               <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {'Status'}
               </h2>
@@ -592,7 +592,7 @@ function AnnouncementDetailPage() {
           )}
 
           {announcement.status === 'draft' && (
-            <div className="flex h-40 items-center justify-center rounded-lg border bg-white">
+            <div className="flex h-40 items-center justify-center rounded-lg border bg-background">
               <p className="text-sm text-muted-foreground">
                 Send this announcement to start tracking read status.
               </p>
@@ -603,7 +603,7 @@ function AnnouncementDetailPage() {
         {/* ── Right: announcement content (1/3) ── */}
         <div className="space-y-4">
           {/* Post card */}
-          <div className="rounded-lg border bg-white p-6">
+          <div className="rounded-lg border bg-background p-6">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Post
             </h2>
@@ -935,7 +935,7 @@ function AnnouncementDetailPage() {
                   'w-full rounded-md border p-3.5 text-left transition-colors',
                   deleteMode === 'remove-from-list'
                     ? 'border-primary bg-primary/[0.04]'
-                    : 'border-border hover:bg-slate-50',
+                    : 'border-border hover:bg-muted',
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -969,7 +969,7 @@ function AnnouncementDetailPage() {
                   'w-full rounded-md border p-3.5 text-left transition-colors',
                   deleteMode === 'delete-for-everyone'
                     ? 'border-destructive bg-destructive/[0.04]'
-                    : 'border-border hover:bg-slate-50',
+                    : 'border-border hover:bg-muted',
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -1012,7 +1012,7 @@ function AnnouncementDetailPage() {
                   to confirm.
                 </p>
                 <Input
-                  placeholder="DELETE"
+                  placeholder=""
                   value={deleteConfirmText}
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
                   className="font-mono uppercase"

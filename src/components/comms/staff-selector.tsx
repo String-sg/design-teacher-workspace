@@ -17,6 +17,9 @@ interface StaffSelectorProps {
   value: Array<SelectedEntity>
   onChange: (staff: Array<SelectedEntity>) => void
   renderChipExtra?: (entity: SelectedEntity) => React.ReactNode
+  hideChips?: boolean
+  openOnFocus?: boolean
+  autoOpen?: boolean
 }
 
 /** "Sec 3A" → "3A", consistent with student class labels */
@@ -121,6 +124,9 @@ export function StaffSelector({
   value,
   onChange,
   renderChipExtra,
+  hideChips,
+  openOnFocus,
+  autoOpen,
 }: StaffSelectorProps) {
   return (
     <EntitySelector
@@ -132,7 +138,11 @@ export function StaffSelector({
       searchPlaceholder="Search staff…"
       noResultsText="No staff found"
       chipsBelow
+      maxVisibleTokens={2}
       renderChipExtra={renderChipExtra}
+      hideChips={hideChips}
+      openOnFocus={openOnFocus}
+      autoOpen={autoOpen}
     />
   )
 }

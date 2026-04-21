@@ -372,9 +372,9 @@ function ParentsGatewayPage() {
 
         {/* Table */}
         {tab === 'custom-forms' ? (
-          <div className="max-w-full overflow-x-auto bg-white">
+          <div className="max-w-full overflow-x-auto bg-background">
             {filteredForms.length === 0 ? (
-              <div className="py-16">
+              <div className="flex flex-col items-center py-16">
                 <EmptyState
                   title="No forms found"
                   description="Try adjusting your search, or create a new form."
@@ -382,7 +382,7 @@ function ParentsGatewayPage() {
               </div>
             ) : (
               <Table tableClassName="table-fixed w-full">
-                <TableHeader className="border-b bg-white">
+                <TableHeader className="border-b bg-background">
                   <TableRow className="border-0 hover:bg-transparent">
                     <TableHead className="w-[500px] pl-6">Title</TableHead>
                     <TableHead className="w-[110px]">Date</TableHead>
@@ -487,9 +487,9 @@ function ParentsGatewayPage() {
             )}
           </div>
         ) : (
-          <div className="max-w-full overflow-x-auto bg-white">
+          <div className="max-w-full overflow-x-auto bg-background">
             {filtered.length === 0 ? (
-              <div className="py-16">
+              <div className="flex flex-col items-center py-16">
                 <EmptyState
                   title="No posts found"
                   description="Try adjusting your search or filter, or create a new post."
@@ -497,7 +497,7 @@ function ParentsGatewayPage() {
               </div>
             ) : (
               <Table tableClassName="table-fixed w-full">
-                <TableHeader className="border-b bg-white">
+                <TableHeader className="border-b bg-background">
                   <TableRow className="border-0 hover:bg-transparent">
                     <TableHead className="w-[44px] pl-5">
                       <Checkbox
@@ -709,7 +709,7 @@ function ParentsGatewayPage() {
 
             {/* Floating selection action bar */}
             {selectedIds.size > 0 && tab !== 'custom-forms' && (
-              <div className="flex items-center gap-3 border-t bg-white px-6 py-3">
+              <div className="flex items-center gap-3 border-t bg-background px-6 py-3">
                 <span className="text-sm font-medium text-foreground">
                   {selectedIds.size} selected
                 </span>
@@ -786,7 +786,7 @@ function ParentsGatewayPage() {
                   'w-full rounded-md border p-3.5 text-left transition-colors',
                   deleteMode === 'remove-from-list'
                     ? 'border-primary bg-primary/[0.04]'
-                    : 'border-border hover:bg-slate-50',
+                    : 'border-border hover:bg-muted',
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -820,7 +820,7 @@ function ParentsGatewayPage() {
                   'w-full rounded-md border p-3.5 text-left transition-colors',
                   deleteMode === 'delete-for-everyone'
                     ? 'border-destructive bg-destructive/[0.04]'
-                    : 'border-border hover:bg-slate-50',
+                    : 'border-border hover:bg-muted',
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -862,7 +862,7 @@ function ParentsGatewayPage() {
                 to confirm.
               </p>
               <Input
-                placeholder="DELETE"
+                placeholder=""
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 className="font-mono uppercase"

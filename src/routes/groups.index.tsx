@@ -427,16 +427,16 @@ function GroupsIndex() {
   return (
     <div className="flex flex-col">
       {/* ── Page header (matches forms.tsx pattern) ───────────────────────── */}
-      <div className="border-b px-4 py-4">
+      <div className="border-b px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold md:text-2xl">Groups</h1>
+              <h1 className="text-2xl font-semibold">Groups</h1>
               <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-900">
                 Concept
               </span>
             </div>
-            <p className="mt-1 hidden text-sm text-muted-foreground md:block">
+            <p className="mt-1 text-sm text-muted-foreground">
               Organise students into reusable groups for announcements, forms,
               and reports.
             </p>
@@ -495,7 +495,7 @@ function GroupsIndex() {
 
         {/* ── My Groups table ─────────────────────────────────────────────── */}
         {tab === 'my-groups' && (
-          <div className="max-w-full overflow-x-auto bg-white">
+          <div className="max-w-full overflow-x-auto bg-background">
             {filteredCombinedGroups.length === 0 ? (
               <div className="flex flex-col items-center py-16">
                 <EmptyState
@@ -523,7 +523,7 @@ function GroupsIndex() {
               </div>
             ) : (
               <Table tableClassName="table-fixed w-full">
-                <TableHeader className="border-b bg-white">
+                <TableHeader className="border-b bg-background">
                   <TableRow className="border-0 hover:bg-transparent">
                     <TableHead className="pl-5 w-[44px]">
                       <Checkbox
@@ -768,7 +768,7 @@ function GroupsIndex() {
 
             {/* Selection action bar */}
             {selectedIds.size > 0 && (
-              <div className="flex items-center gap-3 border-t bg-white px-6 py-3">
+              <div className="flex items-center gap-3 border-t bg-background px-6 py-3">
                 <span className="text-sm font-medium text-foreground">
                   {selectedIds.size} selected
                 </span>
@@ -812,9 +812,9 @@ function GroupsIndex() {
               </Alert>
             </div>
 
-            <div className="max-w-full overflow-x-auto bg-white">
+            <div className="max-w-full overflow-x-auto bg-background">
               {filteredAssignedGroups.length === 0 ? (
-                <div className="py-16">
+                <div className="flex flex-col items-center py-16">
                   <EmptyState
                     title={
                       assignedSearch || typeFilter.size > 0
@@ -830,7 +830,7 @@ function GroupsIndex() {
                 </div>
               ) : (
                 <Table tableClassName="table-fixed w-full">
-                  <TableHeader className="border-b bg-white">
+                  <TableHeader className="border-b bg-background">
                     <TableRow className="border-0 hover:bg-transparent">
                       <TableHead className="pl-6">Name</TableHead>
                       <TableHead className="w-24">Students</TableHead>
@@ -910,7 +910,7 @@ function GroupsIndex() {
                   'w-full rounded-md border p-3.5 text-left transition-colors',
                   deleteMode === 'delete-for-self'
                     ? 'border-primary bg-primary/[0.04]'
-                    : 'border-border hover:bg-slate-50',
+                    : 'border-border hover:bg-muted',
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -944,7 +944,7 @@ function GroupsIndex() {
                   'w-full rounded-md border p-3.5 text-left transition-colors',
                   deleteMode === 'delete-for-everyone'
                     ? 'border-destructive bg-destructive/[0.04]'
-                    : 'border-border hover:bg-slate-50',
+                    : 'border-border hover:bg-muted',
                 )}
               >
                 <div className="flex items-start gap-3">
