@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Link,
   createFileRoute,
@@ -7,7 +7,6 @@ import {
 } from '@tanstack/react-router'
 import {
   ArrowLeft,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -21,13 +20,15 @@ import {
   Trash2,
   UserMinus,
   UserPlus,
-  X,
 } from 'lucide-react'
 
 import type { GroupSharedWith, StudentGroup } from '@/types/student-group'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { MOCK_GROUPS, getGroupById } from '@/data/mock-groups'
 import { MOCK_STAFF, MOCK_STAFF_GROUPS } from '@/data/mock-staff'
+import { StaffSelector } from '@/components/comms/staff-selector'
+import type { SelectedEntity } from '@/components/comms/entity-selector'
+import { stripSalutation } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -121,251 +122,91 @@ function SharingDialog({
     sharedWith: Array<GroupSharedWith>,
   ) => void
 }) {
-  const [sharedWith, setSharedWith] = useState<Array<GroupSharedWith>>(
-    group.sharedWith,
+  // Seed StaffSelector value from existing sharedWith entries
+  const [selectedStaff, setSelectedStaff] = useState<Array<SelectedEntity>>(
+    () =>
+      group.sharedWith.map((sw) => ({
+        id: sw.staffId,
+        label: stripSalutation(sw.name),
+        type: 'individual' as const,
+        count: 1,
+      })),
   )
-  const [query, setQuery] = useState('')
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null)
-  const wrapperRef = useRef<HTMLDivElement>(null)
 
-  // Filter results for the dropdown
-  const { dropGroups, dropIndividuals } = useMemo(() => {
-    const q = query.toLowerCase().trim()
-    const alreadyIds = new Set(sharedWith.map((sw) => sw.staffId))
+  // Role overrides per staffId — defaults to 'viewer' for newly added people
+  const [staffRoles, setStaffRoles] = useState<
+    Record<string, 'viewer' | 'editor'>
+  >(() =>
+    Object.fromEntries(group.sharedWith.map((sw) => [sw.staffId, sw.role])),
+  )
 
-    const matchedGroups = MOCK_STAFF_GROUPS.filter(
-      (g) => !q || g.label.toLowerCase().includes(q),
-    )
-
-    const matchedIndividuals = q
-      ? MOCK_STAFF.filter((s) => {
-          if (alreadyIds.has(s.id)) return false
-          if (matchedGroups.some((g) => g.memberIds.includes(s.id)))
-            return false
-          const fc = (s.formClass ?? '').toLowerCase()
-          return (
-            s.name.toLowerCase().includes(q) ||
-            s.email.toLowerCase().includes(q) ||
-            fc.includes(q)
-          )
-        })
-      : []
-
-    return { dropGroups: matchedGroups, dropIndividuals: matchedIndividuals }
-  }, [query, sharedWith])
-
-  function addStaff(staffId: string) {
-    const staff = MOCK_STAFF.find((s) => s.id === staffId)
-    if (!staff || sharedWith.some((sw) => sw.staffId === staffId)) return
-    setSharedWith((prev) => [
-      ...prev,
-      {
-        staffId: staff.id,
-        name: staff.name,
-        email: staff.email,
-        role: 'viewer',
-      },
-    ])
-  }
+  // Expand the selectedStaff entities (groups → individual staff IDs)
+  const expandedStaffIds = useMemo<Array<string>>(() => {
+    const ids: string[] = []
+    const seen = new Set<string>()
+    for (const entity of selectedStaff) {
+      if (entity.type === 'individual') {
+        if (!seen.has(entity.id)) {
+          seen.add(entity.id)
+          ids.push(entity.id)
+        }
+      } else {
+        // Group — find and expand, respecting exclusions
+        const grp = MOCK_STAFF_GROUPS.find((g) => g.id === entity.id)
+        if (!grp) continue
+        const excluded = new Set(entity.excludedMemberNames ?? [])
+        for (const memberId of grp.memberIds) {
+          const member = MOCK_STAFF.find((s) => s.id === memberId)
+          if (!member) continue
+          const memberName = stripSalutation(member.name)
+          if (!excluded.has(memberName) && !seen.has(memberId)) {
+            seen.add(memberId)
+            ids.push(memberId)
+          }
+        }
+      }
+    }
+    return ids
+  }, [selectedStaff])
 
   function updateRole(staffId: string, role: 'viewer' | 'editor') {
-    setSharedWith((prev) =>
-      prev.map((sw) => (sw.staffId === staffId ? { ...sw, role } : sw)),
-    )
+    setStaffRoles((prev) => ({ ...prev, [staffId]: role }))
   }
 
-  function removeStaff(staffId: string) {
-    setSharedWith((prev) => prev.filter((sw) => sw.staffId !== staffId))
-  }
-
-  // Render a group row (used in dropdown for both search and browse)
-  function renderGroupRow(grp: (typeof MOCK_STAFF_GROUPS)[0]) {
-    const isExpanded = expandedGroupId === grp.id
-    const members = grp.memberIds
-      .map((id) => MOCK_STAFF.find((s) => s.id === id))
-      .filter(Boolean) as typeof MOCK_STAFF
-    const addedCount = members.filter((s) =>
-      sharedWith.some((sw) => sw.staffId === s.id),
-    ).length
-
-    return (
-      <div key={grp.id}>
-        <div className="flex items-center">
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => members.forEach((s) => addStaff(s.id))}
-            className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2 text-left hover:bg-slate-50 transition-colors"
-          >
-            <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
-              {grp.label.slice(0, 2).toUpperCase()}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{grp.label}</p>
-              <p className="text-xs text-muted-foreground">
-                {addedCount > 0
-                  ? `${addedCount}/${members.length} added`
-                  : `${members.length} member${members.length !== 1 ? 's' : ''}`}
-              </p>
-            </div>
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() =>
-              setExpandedGroupId((prev) => (prev === grp.id ? null : grp.id))
-            }
-            className="flex shrink-0 items-center px-2.5 py-2 hover:bg-slate-50 transition-colors"
-            aria-label={isExpanded ? 'Collapse' : 'Expand'}
-          >
-            <ChevronDown
-              className={cn(
-                'size-3.5 text-muted-foreground transition-transform duration-150',
-                isExpanded && 'rotate-180',
-              )}
-            />
-          </button>
-        </div>
-        {isExpanded && (
-          <div className="border-y border-slate-100 bg-slate-50/70 px-4 pb-2 pt-1.5">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {members.length} member{members.length !== 1 ? 's' : ''}
-            </p>
-            {members.map((s) => {
-              const alreadyAdded = sharedWith.some((sw) => sw.staffId === s.id)
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => addStaff(s.id)}
-                  disabled={alreadyAdded}
-                  className="flex w-full items-center gap-2 rounded px-1.5 py-1.5 text-left text-xs hover:bg-blue-50 disabled:opacity-40 disabled:cursor-default transition-colors"
-                >
-                  <StaffAvatar name={s.name} size={6} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium text-slate-700">
-                      {s.name}
-                    </span>
-                    <span className="block truncate text-muted-foreground">
-                      {[s.formClass && `Form ${s.formClass}`, s.email]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </span>
-                  </span>
-                  {alreadyAdded && (
-                    <span className="shrink-0 text-[10px] text-muted-foreground">
-                      Added
-                    </span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        )}
-      </div>
-    )
-  }
+  // Derive final sharedWith for saving
+  const derivedSharedWith: Array<GroupSharedWith> = expandedStaffIds.flatMap(
+    (staffId) => {
+      const s = MOCK_STAFF.find((m) => m.id === staffId)
+      if (!s) return []
+      return [
+        {
+          staffId: s.id,
+          name: s.name,
+          email: s.email,
+          role: staffRoles[s.id] ?? 'viewer',
+        },
+      ]
+    },
+  )
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[80vh] max-w-md flex-col gap-0 p-0">
+      <DialogContent className="flex max-h-[85vh] max-w-md flex-col gap-0 p-0">
         <DialogHeader className="border-b px-5 py-4">
           <DialogTitle>Share this group</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-1 flex-col overflow-hidden">
-          {/* Search with dropdown */}
-          <div ref={wrapperRef} className="relative px-5 pt-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-              <Input
-                placeholder="Search by name, email or group…"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value)
-                  setDropdownOpen(true)
-                }}
-                onFocus={() => setDropdownOpen(true)}
-                onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
-                className="pl-9 h-9"
-                autoComplete="off"
-              />
-              {query && (
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    setQuery('')
-                    setExpandedGroupId(null)
-                  }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="size-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Dropdown panel */}
-            {dropdownOpen && (
-              <div className="absolute left-5 right-5 top-[calc(100%+4px)] z-50 max-h-56 overflow-y-auto rounded-md border bg-background shadow-lg">
-                {dropGroups.length === 0 && dropIndividuals.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-muted-foreground">
-                    No staff found
-                  </p>
-                ) : (
-                  <>
-                    {dropGroups.length > 0 && (
-                      <>
-                        <p className="px-3 pb-0.5 pt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                          Groups
-                        </p>
-                        {dropGroups.map(renderGroupRow)}
-                      </>
-                    )}
-                    {dropGroups.length > 0 && dropIndividuals.length > 0 && (
-                      <div className="mx-3 border-t" />
-                    )}
-                    {dropIndividuals.length > 0 && (
-                      <>
-                        <p className="px-3 pb-0.5 pt-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                          Individuals
-                        </p>
-                        {dropIndividuals.map((s) => (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={() => addStaff(s.id)}
-                            className="flex w-full items-center gap-2.5 px-3 py-2 text-left hover:bg-slate-50 transition-colors"
-                          >
-                            <StaffAvatar name={s.name} size={7} />
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-medium">
-                                {s.name}
-                              </p>
-                              <p className="truncate text-xs text-muted-foreground">
-                                {[s.formClass && `Form ${s.formClass}`, s.email]
-                                  .filter(Boolean)
-                                  .join(' · ')}
-                              </p>
-                            </div>
-                          </button>
-                        ))}
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
+        <div className="flex flex-1 flex-col overflow-y-auto">
+          {/* Staff selector — same component as new post staff-in-charge */}
+          <div className="px-5 pt-4">
+            <StaffSelector value={selectedStaff} onChange={setSelectedStaff} />
           </div>
 
-          {/* People with access */}
-          <div className="flex-1 overflow-y-auto px-5 pb-2 pt-4">
-            {sharedWith.length === 0 ? (
+          {/* People with access — role management for each expanded individual */}
+          <div className="px-5 pb-4 pt-4">
+            {expandedStaffIds.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No one else has access yet. Search above to add people.
+                No one added yet. Search above to add people.
               </p>
             ) : (
               <>
@@ -373,7 +214,7 @@ function SharingDialog({
                   People with access
                 </p>
                 <div className="space-y-0.5">
-                  {sharedWith.map((sw) => {
+                  {derivedSharedWith.map((sw) => {
                     const staffMeta = MOCK_STAFF.find(
                       (s) => s.id === sw.staffId,
                     )
@@ -411,14 +252,6 @@ function SharingDialog({
                             <SelectItem value="editor">Editor</SelectItem>
                           </SelectContent>
                         </Select>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-7 shrink-0 text-muted-foreground hover:text-destructive"
-                          onClick={() => removeStaff(sw.staffId)}
-                        >
-                          <X className="size-3.5" />
-                        </Button>
                       </div>
                     )
                   })}
@@ -434,7 +267,7 @@ function SharingDialog({
           </Button>
           <Button
             onClick={() => {
-              onSave(group.visibility, sharedWith)
+              onSave(group.visibility, derivedSharedWith)
               onOpenChange(false)
             }}
           >
