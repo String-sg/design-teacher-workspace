@@ -54,6 +54,10 @@ interface StudentTableProps {
   onConfigureSubjects?: () => void
   /** When true, show "..." in Overall % cells while recalculating */
   isRecalculating?: boolean
+  /** Called when user confirms deletion of an imported column */
+  onDeleteColumn?: (columnId: string) => void
+  /** Field to group rows by */
+  groupBy?: string | null
 }
 
 const tagVariantMap: Record<AttentionTag, 'default' | 'secondary' | 'outline'> =
@@ -104,6 +108,8 @@ export function StudentTable({
   selectedSubjects,
   onConfigureSubjects,
   isRecalculating,
+  onDeleteColumn,
+  groupBy,
 }: StudentTableProps) {
   const navigate = useNavigate()
   const { isEnabled } = useFeatureFlags()
@@ -600,9 +606,25 @@ export function StudentTable({
           onClearSort={onClearSort}
           onAddQuickFilter={onAddQuickFilter}
           onClearFilter={onClearFilter}
-          className="min-w-[110px] pr-6"
+          className="min-w-[110px]"
         />
       )}
+      {columns
+        .filter((c) => c.imported && c.visible)
+        .map((col) => (
+          <ColumnHeaderMenu
+            key={col.id}
+            column={col}
+            currentSort={sort}
+            activeFilterFields={activeFilterFields}
+            onSort={onSort}
+            onClearSort={onClearSort}
+            onAddQuickFilter={onAddQuickFilter}
+            onClearFilter={onClearFilter}
+            className="min-w-[130px] pr-6"
+            onDelete={onDeleteColumn ? () => onDeleteColumn(col.id) : undefined}
+          />
+        ))}
     </TableRow>
   )
 
@@ -615,7 +637,7 @@ export function StudentTable({
       <div
         ref={stickyHeaderRef}
         className={cn(
-          'sticky top-0 z-50 overflow-x-auto bg-white',
+          'sticky top-0 z-30 overflow-x-auto bg-white',
           isHeaderVisible ? 'invisible h-0 overflow-hidden' : 'shadow-md',
         )}
         style={{ scrollbarWidth: 'none' }}
@@ -639,8 +661,26 @@ export function StudentTable({
           </TableHeader>
           <TableBody>
             {paginatedStudents.map((student, index) => {
+              const groupValue = groupBy
+                ? String(student[groupBy as keyof typeof student] ?? '—')
+                : null
+              const prevGroupValue =
+                groupBy && index > 0
+                  ? String(paginatedStudents[index - 1][groupBy as keyof typeof paginatedStudents[0]] ?? '—')
+                  : null
+              const showGroupHeader = groupBy && groupValue !== prevGroupValue
               return (
                 <React.Fragment key={student.id}>
+                  {showGroupHeader && (
+                    <TableRow className="hover:bg-transparent border-0">
+                      <TableCell
+                        colSpan={99}
+                        className="bg-muted/40 px-6 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                      >
+                        {groupValue}
+                      </TableCell>
+                    </TableRow>
+                  )}
                   <TableRow
                     className="group cursor-pointer hover:bg-muted/50"
                     onClick={() =>
@@ -846,8 +886,15 @@ export function StudentTable({
                       </TableCell>
                     )}
                     {isVisible('siblings') && (
-                      <TableCell className="pr-6">{student.siblings}</TableCell>
+                      <TableCell>{student.siblings}</TableCell>
                     )}
+                    {columns
+                      .filter((c) => c.imported && c.visible)
+                      .map((col) => (
+                        <TableCell key={col.id} className="pr-6 text-muted-foreground">
+                          —
+                        </TableCell>
+                      ))}
                   </TableRow>
                 </React.Fragment>
               )

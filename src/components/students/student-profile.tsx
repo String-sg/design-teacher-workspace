@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
   BookOpen,
@@ -11,6 +11,7 @@ import {
   Home,
   Info,
   Languages,
+  LayoutGrid,
   PanelRight,
   Phone,
   Plus,
@@ -24,6 +25,7 @@ import { AttendanceAnalytics } from './attendance-analytics'
 import type { Student } from '@/types/student'
 import type { HolisticReport, ReviewStatus, Term } from '@/types/report'
 import { useFeatureFlag } from '@/hooks/use-feature-flag'
+import { getImportedColumns } from '@/lib/imported-columns'
 import {
   TERMS,
   filterReports,
@@ -282,6 +284,7 @@ export function StudentProfile({
   const { isEnabled } = useFeatureFlags()
 
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
+  const importedColumns = useMemo(() => getImportedColumns(), [])
 
   const gradeCounts = getStudentGradeCounts(student)
   const studentReports = filterReports({ studentId: student.id })
@@ -296,6 +299,7 @@ export function StudentProfile({
     { id: 'family', label: 'Family' },
     { id: 'personal', label: 'Personal' },
     ...(holisticReportsEnabled ? [{ id: 'reports', label: 'Reports' }] : []),
+    ...(importedColumns.length > 0 ? [{ id: 'others', label: 'Others' }] : []),
   ]
 
   return (
@@ -1114,6 +1118,26 @@ export function StudentProfile({
                 </Button>
               </div>
             )}
+          </Section>
+        )}
+        {/* Others Section — imported fields */}
+        {importedColumns.length > 0 && (
+          <Section
+            id="others"
+            title="Others"
+            icon={<LayoutGrid className="h-5 w-5" />}
+            iconClassName="bg-slate-100 text-slate-600"
+          >
+            <dl className="grid grid-cols-3 gap-x-8 gap-y-6">
+              {importedColumns.map((col) => (
+                <div key={col.id} className="flex flex-col gap-1">
+                  <dt className="text-sm font-semibold">{col.label}</dt>
+                  <dd className="text-sm text-muted-foreground">
+                    Field that is uploaded without category tag to it
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </Section>
         )}
       </div>

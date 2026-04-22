@@ -20,6 +20,7 @@ import { defaultColumns } from '@/components/students/column-visibility-popover'
 import { SubjectSelectorDialog, ALL_SUBJECTS } from '@/components/students/subject-selector-dialog'
 
 import { getMetrics, mockStudents } from '@/data/mock-students'
+import { getImportedColumns, saveImportedColumns } from '@/lib/imported-columns'
 
 const SUBJECT_SELECTION_KEY = 'overall-pct-subjects'
 
@@ -77,6 +78,16 @@ function matchesCondition(
   filter: FilterCriterion,
   selectedSubjects?: Array<string> | null,
 ): boolean {
+  // Imported/custom fields have no student data — skip filter (show all)
+  const knownFields = new Set<string>([
+    'class','cca','overallPercentage','conduct','approvedMtl','learningSupport',
+    'postSecEligibility','offences','absences','lateComing','ccaMissed',
+    'riskIndicators','lowMoodFlagged','socialLinks','counsellingSessions','sen',
+    'fas','housing','housingType','custody','commuterStatus',
+    'afterSchoolArrangement','siblings','externalAgencies',
+  ])
+  if (!knownFields.has(filter.field)) return true
+
   // For overallPercentage, use the computed value based on selected subjects
   const value =
     filter.field === 'overallPercentage'
@@ -138,7 +149,28 @@ function StudentsPage() {
   const [selectedClass, setSelectedClass] = useState('Secondary 3')
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<Array<FilterCriterion>>([])
-  const [columns, setColumns] = useState<Array<ColumnConfig>>(defaultColumns)
+  const [columns, setColumns] = useState<Array<ColumnConfig>>(() => {
+    const saved = getImportedColumns()
+    if (saved.length === 0) return defaultColumns
+    const now = new Date()
+    const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    const restoredImported: Array<ColumnConfig> = saved.map((c) => ({
+      id: c.id,
+      label: c.label,
+      visible: true,
+      sortable: true,
+      imported: true,
+      source: 'Imported by user',
+      lastUpdated: `${dateStr} by You`,
+    }))
+    return [
+      ...defaultColumns.filter((c) => !restoredImported.some((ic) => ic.id === c.id)),
+      ...restoredImported,
+    ]
+  })
+  const [groupBy, setGroupBy] = useState<string | null>(null)
+
+  const importedColumns = columns.filter((c) => c.imported)
   const [sort, setSort] = useState<SortConfig | null>(null)
   const [selectedSubjects, setSelectedSubjects] =
     useState<Array<string> | null>(() => loadSelectedSubjects())
@@ -344,6 +376,16 @@ function StudentsPage() {
           onFiltersChange={setFilters}
           columns={columns}
           onColumnsChange={setColumns}
+          importedColumns={importedColumns.map((c) => ({ id: c.id, label: c.label }))}
+          groupBy={groupBy}
+          onGroupChange={studentAnalyticsEnabled ? setGroupBy : undefined}
+          onImportComplete={(importedColumns) => {
+            setColumns((prev) => [
+              ...prev.filter((c) => !importedColumns.some((ic) => ic.id === c.id)),
+              ...importedColumns,
+            ])
+            saveImportedColumns(importedColumns.map((c) => ({ id: c.id, label: c.label })))
+          }}
           matchedCount={hasActiveFilters ? matchedIds.size : undefined}
           totalCount={hasActiveFilters ? classStudents.length : undefined}
           className="px-6 pb-4"
@@ -366,6 +408,10 @@ function StudentsPage() {
         selectedSubjects={selectedSubjects}
         onConfigureSubjects={() => setSubjectDialogOpen(true)}
         isRecalculating={isRecalculating}
+        onDeleteColumn={(columnId) =>
+          setColumns((prev) => prev.filter((c) => c.id !== columnId))
+        }
+        groupBy={groupBy}
       />
 
       <SubjectSelectorDialog
