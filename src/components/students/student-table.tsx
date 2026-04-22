@@ -56,8 +56,6 @@ interface StudentTableProps {
   isRecalculating?: boolean
   /** Called when user confirms deletion of an imported column */
   onDeleteColumn?: (columnId: string) => void
-  /** Field to group rows by */
-  groupBy?: string | null
 }
 
 const tagVariantMap: Record<AttentionTag, 'default' | 'secondary' | 'outline'> =
@@ -109,7 +107,6 @@ export function StudentTable({
   onConfigureSubjects,
   isRecalculating,
   onDeleteColumn,
-  groupBy,
 }: StudentTableProps) {
   const navigate = useNavigate()
   const { isEnabled } = useFeatureFlags()
@@ -661,26 +658,8 @@ export function StudentTable({
           </TableHeader>
           <TableBody>
             {paginatedStudents.map((student, index) => {
-              const groupValue = groupBy
-                ? String(student[groupBy as keyof typeof student] ?? '—')
-                : null
-              const prevGroupValue =
-                groupBy && index > 0
-                  ? String(paginatedStudents[index - 1][groupBy as keyof typeof paginatedStudents[0]] ?? '—')
-                  : null
-              const showGroupHeader = groupBy && groupValue !== prevGroupValue
               return (
                 <React.Fragment key={student.id}>
-                  {showGroupHeader && (
-                    <TableRow className="hover:bg-transparent border-0">
-                      <TableCell
-                        colSpan={99}
-                        className="bg-muted/40 px-6 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                      >
-                        {groupValue}
-                      </TableCell>
-                    </TableRow>
-                  )}
                   <TableRow
                     className="group cursor-pointer hover:bg-muted/50"
                     onClick={() =>

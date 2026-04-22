@@ -168,8 +168,6 @@ function StudentsPage() {
       ...restoredImported,
     ]
   })
-  const [groupBy, setGroupBy] = useState<string | null>(null)
-
   const importedColumns = columns.filter((c) => c.imported)
   const [sort, setSort] = useState<SortConfig | null>(null)
   const [selectedSubjects, setSelectedSubjects] =
@@ -377,8 +375,6 @@ function StudentsPage() {
           columns={columns}
           onColumnsChange={setColumns}
           importedColumns={importedColumns.map((c) => ({ id: c.id, label: c.label }))}
-          groupBy={groupBy}
-          onGroupChange={studentAnalyticsEnabled ? setGroupBy : undefined}
           onImportComplete={(importedColumns) => {
             setColumns((prev) => [
               ...prev.filter((c) => !importedColumns.some((ic) => ic.id === c.id)),
@@ -411,7 +407,6 @@ function StudentsPage() {
         onDeleteColumn={(columnId) =>
           setColumns((prev) => prev.filter((c) => c.id !== columnId))
         }
-        groupBy={groupBy}
       />
 
       <SubjectSelectorDialog
