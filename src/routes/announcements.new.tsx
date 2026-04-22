@@ -55,13 +55,8 @@ import { PG_SHORTCUT_PRESETS } from '@/data/pg-shortcuts'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Popover, PopoverContent } from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn, stripSalutation } from '@/lib/utils'
 import {
   clearDraft,
@@ -916,15 +911,12 @@ interface MissingField {
 }
 
 function getMissingFields(
-  sendOption: SendOption,
   title: string,
   description: string,
   recipients: Array<SelectedEntity>,
   enquiryEmail: string,
   responseType: string,
   dueDate: string,
-  scheduledDate: string,
-  scheduledTime: string,
 ): Array<MissingField> {
   const missing: Array<MissingField> = []
   if (!title.trim()) missing.push({ field: 'Title', hint: 'Add a title' })
@@ -936,11 +928,6 @@ function getMissingFields(
     missing.push({ field: 'Enquiry email', hint: 'Select an enquiry email' })
   if (responseType !== 'view-only' && !dueDate)
     missing.push({ field: 'Due date', hint: 'Set a due date for responses' })
-  if (sendOption === 'scheduled' && (!scheduledDate || !scheduledTime))
-    missing.push({
-      field: 'Send date & time',
-      hint: 'Choose when to send this post',
-    })
   return missing
 }
 
@@ -1444,20 +1431,23 @@ function NewAnnouncementPage() {
     canPost && scheduledDate.length > 0 && scheduledTime.length > 0
   const canSubmit = sendOption === 'scheduled' ? canSchedule : canPost
   const missingFields = getMissingFields(
-    sendOption,
     title,
     description,
     recipients,
     enquiryEmail,
     responseType,
     dueDate,
-    scheduledDate,
-    scheduledTime,
   )
 
   // Validation popover state
   const [showValidationPopover, setShowValidationPopover] = useState(false)
   const postBtnWrapRef = useRef<HTMLDivElement>(null)
+
+  // Schedule popover state
+  const [showSchedulePopover, setShowSchedulePopover] = useState(false)
+  const [selectedScheduleDate, setSelectedScheduleDate] = useState<
+    Date | undefined
+  >(undefined)
 
   // Auto-close validation popover once all required fields are filled
   useEffect(() => {
@@ -1466,11 +1456,28 @@ function NewAnnouncementPage() {
 
   // Open validation popover when user clicks disabled Post button
   function handlePostClick() {
-    if (!canSubmit) {
+    if (!canPost) {
       setShowValidationPopover(true)
       return
     }
+    setSendOption('now')
     setShowValidationPopover(false)
+    setShowConfirmSheet(true)
+  }
+
+  // Confirm schedule: validate form, set scheduled date, open confirmation sheet
+  function handleScheduleConfirm() {
+    if (!selectedScheduleDate) return
+    if (!canPost) {
+      setShowSchedulePopover(false)
+      setShowValidationPopover(true)
+      return
+    }
+    const d = selectedScheduleDate
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    setScheduledDate(dateStr)
+    setSendOption('scheduled')
+    setShowSchedulePopover(false)
     setShowConfirmSheet(true)
   }
 
@@ -1712,8 +1719,8 @@ function NewAnnouncementPage() {
             )}
           </Button>
 
-          {/* Split button + validation hint */}
-          <div className="flex flex-col items-end gap-1">
+          {/* Action buttons */}
+          <div ref={postBtnWrapRef} className="flex items-center gap-2">
             {isEditingPosted ? (
               /* Posted edit: single "Save changes" button, no schedule option */
               <Button size="sm" onClick={handleSavePostedEdit}>
@@ -1721,136 +1728,95 @@ function NewAnnouncementPage() {
                 Save changes
               </Button>
             ) : (
-              <Popover
-                open={showValidationPopover}
-                onOpenChange={setShowValidationPopover}
-              >
-                <div
-                  ref={postBtnWrapRef}
-                  className="flex overflow-hidden rounded-md"
+              <>
+                {/* Post button with validation popover */}
+                <Popover
+                  open={showValidationPopover}
+                  onOpenChange={setShowValidationPopover}
                 >
                   <Button
                     size="sm"
-                    className={cn(
-                      'rounded-r-none',
-                      !canSubmit && 'cursor-not-allowed opacity-50',
-                    )}
                     onClick={handlePostClick}
                   >
-                    {sendOption === 'scheduled' ? (
-                      <>
+                    <Send className="mr-2 h-3.5 w-3.5" />
+                    Post
+                  </Button>
+                  {/* Validation popover — shown when Post is clicked but form is incomplete */}
+                  <PopoverContent
+                    anchor={postBtnWrapRef}
+                    side="bottom"
+                    align="end"
+                    className="w-64 gap-2 p-3"
+                  >
+                    <p className="text-sm font-medium text-slate-800">
+                      Complete these fields before posting
+                    </p>
+                    <ul className="mt-1.5 space-y-1">
+                      {missingFields.map((f) => (
+                        <li
+                          key={f.field}
+                          className="flex items-start gap-1.5 text-xs text-slate-600"
+                        >
+                          <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-destructive" />
+                          {f.hint}
+                        </li>
+                      ))}
+                    </ul>
+                  </PopoverContent>
+                </Popover>
+
+                {/* Schedule button with calendar popover */}
+                <Popover
+                  open={showSchedulePopover}
+                  onOpenChange={setShowSchedulePopover}
+                >
+                  <PopoverTrigger
+                    render={
+                      <Button size="sm" variant="outline">
                         <CalendarClock className="mr-2 h-3.5 w-3.5" />
                         Schedule
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-3.5 w-3.5" />
-                        Post
-                      </>
-                    )}
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <Button
-                          size="sm"
-                          className={cn(
-                            'rounded-l-none border-l border-primary-foreground/25 px-2',
-                            !canSubmit && 'cursor-not-allowed opacity-50',
-                          )}
-                          aria-label="Choose send option"
+                      </Button>
+                    }
+                  />
+                  <PopoverContent
+                    side="bottom"
+                    align="end"
+                    className="w-auto overflow-hidden p-0"
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={selectedScheduleDate}
+                      onSelect={setSelectedScheduleDate}
+                      disabled={{ before: new Date() }}
+                      initialFocus
+                    />
+                    <div className="flex items-center gap-3 border-t px-4 py-3">
+                      <div className="flex flex-1 items-center gap-2">
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          Time
+                        </span>
+                        <input
+                          type="time"
+                          value={scheduledTime}
+                          onChange={(e) => setScheduledTime(e.target.value)}
+                          className="flex-1 rounded-md border border-input bg-background px-2.5 py-1 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
                         />
-                      }
-                    >
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem onClick={() => setSendOption('now')}>
-                        <Send className="h-4 w-4" />
-                        Post now
-                        {sendOption === 'now' && (
-                          <Check className="ml-auto h-3.5 w-3.5 text-primary" />
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setSendOption('scheduled')}
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={handleScheduleConfirm}
+                        disabled={!selectedScheduleDate}
                       >
-                        <CalendarClock className="h-4 w-4" />
-                        Schedule for later
-                        {sendOption === 'scheduled' && (
-                          <Check className="ml-auto h-3.5 w-3.5 text-primary" />
-                        )}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                {/* Validation popover — shown when Post is clicked but form is incomplete */}
-                <PopoverContent
-                  anchor={postBtnWrapRef}
-                  side="bottom"
-                  align="end"
-                  className="w-64 gap-2 p-3"
-                >
-                  <p className="text-sm font-medium text-slate-800">
-                    Complete these fields before posting
-                  </p>
-                  <ul className="mt-1.5 space-y-1">
-                    {missingFields.map((f) => (
-                      <li
-                        key={f.field}
-                        className="flex items-start gap-1.5 text-xs text-slate-600"
-                      >
-                        <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-destructive" />
-                        {f.hint}
-                      </li>
-                    ))}
-                  </ul>
-                </PopoverContent>
-              </Popover>
+                        Confirm
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </>
             )}
           </div>
         </div>
 
-        {/* Scheduling strip — hidden when editing a posted post */}
-        {!isEditingPosted && sendOption === 'scheduled' && (
-          <div className="flex items-center gap-3 border-b bg-blue-50 px-6 py-2">
-            <CalendarClock className="h-4 w-4 shrink-0 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Send on</span>
-            <input
-              type="date"
-              value={scheduledDate}
-              min={new Date().toISOString().split('T')[0]}
-              onChange={(e) => setScheduledDate(e.target.value)}
-              className="rounded-md border border-blue-200 bg-white px-2.5 py-1 text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-300"
-            />
-            <span className="text-sm text-blue-600">at</span>
-            <input
-              type="time"
-              value={scheduledTime}
-              onChange={(e) => setScheduledTime(e.target.value)}
-              className="rounded-md border border-blue-200 bg-white px-2.5 py-1 text-sm text-foreground outline-none focus:ring-2 focus:ring-blue-300"
-            />
-            <div className="ml-auto flex items-center gap-3">
-              <Button
-                size="sm"
-                onClick={() => setShowConfirmSheet(true)}
-                disabled={!canSchedule}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-              >
-                <CalendarClock className="mr-1.5 h-3.5 w-3.5" />
-                Schedule
-              </Button>
-              <button
-                type="button"
-                onClick={() => setSendOption('now')}
-                className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700"
-              >
-                <X className="h-3 w-3" />
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Form body */}
