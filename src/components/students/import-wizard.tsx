@@ -55,6 +55,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import type { ColumnConfig } from './column-visibility-popover'
 
 // ─── Mock data ──────────────────────────────────────────────────────────────
 
@@ -225,7 +226,7 @@ function WizardStepper({ current }: { current: number }) {
               </div>
               <span
                 className={cn(
-                  'text-sm',
+                  'hidden text-sm min-[562px]:inline',
                   (isActive || isCompleted) && 'text-[var(--color-slate-12,#1c2024)]',
                   isDimmed && 'text-[var(--btn-color-foreground-disabled,#b9bbc6)]',
                 )}
@@ -234,7 +235,7 @@ function WizardStepper({ current }: { current: number }) {
               </span>
             </div>
             {i < WIZARD_STEPS.length - 1 && (
-              <Separator className="mx-3 data-[orientation=horizontal]:w-[24px]" />
+              <Separator className="mx-2 data-[orientation=horizontal]:w-[16px] min-[562px]:mx-3 min-[562px]:data-[orientation=horizontal]:w-[24px]" />
             )}
           </React.Fragment>
         )
@@ -247,8 +248,10 @@ function WizardStepper({ current }: { current: number }) {
 
 function DropZone({
   onFileAccepted,
+  className,
 }: {
   onFileAccepted: (file: File) => void
+  className?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -271,6 +274,7 @@ function DropZone({
       onClick={() => inputRef.current?.click()}
       className={cn(
         'flex h-full min-h-[320px] w-full cursor-pointer flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed transition-colors',
+        className,
         isDragging
           ? 'border-blue-400 bg-blue-100/60'
           : 'border-blue-300 bg-blue-50/60 hover:border-blue-400 hover:bg-blue-50',
@@ -324,9 +328,9 @@ function Step1({
         </p>
       </div>
 
-      <div className="flex flex-1 gap-6 px-8 pb-8">
-        {/* Left panel */}
-        <div className="flex w-[340px] shrink-0 flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-6 px-8 pb-8 sm:flex-row">
+        {/* Left panel — second on mobile, first on desktop */}
+        <div className="order-2 flex shrink-0 flex-col gap-4 sm:order-1 sm:w-[340px]">
           {hasError && (
             <Alert className="rounded-3xl border-[var(--slate-6)] bg-white [&>svg]:text-[var(--crimson-11)]">
               <AlertCircle className="h-4 w-4" />
@@ -445,9 +449,12 @@ function Step1({
           </div>
         </div>
 
-        {/* Right panel */}
-        <div className="flex flex-1 flex-col">
-          <DropZone onFileAccepted={onFileAccepted} />
+        {/* Right panel — first on mobile (above left), second on desktop */}
+        <div className="order-1 flex flex-1 flex-col sm:order-2 py-3 sm:py-0">
+          <DropZone
+            onFileAccepted={onFileAccepted}
+            className="min-h-0 h-[132px] sm:h-full sm:min-h-[320px]"
+          />
         </div>
       </div>
     </div>
@@ -476,9 +483,9 @@ function Step2({
           <Badge variant="outline" className="mt-6 border-transparent bg-[var(--color-slate-3)] text-[var(--color-slate-11)] text-sm">1023 records, 5 columns</Badge>
         </div>
 
-        <div className="flex items-start gap-4 px-8 pb-6">
-          {/* Table — horizontal scroll only, shows all 10 rows */}
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex flex-col gap-4 px-8 pb-6 sm:flex-row sm:items-start">
+          {/* Table — second on mobile, first on desktop */}
+          <div className="order-2 flex min-w-0 flex-1 flex-col gap-2 sm:order-1">
             <div className="overflow-hidden rounded-2xl border bg-white">
               <div className="overflow-x-auto [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:border-t [&::-webkit-scrollbar]:border-[var(--color-slate-6)] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--color-slate-5)] [&::-webkit-scrollbar-track]:ml-4 [&::-webkit-scrollbar-track]:mr-4 [&::-webkit-scrollbar-track]:rounded-full">
                 <Table>
@@ -524,10 +531,10 @@ function Step2({
             <p className="text-sm text-[var(--color-slate-11)]">Preview of first 10 rows</p>
           </div>
 
-          {/* Validation panel */}
-          <div className="h-[620px] w-[412px] shrink-0">
+          {/* Validation panel — first on mobile (top), second on desktop (right) */}
+          <div className="order-1 w-full sm:order-2 sm:h-[620px] sm:w-[412px] sm:shrink-0">
             {hasIssues ? (
-              <div className="flex min-h-[620px] flex-col rounded-2xl border bg-white p-6">
+              <div className="flex flex-col rounded-2xl border bg-white px-6 py-6 sm:min-h-[620px] sm:p-6">
               <div className="mb-5 flex items-center justify-between">
                 <p className="text-lg font-semibold text-[var(--color-slate-11)]">
                   Few issues found
@@ -564,7 +571,7 @@ function Step2({
               </ul>
             </div>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center rounded-[var(--radius-3xl,24px)] border border-[var(--color-slate-6)] bg-white px-6 py-5">
+            <div className="flex flex-col items-center justify-center rounded-[var(--radius-3xl,24px)] border border-[var(--color-slate-6)] bg-white px-6 py-6 sm:h-full sm:py-5">
               <div className="flex flex-col items-center">
                 <img
                   src="/no-issues-illustration.png"
@@ -1033,7 +1040,13 @@ function ConfirmationPage({
 
 // ─── Wizard root ─────────────────────────────────────────────────────────────
 
-export function ImportWizard({ onClose }: { onClose: () => void }) {
+export function ImportWizard({
+  onClose,
+  onImportComplete,
+}: {
+  onClose: () => void
+  onImportComplete?: (columns: Array<ColumnConfig>) => void
+}) {
   const [step, setStep] = useState<WizardStep>(1)
   const [uploadError, setUploadError] = useState(false)
   const [hasIssues, setHasIssues] = useState(false)
@@ -1095,7 +1108,7 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
   return (
     <>
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between px-6 py-4">
+      <div className="flex shrink-0 items-center justify-between gap-6 px-6 py-4">
         <div className="flex items-center gap-4">
           <span className="text-base font-semibold text-slate-900">
             Import data
@@ -1140,7 +1153,28 @@ export function ImportWizard({ onClose }: { onClose: () => void }) {
           fieldsByCategory={
             confirmationShowAll ? MOCK_MANY_FIELDS_BY_CATEGORY : fieldsByCategory
           }
-          onExplore={onClose}
+          onExplore={() => {
+            if (onImportComplete) {
+              const now = new Date()
+              const dateStr = now.toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })
+              onImportComplete(
+                INCOMING_FIELDS.map((f) => ({
+                  id: f.id,
+                  label: f.name,
+                  visible: true,
+                  sortable: true,
+                  imported: true,
+                  source: 'Imported by user',
+                  lastUpdated: `${dateStr} by You`,
+                })),
+              )
+            }
+            onClose()
+          }}
         />
       )}
 

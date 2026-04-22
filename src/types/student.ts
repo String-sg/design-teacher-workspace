@@ -182,7 +182,7 @@ export interface FilterRangeValue {
 
 export interface FilterCriterion {
   id: string
-  field: FilterField
+  field: FilterField | string
   operator: FilterOperator
   value: string | number | FilterRangeValue | Array<string>
 }

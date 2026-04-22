@@ -17,7 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-
 interface StudentFiltersProps {
   searchValue: string
   onSearchChange: (value: string) => void
@@ -25,6 +24,8 @@ interface StudentFiltersProps {
   onFiltersChange: (filters: Array<FilterCriterion>) => void
   columns: Array<ColumnConfig>
   onColumnsChange: (columns: Array<ColumnConfig>) => void
+  onImportComplete?: (importedColumns: Array<ColumnConfig>) => void
+  importedColumns?: Array<{ id: string; label: string }>
   matchedCount?: number
   totalCount?: number
   className?: string
@@ -37,6 +38,8 @@ export function StudentFilters({
   onFiltersChange,
   columns,
   onColumnsChange,
+  onImportComplete,
+  importedColumns = [],
   matchedCount,
   totalCount,
   className,
@@ -68,6 +71,7 @@ export function StudentFilters({
           <MultiFilterPopover
             filters={filters}
             onFiltersChange={onFiltersChange}
+            importedFields={importedColumns}
             matchedCount={matchedCount}
             totalCount={totalCount}
           />
@@ -87,7 +91,7 @@ export function StudentFilters({
                 </Button>
               }
             />
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="p-3">
               <DropdownMenuItem onClick={() => setExportModalOpen(true)}>
                 <Download className="mr-2 size-4" />
                 Export data
@@ -105,7 +109,10 @@ export function StudentFilters({
 
       {flags['import-data'] && importDialogOpen && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background">
-          <ImportWizard onClose={() => setImportDialogOpen(false)} />
+          <ImportWizard
+            onClose={() => setImportDialogOpen(false)}
+            onImportComplete={onImportComplete}
+          />
         </div>
       )}
 
@@ -113,7 +120,6 @@ export function StudentFilters({
         open={exportModalOpen}
         onOpenChange={setExportModalOpen}
         onExport={({ senFormats }) => {
-          // TODO: implement actual CSV export
           console.log('Exporting CSV', { senFormats })
         }}
       />

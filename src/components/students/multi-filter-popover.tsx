@@ -86,6 +86,7 @@ const filterFieldOptions: Array<FilterFieldOption2> = filterFieldConfigs.map(
 interface MultiFilterPopoverProps {
   filters: Array<FilterCriterion>
   onFiltersChange: (filters: Array<FilterCriterion>) => void
+  importedFields?: Array<{ id: string; label: string }>
   matchedCount?: number
   totalCount?: number
   className?: string
@@ -97,6 +98,7 @@ const generateId = () => `filter-${++filterIdCounter}`
 export function MultiFilterPopover({
   filters,
   onFiltersChange,
+  importedFields = [],
   matchedCount,
   totalCount,
   className,
@@ -158,13 +160,32 @@ export function MultiFilterPopover({
     }
   }, [openMultiselectIndex])
 
+  const importedFieldOptions = useMemo(
+    () =>
+      importedFields.map((f) => ({
+        field: f.id as FilterField,
+        label: f.label,
+        type: 'text' as const,
+        group: 'general' as const,
+        operators: textOperatorOptions,
+        defaultOperator: 'contains' as FilterOperator,
+        defaultValue: '',
+      })),
+    [importedFields],
+  )
+
+  const allFieldOptions = useMemo(
+    () => [...filterFieldOptions, ...importedFieldOptions],
+    [importedFieldOptions],
+  )
+
   const activeFields = useMemo(
     () => new Set(filters.map((f) => f.field)),
     [filters],
   )
   const availableFields = useMemo(
-    () => filterFieldOptions.filter((opt) => !activeFields.has(opt.field)),
-    [activeFields],
+    () => allFieldOptions.filter((opt) => !activeFields.has(opt.field)),
+    [activeFields, allFieldOptions],
   )
 
   const filteredFields = useMemo(() => {
@@ -173,12 +194,26 @@ export function MultiFilterPopover({
     return availableFields.filter((opt) => opt.label.toLowerCase().includes(q))
   }, [availableFields, searchQuery])
 
-  const groupedFields = useMemo(() => {
-    return [{ group: '_all', label: '', fields: filteredFields }]
-  }, [filteredFields])
+  const availableImported = useMemo(
+    () => importedFieldOptions.filter((opt) => !activeFields.has(opt.field)),
+    [importedFieldOptions, activeFields],
+  )
+  const filteredImported = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return availableImported
+    return availableImported.filter((opt) => opt.label.toLowerCase().includes(q))
+  }, [availableImported, searchQuery])
 
-  const handleAddFilter = (field: FilterField) => {
-    const fieldOption = filterFieldOptions.find((opt) => opt.field === field)
+  const groupedFields = useMemo(() => {
+    const groups = [{ group: '_all', label: '', fields: filteredFields.filter((f) => !importedFields.some((i) => i.id === f.field)) }]
+    if (filteredImported.length > 0) {
+      groups.push({ group: '_imported', label: 'Imported data', fields: filteredImported })
+    }
+    return groups
+  }, [filteredFields, filteredImported, importedFields])
+
+  const handleAddFilter = (field: FilterField | string) => {
+    const fieldOption = allFieldOptions.find((opt) => opt.field === field)
     if (!fieldOption) return
     const operator = fieldOption.defaultOperator
     const value =
@@ -204,8 +239,8 @@ export function MultiFilterPopover({
     onFiltersChange(filters.filter((_, i) => i !== index))
   }
 
-  const handleFieldChange = (index: number, field: FilterField) => {
-    const fieldOption = filterFieldOptions.find((opt) => opt.field === field)
+  const handleFieldChange = (index: number, field: FilterField | string) => {
+    const fieldOption = allFieldOptions.find((opt) => opt.field === field)
     if (!fieldOption) return
     const operator = fieldOption.defaultOperator
     const value =
@@ -258,8 +293,8 @@ export function MultiFilterPopover({
     setSearchQuery('')
   }
 
-  const getFieldOption = (field: FilterField) =>
-    filterFieldOptions.find((opt) => opt.field === field)
+  const getFieldOption = (field: FilterField | string) =>
+    allFieldOptions.find((opt) => opt.field === field)
 
   const needsValueInput = (operator: FilterOperator) =>
     !['is_empty', 'is_not_empty'].includes(operator)
@@ -321,7 +356,7 @@ export function MultiFilterPopover({
                   {/* Field selector – same combobox as "Select filter" */}
                   {(() => {
                     const isOpen = openFieldSelectorIndex === index
-                    const rowFields = filterFieldOptions.filter(
+                    const rowFields = allFieldOptions.filter(
                       (opt) =>
                         opt.field === filter.field ||
                         !activeFields.has(opt.field),
@@ -782,7 +817,7 @@ export function MultiFilterPopover({
                             ))}
                           </div>
                         ))}
-                        {filteredFields.length === 0 && (
+                        {filteredFields.length === 0 && filteredImported.length === 0 && (
                           <div className="px-3 py-6 text-center text-sm text-muted-foreground">
                             No filters found
                           </div>

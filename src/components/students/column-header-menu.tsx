@@ -8,6 +8,7 @@ import {
   Clock,
   Filter,
   Settings2,
+  Trash2,
   X,
 } from 'lucide-react'
 
@@ -20,6 +21,15 @@ import {
   PREV_TERM_LABEL,
 } from './column-visibility-popover'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Popover,
   PopoverContent,
@@ -53,6 +63,8 @@ interface ColumnHeaderMenuProps {
   selectedTerm?: string
   /** Called when user picks a different term for this column */
   onTermChange?: (term: string) => void
+  /** Called when user confirms deletion of an imported column */
+  onDelete?: () => void
 }
 
 export function ColumnHeaderMenu({
@@ -71,9 +83,11 @@ export function ColumnHeaderMenu({
   hasCustomSubjects,
   selectedTerm,
   onTermChange,
+  onDelete,
 }: ColumnHeaderMenuProps) {
   const [open, setOpen] = useState(false)
   const [termSubOpen, setTermSubOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const isSortedBy = currentSort?.field === column.id
   const sortDirection = isSortedBy ? currentSort.direction : null
@@ -122,6 +136,31 @@ export function ColumnHeaderMenu({
   }
 
   return (
+    <>
+    <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <DialogContent showCloseButton={false} className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Delete imported column?</DialogTitle>
+          <DialogDescription>
+            This will remove this column and the data in it
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            Keep column
+          </Button>
+          <Button
+            className="bg-[var(--color-twblue-9,#0064ff)] text-white hover:bg-[var(--color-twblue-10,#0057e0)]"
+            onClick={() => {
+              setDeleteDialogOpen(false)
+              onDelete?.()
+            }}
+          >
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     <TableHead
       className={cn(
         className,
@@ -296,6 +335,24 @@ export function ColumnHeaderMenu({
             </>
           )}
 
+          {/* Delete (imported columns only) */}
+          {column.imported && onDelete && (
+            <>
+              <div className="my-1 h-px bg-border" />
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false)
+                  setDeleteDialogOpen(true)
+                }}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-[var(--slate-5)]"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </button>
+            </>
+          )}
+
           {/* Source / last updated footer */}
           {(displaySource || column.lastUpdated) && (
             <>
@@ -314,7 +371,7 @@ export function ColumnHeaderMenu({
                 {column.lastUpdated && (
                   <div>
                     <p className="text-xs font-medium text-foreground">
-                      Last synced:
+                      {column.imported ? 'Last uploaded:' : 'Last synced:'}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {column.lastUpdated}
@@ -327,5 +384,6 @@ export function ColumnHeaderMenu({
         </PopoverContent>
       </Popover>
     </TableHead>
+    </>
   )
 }

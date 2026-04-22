@@ -27,6 +27,8 @@ export interface ColumnConfig {
   source?: string
   lastUpdated?: string
   temporalType?: TemporalType
+  /** True for columns added via the Import Data wizard */
+  imported?: boolean
 }
 
 export const CURRENT_TERM_KEY = 'T1 2026'
