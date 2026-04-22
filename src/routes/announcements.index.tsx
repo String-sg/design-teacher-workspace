@@ -5,6 +5,7 @@ import {
   Copy,
   Lock,
   MoreHorizontal,
+  Paperclip,
   Search,
   Trash2,
   Users,
@@ -595,6 +596,9 @@ function ParentsGatewayPage() {
                                 <span className="truncate font-medium">
                                   {announcement.title}
                                 </span>
+                                {(announcement.attachments?.length ?? 0) > 0 && (
+                                  <Paperclip className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                                )}
                                 {announcement.responseType ===
                                   'acknowledge' && (
                                   <span className="shrink-0 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 ring-1 ring-inset ring-blue-200">

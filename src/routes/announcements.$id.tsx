@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   CalendarClock,
   ChevronDown,
+  Clock,
   Lock,
   Mail,
   MessageSquare,
@@ -442,6 +443,17 @@ function AnnouncementDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* 30-day file expiry banner — shown whenever the announcement has attachments */}
+      {(announcement.attachments?.length ?? 0) > 0 && (
+        <div className="mx-6 mb-2 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+          <p>
+            <span className="font-medium">Files expire after 30 days.</span>{' '}
+            Uploaded files and images are automatically removed 30 days after upload. Re-upload before sending if needed.
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-6 px-6 lg:grid-cols-3">
         {/* ── Left: read tracking (2/3) ── */}

@@ -192,6 +192,7 @@ interface AnnouncementPreviewProps {
   uploadedFiles?: Array<File>
   uploadedPhotos?: Array<{ file: File; url: string }>
   websiteLinks?: Array<PGWebsiteLink>
+  draftFilesMeta?: Array<FileMeta>
 }
 
 function AnnouncementPreview({
@@ -213,6 +214,7 @@ function AnnouncementPreview({
   uploadedFiles = [],
   uploadedPhotos = [],
   websiteLinks = [],
+  draftFilesMeta = [],
 }: AnnouncementPreviewProps) {
   const totalCount = recipients.reduce((s, r) => s + r.count, 0)
   const [screen, setScreen] = useState<AnnouncementPreviewScreen>('main')
@@ -501,8 +503,8 @@ function AnnouncementPreview({
         </div>
       )}
 
-      {/* Attachments */}
-      {uploadedFiles.length > 0 && (
+      {/* Attachments — real uploads + draft-seeded stubs */}
+      {(uploadedFiles.length > 0 || draftFilesMeta.length > 0) && (
         <div className="px-4 py-4">
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
             Attachments
@@ -510,7 +512,7 @@ function AnnouncementPreview({
           <div className="space-y-2">
             {uploadedFiles.map((file, i) => (
               <div
-                key={i}
+                key={`upload-${i}`}
                 className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2.5"
               >
                 <FileText className="h-4 w-4 shrink-0 text-slate-400" />
@@ -520,6 +522,22 @@ function AnnouncementPreview({
                   </p>
                   <p className="text-[10px] text-slate-400">
                     {formatFileSize(file.size)}
+                  </p>
+                </div>
+              </div>
+            ))}
+            {draftFilesMeta.map((meta, i) => (
+              <div
+                key={`draft-${i}`}
+                className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2.5"
+              >
+                <FileText className="h-4 w-4 shrink-0 text-slate-400" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-slate-800">
+                    {meta.name}
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    {formatFileSize(meta.size)}
                   </p>
                 </div>
               </div>
@@ -1198,6 +1216,23 @@ function NewAnnouncementPage() {
       setRecipients(recipientEntities)
     }
 
+    // Seed attachments so the files section shows them and the 30-day banner triggers
+    if (existingAnnouncement.attachments?.length) {
+      setDraftFilesMeta(
+        existingAnnouncement.attachments.map((att) => {
+          // Parse "214 KB" / "1.2 MB" → bytes
+          const [num, unit] = att.size.split(' ')
+          const multiplier =
+            unit?.toUpperCase() === 'MB' ? 1024 * 1024 : 1024
+          return {
+            name: att.name,
+            size: Math.round(parseFloat(num) * multiplier),
+            uploadedAt: existingAnnouncement.createdAt,
+          }
+        }),
+      )
+    }
+
     // Restore scheduled date/time if applicable
     if (existingAnnouncement.scheduledAt) {
       const dt = new Date(existingAnnouncement.scheduledAt)
@@ -1850,8 +1885,8 @@ function NewAnnouncementPage() {
               </div>
             )}
 
-            {/* 30-day media retention banner — only when reopening a draft that had files/photos */}
-            {draftLoaded &&
+            {/* 30-day media retention banner — when reopening a draft or editing a saved draft with files/photos */}
+            {(draftLoaded || isEditing) &&
               (draftFilesMeta.length > 0 || draftPhotosMeta.length > 0) &&
               (() => {
                 const allMeta = [...draftFilesMeta, ...draftPhotosMeta]
@@ -2699,6 +2734,7 @@ function NewAnnouncementPage() {
                 uploadedFiles={uploadedFiles}
                 uploadedPhotos={uploadedPhotos}
                 websiteLinks={websiteLinks}
+                draftFilesMeta={draftFilesMeta}
               />
             </div>
           )}

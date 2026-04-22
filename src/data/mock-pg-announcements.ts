@@ -43,6 +43,7 @@ export const mockPGAnnouncements: Array<PGAnnouncement> = [
       '<p>Dear Parent/Guardian,</p><p>Please note the updated arrangements for Sports Day on <strong>15 May 2026</strong>. Students are to report to the school hall by 7.30 am in their House attire.</p>',
     shortcuts: [],
     websiteLinks: [],
+    attachments: [{ name: 'Sports Day Programme 2026.pdf', size: '214 KB' }],
     status: 'draft',
     ownership: 'mine',
     role: 'editor',
