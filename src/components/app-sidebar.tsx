@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   BarChart3,
   Bot,
+  CalendarCheck2,
   CircleHelp,
   FileText,
   Home,
@@ -70,6 +71,11 @@ const mainNavItems: Array<MenuItem> = [
     title: 'Home',
     url: '/',
     icon: Home,
+  },
+  {
+    title: 'Attendance',
+    url: '/attendance',
+    icon: CalendarCheck2,
   },
 ]
 
@@ -247,7 +253,9 @@ export function AppSidebar() {
   const filteredManageItems = filterItems(manageItems)
   const filteredStudentItems = studentAnalyticsEnabled
     ? studentInsightItemsWithAnalytics.filter((item) =>
-        item.featureFlag === 'student-analytics' ? studentAnalyticsEnabled : true,
+        item.featureFlag === 'student-analytics'
+          ? studentAnalyticsEnabled
+          : true,
       )
     : studentInsightItemsWithoutAnalytics
 

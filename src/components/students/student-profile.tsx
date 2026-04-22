@@ -3,8 +3,11 @@ import { Link } from '@tanstack/react-router'
 import {
   BookOpen,
   Calendar,
+  Check,
   ChevronRight,
+  Clock,
   Eye,
+  EyeOff,
   FileText,
   GraduationCap,
   Heart,
@@ -24,13 +27,17 @@ import { AcademicAnalytics } from './academic-analytics'
 import { AttendanceAnalytics } from './attendance-analytics'
 import type { Student } from '@/types/student'
 import type { HolisticReport, ReviewStatus, Term } from '@/types/report'
+import type { AgencyReport } from '@/data/mock-agency-reports'
 import { useFeatureFlag } from '@/hooks/use-feature-flag'
 import {
   TERMS,
   filterReports,
   getStudentGradeCounts,
 } from '@/data/mock-reports'
-import { getAgencyReportsByStudent, type AgencyReport } from '@/data/mock-agency-reports'
+import {
+  AGENCY_TEMPLATES,
+  getAgencyReportsByStudent,
+} from '@/data/mock-agency-reports'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -55,10 +62,18 @@ interface SectionProps {
   title: string
   icon: React.ReactNode
   iconClassName?: string
+  headerRight?: React.ReactNode
   children: React.ReactNode
 }
 
-function Section({ id, title, icon, iconClassName, children }: SectionProps) {
+function Section({
+  id,
+  title,
+  icon,
+  iconClassName,
+  headerRight,
+  children,
+}: SectionProps) {
   return (
     <section id={id} className="scroll-mt-24 rounded-lg border bg-white p-6">
       <div className="mb-4 flex items-center gap-3">
@@ -70,7 +85,8 @@ function Section({ id, title, icon, iconClassName, children }: SectionProps) {
         >
           {icon}
         </span>
-        <h2 className="text-lg font-semibold">{title}</h2>
+        <h2 className="text-lg font-semibold flex-1">{title}</h2>
+        {headerRight}
       </div>
       {children}
     </section>
@@ -268,32 +284,133 @@ const AGENCY_STATUS_CONFIG: Record<
   AgencyReport['status'],
   { label: string; className: string }
 > = {
-  draft: { label: 'Draft', className: 'bg-slate-100 text-slate-700 hover:bg-slate-100' },
-  pending_review: { label: 'Pending Review', className: 'bg-amber-100 text-amber-700 hover:bg-amber-100' },
-  approved: { label: 'Approved', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
-  sent: { label: 'Sent', className: 'bg-green-100 text-green-700 hover:bg-green-100' },
+  draft: {
+    label: 'Draft',
+    className: 'bg-slate-100 text-slate-700 hover:bg-slate-100',
+  },
+  pending_review: {
+    label: 'Pending Review',
+    className: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
+  },
+  approved: {
+    label: 'Approved',
+    className: 'bg-green-100 text-green-700 hover:bg-green-100',
+  },
+  sent: {
+    label: 'Sent',
+    className: 'bg-green-100 text-green-700 hover:bg-green-100',
+  },
+}
+
+function addBusinessDaysSimple(from: Date, days: number): Date {
+  const d = new Date(from)
+  let added = 0
+  while (added < days) {
+    d.setDate(d.getDate() + 1)
+    const dow = d.getDay()
+    if (dow !== 0 && dow !== 6) added++
+  }
+  return d
 }
 
 function AgencyReportRow({ report }: { report: AgencyReport }) {
-  const { label, className } = AGENCY_STATUS_CONFIG[report.status]
+  const [showPw, setShowPw] = useState(false)
+  const [status, setStatus] = useState<AgencyReport['status']>(report.status)
+  const { label, className } = AGENCY_STATUS_CONFIG[status]
   const createdDate = report.createdAt.toLocaleDateString('en-SG', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   })
+
+  // Due date: clock icon + bare "N days" (no "Due in" prefix)
+  let dueLabel: string | null = null
+  let dueClass = ''
+  if (report.startedAt && (status === 'draft' || status === 'pending_review')) {
+    const tpl = AGENCY_TEMPLATES.find((t) => t.id === report.templateId)
+    if (tpl) {
+      const due = addBusinessDaysSimple(report.startedAt, tpl.turnaroundDays)
+      const today = new Date(2026, 3, 21) // Apr 21 2026
+      const diffMs = due.getTime() - today.getTime()
+      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
+      if (diffDays < 0) {
+        const abs = Math.abs(diffDays)
+        dueLabel = `${abs} day${abs !== 1 ? 's' : ''} overdue`
+        dueClass = 'text-red-600'
+      } else {
+        dueLabel = `${diffDays} day${diffDays !== 1 ? 's' : ''}`
+        dueClass = diffDays <= 2 ? 'text-amber-600' : 'text-muted-foreground'
+      }
+    }
+  }
+
   return (
-    <div className="flex items-center gap-3 rounded-lg border px-4 py-3">
-      <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" />
-      <div className="flex-1">
-        <p className="text-sm font-medium">{report.templateName}</p>
-        <p className="text-xs text-muted-foreground">{createdDate}</p>
+    <div className="group flex flex-col gap-1.5 rounded-lg border transition-colors hover:border-primary/40 hover:bg-muted/20">
+      <div className="flex items-center gap-3 px-4 py-3">
+        <button
+          className="flex-1 min-w-0 text-left"
+          onClick={() => {
+            /* mock: open the report inline */
+          }}
+        >
+          <p className="text-sm font-medium truncate">{report.templateName}</p>
+          <p className="text-xs text-muted-foreground truncate">
+            {report.agency} · {createdDate}
+          </p>
+        </button>
+        {dueLabel && (
+          <span
+            className={cn(
+              'flex items-center gap-1 text-xs font-medium',
+              dueClass,
+            )}
+          >
+            <Clock className="h-3 w-3" />
+            {dueLabel}
+          </span>
+        )}
+        {status === 'approved' ? (
+          <div className="flex items-center gap-2">
+            <Badge className={className}>{label}</Badge>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs"
+              onClick={(e) => {
+                e.stopPropagation()
+                setStatus('sent')
+              }}
+            >
+              Mark as sent
+            </Button>
+          </div>
+        ) : (
+          <Badge className={className}>{label}</Badge>
+        )}
+        {report.passwordSaved && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowPw((p) => !p)
+            }}
+            className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            title={showPw ? 'Hide password' : 'View password'}
+          >
+            <Lock className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
-      <Badge className={className}>{label}</Badge>
-      {report.passwordSaved && (
-        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Lock className="h-3 w-3" />
-          Password saved
-        </span>
+      {showPw && report.password && (
+        <div className="mx-4 mb-3 flex items-center gap-2 rounded-md bg-muted/50 px-3 py-1.5 text-xs">
+          <span className="text-muted-foreground">PDF password:</span>
+          <span className="flex-1 font-mono">{report.password}</span>
+          <button
+            onClick={() => setShowPw(false)}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <EyeOff className="h-3 w-3" />
+          </button>
+        </div>
       )}
     </div>
   )
@@ -1093,6 +1210,24 @@ export function StudentProfile({
             title="Reports"
             icon={<FileText className="h-5 w-5" />}
             iconClassName="bg-red-100 text-red-600"
+            headerRight={
+              studentReports.length > 0 ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground"
+                  render={
+                    <Link
+                      to="/reports"
+                      search={{ studentId: student.id, groupBy: 'student' }}
+                    />
+                  }
+                >
+                  <Eye className="mr-1 h-4 w-4" />
+                  View all in Reports
+                </Button>
+              ) : undefined
+            }
           >
             {studentReports.length > 0 ? (
               <div className="space-y-2">
@@ -1132,25 +1267,6 @@ export function StudentProfile({
                     : missingTerms.join(', ')}{' '}
                   not yet generated
                 </span>
-              </div>
-            )}
-
-            {studentReports.length > 0 && (
-              <div className="mt-4 border-t pt-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground"
-                  render={
-                    <Link
-                      to="/reports"
-                      search={{ studentId: student.id, groupBy: 'student' }}
-                    />
-                  }
-                >
-                  <Eye className="mr-1 h-4 w-4" />
-                  View all in Reports
-                </Button>
               </div>
             )}
 

@@ -1,24 +1,33 @@
 import { useState } from 'react'
-import { Link, createFileRoute, notFound, useNavigate } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  useNavigate,
+} from '@tanstack/react-router'
 import {
   AlertTriangle,
   ArrowLeft,
   Check,
   ChevronRight,
+  Clock,
   Download,
+  ExternalLink,
   Eye,
   EyeOff,
-  ExternalLink,
   FileText,
+  ListChecks,
   Lock,
-  MessageSquare,
   PanelRight,
   RefreshCw,
   Sparkles,
-  Upload,
-  X,
 } from 'lucide-react'
 
+import type {
+  AgencyTemplate,
+  ReportField,
+  ReportSection,
+} from '@/data/mock-agency-reports'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -26,11 +35,9 @@ import { getStudentById } from '@/data/mock-students'
 import {
   AGENCY_TEMPLATES,
   AI_DRAFTS,
-  DATA_SOURCES,
-  type AgencyTemplate,
-  type DataSource,
-  type ReportField,
-  type ReportSection,
+  AI_DRAFT_CITATIONS,
+  MOCK_COUNSELLOR,
+  mockAgencyReports,
 } from '@/data/mock-agency-reports'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
@@ -45,20 +52,28 @@ export const Route = createFileRoute('/students_/$id/agency-report/new')({
 
 // ── Types ──────────────────────────────────────────────────────
 
-type WizardStep = 'templates' | 'sources' | 'form' | 'review' | 'p-review' | 'export' | 'done'
+type WizardStep =
+  | 'templates'
+  | 'form'
+  | 'review'
+  | 'submitted'
+  | 'export'
+  | 'done'
 
 // ── Step bar ──────────────────────────────────────────────────
 
-const STEP_LABELS = ['Template', 'Sources', 'Fill Report', 'P Review', 'Export']
+const STEP_LABELS = ['Template', 'Fill Report', 'Export']
 const STEP_MAP: Record<WizardStep, number> = {
   templates: 0,
-  sources: 1,
-  form: 2,
-  review: 2,
-  'p-review': 3,
-  export: 4,
-  done: 4,
+  form: 1,
+  review: 1,
+  submitted: 2,
+  export: 2,
+  done: 2,
 }
+
+const PREVIEW_SCALES = [0.55, 0.68, 0.82, 1] as const
+const PREVIEW_BG = '#E8E6E0'
 
 function StepBar({ step }: { step: WizardStep }) {
   const cur = STEP_MAP[step]
@@ -82,14 +97,21 @@ function StepBar({ step }: { step: WizardStep }) {
             <span
               className={cn(
                 'hidden text-xs sm:block',
-                i === cur ? 'font-semibold text-foreground' : 'text-muted-foreground',
+                i === cur
+                  ? 'font-semibold text-foreground'
+                  : 'text-muted-foreground',
               )}
             >
               {label}
             </span>
           </div>
           {i < STEP_LABELS.length - 1 && (
-            <div className={cn('mx-2 h-0.5 w-6 shrink-0', i < cur ? 'bg-green-500' : 'bg-border')} />
+            <div
+              className={cn(
+                'mx-2 h-0.5 w-6 shrink-0',
+                i < cur ? 'bg-green-500' : 'bg-border',
+              )}
+            />
           )}
         </div>
       ))}
@@ -128,178 +150,250 @@ function StudentBar({
   )
 }
 
+// ── Agency icon badge ─────────────────────────────────────────
+
+function AgencyIcon({ abbrev, color }: { abbrev: string; color: string }) {
+  return (
+    <div
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[10px] font-bold text-white"
+      style={{ backgroundColor: color }}
+    >
+      {abbrev.length > 4 ? abbrev.slice(0, 4) : abbrev}
+    </div>
+  )
+}
+
 // ── S2 Template Selection ─────────────────────────────────────
+
+const TEMPLATE_CATEGORIES = [
+  {
+    id: 'child-welfare',
+    label: 'Child Welfare',
+    ids: ['cps', 'children-home'],
+  },
+  {
+    id: 'social-services',
+    label: 'Social Services',
+    ids: ['msf', 'msf-probation', 'msf-psv', 'sc-swo-a', 'sc-swo-b', 'intake'],
+  },
+  {
+    id: 'law-enforcement',
+    label: 'Law Enforcement & Corrections',
+    ids: ['spf', 'cnb', 'sps'],
+  },
+  {
+    id: 'mental-health',
+    label: 'Mental Health & Wellbeing',
+    ids: ['imh-cgc', 'reach', 'navh', 'nuh'],
+  },
+  { id: 'assessment', label: 'Assessment Tools', ids: ['assq'] },
+  { id: 'general', label: 'General', ids: ['nric-report'] },
+]
+
+function addBusinessDays(from: Date, days: number): Date {
+  const d = new Date(from)
+  let added = 0
+  while (added < days) {
+    d.setDate(d.getDate() + 1)
+    const dow = d.getDay()
+    if (dow !== 0 && dow !== 6) added++
+  }
+  return d
+}
+
+function formatDueDate(date: Date): string {
+  return date.toLocaleDateString('en-SG', { day: 'numeric', month: 'short' })
+}
+
+function templatePreviewImg(template: AgencyTemplate): string | null {
+  if (!template.templateFile) return null
+  const filename = template.templateFile.split('/').pop() ?? ''
+  const base = filename.replace(/\.(docx?|pdf)$/i, '')
+  return `/report-previews/${base}-thumb.png`
+}
+
+function TemplateThumbnail({ template }: { template: AgencyTemplate }) {
+  const src = templatePreviewImg(template)
+  return (
+    <div className="h-[120px] w-full overflow-hidden rounded-t-lg bg-white">
+      {src && (
+        <img
+          src={src}
+          alt={`${template.name} first page`}
+          className="h-full w-full object-cover object-top"
+        />
+      )}
+    </div>
+  )
+}
 
 function TemplateSelection({
   studentName,
   studentClass,
+  studentId,
   selected,
   onToggle,
+  onSelectAndContinue,
   onBack,
   onContinue,
 }: {
   studentName: string
   studentClass: string
-  selected: string[]
+  studentId: string
+  selected: Array<string>
   onToggle: (id: string) => void
+  onSelectAndContinue: (id: string) => void
   onBack: () => void
   onContinue: () => void
 }) {
-  return (
-    <div className="space-y-5">
-      <StudentBar name={studentName} studentClass={studentClass} inProgress={1} />
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [multiSelect, setMultiSelect] = useState(false)
 
-      <div>
-        <h2 className="text-xl font-semibold">Select Agency Template(s)</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Choose one or more templates. Reports are completed sequentially — shared data carries across.
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        {AGENCY_TEMPLATES.map((tpl) => {
-          const on = selected.includes(tpl.id)
-          const pct = Math.round((tpl.autoFilled / tpl.totalFields) * 100)
-          return (
-            <button
-              key={tpl.id}
-              onClick={() => onToggle(tpl.id)}
-              className={cn(
-                'w-full rounded-xl border-2 p-5 text-left transition-all',
-                on ? 'border-primary bg-primary/5' : 'border-border bg-white hover:border-primary/40',
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={cn(
-                    'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2',
-                    on ? 'border-primary bg-primary' : 'border-border bg-transparent',
-                  )}
-                >
-                  {on && <Check className="h-3 w-3 text-white" />}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{ background: tpl.id === 'cps' ? '#dc2626' : '#2563eb' }}
-                    />
-                    <span className="font-semibold">{tpl.name}</span>
-                  </div>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{tpl.agency}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">{tpl.totalFields} fields</p>
-                  <p className="text-xs text-green-600">~{tpl.autoFilled} auto-filled</p>
-                </div>
-              </div>
-
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-green-500" style={{ width: `${pct}%` }} />
-              </div>
-
-              <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{tpl.pages} pages</span>
-                <span>·</span>
-                <button
-                  className="text-blue-600 hover:underline"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Preview blank template
-                </button>
-              </div>
-            </button>
-          )
-        })}
-      </div>
-
-      <div className="flex justify-between pt-2">
-        <Button variant="outline" onClick={onBack} render={<Link to="/students/$id" params={{ id: '' }} />}>
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          Cancel
-        </Button>
-        <Button onClick={onContinue} disabled={selected.length === 0}>
-          Continue with {selected.length} template{selected.length !== 1 ? 's' : ''}
-          <ChevronRight className="ml-1 h-4 w-4" />
-        </Button>
-      </div>
-    </div>
+  const inProgressReports = mockAgencyReports.filter(
+    (r) =>
+      r.studentId === studentId &&
+      (r.status === 'draft' || r.status === 'pending_review'),
   )
-}
 
-// ── S3 Source Selection ───────────────────────────────────────
-
-function SourceSelection({
-  sources,
-  onToggle,
-  onBack,
-  onContinue,
-}: {
-  sources: DataSource[]
-  onToggle: (id: string) => void
-  onBack: () => void
-  onContinue: () => void
-}) {
   return (
     <div className="space-y-5">
-      <div>
-        <h2 className="text-xl font-semibold">Data Sources</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Select which data sources to pull from. Uncheck any you'd like to skip.
-        </p>
-      </div>
+      <StudentBar
+        name={studentName}
+        studentClass={studentClass}
+        inProgress={inProgressReports.length}
+      />
 
-      <div className="space-y-2">
-        {sources.map((src) => (
-          <button
-            key={src.id}
-            onClick={() => onToggle(src.id)}
-            className={cn(
-              'flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all',
-              src.checked ? 'border-green-400 bg-green-50' : 'border-border bg-white hover:border-border/60',
-            )}
-          >
-            <div
-              className={cn(
-                'flex h-5 w-5 shrink-0 items-center justify-center rounded border-2',
-                src.checked ? 'border-green-500 bg-green-500' : 'border-border bg-transparent',
-              )}
-            >
-              {src.checked && <Check className="h-3 w-3 text-white" />}
-            </div>
-            <div className="flex-1">
-              <p className="font-medium">{src.name}</p>
-              <p className="text-xs text-muted-foreground">{src.desc}</p>
-            </div>
-            <div className="text-right text-xs text-muted-foreground">
-              <p>Last synced</p>
-              <p>{src.lastSync}</p>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-col items-center gap-1 rounded-xl border-2 border-dashed px-4 py-6 text-center text-muted-foreground">
-        <Upload className="h-5 w-5" />
-        <p className="text-sm font-medium">Upload additional documents</p>
-        <p className="text-xs">External assessments, parent correspondence, previous reports</p>
-      </div>
-
-      <div className="flex items-start gap-2 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-700">
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-        <span>Housing data (School Cockpit) was last updated 14 months ago — please verify during review.</span>
-      </div>
-
-      <div className="flex justify-between pt-2">
-        <Button variant="outline" onClick={onBack}>
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          Back
-        </Button>
-        <Button onClick={onContinue}>
-          Pull data & begin
-          <ChevronRight className="ml-1 h-4 w-4" />
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold">Select a template</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Choose the agency report to generate for this student.
+          </p>
+        </div>
+        <Button
+          variant={multiSelect ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setMultiSelect((m) => !m)}
+          className="gap-1.5 text-xs"
+        >
+          <ListChecks className="h-3.5 w-3.5" />
+          {multiSelect ? 'Cancel multi-select' : 'Select multiple'}
         </Button>
       </div>
+
+      {TEMPLATE_CATEGORIES.map((cat) => {
+        const catTemplates = cat.ids
+          .map((id) => AGENCY_TEMPLATES.find((t) => t.id === id))
+          .filter(Boolean) as Array<AgencyTemplate>
+        if (catTemplates.length === 0) return null
+        return (
+          <div key={cat.id}>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {cat.label}
+            </p>
+            <div className="grid grid-cols-3 gap-2 lg:grid-cols-4">
+              {catTemplates.map((tpl) => {
+                const on = selected.includes(tpl.id)
+                const inProgress = inProgressReports.find(
+                  (r) => r.templateId === tpl.id,
+                )
+                const dueDate = inProgress?.startedAt
+                  ? formatDueDate(
+                      addBusinessDays(inProgress.startedAt, tpl.turnaroundDays),
+                    )
+                  : null
+                const isHovered = hoveredId === tpl.id
+
+                return (
+                  <button
+                    key={tpl.id}
+                    onClick={() => {
+                      if (multiSelect) {
+                        onToggle(tpl.id)
+                      } else {
+                        onSelectAndContinue(tpl.id)
+                      }
+                    }}
+                    onMouseEnter={() => setHoveredId(tpl.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    className={cn(
+                      'relative overflow-hidden rounded-xl border-2 text-left transition-all',
+                      on && multiSelect
+                        ? 'border-primary shadow-md'
+                        : 'border-border bg-white hover:border-primary/40 hover:shadow-sm',
+                    )}
+                  >
+                    {/* Thumbnail */}
+                    <div className="relative overflow-hidden">
+                      <TemplateThumbnail template={tpl} />
+
+                      {/* Hover overlay — clock + days */}
+                      <div
+                        className={cn(
+                          'absolute inset-x-0 bottom-0 flex items-center gap-1.5 bg-black/65 px-2.5 py-1.5 transition-opacity duration-150',
+                          isHovered || inProgress ? 'opacity-100' : 'opacity-0',
+                        )}
+                      >
+                        <Clock className="h-3 w-3 shrink-0 text-white/80" />
+                        <p className="text-[11px] text-white/90">
+                          {dueDate ? (
+                            <span className="font-semibold text-amber-300">
+                              Due {dueDate}
+                            </span>
+                          ) : (
+                            `${tpl.turnaroundDays} days`
+                          )}
+                        </p>
+                      </div>
+
+                      {/* Multi-select checkmark */}
+                      {multiSelect && on && (
+                        <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary shadow">
+                          <Check className="h-3 w-3 text-white" />
+                        </div>
+                      )}
+                      {/* Multi-select empty checkbox */}
+                      {multiSelect && !on && (
+                        <div className="absolute right-2 top-2 h-5 w-5 rounded-full border-2 border-white/80 bg-black/20" />
+                      )}
+                    </div>
+
+                    {/* Card footer */}
+                    <div
+                      className={cn(
+                        'px-2.5 py-2 border-t',
+                        on && multiSelect ? 'bg-primary/5' : 'bg-white',
+                      )}
+                    >
+                      <p className="text-[11px] font-semibold leading-tight truncate">
+                        {tpl.name}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                        {tpl.agency}
+                      </p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+
+      {/* Footer — only visible in multi-select mode */}
+      {multiSelect && (
+        <div className="flex justify-between pt-2">
+          <Button variant="outline" onClick={() => setMultiSelect(false)}>
+            Cancel
+          </Button>
+          <Button onClick={onContinue} disabled={selected.length === 0}>
+            {selected.length === 0
+              ? 'Select templates'
+              : `Continue with ${selected.length} template${selected.length !== 1 ? 's' : ''}`}
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
@@ -353,7 +447,11 @@ function FieldRow({
           <textarea
             value={value}
             onChange={(e) => onValueChange(e.target.value)}
-            placeholder={field.aiDraftable ? "Click 'AI Draft' to generate, or write manually…" : 'Enter details…'}
+            placeholder={
+              field.aiDraftable
+                ? "Click 'AI Draft' to generate, or write manually…"
+                : 'Enter details…'
+            }
             className={cn(
               'w-full resize-y rounded-lg border px-3.5 py-2.5 text-sm leading-relaxed outline-none transition-colors',
               'focus:border-primary focus:ring-1 focus:ring-primary',
@@ -366,14 +464,53 @@ function FieldRow({
                 <Sparkles className="mr-1.5 h-3.5 w-3.5" />
                 {aiFlag ? 'Redraft' : 'AI Draft'}
               </Button>
-              {aiFlag && (
-                <Button variant="ghost" size="sm" className="text-muted-foreground">
-                  <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-                  View sources used
-                </Button>
-              )}
             </div>
           )}
+          {aiFlag &&
+            (
+              AI_DRAFT_CITATIONS as Record<
+                string,
+                | Array<{ num: number; source: string; detail: string }>
+                | undefined
+              >
+            )[field.id] && (
+              <div className="mt-2 rounded-lg border bg-muted/30 px-3 py-2.5">
+                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Sources
+                </p>
+                <div className="space-y-1">
+                  {(
+                    AI_DRAFT_CITATIONS as Record<
+                      string,
+                      | Array<{ num: number; source: string; detail: string }>
+                      | undefined
+                    >
+                  )[field.id]!.map((c) => (
+                    <div
+                      key={c.num}
+                      className="flex items-start gap-2 text-xs text-muted-foreground"
+                    >
+                      <sup className="mt-0.5 font-semibold text-primary">
+                        {c.num}
+                      </sup>
+                      <span>
+                        <span className="font-medium text-foreground">
+                          {c.source}
+                        </span>{' '}
+                        —{' '}
+                        <a
+                          href="#"
+                          onClick={(e) => e.preventDefault()}
+                          className="text-blue-600 underline underline-offset-2 hover:text-blue-700"
+                        >
+                          {c.detail}
+                        </a>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       ) : (
         <input
@@ -397,113 +534,292 @@ function SectionPanel({
   aiFlags,
   onValueChange,
   onAiDraft,
-  onMarkComplete,
-  isComplete,
+  onToggleReviewed,
+  isReviewed,
 }: {
   section: ReportSection
   fieldValues: Record<string, string>
   aiFlags: Record<string, boolean>
   onValueChange: (fieldId: string, v: string) => void
   onAiDraft: (fieldId: string) => void
-  onMarkComplete: (sectionId: string) => void
-  isComplete: boolean
+  onToggleReviewed: (sectionId: string) => void
+  isReviewed: boolean
 }) {
-  const locked = section.role !== 'yh'
+  const isCounsellorSection = section.role === 'counsellor'
+  const isPrincipalSection = section.role === 'principal'
+  const isEditable = section.role === 'yh'
+
+  const counsellorHasData =
+    MOCK_COUNSELLOR.fields &&
+    Object.keys(MOCK_COUNSELLOR.fields as Record<string, string>).length > 0
+
+  const reviewToggle = (
+    <Button
+      variant={isReviewed ? 'secondary' : 'outline'}
+      size="sm"
+      onClick={() => onToggleReviewed(section.id)}
+      className={cn(isReviewed && 'text-green-700')}
+    >
+      {isReviewed ? (
+        <>
+          <Check className="mr-1.5 h-3.5 w-3.5 text-green-600" />
+          Verified
+        </>
+      ) : (
+        <>Mark as verified</>
+      )}
+    </Button>
+  )
 
   return (
     <div>
       <div className="mb-5 flex items-center gap-2">
         <h3 className="text-lg font-semibold">{section.title}</h3>
-        {locked && (
-          <Badge
-            className={cn(
-              'gap-1',
-              section.role === 'principal'
-                ? 'bg-purple-50 text-purple-700 hover:bg-purple-50'
-                : 'bg-blue-50 text-blue-700 hover:bg-blue-50',
-            )}
-          >
+        {isPrincipalSection && (
+          <Badge className="gap-1 bg-purple-50 text-purple-700 hover:bg-purple-50">
             <Lock className="h-2.5 w-2.5" />
-            To be completed by {section.role === 'principal' ? 'Principal' : 'School Counsellor'}
+            To be completed by Principal
+          </Badge>
+        )}
+        {isCounsellorSection && counsellorHasData && (
+          <Badge className="gap-1 bg-blue-50 text-blue-700 hover:bg-blue-50">
+            <Check className="h-2.5 w-2.5" />
+            Completed by School Counsellor
+          </Badge>
+        )}
+        {isCounsellorSection && !counsellorHasData && (
+          <Badge className="gap-1 bg-amber-50 text-amber-700 hover:bg-amber-50">
+            <Clock className="h-2.5 w-2.5" />
+            Awaiting Counsellor
           </Badge>
         )}
       </div>
 
-      {locked ? (
+      {isPrincipalSection ? (
         <div className="flex flex-col items-center gap-2 rounded-xl border-2 border-dashed py-10 text-center text-muted-foreground">
           <Lock className="h-5 w-5" />
           <p className="text-sm">
-            This section will be available for the{' '}
-            {section.role === 'principal' ? 'Principal' : 'School Counsellor'} during review.
+            This section will be available for the Principal during review.
           </p>
         </div>
-      ) : (
+      ) : isCounsellorSection ? (
+        counsellorHasData ? (
+          <div className="space-y-4">
+            <div className="rounded-xl border bg-muted/20 p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100">
+                  <Check className="h-3.5 w-3.5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">
+                    Completed by {MOCK_COUNSELLOR.name} ·{' '}
+                    {MOCK_COUNSELLOR.completedAt}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Read-only — submitted by School Counsellor
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {section.fields.map((f) => (
+                  <div key={f.id}>
+                    <p className="mb-1 text-xs font-medium text-muted-foreground">
+                      {f.label}
+                    </p>
+                    <p className="text-sm leading-relaxed">
+                      {(MOCK_COUNSELLOR.fields as Record<string, string>)[
+                        f.id
+                      ] ?? '—'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end border-t pt-4">{reviewToggle}</div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed bg-amber-50/40 py-10 text-center">
+            <Clock className="h-5 w-5 text-amber-600" />
+            <p className="text-sm font-medium">
+              Awaiting input from School Counsellor
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                /* mock: send reminder */
+              }}
+            >
+              Send reminder
+            </Button>
+          </div>
+        )
+      ) : isEditable ? (
         <div className="space-y-5">
           {section.fields.map((field) => (
             <FieldRow
               key={field.id}
               field={field}
-              value={fieldValues[field.id] ?? field.value ?? ''}
+              value={
+                (fieldValues as Record<string, string | undefined>)[field.id] ??
+                field.value ??
+                ''
+              }
               aiFlag={!!aiFlags[field.id]}
               onValueChange={(v) => onValueChange(field.id, v)}
               onAiDraft={() => onAiDraft(field.id)}
             />
           ))}
-          <div className="flex justify-end border-t pt-4">
-            <Button variant="outline" size="sm" onClick={() => onMarkComplete(section.id)} disabled={isComplete}>
-              {isComplete ? (
-                <>
-                  <Check className="mr-1.5 h-3.5 w-3.5 text-green-600" />
-                  Completed
-                </>
-              ) : (
-                <>
-                  Mark complete
-                  <Check className="ml-1.5 h-3.5 w-3.5" />
-                </>
-              )}
-            </Button>
-          </div>
+          <div className="flex justify-end border-t pt-4">{reviewToggle}</div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
 
-function PdfPreview({ template, onClose }: { template: AgencyTemplate; onClose: () => void }) {
-  return (
-    <div className="flex h-full flex-col border-l bg-gray-50">
-      <div className="flex shrink-0 items-center justify-between border-b px-4 py-2.5">
-        <span className="text-sm font-semibold">PDF Preview</span>
-        <button onClick={onClose} className="rounded p-1 text-muted-foreground hover:bg-muted">
-          <X className="h-4 w-4" />
-        </button>
+function templateReferenceAsset(template: AgencyTemplate): {
+  kind: 'pdf' | 'image'
+  src: string
+} | null {
+  if (template.templateFile?.toLowerCase().endsWith('.pdf')) {
+    return { kind: 'pdf', src: template.templateFile }
+  }
+  const img = templatePreviewImg(template)
+  return img ? { kind: 'image', src: img } : null
+}
+
+
+function TemplateReferenceBody({
+  template,
+  scale,
+}: {
+  template: AgencyTemplate
+  scale: number
+}) {
+  const asset = templateReferenceAsset(template)
+  if (!asset) {
+    return (
+      <div
+        style={{
+          background: '#fff',
+          width: 680,
+          margin: '0 auto',
+          padding: '80px 40px',
+          boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
+          textAlign: 'center',
+          color: '#888',
+          fontSize: 14,
+        }}
+      >
+        No template preview available for {template.name}.
       </div>
-      <div className="flex-1 overflow-y-auto p-3">
-        {Array.from({ length: template.pages }).map((_, p) => (
-          <div
-            key={p}
-            className="mb-3 flex flex-col rounded border bg-white p-2.5 shadow-sm"
-            style={{ aspectRatio: '0.707' }}
-          >
-            <p className="mb-1 text-[6px] font-bold uppercase tracking-wide text-muted-foreground">
-              {template.agency}
-            </p>
-            <p className="mb-2 text-[5px] text-muted-foreground">Page {p + 1}</p>
-            {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="mb-1 flex gap-1">
-                <div className="h-[3px] w-[30%] rounded-full bg-border/60" />
-                <div
-                  className={cn(
-                    'h-[3px] flex-1 rounded-full',
-                    p < 2 ? 'bg-indigo-200' : 'bg-border/60',
-                  )}
-                />
-              </div>
-            ))}
-          </div>
-        ))}
-        <p className="text-center text-[10px] text-muted-foreground">Updates as you fill the form</p>
+    )
+  }
+
+  if (asset.kind === 'pdf') {
+    return (
+      <iframe
+        src={`${asset.src}#toolbar=0&navpanes=0&view=FitH`}
+        title={`${template.name} blank template`}
+        style={{
+          width: 720,
+          height: 1000,
+          border: 'none',
+          margin: '0 auto',
+          display: 'block',
+          background: '#fff',
+          boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
+        }}
+      />
+    )
+  }
+
+  return (
+    <img
+      src={asset.src}
+      alt={`${template.name} blank template`}
+      style={{
+        width: 720,
+        maxWidth: '100%',
+        display: 'block',
+        margin: '0 auto',
+        background: '#fff',
+        boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
+      }}
+    />
+  )
+}
+
+function DocumentPreview({
+  template,
+  scale,
+  onScaleChange,
+}: {
+  template: AgencyTemplate
+  scale: number
+  onScaleChange: (s: number) => void
+}) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        overflow: 'auto',
+        background: PREVIEW_BG,
+        padding: 20,
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 12,
+          padding: '0 4px',
+        }}
+      >
+        <span
+          style={{
+            fontSize: 10.5,
+            fontWeight: 650,
+            color: '#555',
+            letterSpacing: 0.5,
+          }}
+        >
+          TEMPLATE REFERENCE — {template.name}
+        </span>
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          <span style={{ fontSize: 9.5, color: '#888' }}>Zoom</span>
+          {PREVIEW_SCALES.map((s) => (
+            <button
+              key={s}
+              onClick={() => onScaleChange(s)}
+              style={{
+                width: 32,
+                height: 22,
+                borderRadius: 4,
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 10,
+                fontWeight: 700,
+                fontFamily: 'ui-monospace, monospace',
+                background: scale === s ? '#1f2937' : '#fff',
+                color: scale === s ? '#fff' : '#555',
+              }}
+            >
+              {Math.round(s * 100)}%
+            </button>
+          ))}
+        </div>
+      </div>
+      <div
+        style={{
+          transformOrigin: 'top center',
+          transform: `scale(${scale})`,
+          width: `${100 / scale}%`,
+        }}
+      >
+        <TemplateReferenceBody template={template} scale={scale} />
       </div>
     </div>
   )
@@ -525,42 +841,149 @@ function ReportForm({
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
   const [aiFlags, setAiFlags] = useState<Record<string, boolean>>({})
   const [activeSection, setActiveSection] = useState(template.sections[0].id)
-  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set())
+  const [completedSections, setCompletedSections] = useState<Set<string>>(
+    new Set(),
+  )
   const [previewOpen, setPreviewOpen] = useState(true)
+  const [previewScale, setPreviewScale] = useState<number>(0.68)
+  const [savedStatus, setSavedStatus] = useState<'saved' | 'saving'>('saved')
 
-  const updateField = (id: string, v: string) => setFieldValues((p) => ({ ...p, [id]: v }))
+  const updateField = (id: string, v: string) => {
+    setFieldValues((p) => ({ ...p, [id]: v }))
+    setSavedStatus('saving')
+    setTimeout(() => setSavedStatus('saved'), 800)
+  }
   const aiDraft = (id: string) => {
-    updateField(id, AI_DRAFTS[id] ?? 'Based on available case notes and TCI data, the student has shown consistent patterns…')
+    updateField(
+      id,
+      AI_DRAFTS[id] ??
+        'Based on available case notes and TCI data, the student has shown consistent patterns…',
+    )
     setAiFlags((p) => ({ ...p, [id]: true }))
   }
-  const markComplete = (sectionId: string) => {
-    setCompletedSections((p) => new Set([...p, sectionId]))
-    const idx = template.sections.findIndex((s) => s.id === sectionId)
-    if (idx < template.sections.length - 1) setActiveSection(template.sections[idx + 1].id)
+  const toggleReviewed = (sectionId: string) => {
+    setCompletedSections((p) => {
+      const next = new Set(p)
+      if (next.has(sectionId)) {
+        next.delete(sectionId)
+        return next
+      }
+      next.add(sectionId)
+      return next
+    })
+    if (!completedSections.has(sectionId)) {
+      const idx = template.sections.findIndex((s) => s.id === sectionId)
+      if (idx < template.sections.length - 1)
+        setActiveSection(template.sections[idx + 1].id)
+    }
+  }
+  const saveDraft = () => {
+    setSavedStatus('saving')
+    setTimeout(() => setSavedStatus('saved'), 500)
   }
 
-  const currentSection = template.sections.find((s) => s.id === activeSection) ?? template.sections[0]
+  const currentSection =
+    template.sections.find((s) => s.id === activeSection) ??
+    template.sections[0]
+
+  // Merged values: field defaults + counsellor mock + user edits
+  const mergedValues: Record<string, string> = {}
+  for (const section of template.sections) {
+    for (const f of section.fields) {
+      if (f.value) mergedValues[f.id] = f.value
+    }
+  }
+  for (const [k, val] of Object.entries(
+    (MOCK_COUNSELLOR.fields as Record<string, string>) ?? {},
+  )) {
+    mergedValues[k] = val
+  }
+  for (const [k, val] of Object.entries(fieldValues)) {
+    if (val !== undefined && val !== '') mergedValues[k] = val
+    else if (val === '') delete mergedValues[k]
+  }
+
+  // Completion %: fraction of non-principal fields with a non-empty value
+  const allFields = template.sections
+    .filter((s) => s.role !== 'principal')
+    .flatMap((s) => s.fields)
+  const filledCount = allFields.filter((f) => !!mergedValues[f.id]).length
+  const completionPct = allFields.length
+    ? Math.round((filledCount / allFields.length) * 100)
+    : 0
+
+  const reviewableSections = template.sections.filter(
+    (s) => s.role !== 'principal',
+  )
+  const reviewedCount = reviewableSections.filter((s) =>
+    completedSections.has(s.id),
+  ).length
 
   return (
     <div className="flex h-[calc(100vh-120px)] flex-col overflow-hidden rounded-xl border bg-white">
       {/* Form header */}
       <div className="flex shrink-0 items-center gap-3 border-b px-4 py-2.5">
-        <button onClick={onBack} className="rounded p-1 text-muted-foreground hover:bg-muted">
+        <button
+          onClick={onBack}
+          className="rounded p-1 text-muted-foreground hover:bg-muted"
+        >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span
-              className="h-2.5 w-2.5 rounded-full"
-              style={{ background: template.id === 'cps' ? '#dc2626' : '#2563eb' }}
-            />
-            <span className="font-semibold">{template.name}</span>
-          </div>
-          <p className="text-xs text-muted-foreground">
+        <AgencyIcon abbrev={template.abbrev} color={template.color} />
+        <div className="flex-1 min-w-0">
+          <span className="font-semibold">{template.name}</span>
+          <p className="text-xs text-muted-foreground truncate">
             {studentName} · {studentClass}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setPreviewOpen((p) => !p)}>
+
+        {/* Completion % indicator */}
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              'text-xs font-mono font-semibold tabular-nums',
+              completionPct === 100 ? 'text-green-600' : 'text-foreground',
+            )}
+          >
+            {completionPct}%
+          </span>
+          <div className="h-1 w-14 overflow-hidden rounded-full bg-muted">
+            <div
+              className={cn(
+                'h-full transition-all',
+                completionPct === 100 ? 'bg-green-500' : 'bg-amber-500',
+              )}
+              style={{ width: `${completionPct}%` }}
+            />
+          </div>
+        </div>
+
+        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+          {savedStatus === 'saving' ? (
+            <>
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              Saving…
+            </>
+          ) : (
+            <>
+              <Check className="h-3 w-3 text-green-600" />
+              Saved
+            </>
+          )}
+        </span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={saveDraft}
+          className="text-muted-foreground"
+        >
+          Save as draft
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setPreviewOpen((p) => !p)}
+        >
           <PanelRight className="mr-1.5 h-3.5 w-3.5" />
           {previewOpen ? 'Hide' : 'Show'} Preview
         </Button>
@@ -571,54 +994,88 @@ function ReportForm({
       </div>
 
       <div className="flex min-h-0 flex-1">
-        {/* Section nav */}
-        <div className="w-48 shrink-0 overflow-y-auto border-r bg-muted/30 py-2">
-          {template.sections.map((s) => {
-            const active = s.id === activeSection
-            const locked = s.role !== 'yh'
-            const done = completedSections.has(s.id)
-            return (
-              <button
-                key={s.id}
-                onClick={() => !locked && setActiveSection(s.id)}
-                className={cn(
-                  'flex w-full items-center gap-1.5 border-r-2 px-4 py-2 text-left text-sm transition-colors',
-                  active ? 'border-primary bg-white font-medium text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
-                  locked ? 'cursor-default opacity-50' : 'cursor-pointer',
-                )}
-              >
-                {done && <Check className="h-3 w-3 shrink-0 text-green-600" />}
-                {locked && !done && <Lock className="h-3 w-3 shrink-0" />}
-                <span className="flex-1 truncate">{s.title}</span>
-                {s.role === 'principal' && (
-                  <Badge className="text-[10px] bg-purple-50 text-purple-700 hover:bg-purple-50 px-1">P</Badge>
-                )}
-                {s.role === 'counsellor' && (
-                  <Badge className="text-[10px] bg-blue-50 text-blue-700 hover:bg-blue-50 px-1">SC</Badge>
-                )}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Form body */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <SectionPanel
-            section={currentSection}
-            fieldValues={fieldValues}
-            aiFlags={aiFlags}
-            onValueChange={updateField}
-            onAiDraft={aiDraft}
-            onMarkComplete={markComplete}
-            isComplete={completedSections.has(currentSection.id)}
-          />
-        </div>
-
-        {/* PDF preview */}
-        {previewOpen && (
-          <div className="w-56 shrink-0">
-            <PdfPreview template={template} onClose={() => setPreviewOpen(false)} />
+        {/* Left form panel: ~40% */}
+        <div
+          className="flex min-w-0 shrink-0 flex-col border-r"
+          style={{ width: previewOpen ? '40%' : '100%', minWidth: 360 }}
+        >
+          {/* Progress chip */}
+          <div className="flex shrink-0 items-center gap-2 border-b bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
+            <ListChecks className="h-3.5 w-3.5" />
+            <span className="font-medium text-foreground">
+              {reviewedCount} of {reviewableSections.length} sections verified
+            </span>
           </div>
+
+          <div className="flex min-h-0 flex-1">
+            {/* Section nav */}
+            <div className="w-44 shrink-0 overflow-y-auto border-r bg-muted/30 py-2">
+              {template.sections.map((s) => {
+                const active = s.id === activeSection
+                const isPrincipal = s.role === 'principal'
+                const isCounsellor = s.role === 'counsellor'
+                const done = completedSections.has(s.id)
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => !isPrincipal && setActiveSection(s.id)}
+                    className={cn(
+                      'flex w-full items-center gap-1.5 border-r-2 px-3 py-2 text-left text-sm transition-colors',
+                      active
+                        ? 'border-primary bg-white font-medium text-foreground'
+                        : 'border-transparent text-muted-foreground hover:text-foreground',
+                      isPrincipal
+                        ? 'cursor-default opacity-50'
+                        : 'cursor-pointer',
+                    )}
+                  >
+                    {done && (
+                      <Check className="h-3 w-3 shrink-0 text-green-600" />
+                    )}
+                    {isCounsellor && !done && (
+                      <Check className="h-3 w-3 shrink-0 text-blue-500" />
+                    )}
+                    {isPrincipal && !done && (
+                      <Lock className="h-3 w-3 shrink-0" />
+                    )}
+                    <span className="flex-1 truncate">{s.title}</span>
+                    {isPrincipal && (
+                      <Badge className="text-[10px] bg-purple-50 text-purple-700 hover:bg-purple-50 px-1">
+                        P
+                      </Badge>
+                    )}
+                    {isCounsellor && (
+                      <Badge className="text-[10px] bg-blue-50 text-blue-700 hover:bg-blue-50 px-1">
+                        SC
+                      </Badge>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Form body */}
+            <div className="flex-1 overflow-y-auto p-5">
+              <SectionPanel
+                section={currentSection}
+                fieldValues={fieldValues}
+                aiFlags={aiFlags}
+                onValueChange={updateField}
+                onAiDraft={aiDraft}
+                onToggleReviewed={toggleReviewed}
+                isReviewed={completedSections.has(currentSection.id)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Right: static template reference */}
+        {previewOpen && (
+          <DocumentPreview
+            template={template}
+            scale={previewScale}
+            onScaleChange={setPreviewScale}
+          />
         )}
       </div>
     </div>
@@ -626,12 +1083,6 @@ function ReportForm({
 }
 
 // ── S6/S7 Review & Submit ─────────────────────────────────────
-
-const STATUS_ICONS: Record<string, React.ReactNode> = {
-  complete: <Check className="h-3.5 w-3.5 text-green-600" />,
-  locked: <Lock className="h-3.5 w-3.5 text-purple-500" />,
-  locked_sc: <Lock className="h-3.5 w-3.5 text-blue-500" />,
-}
 
 function ReviewSubmit({
   template,
@@ -645,178 +1096,179 @@ function ReviewSubmit({
   onSubmit: () => void
 }) {
   const [note, setNote] = useState('')
+  const asset = templateReferenceAsset(template)
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">Review & Submit</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {template.name} · {studentName}
-        </p>
-      </div>
-
-      {/* Completion checklist */}
-      <div className="rounded-xl border bg-white">
-        <div className="border-b px-5 py-3">
-          <h3 className="font-semibold">Completion checklist</h3>
+    <div className="flex h-[calc(100vh-120px)] flex-col overflow-hidden rounded-xl border bg-white">
+      <div className="flex shrink-0 items-center gap-3 border-b px-5 py-3">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-base font-semibold truncate">Review &amp; Submit</h2>
+          <p className="text-xs text-muted-foreground truncate">
+            {template.name} · {studentName}
+          </p>
         </div>
-        <div className="divide-y">
-          {template.sections.map((s) => (
-            <div key={s.id} className="flex items-center gap-3 px-5 py-3">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted">
-                {s.role === 'yh'
-                  ? STATUS_ICONS.complete
-                  : s.role === 'principal'
-                    ? STATUS_ICONS.locked
-                    : STATUS_ICONS.locked_sc}
-              </div>
-              <span className="flex-1 text-sm">{s.title}</span>
-              {s.role === 'yh' && (
-                <Badge className="bg-green-50 text-green-700 hover:bg-green-50">Completed</Badge>
-              )}
-              {s.role === 'principal' && (
-                <Badge className="bg-purple-50 text-purple-700 hover:bg-purple-50">Awaiting Principal</Badge>
-              )}
-              {s.role === 'counsellor' && (
-                <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50">Awaiting Counsellor</Badge>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Note to Principal */}
-      <div className="rounded-xl border bg-white p-5 space-y-3">
-        <h3 className="font-semibold">Note to Principal (optional)</h3>
-        <p className="text-sm text-muted-foreground">
-          Flag anything specific for the Principal's attention before they review.
-        </p>
-        <textarea
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder="e.g. Counselling details needed in Section 5. Housing info may be outdated."
-          className="w-full resize-none rounded-lg border px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary min-h-[80px]"
-        />
-      </div>
-
-      <div className="flex justify-between pt-2">
-        <Button variant="outline" onClick={onBack}>
+        <Button variant="outline" size="sm" onClick={onBack}>
           <ArrowLeft className="mr-1 h-4 w-4" />
           Back to form
         </Button>
-        <Button onClick={onSubmit}>
+        <Button size="sm" onClick={onSubmit}>
           Submit for Principal Review
           <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
+      </div>
+
+      <div className="flex min-h-0 flex-1">
+        {/* Full-width document preview */}
+        <div
+          className="flex-1 overflow-auto"
+          style={{ background: PREVIEW_BG, padding: 24 }}
+        >
+          {asset?.kind === 'pdf' ? (
+            <iframe
+              src={`${asset.src}#toolbar=0&navpanes=0&view=FitH`}
+              title={`${template.name} blank template`}
+              style={{
+                width: '100%',
+                maxWidth: 820,
+                height: '100%',
+                minHeight: 900,
+                border: 'none',
+                margin: '0 auto',
+                display: 'block',
+                background: '#fff',
+                boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
+              }}
+            />
+          ) : asset?.kind === 'image' ? (
+            <img
+              src={asset.src}
+              alt={`${template.name} blank template`}
+              style={{
+                width: '100%',
+                maxWidth: 820,
+                display: 'block',
+                margin: '0 auto',
+                background: '#fff',
+                boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
+              }}
+            />
+          ) : (
+            <div className="rounded-lg bg-white p-10 text-center text-sm text-muted-foreground">
+              No template preview available.
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar: compact checklist + Note to Principal */}
+        <aside className="w-80 shrink-0 overflow-y-auto border-l bg-white">
+          <div className="border-b px-4 py-3">
+            <h3 className="text-sm font-semibold">Completion checklist</h3>
+          </div>
+          <div className="divide-y">
+            {template.sections.map((s) => (
+              <div key={s.id} className="flex items-center gap-2 px-4 py-2.5">
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-muted">
+                  {s.role === 'yh' ? (
+                    <Check className="h-3 w-3 text-green-600" />
+                  ) : s.role === 'principal' ? (
+                    <Lock className="h-3 w-3 text-purple-500" />
+                  ) : (
+                    <Check className="h-3 w-3 text-blue-500" />
+                  )}
+                </div>
+                <span className="flex-1 truncate text-xs">{s.title}</span>
+                {s.role === 'yh' && (
+                  <Badge className="bg-green-50 text-green-700 hover:bg-green-50 text-[10px] px-1.5">
+                    Done
+                  </Badge>
+                )}
+                {s.role === 'principal' && (
+                  <Badge className="bg-purple-50 text-purple-700 hover:bg-purple-50 text-[10px] px-1.5">
+                    P
+                  </Badge>
+                )}
+                {s.role === 'counsellor' && (
+                  <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 text-[10px] px-1.5">
+                    SC
+                  </Badge>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2 border-t p-4">
+            <label
+              htmlFor="note-to-principal"
+              className="block text-sm font-semibold"
+            >
+              Note to Principal{' '}
+              <span className="text-xs font-normal text-muted-foreground">
+                (optional)
+              </span>
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Flag anything specific before they review.
+            </p>
+            <textarea
+              id="note-to-principal"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="e.g. Counselling details needed in Section 5. Housing info may be outdated."
+              className="min-h-[100px] w-full resize-none rounded-lg border px-3 py-2 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+            />
+          </div>
+        </aside>
       </div>
     </div>
   )
 }
 
-// ── S8 Principal Review ───────────────────────────────────────
+// ── S8 Submitted Status (replaces PrincipalReview) ────────────
 
-function PrincipalReview({
+function SubmittedStatus({
   template,
   studentName,
-  onRequestRevisions,
-  onApprove,
+  onDownload,
 }: {
   template: AgencyTemplate
   studentName: string
-  onRequestRevisions: () => void
-  onApprove: () => void
+  onDownload: () => void
 }) {
   return (
-    <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <div className="flex-1">
-          <h2 className="text-xl font-semibold">Principal Review</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {template.name} · {studentName}
-          </p>
-        </div>
-        <Badge className="bg-amber-50 text-amber-700 hover:bg-amber-50">Pending Review</Badge>
+    <div className="flex flex-col items-center gap-5 py-10 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-50">
+        <Clock className="h-7 w-7 text-amber-600" />
       </div>
-
-      <div className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800">
-        <strong>Note from YH (Mrs. Tan Mei Lin):</strong> Counselling details needed in Section 5. Housing info may be outdated.
+      <div>
+        <h2 className="text-xl font-semibold">
+          Submitted for Principal Review
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {template.name} · {studentName}
+        </p>
       </div>
-
-      <div className="space-y-3">
-        {template.sections.map((s) => (
-          <div key={s.id} className="rounded-xl border bg-white p-5">
-            <div className="mb-4 flex items-center gap-2">
-              <h4 className="flex-1 font-semibold">{s.title}</h4>
-              {s.role === 'yh' && (
-                <Badge className="gap-1 bg-green-50 text-green-700 hover:bg-green-50">
-                  <Check className="h-3 w-3" /> Completed by YH
-                </Badge>
-              )}
-              {s.role === 'principal' && (
-                <Badge className="bg-primary/10 text-primary hover:bg-primary/10">Your input needed</Badge>
-              )}
-              {s.role === 'counsellor' && (
-                <Badge className="gap-1 bg-blue-50 text-blue-700 hover:bg-blue-50">
-                  <Lock className="h-3 w-3" /> Awaiting Counsellor
-                </Badge>
-              )}
-            </div>
-
-            {s.role === 'yh' && (
-              <div className="space-y-0 opacity-80">
-                {s.fields.slice(0, 3).map((f) => (
-                  <div key={f.id} className="flex border-b py-2 text-sm last:border-0">
-                    <span className="w-2/5 text-muted-foreground">{f.label}</span>
-                    <span className="flex-1 font-medium">{f.value || '—'}</span>
-                  </div>
-                ))}
-                {s.fields.length > 3 && (
-                  <p className="pt-1 text-xs text-muted-foreground">+ {s.fields.length - 3} more fields</p>
-                )}
-                <div className="pt-3">
-                  <Button variant="ghost" size="sm" className="h-7 text-muted-foreground">
-                    <MessageSquare className="mr-1.5 h-3.5 w-3.5" />
-                    Add comment
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {s.role === 'principal' &&
-              s.fields.map((f) => (
-                <div key={f.id} className="mb-3 last:mb-0">
-                  <label className="mb-1.5 block text-sm font-medium">{f.label}</label>
-                  <textarea
-                    placeholder="Enter your remarks…"
-                    className="w-full min-h-[80px] resize-y rounded-lg border-2 border-primary bg-primary/5 px-3.5 py-2.5 text-sm outline-none transition-colors focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-              ))}
-
-            {s.role === 'counsellor' && (
-              <div className="flex flex-col items-center gap-1.5 rounded-xl border-2 border-dashed py-8 text-center text-muted-foreground">
-                <Lock className="h-4 w-4" />
-                <p className="text-sm">Awaiting School Counsellor input</p>
-              </div>
-            )}
+      <div className="w-full max-w-sm rounded-xl border bg-white p-5 text-left">
+        <div className="flex items-center gap-3">
+          <AgencyIcon abbrev={template.abbrev} color={template.color} />
+          <div className="flex-1">
+            <Badge className="gap-1 bg-amber-50 text-amber-700 hover:bg-amber-50">
+              <Clock className="h-3 w-3" />
+              Pending Principal Review
+            </Badge>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Submitted 20 Apr 2026. You'll be notified once approved.
+            </p>
           </div>
-        ))}
+        </div>
       </div>
-
-      <div className="flex items-center gap-3 border-t pt-5">
-        <Button
-          variant="outline"
-          className="border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-700"
-          onClick={onRequestRevisions}
-        >
-          Request Revisions
-        </Button>
-        <div className="flex-1" />
-        <Button className="bg-green-600 hover:bg-green-700" onClick={onApprove}>
-          <Check className="mr-1.5 h-4 w-4" />
-          Approve
-        </Button>
-      </div>
+      <p className="max-w-sm text-sm text-muted-foreground">
+        Once the Principal has reviewed and approved the report, you can
+        download and send it.
+      </p>
+      <Button onClick={onDownload}>
+        Continue to Export
+        <ChevronRight className="ml-1 h-4 w-4" />
+      </Button>
     </div>
   )
 }
@@ -835,6 +1287,7 @@ function ExportPassword({
   onDownload: () => void
 }) {
   const [showPw, setShowPw] = useState(false)
+  const [pw, setPw] = useState('')
 
   return (
     <div className="space-y-5">
@@ -856,37 +1309,55 @@ function ExportPassword({
           <FileText className="h-8 w-8 text-muted-foreground" />
         </div>
         <p className="font-medium">{template.name}.pdf</p>
-        <p className="text-sm text-muted-foreground">{template.pages} pages · Password protected</p>
+        <p className="text-sm text-muted-foreground">
+          {template.pages} pages · Password protected
+        </p>
       </div>
 
-      {/* Password management */}
+      {/* Password protect this report */}
       <div className="rounded-xl border bg-white p-5 space-y-4">
         <div className="flex items-center gap-2">
           <Lock className="h-4 w-4 text-muted-foreground" />
-          <span className="font-semibold">Password Management</span>
+          <span className="font-semibold">Password protect this report</span>
           <Badge className="ml-1 gap-1 bg-purple-50 text-purple-700 hover:bg-purple-50 text-[11px]">
             <Lock className="h-2.5 w-2.5" />
             YH, DM &amp; SLs only
           </Badge>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="w-32 shrink-0 text-sm text-muted-foreground">Password on file:</span>
-          <input
-            type={showPw ? 'text' : 'password'}
-            defaultValue="CPS2026Jun"
-            className="flex-1 rounded-lg border px-3 py-2 font-mono text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-          />
-          <Button variant="ghost" size="sm" onClick={() => setShowPw((p) => !p)}>
-            {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            {showPw ? 'Hide' : 'Show'}
-          </Button>
+        <div className="space-y-1.5">
+          <label
+            htmlFor="report-password"
+            className="block text-sm font-medium"
+          >
+            Enter a password for this PDF.
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              id="report-password"
+              type={showPw ? 'text' : 'password'}
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              placeholder="Enter password"
+              className="flex-1 rounded-lg border px-3 py-2 font-mono text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPw((p) => !p)}
+            >
+              {showPw ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+              {showPw ? 'Hide' : 'Show'}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            TW will remember this password for future reference.
+          </p>
         </div>
-
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          <input type="checkbox" defaultChecked className="accent-primary" />
-          Save for future reports to {template.agency}
-        </label>
       </div>
 
       <div className="flex gap-3">
@@ -922,16 +1393,16 @@ function Confirmation({
         <Check className="h-8 w-8 text-green-600" />
       </div>
       <div>
-        <h2 className="text-2xl font-semibold">Report Exported &amp; Archived</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{template.name} for {studentName}</p>
+        <h2 className="text-2xl font-semibold">
+          Report Exported &amp; Archived
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {template.name} for {studentName}
+        </p>
       </div>
-      <p className="max-w-sm text-sm text-muted-foreground">
-        After emailing to {template.agency}, mark this report as 'Sent' to update the status.
-      </p>
-
       <div className="mt-4 flex w-full max-w-xs flex-col gap-3">
         <Button onClick={onStartNext} className="w-full justify-center">
-          Start next report (NUH Referral)
+          Start next report
           <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
         <Button variant="outline" className="w-full justify-center" asChild>
@@ -959,24 +1430,26 @@ function AgencyReportWizardPage() {
   const navigate = useNavigate()
 
   const [step, setStep] = useState<WizardStep>('templates')
-  const [selectedTemplates, setSelectedTemplates] = useState<string[]>([])
-  const [sources, setSources] = useState<DataSource[]>(DATA_SOURCES)
+  const [selectedTemplates, setSelectedTemplates] = useState<Array<string>>([])
 
   useSetBreadcrumbs([
     { label: 'Home', href: '/' },
     { label: 'Profile', href: '/students' },
     { label: student.name, href: `/students/${student.id}` },
-    { label: 'New Agency Report', href: `/students/${student.id}/agency-report/new` },
+    {
+      label: 'New Agency Report',
+      href: `/students/${student.id}/agency-report/new`,
+    },
   ])
 
   const toggleTemplate = (id: string) =>
-    setSelectedTemplates((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
-
-  const toggleSource = (id: string) =>
-    setSources((p) => p.map((s) => (s.id === id ? { ...s, checked: !s.checked } : s)))
+    setSelectedTemplates((p) =>
+      p.includes(id) ? p.filter((x) => x !== id) : [...p, id],
+    )
 
   const activeTemplate =
-    AGENCY_TEMPLATES.find((t) => t.id === selectedTemplates[0]) ?? AGENCY_TEMPLATES[0]
+    AGENCY_TEMPLATES.find((t) => t.id === selectedTemplates[0]) ??
+    AGENCY_TEMPLATES[0]
 
   const showStepBar = step !== 'done'
 
@@ -984,8 +1457,12 @@ function AgencyReportWizardPage() {
     <div className="flex min-h-screen flex-col bg-muted/20">
       {/* Mini top bar */}
       <div className="flex items-center gap-2 border-b bg-white px-5 py-2.5">
-        <span className="text-sm font-semibold text-primary">Teacher Workspace</span>
-        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary">Beta</span>
+        <span className="text-sm font-semibold text-primary">
+          Teacher Workspace
+        </span>
+        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary">
+          Beta
+        </span>
         <div className="flex-1" />
         <span className="text-sm text-muted-foreground">Student Insights</span>
         <span className="text-sm text-muted-foreground">/</span>
@@ -1003,25 +1480,27 @@ function AgencyReportWizardPage() {
       <main
         className={cn(
           'mx-auto w-full flex-1 py-6',
-          step === 'form' ? 'max-w-full px-6' : 'max-w-2xl px-5',
+          step === 'form' || step === 'review'
+            ? 'max-w-full px-6'
+            : step === 'templates'
+              ? 'max-w-5xl px-6'
+              : 'max-w-2xl px-5',
         )}
       >
         {step === 'templates' && (
           <TemplateSelection
             studentName={student.name}
             studentClass={student.class}
+            studentId={student.id}
             selected={selectedTemplates}
             onToggle={toggleTemplate}
-            onBack={() => navigate({ to: '/students/$id', params: { id: student.id } })}
-            onContinue={() => setStep('sources')}
-          />
-        )}
-
-        {step === 'sources' && (
-          <SourceSelection
-            sources={sources}
-            onToggle={toggleSource}
-            onBack={() => setStep('templates')}
+            onSelectAndContinue={(id) => {
+              setSelectedTemplates([id])
+              setStep('form')
+            }}
+            onBack={() =>
+              navigate({ to: '/students/$id', params: { id: student.id } })
+            }
             onContinue={() => setStep('form')}
           />
         )}
@@ -1031,7 +1510,7 @@ function AgencyReportWizardPage() {
             template={activeTemplate}
             studentName={student.name}
             studentClass={student.class}
-            onBack={() => setStep('sources')}
+            onBack={() => setStep('templates')}
             onSubmitForReview={() => setStep('review')}
           />
         )}
@@ -1041,16 +1520,15 @@ function AgencyReportWizardPage() {
             template={activeTemplate}
             studentName={student.name}
             onBack={() => setStep('form')}
-            onSubmit={() => setStep('p-review')}
+            onSubmit={() => setStep('submitted')}
           />
         )}
 
-        {step === 'p-review' && (
-          <PrincipalReview
+        {step === 'submitted' && (
+          <SubmittedStatus
             template={activeTemplate}
             studentName={student.name}
-            onRequestRevisions={() => setStep('form')}
-            onApprove={() => setStep('export')}
+            onDownload={() => setStep('export')}
           />
         )}
 
@@ -1058,7 +1536,7 @@ function AgencyReportWizardPage() {
           <ExportPassword
             template={activeTemplate}
             studentName={student.name}
-            onBack={() => setStep('p-review')}
+            onBack={() => setStep('submitted')}
             onDownload={() => setStep('done')}
           />
         )}
