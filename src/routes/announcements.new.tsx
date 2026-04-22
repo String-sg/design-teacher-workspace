@@ -1067,6 +1067,7 @@ function NewAnnouncementPage() {
   const [draftFilesMeta, setDraftFilesMeta] = useState<Array<FileMeta>>([])
   const [draftPhotosMeta, setDraftPhotosMeta] = useState<Array<FileMeta>>([])
   const [draftLoaded, setDraftLoaded] = useState(false)
+  const [fileBannerDismissed, setFileBannerDismissed] = useState(false)
 
   // Debounced auto-save — persists to localStorage 2 s after any form state change
   useEffect(() => {
@@ -1885,8 +1886,9 @@ function NewAnnouncementPage() {
               </div>
             )}
 
-            {/* 30-day media retention banner — when reopening a draft or editing a saved draft with files/photos */}
-            {(draftLoaded || isEditing) &&
+            {/* 30-day media retention banner — dismissable per session, resets on each entry */}
+            {!fileBannerDismissed &&
+              (draftLoaded || isEditing) &&
               (draftFilesMeta.length > 0 || draftPhotosMeta.length > 0) &&
               (() => {
                 const allMeta = [...draftFilesMeta, ...draftPhotosMeta]
@@ -1908,7 +1910,7 @@ function NewAnnouncementPage() {
                 return (
                   <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs">
                     <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
-                    <div>
+                    <div className="flex-1">
                       <p className="font-semibold text-amber-900">
                         {mediaLabel} from this draft{' '}
                         {minDays === 0
@@ -1920,6 +1922,14 @@ function NewAnnouncementPage() {
                         Re-upload them before posting to avoid losing them.
                       </p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setFileBannerDismissed(true)}
+                      className="shrink-0 rounded p-0.5 text-amber-500 hover:bg-amber-100 hover:text-amber-700"
+                      aria-label="Dismiss"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 )
               })()}
