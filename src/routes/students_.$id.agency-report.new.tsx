@@ -75,7 +75,6 @@ const STEP_MAP: Record<WizardStep, number> = {
 }
 
 const PREVIEW_SCALES = [0.55, 0.68, 0.82, 1] as const
-const PREVIEW_BG = '#E8E6E0'
 
 function StepBar({ step }: { step: WizardStep }) {
   const cur = STEP_MAP[step]
@@ -790,18 +789,7 @@ function TemplateReferenceBody({
   const asset = templateReferenceAsset(template)
   if (!asset) {
     return (
-      <div
-        style={{
-          background: '#fff',
-          width: 680,
-          margin: '0 auto',
-          padding: '80px 40px',
-          boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
-          textAlign: 'center',
-          color: '#888',
-          fontSize: 14,
-        }}
-      >
+      <div className="mx-auto w-[680px] max-w-full rounded-md bg-card px-10 py-20 text-center text-sm text-muted-foreground shadow-lg">
         No template preview available for {template.name}.
       </div>
     )
@@ -812,15 +800,7 @@ function TemplateReferenceBody({
       <iframe
         src={`${asset.src}#toolbar=0&navpanes=0&view=FitH`}
         title={`${template.name} blank template`}
-        style={{
-          width: 720,
-          height: 1000,
-          border: 'none',
-          margin: '0 auto',
-          display: 'block',
-          background: '#fff',
-          boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
-        }}
+        className="mx-auto block h-[1000px] w-[720px] max-w-full rounded-md border-0 bg-card shadow-lg"
       />
     )
   }
@@ -829,14 +809,7 @@ function TemplateReferenceBody({
     <img
       src={asset.src}
       alt={`${template.name} blank template`}
-      style={{
-        width: 720,
-        maxWidth: '100%',
-        display: 'block',
-        margin: '0 auto',
-        background: '#fff',
-        boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
-      }}
+      className="mx-auto block w-[720px] max-w-full rounded-md bg-card shadow-lg"
     />
   )
 }
@@ -851,52 +824,23 @@ function DocumentPreview({
   onScaleChange: (s: number) => void
 }) {
   return (
-    <div
-      style={{
-        flex: 1,
-        overflow: 'auto',
-        background: PREVIEW_BG,
-        padding: 20,
-        minWidth: 0,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 12,
-          padding: '0 4px',
-        }}
-      >
-        <span
-          style={{
-            fontSize: 10.5,
-            fontWeight: 650,
-            color: '#555',
-            letterSpacing: 0.5,
-          }}
-        >
-          TEMPLATE REFERENCE — {template.name}
+    <div className="min-w-0 flex-1 overflow-auto bg-slate-2 p-5">
+      <div className="mb-3 flex items-center justify-between px-1">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          Template reference · {template.name}
         </span>
-        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-          <span style={{ fontSize: 9.5, color: '#888' }}>Zoom</span>
+        <div className="flex items-center gap-1">
+          <span className="mr-1 text-[11px] text-muted-foreground">Zoom</span>
           {PREVIEW_SCALES.map((s) => (
             <button
               key={s}
               onClick={() => onScaleChange(s)}
-              style={{
-                width: 32,
-                height: 22,
-                borderRadius: 4,
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 10,
-                fontWeight: 700,
-                fontFamily: 'ui-monospace, monospace',
-                background: scale === s ? '#1f2937' : '#fff',
-                color: scale === s ? '#fff' : '#555',
-              }}
+              className={cn(
+                'h-6 w-9 rounded-md font-mono text-[10px] font-semibold transition-colors',
+                scale === s
+                  ? 'bg-foreground text-background'
+                  : 'bg-card text-muted-foreground hover:bg-muted',
+              )}
             >
               {Math.round(s * 100)}%
             </button>
@@ -904,8 +848,8 @@ function DocumentPreview({
         </div>
       </div>
       <div
+        className="origin-top"
         style={{
-          transformOrigin: 'top center',
           transform: `scale(${scale})`,
           width: `${100 / scale}%`,
         }}
@@ -1027,25 +971,31 @@ function ReportForm({
 
   return (
     <div className="flex h-[calc(100vh-120px)] flex-col overflow-hidden rounded-xl border bg-white">
-      {/* Form header */}
-      <div className="flex shrink-0 items-center gap-3 border-b px-4 py-2.5">
-        <button
+      {/* Form header — mirrors Posts new-post top bar */}
+      <div className="flex shrink-0 items-center gap-3 border-b bg-card px-4 py-3">
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onBack}
-          className="rounded p-1 text-muted-foreground hover:bg-muted"
+          className="text-muted-foreground"
         >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
+          <ArrowLeft className="mr-1 h-4 w-4" />
+          Back
+        </Button>
+        <div className="h-5 w-px bg-border" />
         <AgencyIcon abbrev={template.abbrev} color={template.color} />
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="font-semibold">{template.name}</span>
+            <span className="truncate text-sm font-semibold">
+              {template.name}
+            </span>
             {(() => {
               const days = template.turnaroundDays
               const cls =
                 days < 0
-                  ? 'text-red-600'
+                  ? 'text-crimson-11'
                   : days <= 2
-                    ? 'text-amber-600'
+                    ? 'text-amber-11'
                     : 'text-muted-foreground'
               return (
                 <span
@@ -1062,7 +1012,7 @@ function ReportForm({
               )
             })()}
           </div>
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="truncate text-xs text-muted-foreground">
             {studentName} · {studentClass}
           </p>
         </div>
@@ -1071,17 +1021,17 @@ function ReportForm({
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              'text-xs font-mono font-semibold tabular-nums',
-              completionPct === 100 ? 'text-green-600' : 'text-foreground',
+              'font-mono text-xs font-semibold tabular-nums',
+              completionPct === 100 ? 'text-lime-11' : 'text-foreground',
             )}
           >
             {completionPct}%
           </span>
-          <div className="h-1 w-14 overflow-hidden rounded-full bg-muted">
+          <div className="h-1 w-16 overflow-hidden rounded-full bg-muted">
             <div
               className={cn(
                 'h-full transition-all',
-                completionPct === 100 ? 'bg-green-500' : 'bg-amber-500',
+                completionPct === 100 ? 'bg-lime-9' : 'bg-amber-9',
               )}
               style={{ width: `${completionPct}%` }}
             />
@@ -1096,11 +1046,12 @@ function ReportForm({
             </>
           ) : (
             <>
-              <Check className="h-3 w-3 text-green-600" />
+              <Check className="h-3 w-3 text-lime-11" />
               Saved
             </>
           )}
         </span>
+        <div className="h-5 w-px bg-border" />
         <Button
           variant="ghost"
           size="sm"
@@ -1240,38 +1191,18 @@ function ReviewSubmit({
 
       <div className="flex min-h-0 flex-1">
         {/* Full-width document preview */}
-        <div
-          className="flex-1 overflow-auto"
-          style={{ background: PREVIEW_BG, padding: 24 }}
-        >
+        <div className="flex-1 overflow-auto bg-slate-2 p-6">
           {asset?.kind === 'pdf' ? (
             <iframe
               src={`${asset.src}#toolbar=0&navpanes=0&view=FitH`}
               title={`${template.name} blank template`}
-              style={{
-                width: '100%',
-                maxWidth: 820,
-                height: '100%',
-                minHeight: 900,
-                border: 'none',
-                margin: '0 auto',
-                display: 'block',
-                background: '#fff',
-                boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
-              }}
+              className="mx-auto block h-full min-h-[900px] w-full max-w-[820px] rounded-md border-0 bg-card shadow-lg"
             />
           ) : asset?.kind === 'image' ? (
             <img
               src={asset.src}
               alt={`${template.name} blank template`}
-              style={{
-                width: '100%',
-                maxWidth: 820,
-                display: 'block',
-                margin: '0 auto',
-                background: '#fff',
-                boxShadow: '0 2px 20px rgba(0,0,0,0.1)',
-              }}
+              className="mx-auto block w-full max-w-[820px] rounded-md bg-card shadow-lg"
             />
           ) : (
             <div className="rounded-lg bg-white p-10 text-center text-sm text-muted-foreground">
