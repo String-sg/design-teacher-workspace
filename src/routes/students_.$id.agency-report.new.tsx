@@ -898,7 +898,7 @@ function ReportForm({
   const [completedSections, setCompletedSections] = useState<Set<string>>(
     new Set(),
   )
-  const [previewOpen, setPreviewOpen] = useState(true)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const [previewScale, setPreviewScale] = useState<number>(0.68)
   const [savedStatus, setSavedStatus] = useState<'saved' | 'saving'>('saved')
   const scrollRef = useRef<HTMLDivElement>(null)
