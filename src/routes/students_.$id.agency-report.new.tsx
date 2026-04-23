@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Link,
   createFileRoute,
@@ -190,41 +190,11 @@ const TEMPLATE_CATEGORIES = [
   { id: 'general', label: 'General', ids: ['nric-report'] },
 ]
 
-function addBusinessDays(from: Date, days: number): Date {
-  const d = new Date(from)
-  let added = 0
-  while (added < days) {
-    d.setDate(d.getDate() + 1)
-    const dow = d.getDay()
-    if (dow !== 0 && dow !== 6) added++
-  }
-  return d
-}
-
-function formatDueDate(date: Date): string {
-  return date.toLocaleDateString('en-SG', { day: 'numeric', month: 'short' })
-}
-
 function templatePreviewImg(template: AgencyTemplate): string | null {
   if (!template.templateFile) return null
   const filename = template.templateFile.split('/').pop() ?? ''
   const base = filename.replace(/\.(docx?|pdf)$/i, '')
   return `/report-previews/${base}-thumb.png`
-}
-
-function TemplateThumbnail({ template }: { template: AgencyTemplate }) {
-  const src = templatePreviewImg(template)
-  return (
-    <div className="h-[120px] w-full overflow-hidden rounded-t-lg bg-white">
-      {src && (
-        <img
-          src={src}
-          alt={`${template.name} first page`}
-          className="h-full w-full object-cover object-top"
-        />
-      )}
-    </div>
-  )
 }
 
 function TemplateSelection({
@@ -246,14 +216,32 @@ function TemplateSelection({
   onBack: () => void
   onContinue: () => void
 }) {
-  const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [multiSelect, setMultiSelect] = useState(false)
+  const [activeCat, setActiveCat] = useState<string>(
+    TEMPLATE_CATEGORIES[0]?.id ?? '',
+  )
 
   const inProgressReports = mockAgencyReports.filter(
     (r) =>
       r.studentId === studentId &&
       (r.status === 'draft' || r.status === 'pending_review'),
   )
+
+  useEffect(() => {
+    const onScroll = () => {
+      let current = TEMPLATE_CATEGORIES[0]?.id ?? ''
+      for (const cat of TEMPLATE_CATEGORIES) {
+        const el = document.getElementById(`cat-${cat.id}`)
+        if (!el) continue
+        const rect = el.getBoundingClientRect()
+        if (rect.top <= 140) current = cat.id
+      }
+      setActiveCat(current)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
     <div className="space-y-5">
@@ -281,104 +269,159 @@ function TemplateSelection({
         </Button>
       </div>
 
-      {TEMPLATE_CATEGORIES.map((cat) => {
-        const catTemplates = cat.ids
-          .map((id) => AGENCY_TEMPLATES.find((t) => t.id === id))
-          .filter(Boolean) as Array<AgencyTemplate>
-        if (catTemplates.length === 0) return null
-        return (
-          <div key={cat.id}>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {cat.label}
-            </p>
-            <div className="grid grid-cols-3 gap-2 lg:grid-cols-4">
-              {catTemplates.map((tpl) => {
-                const on = selected.includes(tpl.id)
-                const inProgress = inProgressReports.find(
-                  (r) => r.templateId === tpl.id,
-                )
-                const dueDate = inProgress?.startedAt
-                  ? formatDueDate(
-                      addBusinessDays(inProgress.startedAt, tpl.turnaroundDays),
-                    )
-                  : null
-                const isHovered = hoveredId === tpl.id
-
-                return (
-                  <button
-                    key={tpl.id}
-                    onClick={() => {
-                      if (multiSelect) {
-                        onToggle(tpl.id)
-                      } else {
-                        onSelectAndContinue(tpl.id)
-                      }
-                    }}
-                    onMouseEnter={() => setHoveredId(tpl.id)}
-                    onMouseLeave={() => setHoveredId(null)}
-                    className={cn(
-                      'relative overflow-hidden rounded-xl border-2 text-left transition-all',
-                      on && multiSelect
-                        ? 'border-primary shadow-md'
-                        : 'border-border bg-white hover:border-primary/40 hover:shadow-sm',
-                    )}
-                  >
-                    {/* Thumbnail */}
-                    <div className="relative overflow-hidden">
-                      <TemplateThumbnail template={tpl} />
-
-                      {/* Hover overlay — clock + days */}
-                      <div
-                        className={cn(
-                          'absolute inset-x-0 bottom-0 flex items-center gap-1.5 bg-black/65 px-2.5 py-1.5 transition-opacity duration-150',
-                          isHovered || inProgress ? 'opacity-100' : 'opacity-0',
-                        )}
-                      >
-                        <Clock className="h-3 w-3 shrink-0 text-white/80" />
-                        <p className="text-[11px] text-white/90">
-                          {dueDate ? (
-                            <span className="font-semibold text-amber-300">
-                              Due {dueDate}
-                            </span>
-                          ) : (
-                            `${tpl.turnaroundDays} days`
-                          )}
+      <div className="flex gap-6">
+        {/* Left column — drafts + template list */}
+        <div className="min-w-0 flex-1 space-y-6">
+          {/* Continue working on — drafts/pending reviews */}
+          {inProgressReports.length > 0 && !multiSelect && (
+            <section className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Continue working on
+              </p>
+              <div className="space-y-1.5">
+                {inProgressReports.map((r) => {
+                  const tpl = AGENCY_TEMPLATES.find(
+                    (t) => t.id === r.templateId,
+                  )
+                  if (!tpl) return null
+                  const lastEdited = (r.startedAt ?? r.createdAt)
+                    .toLocaleDateString('en-SG', {
+                      day: 'numeric',
+                      month: 'short',
+                    })
+                  const statusLabel =
+                    r.status === 'draft' ? 'Draft' : 'Pending Review'
+                  const statusClass =
+                    r.status === 'draft'
+                      ? 'bg-slate-100 text-slate-700 hover:bg-slate-100'
+                      : 'bg-amber-100 text-amber-700 hover:bg-amber-100'
+                  return (
+                    <button
+                      key={r.id}
+                      onClick={() => onSelectAndContinue(tpl.id)}
+                      className="flex w-full items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/40 px-3 py-2.5 text-left hover:border-amber-300 hover:bg-amber-50"
+                    >
+                      <FileText className="h-4 w-4 shrink-0 text-amber-700" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">
+                          {r.templateName}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {r.agency} · Last edited {lastEdited}
                         </p>
                       </div>
+                      <Badge className={cn('text-[10px]', statusClass)}>
+                        {statusLabel}
+                      </Badge>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  )
+                })}
+              </div>
+            </section>
+          )}
 
-                      {/* Multi-select checkmark */}
-                      {multiSelect && on && (
-                        <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary shadow">
-                          <Check className="h-3 w-3 text-white" />
+          {inProgressReports.length > 0 && !multiSelect && (
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Start a new report
+            </p>
+          )}
+
+          {/* Template list, grouped by category */}
+          {TEMPLATE_CATEGORIES.map((cat) => {
+            const catTemplates = cat.ids
+              .map((id) => AGENCY_TEMPLATES.find((t) => t.id === id))
+              .filter(Boolean) as Array<AgencyTemplate>
+            if (catTemplates.length === 0) return null
+            return (
+              <section
+                key={cat.id}
+                id={`cat-${cat.id}`}
+                className="scroll-mt-24 space-y-2"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {cat.label}
+                </p>
+                <div className="overflow-hidden rounded-lg border bg-white">
+                  {catTemplates.map((tpl, i) => {
+                    const on = selected.includes(tpl.id)
+                    return (
+                      <button
+                        key={tpl.id}
+                        onClick={() => {
+                          if (multiSelect) {
+                            onToggle(tpl.id)
+                          } else {
+                            onSelectAndContinue(tpl.id)
+                          }
+                        }}
+                        className={cn(
+                          'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40',
+                          i > 0 && 'border-t',
+                          on && multiSelect && 'bg-primary/5',
+                        )}
+                      >
+                        {multiSelect && (
+                          <div
+                            className={cn(
+                              'flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border',
+                              on
+                                ? 'border-primary bg-primary'
+                                : 'border-muted-foreground/40 bg-white',
+                            )}
+                          >
+                            {on && <Check className="h-3 w-3 text-white" />}
+                          </div>
+                        )}
+                        <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <div className="min-w-0 flex-1">
+                          <span className="text-sm font-medium">
+                            {tpl.name}
+                          </span>
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {tpl.agency}
+                          </span>
                         </div>
-                      )}
-                      {/* Multi-select empty checkbox */}
-                      {multiSelect && !on && (
-                        <div className="absolute right-2 top-2 h-5 w-5 rounded-full border-2 border-white/80 bg-black/20" />
-                      )}
-                    </div>
+                        {!multiSelect && (
+                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+            )
+          })}
+        </div>
 
-                    {/* Card footer */}
-                    <div
-                      className={cn(
-                        'px-2.5 py-2 border-t',
-                        on && multiSelect ? 'bg-primary/5' : 'bg-white',
-                      )}
-                    >
-                      <p className="text-[11px] font-semibold leading-tight truncate">
-                        {tpl.name}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
-                        {tpl.agency}
-                      </p>
-                    </div>
-                  </button>
+        {/* Right column — sticky jump links */}
+        <aside className="hidden w-44 shrink-0 lg:block">
+          <div className="sticky top-24 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Jump to
+            </p>
+            <nav className="flex flex-col gap-1">
+              {TEMPLATE_CATEGORIES.map((cat) => {
+                const active = cat.id === activeCat
+                return (
+                  <a
+                    key={cat.id}
+                    href={`#cat-${cat.id}`}
+                    className={cn(
+                      'rounded-full px-3 py-1.5 text-xs transition-colors',
+                      active
+                        ? 'bg-primary text-white hover:bg-primary'
+                        : 'bg-muted text-foreground hover:bg-muted/80',
+                    )}
+                  >
+                    {cat.label}
+                  </a>
                 )
               })}
-            </div>
+            </nav>
           </div>
-        )
-      })}
+        </aside>
+      </div>
 
       {/* Footer — only visible in multi-select mode */}
       {multiSelect && (
@@ -417,11 +460,6 @@ function FieldRow({
     <div className="space-y-1.5">
       <div className="flex flex-wrap items-center gap-1.5">
         <label className="text-sm font-medium">{field.label}</label>
-        {field.source && (
-          <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 text-[11px]">
-            From {field.source}
-          </Badge>
-        )}
         {field.stale && (
           <Badge className="gap-1 bg-amber-50 text-amber-700 hover:bg-amber-50 text-[11px]">
             <AlertTriangle className="h-2.5 w-2.5" />
@@ -517,6 +555,7 @@ function FieldRow({
           type="text"
           value={value}
           onChange={(e) => onValueChange(e.target.value)}
+          placeholder="Enter details..."
           className={cn(
             'w-full rounded-lg border px-3.5 py-2 text-sm outline-none transition-colors',
             'focus:border-primary focus:ring-1 focus:ring-primary',
@@ -931,7 +970,31 @@ function ReportForm({
         </button>
         <AgencyIcon abbrev={template.abbrev} color={template.color} />
         <div className="flex-1 min-w-0">
-          <span className="font-semibold">{template.name}</span>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">{template.name}</span>
+            {(() => {
+              const days = template.turnaroundDays
+              const cls =
+                days < 0
+                  ? 'text-red-600'
+                  : days <= 2
+                    ? 'text-amber-600'
+                    : 'text-muted-foreground'
+              return (
+                <span
+                  className={cn(
+                    'flex items-center gap-1 text-xs font-medium',
+                    cls,
+                  )}
+                >
+                  <Clock className="h-3 w-3" />
+                  {days < 0
+                    ? `${Math.abs(days)} day${Math.abs(days) !== 1 ? 's' : ''} overdue`
+                    : `${days} day${days !== 1 ? 's' : ''}`}
+                </span>
+              )
+            })()}
+          </div>
           <p className="text-xs text-muted-foreground truncate">
             {studentName} · {studentClass}
           </p>
@@ -997,7 +1060,7 @@ function ReportForm({
         {/* Left form panel: ~40% */}
         <div
           className="flex min-w-0 shrink-0 flex-col border-r"
-          style={{ width: previewOpen ? '40%' : '100%', minWidth: 360 }}
+          style={{ width: previewOpen ? '45%' : '100%', minWidth: 360 }}
         >
           {/* Progress chip */}
           <div className="flex shrink-0 items-center gap-2 border-b bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
