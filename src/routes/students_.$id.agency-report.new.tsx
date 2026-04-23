@@ -39,6 +39,7 @@ import {
   MOCK_COUNSELLOR,
   mockAgencyReports,
 } from '@/data/mock-agency-reports'
+import { useFeatureFlag } from '@/hooks/use-feature-flag'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 export const Route = createFileRoute('/students_/$id/agency-report/new')({
@@ -1491,6 +1492,7 @@ function Confirmation({
 function AgencyReportWizardPage() {
   const { student } = Route.useLoaderData()
   const navigate = useNavigate()
+  const agencyReportsEnabled = useFeatureFlag('agency-reports')
 
   const [step, setStep] = useState<WizardStep>('templates')
   const [selectedTemplates, setSelectedTemplates] = useState<Array<string>>([])
@@ -1504,6 +1506,31 @@ function AgencyReportWizardPage() {
       href: `/students/${student.id}/agency-report/new`,
     },
   ])
+
+  if (!agencyReportsEnabled) {
+    return (
+      <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-3 px-6 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+          <Lock className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <h1 className="text-lg font-semibold">Agency Reports is disabled</h1>
+        <p className="text-sm text-muted-foreground">
+          This feature is behind a flag. Enable it in Settings → Manage Flags to
+          generate agency reports for this student.
+        </p>
+        <div className="mt-2 flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/students/$id" params={{ id: student.id }}>
+              Back to profile
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link to="/flags">Open Manage Flags</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   const toggleTemplate = (id: string) =>
     setSelectedTemplates((p) =>

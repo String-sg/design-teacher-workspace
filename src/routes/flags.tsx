@@ -78,6 +78,13 @@ const featureFlagConfigs: Array<FeatureFlagConfig> = [
       'Show the Import Data option in the student list to upload custom fields via a guided wizard',
     stage: 'Experiment',
   },
+  {
+    key: 'agency-reports',
+    label: 'Agency Reports',
+    description:
+      'Show the Agency Reports subsection on the student profile and enable the Agency Report generation wizard (template picker, Fill Report with split-pane template reference, Review & Submit, Export)',
+    stage: 'Experiment',
+  },
 ]
 
 function FeatureFlagsPage() {
