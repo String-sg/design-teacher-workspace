@@ -6,22 +6,22 @@ A design prototype for the **MOE (Ministry of Education) Teacher Workspace** —
 
 ## Tech Stack
 
-| Layer | Technology |
-| --- | --- |
-| Framework | [TanStack Start](https://tanstack.com/start) (full-stack React with SSR) |
-| Language | TypeScript |
-| UI Components | [Shadcn UI](https://ui.shadcn.com/) with [Base UI (MUI)](https://base-ui.com/) primitives (`base-maia` style) |
-| Styling | Tailwind CSS v4 with CSS variables |
-| Routing | TanStack Router (file-based) |
-| Rich Text | Tiptap |
-| Charts | Recharts |
-| Icons | Lucide React |
-| Design Tokens | Flow Design System (`@flow/core`, `@flow/design-tokens`) |
-| Build Tool | Vite |
-| Package Manager | Bun |
-| Testing | Vitest + Testing Library (React & DOM) |
-| Linting | ESLint (TanStack config) |
-| Formatting | Prettier |
+| Layer           | Technology                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------------------- |
+| Framework       | [TanStack Start](https://tanstack.com/start) (full-stack React with SSR)                                      |
+| Language        | TypeScript                                                                                                    |
+| UI Components   | [Shadcn UI](https://ui.shadcn.com/) with [Base UI (MUI)](https://base-ui.com/) primitives (`base-maia` style) |
+| Styling         | Tailwind CSS v4 with CSS variables                                                                            |
+| Routing         | TanStack Router (file-based)                                                                                  |
+| Rich Text       | Tiptap                                                                                                        |
+| Charts          | Recharts                                                                                                      |
+| Icons           | Lucide React                                                                                                  |
+| Design Tokens   | Flow Design System (`@flow/core`, `@flow/design-tokens`)                                                      |
+| Build Tool      | Vite                                                                                                          |
+| Package Manager | Bun                                                                                                           |
+| Testing         | Vitest + Testing Library (React & DOM)                                                                        |
+| Linting         | ESLint (TanStack config)                                                                                      |
+| Formatting      | Prettier                                                                                                      |
 
 ## Project Structure
 
@@ -84,15 +84,15 @@ A design prototype for the **MOE (Ministry of Education) Teacher Workspace** —
 
 ## Available Scripts
 
-| Command | Description |
-| --- | --- |
-| `bun run dev` | Start the Vite dev server on port 3000 |
-| `bun run build` | Create a production build |
-| `bun run preview` | Preview the production build locally |
-| `bun run test` | Run tests with Vitest |
-| `bun run lint` | Run ESLint |
-| `bun run format` | Run Prettier |
-| `bun run check` | Auto-fix formatting and lint issues (`prettier --write . && eslint --fix`) |
+| Command           | Description                                                                |
+| ----------------- | -------------------------------------------------------------------------- |
+| `bun run dev`     | Start the Vite dev server on port 3000                                     |
+| `bun run build`   | Create a production build                                                  |
+| `bun run preview` | Preview the production build locally                                       |
+| `bun run test`    | Run tests with Vitest                                                      |
+| `bun run lint`    | Run ESLint                                                                 |
+| `bun run format`  | Run Prettier                                                               |
+| `bun run check`   | Auto-fix formatting and lint issues (`prettier --write . && eslint --fix`) |
 
 ## Dependencies
 
