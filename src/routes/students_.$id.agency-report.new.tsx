@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Link,
   createFileRoute,
@@ -20,6 +20,7 @@ import {
   Lock,
   PanelRight,
   RefreshCw,
+  Search,
   Sparkles,
 } from 'lucide-react'
 
@@ -221,12 +222,29 @@ function TemplateSelection({
   const [activeCat, setActiveCat] = useState<string>(
     TEMPLATE_CATEGORIES[0]?.id ?? '',
   )
+  const [query, setQuery] = useState('')
+  const [agencyFilter, setAgencyFilter] = useState<string>('all')
 
   const inProgressReports = mockAgencyReports.filter(
     (r) =>
       r.studentId === studentId &&
       (r.status === 'draft' || r.status === 'pending_review'),
   )
+
+  // Unique agency list from templates — preserves discovery order
+  const agencyOptions = Array.from(
+    new Set(AGENCY_TEMPLATES.map((t) => t.agency)),
+  )
+
+  const matchesFilter = (tpl: AgencyTemplate) => {
+    if (agencyFilter !== 'all' && tpl.agency !== agencyFilter) return false
+    if (!query.trim()) return true
+    const q = query.trim().toLowerCase()
+    return (
+      tpl.name.toLowerCase().includes(q) ||
+      tpl.agency.toLowerCase().includes(q)
+    )
+  }
 
   useEffect(() => {
     const onScroll = () => {
@@ -328,11 +346,39 @@ function TemplateSelection({
             </p>
           )}
 
+          {/* Search + agency filter */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative min-w-[220px] flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by report or agency name"
+                className="w-full rounded-lg border bg-white py-2 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <select
+              value={agencyFilter}
+              onChange={(e) => setAgencyFilter(e.target.value)}
+              className="rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            >
+              <option value="all">All agencies</option>
+              {agencyOptions.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Template list, grouped by category */}
           {TEMPLATE_CATEGORIES.map((cat) => {
-            const catTemplates = cat.ids
-              .map((id) => AGENCY_TEMPLATES.find((t) => t.id === id))
-              .filter(Boolean) as Array<AgencyTemplate>
+            const catTemplates = (
+              cat.ids
+                .map((id) => AGENCY_TEMPLATES.find((t) => t.id === id))
+                .filter(Boolean) as Array<AgencyTemplate>
+            ).filter(matchesFilter)
             if (catTemplates.length === 0) return null
             return (
               <section
@@ -612,13 +658,18 @@ function SectionPanel({
   )
 
   return (
-    <div>
+    <section
+      id={`sec-${section.id}`}
+      className="scroll-mt-24 rounded-xl border bg-white p-6"
+    >
       <div className="mb-5 flex items-center gap-2">
-        <h3 className="text-lg font-semibold">{section.title}</h3>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          {section.title}
+        </h2>
         {isPrincipalSection && (
           <Badge className="gap-1 bg-purple-50 text-purple-700 hover:bg-purple-50">
             <Lock className="h-2.5 w-2.5" />
-            To be completed by Principal
+            Principal
           </Badge>
         )}
         {isCounsellorSection && counsellorHasData && (
@@ -713,7 +764,7 @@ function SectionPanel({
           <div className="flex justify-end border-t pt-4">{reviewToggle}</div>
         </div>
       ) : null}
-    </div>
+    </section>
   )
 }
 
@@ -887,6 +938,25 @@ function ReportForm({
   const [previewOpen, setPreviewOpen] = useState(true)
   const [previewScale, setPreviewScale] = useState<number>(0.68)
   const [savedStatus, setSavedStatus] = useState<'saved' | 'saving'>('saved')
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const container = scrollRef.current
+    if (!container) return
+    const onScroll = () => {
+      let current = template.sections[0].id
+      for (const s of template.sections) {
+        const el = document.getElementById(`sec-${s.id}`)
+        if (!el) continue
+        const top = el.getBoundingClientRect().top
+        if (top - 80 <= 0) current = s.id
+      }
+      setActiveSection(current)
+    }
+    onScroll()
+    container.addEventListener('scroll', onScroll, { passive: true })
+    return () => container.removeEventListener('scroll', onScroll)
+  }, [template.sections])
 
   const updateField = (id: string, v: string) => {
     setFieldValues((p) => ({ ...p, [id]: v }))
@@ -922,11 +992,7 @@ function ReportForm({
     setTimeout(() => setSavedStatus('saved'), 500)
   }
 
-  const currentSection =
-    template.sections.find((s) => s.id === activeSection) ??
-    template.sections[0]
-
-  // Merged values: field defaults + counsellor mock + user edits
+  // Merged values: field defaults + counsellor mock + user edits (for completion %)
   const mergedValues: Record<string, string> = {}
   for (const section of template.sections) {
     for (const f of section.fields) {
@@ -1057,81 +1123,72 @@ function ReportForm({
         </Button>
       </div>
 
-      <div className="flex min-h-0 flex-1">
-        {/* Left form panel: ~40% */}
+      <div className="flex min-h-0 flex-1 bg-muted/10">
+        {/* Form cards — scrollable column with scroll-spy */}
         <div
-          className="flex min-w-0 shrink-0 flex-col border-r"
-          style={{ width: previewOpen ? '45%' : '100%', minWidth: 360 }}
+          ref={scrollRef}
+          className="min-w-0 flex-1 overflow-y-auto px-6 py-5"
         >
           {/* Progress chip */}
-          <div className="flex shrink-0 items-center gap-2 border-b bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
+          <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
             <ListChecks className="h-3.5 w-3.5" />
             <span className="font-medium text-foreground">
               {reviewedCount} of {reviewableSections.length} sections verified
             </span>
           </div>
 
-          <div className="flex min-h-0 flex-1">
-            {/* Section nav */}
-            <div className="w-44 shrink-0 overflow-y-auto border-r bg-muted/30 py-2">
-              {template.sections.map((s) => {
-                const active = s.id === activeSection
-                const isPrincipal = s.role === 'principal'
-                const isCounsellor = s.role === 'counsellor'
-                const done = completedSections.has(s.id)
-                return (
-                  <button
-                    key={s.id}
-                    onClick={() => !isPrincipal && setActiveSection(s.id)}
-                    className={cn(
-                      'flex w-full items-center gap-1.5 border-r-2 px-3 py-2 text-left text-sm transition-colors',
-                      active
-                        ? 'border-primary bg-white font-medium text-foreground'
-                        : 'border-transparent text-muted-foreground hover:text-foreground',
-                      isPrincipal
-                        ? 'cursor-default opacity-50'
-                        : 'cursor-pointer',
-                    )}
-                  >
-                    {done && (
-                      <Check className="h-3 w-3 shrink-0 text-green-600" />
-                    )}
-                    {isCounsellor && !done && (
-                      <Check className="h-3 w-3 shrink-0 text-blue-500" />
-                    )}
-                    {isPrincipal && !done && (
-                      <Lock className="h-3 w-3 shrink-0" />
-                    )}
-                    <span className="flex-1 truncate">{s.title}</span>
-                    {isPrincipal && (
-                      <Badge className="text-[10px] bg-purple-50 text-purple-700 hover:bg-purple-50 px-1">
-                        P
-                      </Badge>
-                    )}
-                    {isCounsellor && (
-                      <Badge className="text-[10px] bg-blue-50 text-blue-700 hover:bg-blue-50 px-1">
-                        SC
-                      </Badge>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Form body */}
-            <div className="flex-1 overflow-y-auto p-5">
+          <div className="space-y-4 pb-16">
+            {template.sections.map((s) => (
               <SectionPanel
-                section={currentSection}
+                key={s.id}
+                section={s}
                 fieldValues={fieldValues}
                 aiFlags={aiFlags}
                 onValueChange={updateField}
                 onAiDraft={aiDraft}
                 onToggleReviewed={toggleReviewed}
-                isReviewed={completedSections.has(currentSection.id)}
+                isReviewed={completedSections.has(s.id)}
               />
-            </div>
+            ))}
           </div>
         </div>
+
+        {/* Section nav — sticky pill list */}
+        <aside className="hidden w-48 shrink-0 overflow-y-auto border-x bg-white py-5 lg:block">
+          <div className="sticky top-0 px-3">
+            <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Sections
+            </p>
+            <nav className="flex flex-col gap-1">
+              {template.sections.map((s) => {
+                const active = s.id === activeSection
+                const done = completedSections.has(s.id)
+                return (
+                  <a
+                    key={s.id}
+                    href={`#sec-${s.id}`}
+                    className={cn(
+                      'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-colors',
+                      active
+                        ? 'bg-primary text-white hover:bg-primary'
+                        : 'bg-muted text-foreground hover:bg-muted/80',
+                    )}
+                  >
+                    {done && (
+                      <Check
+                        className={cn(
+                          'h-3 w-3 shrink-0',
+                          active ? 'text-white' : 'text-green-600',
+                        )}
+                      />
+                    )}
+                    <span className="truncate">{s.title}</span>
+                  </a>
+                )
+              })}
+            </nav>
+          </div>
+        </aside>
 
         {/* Right: static template reference */}
         {previewOpen && (
