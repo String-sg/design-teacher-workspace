@@ -227,7 +227,9 @@ function TemplateSelection({
   const inProgressReports = mockAgencyReports.filter(
     (r) =>
       r.studentId === studentId &&
-      (r.status === 'draft' || r.status === 'pending_review'),
+      (r.status === 'draft' ||
+        r.status === 'pending_review' ||
+        r.status === 'edits_requested'),
   )
 
   // Unique agency list from templates — preserves discovery order
@@ -308,11 +310,17 @@ function TemplateSelection({
                       month: 'short',
                     })
                   const statusLabel =
-                    r.status === 'draft' ? 'Draft' : 'Pending Review'
+                    r.status === 'draft'
+                      ? 'Draft'
+                      : r.status === 'edits_requested'
+                        ? 'Edits Requested'
+                        : 'Pending Review'
                   const statusClass =
                     r.status === 'draft'
                       ? 'bg-slate-100 text-slate-700 hover:bg-slate-100'
-                      : 'bg-amber-100 text-amber-700 hover:bg-amber-100'
+                      : r.status === 'edits_requested'
+                        ? 'bg-orange-100 text-orange-700 hover:bg-orange-100'
+                        : 'bg-amber-100 text-amber-700 hover:bg-amber-100'
                   return (
                     <button
                       key={r.id}
@@ -686,46 +694,55 @@ function SectionPanel({
       </div>
 
       {isPrincipalSection ? (
-        <div className="flex flex-col items-center gap-2 rounded-xl border-2 border-dashed py-10 text-center text-muted-foreground">
-          <Lock className="h-5 w-5" />
-          <p className="text-sm">
-            This section will be available for the Principal during review.
-          </p>
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
+            <Lock className="h-3.5 w-3.5" />
+            <span>To be completed by Principal during review.</span>
+          </div>
+          <div className="space-y-5 opacity-50">
+            {section.fields.map((f) => (
+              <div key={f.id} className="space-y-1.5">
+                <label className="text-sm font-medium">{f.label}</label>
+                {f.type === 'narrative' ? (
+                  <div className="min-h-[120px] rounded-lg border bg-muted/30" />
+                ) : (
+                  <div className="h-10 rounded-lg border bg-muted/30" />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       ) : isCounsellorSection ? (
         counsellorHasData ? (
-          <div className="space-y-4">
-            <div className="rounded-xl border bg-muted/20 p-5">
-              <div className="mb-4 flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100">
-                  <Check className="h-3.5 w-3.5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">
-                    Completed by {MOCK_COUNSELLOR.name} ·{' '}
-                    {MOCK_COUNSELLOR.completedAt}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Read-only — submitted by School Counsellor
-                  </p>
-                </div>
+          <div className="rounded-xl border bg-muted/20 p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100">
+                <Check className="h-3.5 w-3.5 text-blue-600" />
               </div>
-              <div className="space-y-4">
-                {section.fields.map((f) => (
-                  <div key={f.id}>
-                    <p className="mb-1 text-xs font-medium text-muted-foreground">
-                      {f.label}
-                    </p>
-                    <p className="text-sm leading-relaxed">
-                      {(MOCK_COUNSELLOR.fields as Record<string, string>)[
-                        f.id
-                      ] ?? '—'}
-                    </p>
-                  </div>
-                ))}
+              <div>
+                <p className="text-sm font-medium">
+                  Completed by {MOCK_COUNSELLOR.name} ·{' '}
+                  {MOCK_COUNSELLOR.completedAt}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Read-only — submitted by School Counsellor
+                </p>
               </div>
             </div>
-            <div className="flex justify-end border-t pt-4">{reviewToggle}</div>
+            <div className="space-y-4">
+              {section.fields.map((f) => (
+                <div key={f.id}>
+                  <p className="mb-1 text-xs font-medium text-muted-foreground">
+                    {f.label}
+                  </p>
+                  <p className="text-sm leading-relaxed">
+                    {(MOCK_COUNSELLOR.fields as Record<string, string>)[
+                      f.id
+                    ] ?? '—'}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed bg-amber-50/40 py-10 text-center">
@@ -824,13 +841,15 @@ function DocumentPreview({
   onScaleChange: (s: number) => void
 }) {
   return (
-    <div className="min-w-0 flex-1 overflow-auto bg-slate-2 p-5">
-      <div className="mb-3 flex items-center justify-between px-1">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Template reference · {template.name}
-        </span>
-        <div className="flex items-center gap-1">
-          <span className="mr-1 text-[11px] text-muted-foreground">Zoom</span>
+    <div className="w-[37%] min-w-0 shrink-0 overflow-auto bg-slate-2 p-5">
+      <div className="mb-3 flex items-start justify-between gap-3 px-1">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-foreground">Preview</p>
+          <p className="text-xs text-muted-foreground">
+            This is the agency's report template for reference.
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
           {PREVIEW_SCALES.map((s) => (
             <button
               key={s}
@@ -963,7 +982,7 @@ function ReportForm({
     : 0
 
   const reviewableSections = template.sections.filter(
-    (s) => s.role !== 'principal',
+    (s) => s.role === 'yh',
   )
   const reviewedCount = reviewableSections.filter((s) =>
     completedSections.has(s.id),

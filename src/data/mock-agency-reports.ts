@@ -1,6 +1,7 @@
 export type AgencyReportStatus =
   | 'draft'
   | 'pending_review'
+  | 'edits_requested'
   | 'approved'
   | 'sent'
 
@@ -1940,6 +1941,17 @@ export const mockAgencyReports: Array<AgencyReport> = [
     createdAt: new Date('2026-04-15'),
     passwordSaved: true,
     password: 'MSF2026Apr',
+  },
+  {
+    id: 'ar-006',
+    studentId: '1',
+    templateId: 'spf',
+    templateName: 'SPF School Report',
+    agency: 'Singapore Police Force',
+    status: 'edits_requested',
+    createdAt: new Date('2026-04-18'),
+    startedAt: new Date('2026-04-18'),
+    passwordSaved: false,
   },
 ]
 

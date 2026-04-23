@@ -292,6 +292,10 @@ const AGENCY_STATUS_CONFIG: Record<
     label: 'Pending Review',
     className: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
   },
+  edits_requested: {
+    label: 'Edits Requested',
+    className: 'bg-orange-100 text-orange-700 hover:bg-orange-100',
+  },
   approved: {
     label: 'Approved',
     className: 'bg-green-100 text-green-700 hover:bg-green-100',
