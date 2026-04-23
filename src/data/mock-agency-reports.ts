@@ -3,7 +3,6 @@ export type AgencyReportStatus =
   | 'pending_review'
   | 'edits_requested'
   | 'approved'
-  | 'sent'
 
 export type FieldRole = 'yh' | 'principal' | 'counsellor'
 export type FieldType = 'text' | 'narrative'
@@ -1893,7 +1892,7 @@ export const mockAgencyReports: Array<AgencyReport> = [
     templateId: 'cps',
     templateName: 'CPS School Report',
     agency: 'Child Protective Service',
-    status: 'sent',
+    status: 'approved',
     createdAt: new Date('2026-02-12'),
     passwordSaved: true,
     password: 'CPS2026Jun',
@@ -1904,7 +1903,7 @@ export const mockAgencyReports: Array<AgencyReport> = [
     templateId: 'nuh',
     templateName: 'NUH Referral Form',
     agency: 'National University Hospital',
-    status: 'sent',
+    status: 'approved',
     createdAt: new Date('2026-01-08'),
     passwordSaved: true,
     password: 'NUH2026Jan',

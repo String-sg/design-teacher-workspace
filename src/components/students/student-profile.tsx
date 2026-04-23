@@ -300,10 +300,6 @@ const AGENCY_STATUS_CONFIG: Record<
     label: 'Approved',
     className: 'bg-green-100 text-green-700 hover:bg-green-100',
   },
-  sent: {
-    label: 'Sent',
-    className: 'bg-green-100 text-green-700 hover:bg-green-100',
-  },
 }
 
 function addBusinessDaysSimple(from: Date, days: number): Date {
@@ -319,7 +315,7 @@ function addBusinessDaysSimple(from: Date, days: number): Date {
 
 function AgencyReportRow({ report }: { report: AgencyReport }) {
   const [showPw, setShowPw] = useState(false)
-  const [status, setStatus] = useState<AgencyReport['status']>(report.status)
+  const status = report.status
   const { label, className } = AGENCY_STATUS_CONFIG[status]
   const createdDate = report.createdAt.toLocaleDateString('en-SG', {
     day: 'numeric',
@@ -373,24 +369,7 @@ function AgencyReportRow({ report }: { report: AgencyReport }) {
             {dueLabel}
           </span>
         )}
-        {status === 'approved' ? (
-          <div className="flex items-center gap-2">
-            <Badge className={className}>{label}</Badge>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 text-xs"
-              onClick={(e) => {
-                e.stopPropagation()
-                setStatus('sent')
-              }}
-            >
-              Mark as sent
-            </Button>
-          </div>
-        ) : (
-          <Badge className={className}>{label}</Badge>
-        )}
+        <Badge className={className}>{label}</Badge>
         {report.passwordSaved && (
           <button
             onClick={(e) => {
