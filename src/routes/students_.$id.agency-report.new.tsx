@@ -200,29 +200,14 @@ function AgencyIcon({ abbrev, color }: { abbrev: string; color: string }) {
 
 // ── S2 Template Selection ─────────────────────────────────────
 
-const TEMPLATE_CATEGORIES = [
-  {
-    id: 'child-welfare',
-    label: 'Child Welfare',
-    ids: ['cps', 'children-home'],
-  },
-  {
-    id: 'social-services',
-    label: 'Social Services',
-    ids: ['msf', 'msf-probation', 'msf-psv', 'sc-swo-a', 'sc-swo-b', 'intake'],
-  },
-  {
-    id: 'law-enforcement',
-    label: 'Law Enforcement & Corrections',
-    ids: ['spf', 'cnb', 'sps'],
-  },
-  {
-    id: 'mental-health',
-    label: 'Mental Health & Wellbeing',
-    ids: ['imh-cgc', 'reach', 'navh', 'nuh'],
-  },
-  { id: 'assessment', label: 'Assessment Tools', ids: ['assq'] },
-  { id: 'general', label: 'General', ids: ['nric-report'] },
+const TEMPLATE_CATEGORIES: Array<{
+  id: string
+  label: AgencyTemplate['category']
+}> = [
+  { id: 'care-placement', label: 'Care & Placement' },
+  { id: 'family-social', label: 'Family & Social Services' },
+  { id: 'mental-health', label: 'Mental Health' },
+  { id: 'offences-law', label: 'Offences & Law Enforcement' },
 ]
 
 function templatePreviewImg(template: AgencyTemplate): string | null {
@@ -324,7 +309,7 @@ function TemplateSelection({
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Continue working on
               </p>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {inProgressReports.map((r) => {
                   const tpl = AGENCY_TEMPLATES.find(
                     (t) => t.id === r.templateId,
@@ -337,35 +322,54 @@ function TemplateSelection({
                     })
                   const statusLabel =
                     r.status === 'draft'
-                      ? 'Draft'
+                      ? 'DRAFT'
                       : r.status === 'edits_requested'
-                        ? 'Edits Requested'
-                        : 'Pending Review'
-                  const statusClass =
+                        ? 'EDITS REQUESTED'
+                        : 'PENDING REVIEW'
+                  // Mock completion fraction for demo
+                  const pct =
                     r.status === 'draft'
-                      ? 'bg-slate-100 text-slate-700 hover:bg-slate-100'
+                      ? 40
                       : r.status === 'edits_requested'
-                        ? 'bg-orange-100 text-orange-700 hover:bg-orange-100'
-                        : 'bg-amber-100 text-amber-700 hover:bg-amber-100'
+                        ? 70
+                        : 100
                   return (
                     <button
                       key={r.id}
                       onClick={() => onSelectAndContinue(tpl.id)}
-                      className="flex w-full items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/40 px-3 py-2.5 text-left hover:border-amber-300 hover:bg-amber-50"
+                      className="group flex w-full items-center gap-4 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/10"
                     >
-                      <FileText className="h-4 w-4 shrink-0 text-amber-700" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">
-                          {r.templateName}
-                        </p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {r.agency} · Last edited {lastEdited}
-                        </p>
-                      </div>
-                      <Badge className={cn('text-[10px]', statusClass)}>
+                      <div className="flex shrink-0 items-center justify-center rounded bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wider text-primary-foreground">
                         {statusLabel}
-                      </Badge>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-baseline gap-x-2">
+                          <p className="truncate text-sm font-semibold">
+                            {r.templateName}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            · {r.agency}
+                          </p>
+                        </div>
+                        <div className="mt-1.5 flex items-center gap-2">
+                          <div className="h-1 max-w-[240px] flex-1 overflow-hidden rounded-full bg-primary/15">
+                            <div
+                              className="h-full bg-primary transition-all"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <span className="font-mono text-[11px] font-semibold tabular-nums text-muted-foreground">
+                            {pct}%
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">
+                            · Last edited {lastEdited}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="flex shrink-0 items-center gap-1 text-sm font-medium text-primary">
+                        Resume draft
+                        <ChevronRight className="h-4 w-4" />
+                      </span>
                     </button>
                   )
                 })}
@@ -475,68 +479,79 @@ function TemplateSelection({
 
           {/* Template list, grouped by category */}
           {TEMPLATE_CATEGORIES.map((cat) => {
-            const catTemplates = (
-              cat.ids
-                .map((id) => AGENCY_TEMPLATES.find((t) => t.id === id))
-                .filter(Boolean) as Array<AgencyTemplate>
-            ).filter(matchesFilter)
+            const catTemplates = AGENCY_TEMPLATES.filter(
+              (t) => t.category === cat.label,
+            )
+              .filter(matchesFilter)
+              .sort((a, b) => a.name.localeCompare(b.name))
             if (catTemplates.length === 0) return null
             return (
               <section
                 key={cat.id}
                 id={`cat-${cat.id}`}
-                className="scroll-mt-24 space-y-2"
+                className="scroll-mt-24 overflow-hidden rounded-lg border bg-card"
               >
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {cat.label}
-                </p>
-                <div className="overflow-hidden rounded-lg border bg-white">
-                  {catTemplates.map((tpl, i) => {
-                    const on = selected.includes(tpl.id)
-                    return (
-                      <button
-                        key={tpl.id}
-                        onClick={() => {
-                          if (multiSelect) {
-                            onToggle(tpl.id)
-                          } else {
-                            onSelectAndContinue(tpl.id)
-                          }
-                        }}
-                        className={cn(
-                          'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/40',
-                          i > 0 && 'border-t',
-                          on && multiSelect && 'bg-primary/5',
-                        )}
-                      >
-                        {multiSelect && (
-                          <div
-                            className={cn(
-                              'flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border',
-                              on
-                                ? 'border-primary bg-primary'
-                                : 'border-muted-foreground/40 bg-white',
-                            )}
-                          >
-                            {on && <Check className="h-3 w-3 text-white" />}
-                          </div>
-                        )}
-                        <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        <div className="min-w-0 flex-1">
-                          <span className="text-sm font-medium">
-                            {tpl.name}
-                          </span>
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            {tpl.agency}
-                          </span>
-                        </div>
-                        {!multiSelect && (
-                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        )}
-                      </button>
-                    )
-                  })}
+                <div className="border-b bg-muted/40 px-4 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    {cat.label}
+                  </p>
                 </div>
+                {catTemplates.map((tpl, i) => {
+                  const on = selected.includes(tpl.id)
+                  const locked = tpl.locked === true
+                  const rowClasses = cn(
+                    'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
+                    i > 0 && 'border-t',
+                    locked
+                      ? 'pointer-events-none opacity-50'
+                      : 'hover:bg-muted/40',
+                    on && multiSelect && !locked && 'bg-primary/5',
+                  )
+                  return (
+                    <button
+                      key={tpl.id}
+                      disabled={locked}
+                      aria-disabled={locked}
+                      onClick={() => {
+                        if (locked) return
+                        if (multiSelect) {
+                          onToggle(tpl.id)
+                        } else {
+                          onSelectAndContinue(tpl.id)
+                        }
+                      }}
+                      className={rowClasses}
+                    >
+                      {multiSelect && !locked && (
+                        <div
+                          className={cn(
+                            'flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border',
+                            on
+                              ? 'border-primary bg-primary'
+                              : 'border-muted-foreground/40 bg-background',
+                          )}
+                        >
+                          {on && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm font-semibold">
+                          {tpl.name}
+                        </span>
+                      </div>
+                      <span className="hidden text-xs text-muted-foreground sm:block">
+                        {tpl.agency}
+                      </span>
+                      {locked ? (
+                        <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      ) : (
+                        !multiSelect && (
+                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        )
+                      )}
+                    </button>
+                  )
+                })}
               </section>
             )
           })}
@@ -548,12 +563,12 @@ function TemplateSelection({
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Jump to
             </p>
-            <nav className="flex flex-col gap-1">
+            <nav className="flex flex-col gap-2">
               {TEMPLATE_CATEGORIES.map((cat) => (
                 <a
                   key={cat.id}
                   href={`#cat-${cat.id}`}
-                  className="rounded-full bg-muted px-3 py-1.5 text-sm hover:bg-muted/80"
+                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {cat.label}
                 </a>
@@ -1508,11 +1523,13 @@ function Confirmation({
           Start next report
           <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
-        <Button variant="outline" className="w-full justify-center" asChild>
-          <a href="#" onClick={(e) => e.preventDefault()}>
-            <ExternalLink className="mr-1.5 h-4 w-4" />
-            Open case in Case Sync
-          </a>
+        <Button
+          variant="outline"
+          className="w-full justify-center"
+          onClick={(e) => e.preventDefault()}
+        >
+          <ExternalLink className="mr-1.5 h-4 w-4" />
+          Open case in Case Sync
         </Button>
         <Button
           variant="ghost"
