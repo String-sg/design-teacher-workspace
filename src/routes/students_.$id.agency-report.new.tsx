@@ -32,6 +32,7 @@ import type {
 } from '@/data/mock-agency-reports'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Popover,
   PopoverContent,
@@ -386,37 +387,42 @@ function TemplateSelection({
           {/* Search + agency filter */}
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative min-w-[220px] flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by report or agency name"
-                className="w-full rounded-lg border bg-white py-2 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                className="w-full pl-9"
+                aria-label="Search templates"
               />
             </div>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  <Filter className="h-3.5 w-3.5" />
+                <Button
+                  variant="outline"
+                  className="gap-2 aria-expanded:bg-white"
+                >
+                  <Filter className="h-4 w-4" />
                   Filter
                   {agencyFilter !== 'all' && (
-                    <Badge className="ml-1 h-4 min-w-4 px-1 text-[10px]">
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                       1
-                    </Badge>
+                    </span>
                   )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="end" className="w-60 p-0">
                 <div className="border-b p-2">
                   <div className="relative">
-                    <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <input
+                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
                       type="text"
                       value={filterQuery}
                       onChange={(e) => setFilterQuery(e.target.value)}
                       placeholder="Search ministries"
-                      className="w-full rounded-md border bg-background py-1.5 pl-7 pr-2 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                      className="h-8 pl-7 text-xs"
+                      aria-label="Search ministries"
                       autoFocus
                     />
                   </div>
@@ -563,12 +569,12 @@ function TemplateSelection({
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Jump to
             </p>
-            <nav className="flex flex-col gap-2">
+            <nav className="flex flex-col gap-1">
               {TEMPLATE_CATEGORIES.map((cat) => (
                 <a
                   key={cat.id}
                   href={`#cat-${cat.id}`}
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  className="rounded-full bg-muted px-3 py-1.5 text-sm hover:bg-muted/80"
                 >
                   {cat.label}
                 </a>
@@ -1083,9 +1089,9 @@ function ReportForm({
               const days = template.turnaroundDays
               const cls =
                 days < 0
-                  ? 'text-crimson-11'
+                  ? 'text-red-600'
                   : days <= 2
-                    ? 'text-amber-11'
+                    ? 'text-amber-600'
                     : 'text-muted-foreground'
               return (
                 <span
@@ -1112,7 +1118,7 @@ function ReportForm({
           <span
             className={cn(
               'font-mono text-xs font-semibold tabular-nums',
-              completionPct === 100 ? 'text-lime-11' : 'text-foreground',
+              completionPct === 100 ? 'text-green-600' : 'text-foreground',
             )}
           >
             {completionPct}%
@@ -1121,7 +1127,7 @@ function ReportForm({
             <div
               className={cn(
                 'h-full transition-all',
-                completionPct === 100 ? 'bg-lime-9' : 'bg-amber-9',
+                completionPct === 100 ? 'bg-green-500' : 'bg-amber-500',
               )}
               style={{ width: `${completionPct}%` }}
             />
@@ -1136,7 +1142,7 @@ function ReportForm({
             </>
           ) : (
             <>
-              <Check className="h-3 w-3 text-lime-11" />
+              <Check className="h-3 w-3 text-green-600" />
               Saved
             </>
           )}
