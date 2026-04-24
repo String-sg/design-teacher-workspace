@@ -340,7 +340,7 @@ function TemplateSelection({
                       onClick={() => onSelectAndContinue(tpl.id)}
                       className="group flex w-full items-center gap-4 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-left transition-colors hover:border-primary/60 hover:bg-primary/10"
                     >
-                      <div className="flex shrink-0 items-center justify-center rounded bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wider text-primary-foreground">
+                      <div className="flex shrink-0 items-center justify-center rounded-sm bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wider text-primary-foreground">
                         {statusLabel}
                       </div>
                       <div className="min-w-0 flex-1">
