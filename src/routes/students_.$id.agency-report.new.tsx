@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import {
   Link,
   createFileRoute,
@@ -218,9 +218,6 @@ function TemplateSelection({
   onContinue: () => void
 }) {
   const [multiSelect, setMultiSelect] = useState(false)
-  const [activeCat, setActiveCat] = useState<string>(
-    TEMPLATE_CATEGORIES[0]?.id ?? '',
-  )
   const [query, setQuery] = useState('')
   const [agencyFilter, setAgencyFilter] = useState<string>('all')
 
@@ -242,22 +239,6 @@ function TemplateSelection({
       tpl.agency.toLowerCase().includes(q)
     )
   }
-
-  useEffect(() => {
-    const onScroll = () => {
-      let current = TEMPLATE_CATEGORIES[0]?.id ?? ''
-      for (const cat of TEMPLATE_CATEGORIES) {
-        const el = document.getElementById(`cat-${cat.id}`)
-        if (!el) continue
-        const rect = el.getBoundingClientRect()
-        if (rect.top <= 140) current = cat.id
-      }
-      setActiveCat(current)
-    }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   return (
     <div className="space-y-5">
@@ -451,23 +432,15 @@ function TemplateSelection({
               Jump to
             </p>
             <nav className="flex flex-col gap-1">
-              {TEMPLATE_CATEGORIES.map((cat) => {
-                const active = cat.id === activeCat
-                return (
-                  <a
-                    key={cat.id}
-                    href={`#cat-${cat.id}`}
-                    className={cn(
-                      'rounded-full px-3 py-1.5 text-xs transition-colors',
-                      active
-                        ? 'bg-primary text-white hover:bg-primary'
-                        : 'bg-muted text-foreground hover:bg-muted/80',
-                    )}
-                  >
-                    {cat.label}
-                  </a>
-                )
-              })}
+              {TEMPLATE_CATEGORIES.map((cat) => (
+                <a
+                  key={cat.id}
+                  href={`#cat-${cat.id}`}
+                  className="rounded-full bg-muted px-3 py-1.5 text-sm hover:bg-muted/80"
+                >
+                  {cat.label}
+                </a>
+              ))}
             </nav>
           </div>
         </aside>
@@ -890,32 +863,12 @@ function ReportForm({
 }) {
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
   const [aiFlags, setAiFlags] = useState<Record<string, boolean>>({})
-  const [activeSection, setActiveSection] = useState(template.sections[0].id)
   const [completedSections, setCompletedSections] = useState<Set<string>>(
     new Set(),
   )
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewScale, setPreviewScale] = useState<number>(0.68)
   const [savedStatus, setSavedStatus] = useState<'saved' | 'saving'>('saved')
-  const scrollRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const container = scrollRef.current
-    if (!container) return
-    const onScroll = () => {
-      let current = template.sections[0].id
-      for (const s of template.sections) {
-        const el = document.getElementById(`sec-${s.id}`)
-        if (!el) continue
-        const top = el.getBoundingClientRect().top
-        if (top - 80 <= 0) current = s.id
-      }
-      setActiveSection(current)
-    }
-    onScroll()
-    container.addEventListener('scroll', onScroll, { passive: true })
-    return () => container.removeEventListener('scroll', onScroll)
-  }, [template.sections])
 
   const updateField = (id: string, v: string) => {
     setFieldValues((p) => ({ ...p, [id]: v }))
@@ -940,11 +893,6 @@ function ReportForm({
       next.add(sectionId)
       return next
     })
-    if (!completedSections.has(sectionId)) {
-      const idx = template.sections.findIndex((s) => s.id === sectionId)
-      if (idx < template.sections.length - 1)
-        setActiveSection(template.sections[idx + 1].id)
-    }
   }
   const saveDraft = () => {
     setSavedStatus('saving')
@@ -1090,11 +1038,8 @@ function ReportForm({
       </div>
 
       <div className="flex min-h-0 flex-1 bg-muted/10">
-        {/* Form cards — scrollable column with scroll-spy */}
-        <div
-          ref={scrollRef}
-          className="min-w-0 flex-1 overflow-y-auto px-6 py-5"
-        >
+        {/* Form cards — scrollable column */}
+        <div className="min-w-0 flex-1 overflow-y-auto px-6 py-5">
           {/* Progress chip */}
           <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
             <ListChecks className="h-3.5 w-3.5" />
@@ -1127,26 +1072,15 @@ function ReportForm({
             </p>
             <nav className="flex flex-col gap-1">
               {template.sections.map((s) => {
-                const active = s.id === activeSection
                 const done = completedSections.has(s.id)
                 return (
                   <a
                     key={s.id}
                     href={`#sec-${s.id}`}
-                    className={cn(
-                      'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-colors',
-                      active
-                        ? 'bg-primary text-white hover:bg-primary'
-                        : 'bg-muted text-foreground hover:bg-muted/80',
-                    )}
+                    className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm hover:bg-muted/80"
                   >
                     {done && (
-                      <Check
-                        className={cn(
-                          'h-3 w-3 shrink-0',
-                          active ? 'text-white' : 'text-green-600',
-                        )}
-                      />
+                      <Check className="h-3 w-3 shrink-0 text-green-600" />
                     )}
                     <span className="truncate">{s.title}</span>
                   </a>
