@@ -225,11 +225,7 @@ function TemplateSelection({
   const [agencyFilter, setAgencyFilter] = useState<string>('all')
 
   const inProgressReports = mockAgencyReports.filter(
-    (r) =>
-      r.studentId === studentId &&
-      (r.status === 'draft' ||
-        r.status === 'pending_review' ||
-        r.status === 'edits_requested'),
+    (r) => r.studentId === studentId && r.status === 'draft',
   )
 
   // Unique agency list from templates — preserves discovery order

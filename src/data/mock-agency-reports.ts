@@ -1887,28 +1887,6 @@ export const DATA_SOURCES: Array<DataSource> = [
 
 export const mockAgencyReports: Array<AgencyReport> = [
   {
-    id: 'ar-001',
-    studentId: '1',
-    templateId: 'cps',
-    templateName: 'CPS School Report',
-    agency: 'Child Protective Service',
-    status: 'approved',
-    createdAt: new Date('2026-02-12'),
-    passwordSaved: true,
-    password: 'CPS2026Jun',
-  },
-  {
-    id: 'ar-003',
-    studentId: '1',
-    templateId: 'nuh',
-    templateName: 'NUH Referral Form',
-    agency: 'National University Hospital',
-    status: 'approved',
-    createdAt: new Date('2026-01-08'),
-    passwordSaved: true,
-    password: 'NUH2026Jan',
-  },
-  {
     id: 'ar-002',
     studentId: '1',
     templateId: 'reach',
