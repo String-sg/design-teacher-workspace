@@ -344,20 +344,32 @@ function AgencyReportRow({ report }: { report: AgencyReport }) {
     }
   }
 
+  const isResumable = status === 'draft' || status === 'edits_requested'
+
+  const titleContent = (
+    <>
+      <p className="text-sm font-medium truncate">{report.templateName}</p>
+      <p className="text-xs text-muted-foreground truncate">
+        {report.agency} · {createdDate}
+      </p>
+    </>
+  )
+
   return (
     <div className="group flex flex-col gap-1.5 rounded-lg border transition-colors hover:border-primary/40 hover:bg-muted/20">
       <div className="flex items-center gap-3 px-4 py-3">
-        <button
-          className="flex-1 min-w-0 text-left"
-          onClick={() => {
-            /* mock: open the report inline */
-          }}
-        >
-          <p className="text-sm font-medium truncate">{report.templateName}</p>
-          <p className="text-xs text-muted-foreground truncate">
-            {report.agency} · {createdDate}
-          </p>
-        </button>
+        {isResumable ? (
+          <Link
+            to="/students/$id/agency-report/new"
+            params={{ id: report.studentId }}
+            search={{ resume: report.templateId }}
+            className="flex-1 min-w-0 text-left"
+          >
+            {titleContent}
+          </Link>
+        ) : (
+          <div className="flex-1 min-w-0">{titleContent}</div>
+        )}
         {dueLabel && (
           <span
             className={cn(

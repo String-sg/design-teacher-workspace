@@ -16,6 +16,7 @@ import {
   Eye,
   EyeOff,
   FileText,
+  Filter,
   ListChecks,
   Lock,
   PanelRight,
@@ -31,6 +32,11 @@ import type {
 } from '@/data/mock-agency-reports'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { getStudentById } from '@/data/mock-students'
 import {
@@ -45,6 +51,10 @@ import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 export const Route = createFileRoute('/students_/$id/agency-report/new')({
   component: AgencyReportWizardPage,
+  validateSearch: (search): { resume?: string } => ({
+    resume:
+      typeof search.resume === 'string' ? (search.resume as string) : undefined,
+  }),
   loader: ({ params }) => {
     const student = getStudentById(params.id)
     if (!student) throw notFound()
@@ -76,46 +86,70 @@ const STEP_MAP: Record<WizardStep, number> = {
 
 const PREVIEW_SCALES = [0.55, 0.68, 0.82, 1] as const
 
-function StepBar({ step }: { step: WizardStep }) {
+function StepBar({
+  step,
+  onBack,
+  canGoBack,
+}: {
+  step: WizardStep
+  onBack?: () => void
+  canGoBack?: boolean
+}) {
   const cur = STEP_MAP[step]
   return (
-    <div className="flex items-center justify-center gap-0 border-b bg-white px-4 py-3">
-      {STEP_LABELS.map((label, i) => (
-        <div key={i} className="flex items-center">
-          <div className="flex items-center gap-1.5">
-            <div
-              className={cn(
-                'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
-                i < cur
-                  ? 'bg-green-500 text-white'
-                  : i === cur
-                    ? 'bg-primary text-white'
-                    : 'border-2 border-border bg-muted text-muted-foreground',
-              )}
-            >
-              {i < cur ? <Check className="h-3 w-3" /> : i + 1}
+    <div className="flex items-center gap-3 border-b bg-white px-4 py-3">
+      <div className="flex w-40 shrink-0 justify-start">
+        {canGoBack && onBack && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="text-muted-foreground"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" />
+            Back
+          </Button>
+        )}
+      </div>
+      <div className="flex flex-1 items-center justify-center gap-0">
+        {STEP_LABELS.map((label, i) => (
+          <div key={i} className="flex items-center">
+            <div className="flex items-center gap-1.5">
+              <div
+                className={cn(
+                  'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
+                  i < cur
+                    ? 'border-2 border-primary bg-primary/10 text-primary'
+                    : i === cur
+                      ? 'bg-primary text-white'
+                      : 'border-2 border-border bg-muted text-muted-foreground',
+                )}
+              >
+                {i < cur ? <Check className="h-3 w-3" /> : i + 1}
+              </div>
+              <span
+                className={cn(
+                  'hidden text-xs sm:block',
+                  i === cur
+                    ? 'font-semibold text-foreground'
+                    : 'text-muted-foreground',
+                )}
+              >
+                {label}
+              </span>
             </div>
-            <span
-              className={cn(
-                'hidden text-xs sm:block',
-                i === cur
-                  ? 'font-semibold text-foreground'
-                  : 'text-muted-foreground',
-              )}
-            >
-              {label}
-            </span>
+            {i < STEP_LABELS.length - 1 && (
+              <div
+                className={cn(
+                  'mx-2 h-0.5 w-6 shrink-0',
+                  i < cur ? 'bg-primary' : 'bg-border',
+                )}
+              />
+            )}
           </div>
-          {i < STEP_LABELS.length - 1 && (
-            <div
-              className={cn(
-                'mx-2 h-0.5 w-6 shrink-0',
-                i < cur ? 'bg-green-500' : 'bg-border',
-              )}
-            />
-          )}
-        </div>
-      ))}
+        ))}
+      </div>
+      <div className="w-40 shrink-0" />
     </div>
   )
 }
@@ -225,10 +259,25 @@ function TemplateSelection({
     (r) => r.studentId === studentId && r.status === 'draft',
   )
 
-  // Unique agency list from templates — preserves discovery order
+  // Unique agency list with short acronym, sorted alphabetically by abbrev
+  const agencyAbbrev = (agency: string): string => {
+    const tpl = AGENCY_TEMPLATES.find((t) => t.agency === agency)
+    return tpl?.abbrev.split(/[-\s]/)[0] ?? agency
+  }
   const agencyOptions = Array.from(
     new Set(AGENCY_TEMPLATES.map((t) => t.agency)),
   )
+    .map((agency) => ({ agency, abbrev: agencyAbbrev(agency) }))
+    .sort((a, b) => a.abbrev.localeCompare(b.abbrev))
+
+  const [filterQuery, setFilterQuery] = useState('')
+  const filteredAgencyOptions = filterQuery.trim()
+    ? agencyOptions.filter(
+        (o) =>
+          o.abbrev.toLowerCase().includes(filterQuery.toLowerCase()) ||
+          o.agency.toLowerCase().includes(filterQuery.toLowerCase()),
+      )
+    : agencyOptions
 
   const matchesFilter = (tpl: AgencyTemplate) => {
     if (agencyFilter !== 'all' && tpl.agency !== agencyFilter) return false
@@ -342,18 +391,86 @@ function TemplateSelection({
                 className="w-full rounded-lg border bg-white py-2 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
-            <select
-              value={agencyFilter}
-              onChange={(e) => setAgencyFilter(e.target.value)}
-              className="rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            >
-              <option value="all">All agencies</option>
-              {agencyOptions.map((a) => (
-                <option key={a} value={a}>
-                  {a}
-                </option>
-              ))}
-            </select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Filter className="h-3.5 w-3.5" />
+                  Filter
+                  {agencyFilter !== 'all' && (
+                    <Badge className="ml-1 h-4 min-w-4 px-1 text-[10px]">
+                      1
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-60 p-0">
+                <div className="border-b p-2">
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={filterQuery}
+                      onChange={(e) => setFilterQuery(e.target.value)}
+                      placeholder="Search ministries"
+                      className="w-full rounded-md border bg-background py-1.5 pl-7 pr-2 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+                <div className="max-h-64 overflow-y-auto py-1">
+                  <button
+                    onClick={() => {
+                      setAgencyFilter('all')
+                      setFilterQuery('')
+                    }}
+                    className={cn(
+                      'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs hover:bg-muted',
+                      agencyFilter === 'all' && 'font-semibold',
+                    )}
+                  >
+                    {agencyFilter === 'all' ? (
+                      <Check className="h-3 w-3 text-primary" />
+                    ) : (
+                      <span className="h-3 w-3" />
+                    )}
+                    All agencies
+                  </button>
+                  {filteredAgencyOptions.map(({ agency, abbrev }) => {
+                    const on = agencyFilter === agency
+                    return (
+                      <button
+                        key={agency}
+                        onClick={() => {
+                          setAgencyFilter(agency)
+                          setFilterQuery('')
+                        }}
+                        className={cn(
+                          'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs hover:bg-muted',
+                          on && 'font-semibold',
+                        )}
+                      >
+                        {on ? (
+                          <Check className="h-3 w-3 text-primary" />
+                        ) : (
+                          <span className="h-3 w-3" />
+                        )}
+                        <span className="w-14 shrink-0 font-mono">
+                          {abbrev}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate text-muted-foreground">
+                          {agency}
+                        </span>
+                      </button>
+                    )
+                  })}
+                  {filteredAgencyOptions.length === 0 && (
+                    <p className="px-3 py-2 text-xs text-muted-foreground">
+                      No matching ministries
+                    </p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Template list, grouped by category */}
@@ -933,19 +1050,14 @@ function ReportForm({
   ).length
 
   return (
-    <div className="flex h-[calc(100vh-120px)] flex-col overflow-hidden rounded-xl border bg-white">
+    <div
+      className={cn(
+        'mx-auto flex h-[calc(100vh-120px)] flex-col overflow-hidden rounded-xl border bg-white transition-[max-width]',
+        previewOpen ? 'max-w-none' : 'max-w-5xl',
+      )}
+    >
       {/* Form header — mirrors Posts new-post top bar */}
       <div className="flex shrink-0 items-center gap-3 border-b bg-card px-4 py-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onBack}
-          className="text-muted-foreground"
-        >
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          Back
-        </Button>
-        <div className="h-5 w-px bg-border" />
         <AgencyIcon abbrev={template.abbrev} color={template.color} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -1128,10 +1240,6 @@ function ReviewSubmit({
             {template.name} · {studentName}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={onBack}>
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          Back to form
-        </Button>
         <Button size="sm" onClick={onSubmit}>
           Submit for Principal Review
           <ChevronRight className="ml-1 h-4 w-4" />
@@ -1361,16 +1469,10 @@ function ExportPassword({
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <Button variant="outline" className="flex-1" onClick={onBack}>
-          <ArrowLeft className="mr-1 h-4 w-4" />
-          Back
-        </Button>
-        <Button className="flex-1" onClick={onDownload}>
-          <Download className="mr-1.5 h-4 w-4" />
-          Download PDF
-        </Button>
-      </div>
+      <Button className="w-full" onClick={onDownload}>
+        <Download className="mr-1.5 h-4 w-4" />
+        Download PDF
+      </Button>
     </div>
   )
 }
@@ -1428,11 +1530,21 @@ function Confirmation({
 
 function AgencyReportWizardPage() {
   const { student } = Route.useLoaderData()
+  const search = Route.useSearch()
   const navigate = useNavigate()
   const agencyReportsEnabled = useFeatureFlag('agency-reports')
 
-  const [step, setStep] = useState<WizardStep>('templates')
-  const [selectedTemplates, setSelectedTemplates] = useState<Array<string>>([])
+  const resumeTemplateId =
+    search.resume && AGENCY_TEMPLATES.some((t) => t.id === search.resume)
+      ? search.resume
+      : undefined
+
+  const [step, setStep] = useState<WizardStep>(
+    resumeTemplateId ? 'form' : 'templates',
+  )
+  const [selectedTemplates, setSelectedTemplates] = useState<Array<string>>(
+    resumeTemplateId ? [resumeTemplateId] : [],
+  )
 
   useSetBreadcrumbs([
     { label: 'Home', href: '/' },
@@ -1456,14 +1568,15 @@ function AgencyReportWizardPage() {
           generate agency reports for this student.
         </p>
         <div className="mt-2 flex gap-2">
-          <Button variant="outline" asChild>
-            <Link to="/students/$id" params={{ id: student.id }}>
-              Back to profile
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link to="/flags">Open Manage Flags</Link>
-          </Button>
+          <Button
+            variant="outline"
+            render={
+              <Link to="/students/$id" params={{ id: student.id }}>
+                Back to profile
+              </Link>
+            }
+          />
+          <Button render={<Link to="/flags">Open Manage Flags</Link>} />
         </div>
       </div>
     )
@@ -1502,7 +1615,18 @@ function AgencyReportWizardPage() {
         )}
       </div>
 
-      {showStepBar && <StepBar step={step} />}
+      {showStepBar && (
+        <StepBar
+          step={step}
+          canGoBack={step !== 'templates'}
+          onBack={() => {
+            if (step === 'form') setStep('templates')
+            else if (step === 'review') setStep('form')
+            else if (step === 'submitted') setStep('review')
+            else if (step === 'export') setStep('submitted')
+          }}
+        />
+      )}
 
       <main
         className={cn(
