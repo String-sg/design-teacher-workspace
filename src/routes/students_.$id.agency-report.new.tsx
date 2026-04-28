@@ -95,10 +95,12 @@ function StepBar({
   step,
   onBack,
   canGoBack,
+  onStepClick,
 }: {
   step: WizardStep
   onBack?: () => void
   canGoBack?: boolean
+  onStepClick?: (index: number) => void
 }) {
   const cur = STEP_MAP[step]
   return (
@@ -117,42 +119,58 @@ function StepBar({
         )}
       </div>
       <div className="flex flex-1 items-center justify-center gap-0">
-        {STEP_LABELS.map((label, i) => (
-          <div key={i} className="flex items-center">
-            <div className="flex items-center gap-1.5">
-              <div
+        {STEP_LABELS.map((label, i) => {
+          const isPast = i < cur
+          const isCurrent = i === cur
+          const clickable = (isPast || isCurrent) && !!onStepClick
+          return (
+            <div key={i} className="flex items-center">
+              <button
+                type="button"
+                onClick={clickable ? () => onStepClick!(i) : undefined}
+                disabled={!clickable}
+                aria-current={isCurrent ? 'step' : undefined}
                 className={cn(
-                  'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
-                  i < cur
-                    ? 'border-2 border-primary bg-primary/10 text-primary'
-                    : i === cur
-                      ? 'bg-primary text-white'
-                      : 'border-2 border-border bg-muted text-muted-foreground',
+                  'flex items-center gap-1.5 rounded-full transition-colors',
+                  clickable
+                    ? 'cursor-pointer px-2 py-0.5 hover:bg-muted'
+                    : 'cursor-default',
                 )}
               >
-                {i < cur ? <Check className="h-3 w-3" /> : i + 1}
-              </div>
-              <span
-                className={cn(
-                  'hidden text-xs sm:block',
-                  i === cur
-                    ? 'font-semibold text-foreground'
-                    : 'text-muted-foreground',
-                )}
-              >
-                {label}
-              </span>
+                <span
+                  className={cn(
+                    'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
+                    isPast
+                      ? 'border-2 border-primary bg-primary/10 text-primary'
+                      : isCurrent
+                        ? 'bg-primary text-white'
+                        : 'border-2 border-border bg-muted text-muted-foreground',
+                  )}
+                >
+                  {isPast ? <Check className="h-3 w-3" /> : i + 1}
+                </span>
+                <span
+                  className={cn(
+                    'hidden text-xs sm:block',
+                    isCurrent
+                      ? 'font-semibold text-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                >
+                  {label}
+                </span>
+              </button>
+              {i < STEP_LABELS.length - 1 && (
+                <div
+                  className={cn(
+                    'mx-2 h-0.5 w-6 shrink-0',
+                    i < cur ? 'bg-primary' : 'bg-border',
+                  )}
+                />
+              )}
             </div>
-            {i < STEP_LABELS.length - 1 && (
-              <div
-                className={cn(
-                  'mx-2 h-0.5 w-6 shrink-0',
-                  i < cur ? 'bg-primary' : 'bg-border',
-                )}
-              />
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
       <div className="w-40 shrink-0" />
     </div>
@@ -1735,6 +1753,13 @@ function AgencyReportWizardPage() {
             else if (step === 'review') setStep('form')
             else if (step === 'submitted') setStep('review')
             else if (step === 'export') setStep('submitted')
+          }}
+          onStepClick={(i) => {
+            // Only allow jumping back (or staying on the current step).
+            // 0 → Template, 1 → Fill Report, 2 → Export
+            if (i === 0) setStep('templates')
+            else if (i === 1) setStep('form')
+            else if (i === 2) setStep('export')
           }}
         />
       )}
