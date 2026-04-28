@@ -270,7 +270,7 @@ function ParentsGatewayPage() {
 
   const tabs: Array<{ value: PostTab; label: string; hidden?: boolean }> = [
     { value: 'with-responses', label: 'With responses' },
-    { value: 'view-only', label: 'View only' },
+    { value: 'view-only', label: 'Read only' },
     { value: 'custom-forms', label: 'Custom forms', hidden: !formsEnabled },
   ]
   const visibleTabs = tabs.filter((t) => !t.hidden)
