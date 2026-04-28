@@ -40,13 +40,17 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { getStudentById } from '@/data/mock-students'
+import type { SectionAssignment, Staff } from '@/data/mock-agency-reports'
 import {
   AGENCY_TEMPLATES,
   AI_DRAFTS,
   AI_DRAFT_CITATIONS,
+  CURRENT_USER,
   MOCK_COUNSELLOR,
+  MOCK_STAFF,
   mockAgencyReports,
 } from '@/data/mock-agency-reports'
+import { toast } from 'sonner'
 import { useFeatureFlag } from '@/hooks/use-feature-flag'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
@@ -728,10 +732,73 @@ function FieldRow({
   )
 }
 
+function AssignmentChip({
+  assignedTo,
+  onChange,
+}: {
+  assignedTo: SectionAssignment
+  onChange: (s: Staff) => void
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="flex items-center gap-1.5 rounded-full border bg-card px-2 py-0.5 text-xs hover:bg-muted"
+        >
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
+            {assignedTo.initials}
+          </span>
+          <span className="font-medium">{assignedTo.name}</span>
+          <span className="text-muted-foreground">· {assignedTo.role}</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-64 p-0">
+        <div className="border-b px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Reassign section
+        </div>
+        <div className="max-h-64 overflow-y-auto py-1">
+          {MOCK_STAFF.map((s) => {
+            const active =
+              s.name === assignedTo.name && s.role === assignedTo.role
+            return (
+              <button
+                key={s.name}
+                onClick={() => onChange(s)}
+                className={cn(
+                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs hover:bg-muted',
+                  active && 'font-semibold',
+                )}
+              >
+                {active ? (
+                  <Check className="h-3 w-3 text-primary" />
+                ) : (
+                  <span className="h-3 w-3" />
+                )}
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] font-semibold">
+                  {s.initials}
+                </span>
+                <span className="min-w-0 flex-1 truncate">{s.name}</span>
+                <span className="text-muted-foreground">{s.role}</span>
+              </button>
+            )
+          })}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+function isSameStaff(a: Staff, b: Staff): boolean {
+  return a.name === b.name && a.role === b.role
+}
+
 function SectionPanel({
   section,
   fieldValues,
   aiFlags,
+  assignedTo,
+  onAssignedChange,
   onValueChange,
   onAiDraft,
   onToggleReviewed,
@@ -740,18 +807,27 @@ function SectionPanel({
   section: ReportSection
   fieldValues: Record<string, string>
   aiFlags: Record<string, boolean>
+  assignedTo: SectionAssignment
+  onAssignedChange: (s: Staff) => void
   onValueChange: (fieldId: string, v: string) => void
   onAiDraft: (fieldId: string) => void
   onToggleReviewed: (sectionId: string) => void
   isReviewed: boolean
 }) {
-  const isCounsellorSection = section.role === 'counsellor'
-  const isPrincipalSection = section.role === 'principal'
-  const isEditable = section.role === 'yh'
+  const isMine = isSameStaff(assignedTo, CURRENT_USER)
+  const completed = assignedTo.completed === true
+  const completedDate = assignedTo.completedDate
 
-  const counsellorHasData =
-    MOCK_COUNSELLOR.fields &&
-    Object.keys(MOCK_COUNSELLOR.fields as Record<string, string>).length > 0
+  // For the read-only rendering of a completed counsellor-role section, fall
+  // back to the MOCK_COUNSELLOR.fields content so the demo shows real text.
+  const completedContent = (fieldId: string): string => {
+    if (section.role === 'counsellor') {
+      const v = (MOCK_COUNSELLOR.fields as Record<string, string>)[fieldId]
+      if (v) return v
+    }
+    const f = section.fields.find((x) => x.id === fieldId)
+    return fieldValues[fieldId] ?? f?.value ?? '—'
+  }
 
   const reviewToggle = (
     <Button
@@ -776,99 +852,14 @@ function SectionPanel({
       id={`sec-${section.id}`}
       className="scroll-mt-24 rounded-xl border bg-white p-6"
     >
-      <div className="mb-5 flex items-center gap-2">
+      <div className="mb-5 flex flex-wrap items-center gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           {section.title}
         </h2>
-        {isPrincipalSection && (
-          <Badge className="gap-1 bg-purple-50 text-purple-700 hover:bg-purple-50">
-            <Lock className="h-2.5 w-2.5" />
-            Principal
-          </Badge>
-        )}
-        {isCounsellorSection && counsellorHasData && (
-          <Badge className="gap-1 bg-blue-50 text-blue-700 hover:bg-blue-50">
-            <Check className="h-2.5 w-2.5" />
-            Completed by School Counsellor
-          </Badge>
-        )}
-        {isCounsellorSection && !counsellorHasData && (
-          <Badge className="gap-1 bg-amber-50 text-amber-700 hover:bg-amber-50">
-            <Clock className="h-2.5 w-2.5" />
-            Awaiting Counsellor
-          </Badge>
-        )}
+        <AssignmentChip assignedTo={assignedTo} onChange={onAssignedChange} />
       </div>
 
-      {isPrincipalSection ? (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-            <Lock className="h-3.5 w-3.5" />
-            <span>To be completed by Principal during review.</span>
-          </div>
-          <div className="space-y-5 opacity-50">
-            {section.fields.map((f) => (
-              <div key={f.id} className="space-y-1.5">
-                <label className="text-sm font-medium">{f.label}</label>
-                {f.type === 'narrative' ? (
-                  <div className="min-h-[120px] rounded-lg border bg-muted/30" />
-                ) : (
-                  <div className="h-10 rounded-lg border bg-muted/30" />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : isCounsellorSection ? (
-        counsellorHasData ? (
-          <div className="rounded-xl border bg-muted/20 p-5">
-            <div className="mb-4 flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100">
-                <Check className="h-3.5 w-3.5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">
-                  Completed by {MOCK_COUNSELLOR.name} ·{' '}
-                  {MOCK_COUNSELLOR.completedAt}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Read-only — submitted by School Counsellor
-                </p>
-              </div>
-            </div>
-            <div className="space-y-4">
-              {section.fields.map((f) => (
-                <div key={f.id}>
-                  <p className="mb-1 text-xs font-medium text-muted-foreground">
-                    {f.label}
-                  </p>
-                  <p className="text-sm leading-relaxed">
-                    {(MOCK_COUNSELLOR.fields as Record<string, string>)[
-                      f.id
-                    ] ?? '—'}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed bg-amber-50/40 py-10 text-center">
-            <Clock className="h-5 w-5 text-amber-600" />
-            <p className="text-sm font-medium">
-              Awaiting input from School Counsellor
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                /* mock: send reminder */
-              }}
-            >
-              Send reminder
-            </Button>
-          </div>
-        )
-      ) : isEditable ? (
+      {isMine ? (
         <div className="space-y-5">
           {section.fields.map((field) => (
             <FieldRow
@@ -886,7 +877,59 @@ function SectionPanel({
           ))}
           <div className="flex justify-end border-t pt-4">{reviewToggle}</div>
         </div>
-      ) : null}
+      ) : completed ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 rounded-lg bg-green-50 px-4 py-2.5 text-xs text-green-700">
+            <Check className="h-3.5 w-3.5 text-green-600" />
+            <span>
+              Completed by {assignedTo.name}
+              {completedDate ? ` · ${completedDate}` : ''}
+            </span>
+          </div>
+          <div className="space-y-4">
+            {section.fields.map((f) => (
+              <div key={f.id}>
+                <p className="mb-1 text-xs font-medium text-muted-foreground">
+                  {f.label}
+                </p>
+                <p className="text-sm leading-relaxed">
+                  {completedContent(f.id)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed bg-amber-50/40 px-4 py-2.5 text-xs">
+            <span className="flex items-center gap-2 text-amber-700">
+              <Clock className="h-3.5 w-3.5" />
+              Awaiting input from {assignedTo.name}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                toast.success(`Reminder sent to ${assignedTo.name}`)
+              }
+            >
+              Send reminder
+            </Button>
+          </div>
+          <div className="space-y-5 opacity-50">
+            {section.fields.map((f) => (
+              <div key={f.id} className="space-y-1.5">
+                <label className="text-sm font-medium">{f.label}</label>
+                {f.type === 'narrative' ? (
+                  <div className="min-h-[120px] rounded-lg border bg-muted/30" />
+                ) : (
+                  <div className="h-10 rounded-lg border bg-muted/30" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   )
 }
@@ -1008,6 +1051,47 @@ function ReportForm({
   const [previewScale, setPreviewScale] = useState<number>(0.68)
   const [savedStatus, setSavedStatus] = useState<'saved' | 'saving'>('saved')
 
+  // Per-section assignments. Defaults: yh → current user; counsellor → SC
+  // (with Mock data marked completed); principal → P (awaiting).
+  const [assignments, setAssignments] = useState<
+    Record<string, SectionAssignment>
+  >(() => {
+    const defaults: Record<string, SectionAssignment> = {}
+    for (const s of template.sections) {
+      if (s.assignedTo) {
+        defaults[s.id] = s.assignedTo
+        continue
+      }
+      if (s.role === 'counsellor') {
+        const sc = MOCK_STAFF.find((p) => p.role === 'SC')!
+        defaults[s.id] = {
+          ...sc,
+          completed: true,
+          completedDate: '15 Apr 2026',
+        }
+      } else if (s.role === 'principal') {
+        const p = MOCK_STAFF.find((p) => p.role === 'P')!
+        defaults[s.id] = { ...p, completed: false }
+      } else {
+        defaults[s.id] = { ...CURRENT_USER, completed: false }
+      }
+    }
+    return defaults
+  })
+
+  const reassignSection = (sectionId: string, staff: Staff) => {
+    setAssignments((prev) => ({
+      ...prev,
+      [sectionId]: {
+        ...staff,
+        // If reassigning back to current user, drop completed marker so they
+        // can edit; if reassigning to other, default to "awaiting".
+        completed: false,
+        completedDate: undefined,
+      },
+    }))
+  }
+
   const updateField = (id: string, v: string) => {
     setFieldValues((p) => ({ ...p, [id]: v }))
     setSavedStatus('saving')
@@ -1063,9 +1147,11 @@ function ReportForm({
     ? Math.round((filledCount / allFields.length) * 100)
     : 0
 
-  const reviewableSections = template.sections.filter(
-    (s) => s.role === 'yh',
-  )
+  // Verified counter only counts sections assigned to the current user.
+  const reviewableSections = template.sections.filter((s) => {
+    const a = assignments[s.id]
+    return a && isSameStaff(a, CURRENT_USER)
+  })
   const reviewedCount = reviewableSections.filter((s) =>
     completedSections.has(s.id),
   ).length
@@ -1188,6 +1274,8 @@ function ReportForm({
                 section={s}
                 fieldValues={fieldValues}
                 aiFlags={aiFlags}
+                assignedTo={assignments[s.id]}
+                onAssignedChange={(staff) => reassignSection(s.id, staff)}
                 onValueChange={updateField}
                 onAiDraft={aiDraft}
                 onToggleReviewed={toggleReviewed}

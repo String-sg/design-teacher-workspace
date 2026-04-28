@@ -20,12 +20,36 @@ export interface ReportField {
   restrictedMsg?: string
 }
 
+export type StaffRole = 'YH' | 'SC' | 'P' | 'VP' | 'FT'
+
+export interface Staff {
+  name: string
+  role: StaffRole
+  initials: string
+}
+
+export interface SectionAssignment extends Staff {
+  completed?: boolean
+  completedDate?: string
+}
+
 export interface ReportSection {
   id: string
   title: string
   role: FieldRole
   fields: Array<ReportField>
+  assignedTo?: SectionAssignment
 }
+
+export const MOCK_STAFF: Array<Staff> = [
+  { name: 'Mr Daniel Tan', role: 'YH', initials: 'DT' },
+  { name: 'Ms Sarah Chen', role: 'SC', initials: 'SC' },
+  { name: 'Mrs Jenny Lim', role: 'P', initials: 'JL' },
+  { name: 'Mr Ahmad Rizal', role: 'FT', initials: 'AR' },
+  { name: 'Ms Priya Nair', role: 'VP', initials: 'PN' },
+]
+
+export const CURRENT_USER: Staff = MOCK_STAFF[0]
 
 export type TemplateCategoryLabel =
   | 'Care & Placement'

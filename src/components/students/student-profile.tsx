@@ -346,12 +346,46 @@ function AgencyReportRow({ report }: { report: AgencyReport }) {
 
   const isResumable = status === 'draft' || status === 'edits_requested'
 
+  // Mock per-section completion summary for in-progress reports
+  // (Counsellor's Input + Principal's Remarks are typical "awaiting" sections.)
+  let completionSummary: {
+    completed: number
+    total: number
+    awaiting: Array<string>
+  } | null = null
+  if (status === 'draft' || status === 'edits_requested') {
+    const tpl = AGENCY_TEMPLATES.find((t) => t.id === report.templateId)
+    if (tpl) {
+      const total = tpl.sections.length
+      const awaiting = tpl.sections
+        .filter((s) => s.role !== 'yh')
+        .map((s) => s.title)
+      completionSummary = {
+        completed: total - awaiting.length - (status === 'draft' ? 0 : 0),
+        total,
+        awaiting,
+      }
+    }
+  }
+
   const titleContent = (
     <>
       <p className="text-sm font-medium truncate">{report.templateName}</p>
       <p className="text-xs text-muted-foreground truncate">
         {report.agency} · {createdDate}
       </p>
+      {completionSummary && completionSummary.awaiting.length > 0 && (
+        <p className="mt-1 text-xs text-muted-foreground truncate">
+          {completionSummary.completed} of {completionSummary.total} sections
+          completed
+          {completionSummary.awaiting.length > 0 && (
+            <>
+              {' · '}
+              <span>Awaiting: {completionSummary.awaiting.join(', ')}</span>
+            </>
+          )}
+        </p>
+      )}
     </>
   )
 
