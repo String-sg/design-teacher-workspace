@@ -1755,7 +1755,7 @@ function NewAnnouncementPage() {
                     onClick={handlePostClick}
                   >
                     <Send className="mr-2 h-3.5 w-3.5" />
-                    Post
+                    Post now
                   </Button>
                   {/* Validation popover — shown when Post is clicked but form is incomplete */}
                   <PopoverContent
