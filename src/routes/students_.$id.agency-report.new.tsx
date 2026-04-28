@@ -12,7 +12,6 @@ import {
   ChevronRight,
   Clock,
   Download,
-  ExternalLink,
   Eye,
   EyeOff,
   FileText,
@@ -1634,14 +1633,6 @@ function Confirmation({
         <Button onClick={onStartNext} className="w-full justify-center">
           Start next report
           <ChevronRight className="ml-1 h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full justify-center"
-          onClick={(e) => e.preventDefault()}
-        >
-          <ExternalLink className="mr-1.5 h-4 w-4" />
-          Open case in Case Sync
         </Button>
         <Button
           variant="ghost"
