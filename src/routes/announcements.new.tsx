@@ -1449,14 +1449,29 @@ function NewAnnouncementPage() {
     Date | undefined
   >(undefined)
 
-  // Auto-close validation popover once all required fields are filled
+  // Inline field error highlights — set on submit attempt, cleared when form becomes valid
+  const [showErrors, setShowErrors] = useState(false)
+
+  // Per-field error flags — only active after a submit attempt
+  const errTitle = showErrors && !title.trim()
+  const errDescription = showErrors && isDescriptionEmpty(description)
+  const errRecipients = showErrors && recipients.length === 0
+  const errEnquiryEmail = showErrors && !enquiryEmail.trim()
+  const errDueDate =
+    showErrors && responseType !== 'view-only' && !dueDate.length
+
+  // Auto-close validation popover + clear error highlights once all required fields are filled
   useEffect(() => {
-    if (missingFields.length === 0) setShowValidationPopover(false)
+    if (missingFields.length === 0) {
+      setShowValidationPopover(false)
+      setShowErrors(false)
+    }
   }, [missingFields.length])
 
   // Open validation popover when user clicks disabled Post button
   function handlePostClick() {
     if (!canPost) {
+      setShowErrors(true)
       setShowValidationPopover(true)
       return
     }
@@ -1469,6 +1484,7 @@ function NewAnnouncementPage() {
   function handleScheduleConfirm() {
     if (!selectedScheduleDate) return
     if (!canPost) {
+      setShowErrors(true)
       setShowSchedulePopover(false)
       setShowValidationPopover(true)
       return
@@ -1920,10 +1936,22 @@ function NewAnnouncementPage() {
                     Parents of the selected students will receive this post via
                     Parents Gateway.
                   </p>
-                  <StudentRecipientSelector
-                    value={recipients}
-                    onChange={setRecipients}
-                  />
+                  <div
+                    className={cn(
+                      errRecipients &&
+                        'rounded-lg ring-[3px] ring-destructive/20',
+                    )}
+                  >
+                    <StudentRecipientSelector
+                      value={recipients}
+                      onChange={setRecipients}
+                    />
+                  </div>
+                  {errRecipients && (
+                    <p className="text-xs text-destructive">
+                      Select at least one recipient.
+                    </p>
+                  )}
                 </div>
 
                 {/* Staff in charge */}
@@ -1977,10 +2005,22 @@ function NewAnnouncementPage() {
                     Select the preferred email address to receive enquiries from
                     parents.
                   </p>
-                  <EnquiryEmailSelector
-                    value={enquiryEmail}
-                    onChange={setEnquiryEmail}
-                  />
+                  <div
+                    className={cn(
+                      errEnquiryEmail &&
+                        'rounded-lg ring-[3px] ring-destructive/20',
+                    )}
+                  >
+                    <EnquiryEmailSelector
+                      value={enquiryEmail}
+                      onChange={setEnquiryEmail}
+                    />
+                  </div>
+                  {errEnquiryEmail && (
+                    <p className="text-xs text-destructive">
+                      Select an enquiry email.
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
@@ -2021,7 +2061,11 @@ function NewAnnouncementPage() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     maxLength={120}
+                    aria-invalid={errTitle}
                   />
+                  {errTitle && (
+                    <p className="text-xs text-destructive">Title is required.</p>
+                  )}
                 </div>
 
                 {/* Description — Tiptap rich text */}
@@ -2041,13 +2085,25 @@ function NewAnnouncementPage() {
                       {descriptionCharCount}/2000
                     </span>
                   </div>
-                  <RichTextArea
-                    value={description}
-                    onChange={setDescription}
-                    placeholder="Write your post here. Use the toolbar to format text and insert inline links."
-                    minHeight="160px"
-                    toolbar="simple"
-                  />
+                  <div
+                    className={cn(
+                      errDescription &&
+                        'rounded-lg ring-[3px] ring-destructive/20',
+                    )}
+                  >
+                    <RichTextArea
+                      value={description}
+                      onChange={setDescription}
+                      placeholder="Write your post here. Use the toolbar to format text and insert inline links."
+                      minHeight="160px"
+                      toolbar="simple"
+                    />
+                  </div>
+                  {errDescription && (
+                    <p className="text-xs text-destructive">
+                      Post details are required.
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -2625,8 +2681,18 @@ function NewAnnouncementPage() {
                       value={dueDate}
                       min={new Date().toISOString().split('T')[0]}
                       onChange={(e) => setDueDate(e.target.value)}
-                      className="rounded-md border border-input bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
+                      className={cn(
+                        'rounded-md border bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring',
+                        errDueDate
+                          ? 'border-destructive ring-[3px] ring-destructive/20'
+                          : 'border-input',
+                      )}
                     />
+                    {errDueDate && (
+                      <p className="text-xs text-destructive">
+                        Due date is required.
+                      </p>
+                    )}
                     {dueDate && (
                       <p className="text-xs text-muted-foreground">
                         Default reminder will be sent on:{' '}
