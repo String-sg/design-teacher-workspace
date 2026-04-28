@@ -2216,7 +2216,7 @@ function NewAnnouncementPage() {
                       Files
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {uploadedFiles.length}/3 · Max 5 MB each
+                      Optional · {uploadedFiles.length}/3 · Max 5 MB each
                     </span>
                   </div>
 
@@ -2330,7 +2330,7 @@ function NewAnnouncementPage() {
                       Photos
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {uploadedPhotos.length}/12 · Max 5 MB each
+                      Optional · {uploadedPhotos.length}/12 · Max 5 MB each
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">
