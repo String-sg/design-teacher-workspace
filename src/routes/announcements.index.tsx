@@ -57,7 +57,7 @@ import { useFeatureFlag } from '@/hooks/use-feature-flag'
 
 export const Route = createFileRoute('/announcements/')({
   validateSearch: (search) => ({
-    tab: (search.tab as PostTab) ?? 'view-only',
+    tab: (search.tab as PostTab) ?? 'with-responses',
   }),
   component: ParentsGatewayPage,
 })
