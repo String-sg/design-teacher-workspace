@@ -269,8 +269,8 @@ function ParentsGatewayPage() {
   }, [searchQuery])
 
   const tabs: Array<{ value: PostTab; label: string; hidden?: boolean }> = [
-    { value: 'view-only', label: 'Posts' },
-    { value: 'with-responses', label: 'Posts with responses' },
+    { value: 'view-only', label: 'View only' },
+    { value: 'with-responses', label: 'With responses' },
     { value: 'custom-forms', label: 'Custom forms', hidden: !formsEnabled },
   ]
   const visibleTabs = tabs.filter((t) => !t.hidden)
