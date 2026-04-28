@@ -66,13 +66,13 @@ interface CreateOption {
 
 const CREATE_OPTIONS: Array<CreateOption> = [
   {
-    title: 'Info only',
+    title: 'View only',
     description: 'Send a post to parents. They can read it on Parents Gateway.',
     to: '/announcements/new',
     mockup: <AnnouncementMockup />,
   },
   {
-    title: 'Response required',
+    title: 'With responses',
     description:
       'Send a post and collect responses from parents — acknowledge or yes/no.',
     to: '/announcements/new',
