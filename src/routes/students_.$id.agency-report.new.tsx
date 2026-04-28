@@ -1724,26 +1724,6 @@ function AgencyReportWizardPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
-      {/* Mini top bar */}
-      <div className="flex items-center gap-2 border-b bg-white px-5 py-2.5">
-        <span className="text-sm font-semibold text-primary">
-          Teacher Workspace
-        </span>
-        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary">
-          Beta
-        </span>
-        <div className="flex-1" />
-        <span className="text-sm text-muted-foreground">Student Insights</span>
-        <span className="text-sm text-muted-foreground">/</span>
-        <span className="text-sm text-muted-foreground">{student.name}</span>
-        {step !== 'templates' && (
-          <>
-            <span className="text-sm text-muted-foreground">/</span>
-            <span className="text-sm font-medium">Agency Report</span>
-          </>
-        )}
-      </div>
-
       {showStepBar && (
         <StepBar
           step={step}
