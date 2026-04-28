@@ -1056,12 +1056,6 @@ function NewAnnouncementPage() {
   const [draftLoaded, setDraftLoaded] = useState(false)
   const [fileBannerDismissed, setFileBannerDismissed] = useState(false)
 
-  // Optional section visibility — shown when toggled on OR when content already exists
-  const [showShortcuts, setShowShortcuts] = useState(false)
-  const [showLinks, setShowLinks] = useState(false)
-  const [showFiles, setShowFiles] = useState(false)
-  const [showPhotos, setShowPhotos] = useState(false)
-
   // Debounced auto-save — persists to localStorage 2 s after any form state change
   useEffect(() => {
     if (isEditing) return
@@ -2116,542 +2110,402 @@ function NewAnnouncementPage() {
               {/* Zone B — optional extras (locked for posted posts) */}
               <div
                 className={cn(
-                  'mt-5 border-t pt-5',
+                  'mt-5 border-t pt-5 space-y-5',
                   isEditingPosted && 'pointer-events-none opacity-50',
                 )}
               >
-                {/* "Add to post" pill toolbar */}
-                {(() => {
-                  const hasShortcuts = shortcuts.length > 0
-                  const hasLinks = websiteLinks.length > 0
-                  const hasFiles =
-                    uploadedFiles.length > 0 || draftFilesMeta.length > 0
-                  const hasPhotos =
-                    uploadedPhotos.length > 0 || draftPhotosMeta.length > 0
-                  const showShortcutsSection = showShortcuts || hasShortcuts
-                  const showLinksSection = showLinks || hasLinks
-                  const showFilesSection = showFiles || hasFiles
-                  const showPhotosSection = showPhotos || hasPhotos
+                {/* Shortcuts */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-700">
+                      Shortcuts
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Optional
+                    </span>
+                  </div>
+                  <PGShortcutsSelector
+                    value={shortcuts}
+                    onChange={setShortcuts}
+                  />
+                </div>
 
-                  const pillBase =
-                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors'
-                  const pillActive =
-                    'border-primary/30 bg-primary/10 text-primary hover:bg-primary/15'
-                  const pillInactive =
-                    'border-dashed border-slate-300 text-slate-500 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-700'
+                {/* Links */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-700">
+                      Links
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Optional · {websiteLinks.length}/3
+                    </span>
+                  </div>
 
-                  return (
-                    <>
-                      <div className="flex flex-wrap gap-2">
-                        {/* Shortcuts pill */}
-                        <button
-                          type="button"
-                          onClick={() => setShowShortcuts((v) => !v)}
-                          className={cn(
-                            pillBase,
-                            showShortcutsSection ? pillActive : pillInactive,
-                          )}
-                        >
-                          {showShortcutsSection ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <Plus className="h-3 w-3" />
-                          )}
-                          Shortcuts
-                          {hasShortcuts && (
-                            <span className="ml-0.5 opacity-70">
-                              · {shortcuts.length}
-                            </span>
-                          )}
-                        </button>
-
-                        {/* Links pill */}
-                        <button
-                          type="button"
-                          onClick={() => setShowLinks((v) => !v)}
-                          className={cn(
-                            pillBase,
-                            showLinksSection ? pillActive : pillInactive,
-                          )}
-                        >
-                          {showLinksSection ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <Plus className="h-3 w-3" />
-                          )}
-                          Links
-                          {hasLinks && (
-                            <span className="ml-0.5 opacity-70">
-                              · {websiteLinks.length}
-                            </span>
-                          )}
-                        </button>
-
-                        {/* Files pill */}
-                        <button
-                          type="button"
-                          onClick={() => setShowFiles((v) => !v)}
-                          className={cn(
-                            pillBase,
-                            showFilesSection ? pillActive : pillInactive,
-                          )}
-                        >
-                          {showFilesSection ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <Plus className="h-3 w-3" />
-                          )}
-                          Files
-                          {hasFiles && (
-                            <span className="ml-0.5 opacity-70">
-                              ·{' '}
-                              {uploadedFiles.length + draftFilesMeta.length}
-                            </span>
-                          )}
-                        </button>
-
-                        {/* Photos pill */}
-                        <button
-                          type="button"
-                          onClick={() => setShowPhotos((v) => !v)}
-                          className={cn(
-                            pillBase,
-                            showPhotosSection ? pillActive : pillInactive,
-                          )}
-                        >
-                          {showPhotosSection ? (
-                            <Check className="h-3 w-3" />
-                          ) : (
-                            <Plus className="h-3 w-3" />
-                          )}
-                          Photos
-                          {hasPhotos && (
-                            <span className="ml-0.5 opacity-70">
-                              ·{' '}
-                              {uploadedPhotos.length + draftPhotosMeta.length}
-                            </span>
-                          )}
-                        </button>
+                  {websiteLinks.length > 0 && (
+                    <div className="space-y-1.5">
+                      {/* Column labels */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="flex-1 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                          URL
+                        </span>
+                        <span className="w-48 shrink-0 text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                          Description{' '}
+                          <span className="text-destructive">*</span>
+                        </span>
+                        <div className="w-6 shrink-0" />
                       </div>
 
-                      {/* Expanded sections */}
-                      <div className="mt-5 space-y-5">
-                        {/* Shortcuts */}
-                        {showShortcutsSection && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-semibold text-slate-700">
-                                Shortcuts
-                              </span>
-                            </div>
-                            <PGShortcutsSelector
-                              value={shortcuts}
-                              onChange={setShortcuts}
+                      {websiteLinks.map((link, i) => {
+                        const missingDescription =
+                          link.url.trim() && !link.label.trim()
+                        return (
+                          <div key={i} className="flex items-center gap-1.5">
+                            <Input
+                              type="url"
+                              placeholder="https://…"
+                              value={link.url}
+                              onChange={(e) =>
+                                updateWebsiteLink(i, 'url', e.target.value)
+                              }
+                              className="h-8 flex-1 text-xs"
                             />
+                            <Input
+                              placeholder="e.g. School website"
+                              value={link.label}
+                              onChange={(e) =>
+                                updateWebsiteLink(i, 'label', e.target.value)
+                              }
+                              aria-invalid={Boolean(missingDescription)}
+                              className={cn(
+                                'h-8 w-48 shrink-0 text-xs',
+                                missingDescription && 'border-destructive',
+                              )}
+                            />
+                            <button
+                              type="button"
+                              aria-label="Remove link"
+                              onClick={() => removeWebsiteLink(i)}
+                              className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
                           </div>
-                        )}
+                        )
+                      })}
+                    </div>
+                  )}
 
-                        {/* Links */}
-                        {showLinksSection && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-semibold text-slate-700">
-                                Links
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {websiteLinks.length}/3
-                              </span>
-                            </div>
+                  {websiteLinks.length < 3 && (
+                    <button
+                      type="button"
+                      onClick={addWebsiteLink}
+                      className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-slate-400 hover:bg-slate-50 hover:text-foreground"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      {websiteLinks.length > 0
+                        ? 'Add another link'
+                        : 'Add link'}
+                    </button>
+                  )}
+                </div>
 
-                            {websiteLinks.length > 0 && (
-                              <div className="space-y-1.5">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="flex-1 text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                                    URL
-                                  </span>
-                                  <span className="w-48 shrink-0 text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                                    Description{' '}
-                                    <span className="text-destructive">*</span>
-                                  </span>
-                                  <div className="w-6 shrink-0" />
-                                </div>
+                {/* Files */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-700">
+                      Files
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {uploadedFiles.length}/3 · Max 5 MB each
+                    </span>
+                  </div>
 
-                                {websiteLinks.map((link, i) => {
-                                  const missingDescription =
-                                    link.url.trim() && !link.label.trim()
-                                  return (
-                                    <div
-                                      key={i}
-                                      className="flex items-center gap-1.5"
-                                    >
-                                      <Input
-                                        type="url"
-                                        placeholder="https://…"
-                                        value={link.url}
-                                        onChange={(e) =>
-                                          updateWebsiteLink(
-                                            i,
-                                            'url',
-                                            e.target.value,
-                                          )
-                                        }
-                                        className="h-8 flex-1 text-xs"
-                                      />
-                                      <Input
-                                        placeholder="e.g. School website"
-                                        value={link.label}
-                                        onChange={(e) =>
-                                          updateWebsiteLink(
-                                            i,
-                                            'label',
-                                            e.target.value,
-                                          )
-                                        }
-                                        aria-invalid={Boolean(
-                                          missingDescription,
-                                        )}
-                                        className={cn(
-                                          'h-8 w-48 shrink-0 text-xs',
-                                          missingDescription &&
-                                            'border-destructive',
-                                        )}
-                                      />
-                                      <button
-                                        type="button"
-                                        aria-label="Remove link"
-                                        onClick={() => removeWebsiteLink(i)}
-                                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                                      >
-                                        <X className="h-3.5 w-3.5" />
-                                      </button>
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            )}
-
-                            {websiteLinks.length < 3 && (
-                              <button
-                                type="button"
-                                onClick={addWebsiteLink}
-                                className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-slate-400 hover:bg-slate-50 hover:text-foreground"
-                              >
-                                <Plus className="h-3.5 w-3.5" />
-                                {websiteLinks.length > 0
-                                  ? 'Add another link'
-                                  : 'Add link'}
-                              </button>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Files */}
-                        {showFilesSection && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-semibold text-slate-700">
-                                Files
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {uploadedFiles.length}/3 · Max 5 MB each
-                              </span>
-                            </div>
-
-                            {uploadedFiles.length > 0 && (
-                              <div className="space-y-1.5">
-                                {uploadedFiles.map((file, i) => (
-                                  <div
-                                    key={i}
-                                    className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
-                                  >
-                                    <FileText className="h-4 w-4 shrink-0 text-slate-400" />
-                                    <div className="min-w-0 flex-1">
-                                      <p className="truncate text-xs font-medium text-slate-700">
-                                        {file.name}
-                                      </p>
-                                      <p className="text-[10px] text-muted-foreground">
-                                        {formatFileSize(file.size)}
-                                      </p>
-                                    </div>
-                                    <button
-                                      type="button"
-                                      aria-label={`Remove ${file.name}`}
-                                      onClick={() => removeFile(i)}
-                                      className="shrink-0 rounded p-0.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {draftFilesMeta.length > 0 && (
-                              <div className="space-y-1.5">
-                                {draftFilesMeta.map((meta, i) => (
-                                  <div
-                                    key={`draft-file-${i}`}
-                                    className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
-                                  >
-                                    <FileText className="h-4 w-4 shrink-0 text-slate-400" />
-                                    <div className="min-w-0 flex-1">
-                                      <p className="truncate text-xs font-medium text-slate-700">
-                                        {meta.name}
-                                      </p>
-                                      <p className="text-[10px] text-muted-foreground">
-                                        {formatFileSize(meta.size)}
-                                      </p>
-                                    </div>
-                                    <button
-                                      type="button"
-                                      aria-label={`Remove ${meta.name}`}
-                                      onClick={() =>
-                                        setDraftFilesMeta((prev) =>
-                                          prev.filter((_, j) => j !== i),
-                                        )
-                                      }
-                                      className="shrink-0 rounded p-0.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {uploadedFiles.length < 3 && (
-                              <div
-                                onClick={() => fileInputRef.current?.click()}
-                                onDragOver={(e) => {
-                                  e.preventDefault()
-                                  setFileDragOver(true)
-                                }}
-                                onDragLeave={() => setFileDragOver(false)}
-                                onDrop={(e) => {
-                                  e.preventDefault()
-                                  setFileDragOver(false)
-                                  processFiles(
-                                    Array.from(e.dataTransfer.files),
-                                  )
-                                }}
-                                className={cn(
-                                  'flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-4 py-4 text-center transition-colors',
-                                  fileDragOver
-                                    ? 'border-primary bg-primary/5 text-primary'
-                                    : 'border-slate-300 text-muted-foreground hover:border-slate-400 hover:bg-slate-50 hover:text-foreground',
-                                )}
-                              >
-                                <Paperclip className="h-4 w-4" />
-                                <p className="text-xs">
-                                  {fileDragOver
-                                    ? 'Drop files here'
-                                    : uploadedFiles.length > 0
-                                      ? 'Drop files or click to add more'
-                                      : 'Drop files here or click to browse'}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Photos */}
-                        {showPhotosSection && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-semibold text-slate-700">
-                                Photos
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {uploadedPhotos.length}/12 · Max 5 MB each
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              Drag to reorder · Select up to 3 as cover photos.
+                  {uploadedFiles.length > 0 && (
+                    <div className="space-y-1.5">
+                      {uploadedFiles.map((file, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+                        >
+                          <FileText className="h-4 w-4 shrink-0 text-slate-400" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-medium text-slate-700">
+                              {file.name}
                             </p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {formatFileSize(file.size)}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${file.name}`}
+                            onClick={() => removeFile(i)}
+                            className="shrink-0 rounded p-0.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                            {uploadedPhotos.length > 0 && (
-                              <div className="grid grid-cols-3 gap-2">
-                                {uploadedPhotos.map((photo, i) => (
-                                  <div
-                                    key={i}
-                                    draggable
-                                    onDragStart={(e) => {
-                                      dragSourceIndex.current = i
-                                      e.dataTransfer.effectAllowed = 'move'
-                                    }}
-                                    onDragOver={(e) => {
-                                      e.preventDefault()
-                                      e.dataTransfer.dropEffect = 'move'
-                                      setDragOverIndex(i)
-                                    }}
-                                    onDragLeave={() => setDragOverIndex(null)}
-                                    onDrop={(e) => {
-                                      e.preventDefault()
-                                      if (dragSourceIndex.current !== null) {
-                                        reorderPhoto(dragSourceIndex.current, i)
-                                        dragSourceIndex.current = null
-                                      }
-                                      setDragOverIndex(null)
-                                    }}
-                                    onDragEnd={() => {
-                                      dragSourceIndex.current = null
-                                      setDragOverIndex(null)
-                                    }}
-                                    className={cn(
-                                      'relative cursor-grab overflow-hidden rounded-md border transition-all active:cursor-grabbing',
-                                      coverPhotoIndices.has(i)
-                                        ? 'border-primary ring-2 ring-primary ring-offset-1'
-                                        : 'border-slate-200',
-                                      dragOverIndex === i &&
-                                        dragSourceIndex.current !== i
-                                        ? 'scale-95 ring-2 ring-primary/50 ring-offset-1'
-                                        : '',
-                                    )}
-                                  >
-                                    <div className="absolute inset-x-0 top-0 z-10 flex items-center gap-0.5 bg-slate-900/75 px-1.5 py-1">
-                                      <button
-                                        type="button"
-                                        onClick={() => toggleCoverPhoto(i)}
-                                        className="flex flex-1 items-center gap-1 text-left"
-                                      >
-                                        <span
-                                          className={cn(
-                                            'flex h-3 w-3 shrink-0 items-center justify-center rounded border',
-                                            coverPhotoIndices.has(i)
-                                              ? 'border-primary bg-primary'
-                                              : 'border-white/70 bg-transparent',
-                                          )}
-                                        >
-                                          {coverPhotoIndices.has(i) && (
-                                            <Check className="h-2 w-2 text-white" />
-                                          )}
-                                        </span>
-                                      </button>
-                                      <button
-                                        type="button"
-                                        aria-label={`Remove ${photo.file.name}`}
-                                        onClick={() => removePhoto(i)}
-                                        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/40"
-                                      >
-                                        <X className="h-2.5 w-2.5" />
-                                      </button>
-                                    </div>
-                                    <img
-                                      src={photo.url}
-                                      alt={photo.file.name}
-                                      className="aspect-square w-full object-cover"
-                                      draggable={false}
-                                    />
-                                    <div className="flex items-center gap-1 bg-white px-1.5 py-0.5">
-                                      {coverPhotoIndices.has(i) && (
-                                        <span className="shrink-0 rounded bg-primary/10 px-1 py-px text-[8px] font-semibold uppercase tracking-wide text-primary">
-                                          Cover
-                                        </span>
-                                      )}
-                                      <p className="truncate text-[10px] italic text-muted-foreground">
-                                        {photo.file.name}
-                                      </p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                  {/* Draft-loaded file stubs — styled identically to real files */}
+                  {draftFilesMeta.length > 0 && (
+                    <div className="space-y-1.5">
+                      {draftFilesMeta.map((meta, i) => (
+                        <div
+                          key={`draft-file-${i}`}
+                          className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+                        >
+                          <FileText className="h-4 w-4 shrink-0 text-slate-400" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-medium text-slate-700">
+                              {meta.name}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {formatFileSize(meta.size)}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${meta.name}`}
+                            onClick={() =>
+                              setDraftFilesMeta((prev) =>
+                                prev.filter((_, j) => j !== i),
+                              )
+                            }
+                            className="shrink-0 rounded p-0.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                            {draftPhotosMeta.length > 0 && (
-                              <div className="grid grid-cols-3 gap-2">
-                                {draftPhotosMeta.map((meta, i) => (
-                                  <div
-                                    key={`draft-photo-${i}`}
-                                    className="relative overflow-hidden rounded-md border border-slate-200"
-                                  >
-                                    {meta.thumbnailUrl ? (
-                                      <img
-                                        src={meta.thumbnailUrl}
-                                        alt={meta.name}
-                                        className="aspect-square w-full object-cover"
-                                        draggable={false}
-                                      />
-                                    ) : (
-                                      <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 bg-slate-100 p-2">
-                                        <ImagePlus className="h-5 w-5 text-slate-400" />
-                                        <p className="line-clamp-2 text-center text-[9px] leading-tight text-slate-500">
-                                          {meta.name}
-                                        </p>
-                                      </div>
-                                    )}
-                                    <button
-                                      type="button"
-                                      aria-label={`Remove ${meta.name}`}
-                                      onClick={() =>
-                                        setDraftPhotosMeta((prev) =>
-                                          prev.filter((_, j) => j !== i),
-                                        )
-                                      }
-                                      className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-900/50 text-white hover:bg-slate-900/70"
-                                    >
-                                      <X className="h-2.5 w-2.5" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                  {uploadedFiles.length < 3 && (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => {
+                        e.preventDefault()
+                        setFileDragOver(true)
+                      }}
+                      onDragLeave={() => setFileDragOver(false)}
+                      onDrop={(e) => {
+                        e.preventDefault()
+                        setFileDragOver(false)
+                        processFiles(Array.from(e.dataTransfer.files))
+                      }}
+                      className={cn(
+                        'flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-4 py-4 text-center transition-colors',
+                        fileDragOver
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-slate-300 text-muted-foreground hover:border-slate-400 hover:bg-slate-50 hover:text-foreground',
+                      )}
+                    >
+                      <Paperclip className="h-4 w-4" />
+                      <p className="text-xs">
+                        {fileDragOver
+                          ? 'Drop files here'
+                          : uploadedFiles.length > 0
+                            ? 'Drop files or click to add more'
+                            : 'Drop files here or click to browse'}
+                      </p>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </div>
 
-                            {uploadedPhotos.length < 12 && (
-                              <div
-                                onClick={() => photoInputRef.current?.click()}
-                                onDragOver={(e) => {
-                                  e.preventDefault()
-                                  setPhotoDragOver(true)
-                                }}
-                                onDragLeave={() => setPhotoDragOver(false)}
-                                onDrop={(e) => {
-                                  e.preventDefault()
-                                  setPhotoDragOver(false)
-                                  processPhotos(
-                                    Array.from(e.dataTransfer.files),
-                                  )
-                                }}
+                {/* Photos */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-slate-700">
+                      Photos
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {uploadedPhotos.length}/12 · Max 5 MB each
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Drag to reorder · Select up to 3 as cover photos.
+                  </p>
+
+                  {uploadedPhotos.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {uploadedPhotos.map((photo, i) => (
+                        <div
+                          key={i}
+                          draggable
+                          onDragStart={(e) => {
+                            dragSourceIndex.current = i
+                            e.dataTransfer.effectAllowed = 'move'
+                          }}
+                          onDragOver={(e) => {
+                            e.preventDefault()
+                            e.dataTransfer.dropEffect = 'move'
+                            setDragOverIndex(i)
+                          }}
+                          onDragLeave={() => setDragOverIndex(null)}
+                          onDrop={(e) => {
+                            e.preventDefault()
+                            if (dragSourceIndex.current !== null) {
+                              reorderPhoto(dragSourceIndex.current, i)
+                              dragSourceIndex.current = null
+                            }
+                            setDragOverIndex(null)
+                          }}
+                          onDragEnd={() => {
+                            dragSourceIndex.current = null
+                            setDragOverIndex(null)
+                          }}
+                          className={cn(
+                            'relative cursor-grab overflow-hidden rounded-md border transition-all active:cursor-grabbing',
+                            coverPhotoIndices.has(i)
+                              ? 'border-primary ring-2 ring-primary ring-offset-1'
+                              : 'border-slate-200',
+                            dragOverIndex === i && dragSourceIndex.current !== i
+                              ? 'scale-95 ring-2 ring-primary/50 ring-offset-1'
+                              : '',
+                          )}
+                        >
+                          {/* Top toolbar — cover toggle + delete */}
+                          <div className="absolute inset-x-0 top-0 z-10 flex items-center gap-0.5 bg-slate-900/75 px-1.5 py-1">
+                            <button
+                              type="button"
+                              onClick={() => toggleCoverPhoto(i)}
+                              className="flex flex-1 items-center gap-1 text-left"
+                            >
+                              <span
                                 className={cn(
-                                  'flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-4 py-4 text-center transition-colors',
-                                  photoDragOver
-                                    ? 'border-primary bg-primary/5 text-primary'
-                                    : 'border-slate-300 text-muted-foreground hover:border-slate-400 hover:bg-slate-50 hover:text-foreground',
+                                  'flex h-3 w-3 shrink-0 items-center justify-center rounded border',
+                                  coverPhotoIndices.has(i)
+                                    ? 'border-primary bg-primary'
+                                    : 'border-white/70 bg-transparent',
                                 )}
                               >
-                                <ImagePlus className="h-4 w-4" />
-                                <p className="text-xs">
-                                  {photoDragOver
-                                    ? 'Drop photos here'
-                                    : uploadedPhotos.length > 0
-                                      ? 'Drop photos or click to add more'
-                                      : 'Drop photos here or click to browse'}
-                                </p>
-                              </div>
-                            )}
+                                {coverPhotoIndices.has(i) && (
+                                  <Check className="h-2 w-2 text-white" />
+                                )}
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              aria-label={`Remove ${photo.file.name}`}
+                              onClick={() => removePhoto(i)}
+                              className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/40"
+                            >
+                              <X className="h-2.5 w-2.5" />
+                            </button>
                           </div>
-                        )}
-                      </div>
-                    </>
-                  )
-                })()}
 
-                {/* Hidden file inputs — always mounted so refs stay stable */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-                <input
-                  ref={photoInputRef}
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handlePhotoChange}
-                />
+                          <img
+                            src={photo.url}
+                            alt={photo.file.name}
+                            className="aspect-square w-full object-cover"
+                            draggable={false}
+                          />
+
+                          <div className="flex items-center gap-1 bg-white px-1.5 py-0.5">
+                            {coverPhotoIndices.has(i) && (
+                              <span className="shrink-0 rounded bg-primary/10 px-1 py-px text-[8px] font-semibold uppercase tracking-wide text-primary">
+                                Cover
+                              </span>
+                            )}
+                            <p className="truncate text-[10px] italic text-muted-foreground">
+                              {photo.file.name}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Draft-loaded photo stubs — show saved thumbnail if available, else grey placeholder */}
+                  {draftPhotosMeta.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {draftPhotosMeta.map((meta, i) => (
+                        <div
+                          key={`draft-photo-${i}`}
+                          className="relative overflow-hidden rounded-md border border-slate-200"
+                        >
+                          {meta.thumbnailUrl ? (
+                            <img
+                              src={meta.thumbnailUrl}
+                              alt={meta.name}
+                              className="aspect-square w-full object-cover"
+                              draggable={false}
+                            />
+                          ) : (
+                            <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 bg-slate-100 p-2">
+                              <ImagePlus className="h-5 w-5 text-slate-400" />
+                              <p className="line-clamp-2 text-center text-[9px] leading-tight text-slate-500">
+                                {meta.name}
+                              </p>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            aria-label={`Remove ${meta.name}`}
+                            onClick={() =>
+                              setDraftPhotosMeta((prev) =>
+                                prev.filter((_, j) => j !== i),
+                              )
+                            }
+                            className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-slate-900/50 text-white hover:bg-slate-900/70"
+                          >
+                            <X className="h-2.5 w-2.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {uploadedPhotos.length < 12 && (
+                    <div
+                      onClick={() => photoInputRef.current?.click()}
+                      onDragOver={(e) => {
+                        e.preventDefault()
+                        setPhotoDragOver(true)
+                      }}
+                      onDragLeave={() => setPhotoDragOver(false)}
+                      onDrop={(e) => {
+                        e.preventDefault()
+                        setPhotoDragOver(false)
+                        processPhotos(Array.from(e.dataTransfer.files))
+                      }}
+                      className={cn(
+                        'flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-4 py-4 text-center transition-colors',
+                        photoDragOver
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-slate-300 text-muted-foreground hover:border-slate-400 hover:bg-slate-50 hover:text-foreground',
+                      )}
+                    >
+                      <ImagePlus className="h-4 w-4" />
+                      <p className="text-xs">
+                        {photoDragOver
+                          ? 'Drop photos here'
+                          : uploadedPhotos.length > 0
+                            ? 'Drop photos or click to add more'
+                            : 'Drop photos here or click to browse'}
+                      </p>
+                    </div>
+                  )}
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handlePhotoChange}
+                  />
+                </div>
               </div>
             </section>
 
