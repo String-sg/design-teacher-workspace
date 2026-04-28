@@ -67,14 +67,15 @@ interface CreateOption {
 const CREATE_OPTIONS: Array<CreateOption> = [
   {
     title: 'Read only',
-    description: 'Send a post to parents. They can read it on Parents Gateway.',
+    description:
+      'Parents receive the post via Parents Gateway. No response needed.',
     to: '/announcements/new',
     mockup: <AnnouncementMockup />,
   },
   {
     title: 'With responses',
     description:
-      'Send a post and collect responses from parents — acknowledge or yes/no.',
+      'Parents receive the post via Parents Gateway and respond — acknowledge or yes/no.',
     to: '/announcements/new',
     search: { responseType: 'acknowledge' },
     mockup: <ResponseMockup />,
@@ -82,7 +83,7 @@ const CREATE_OPTIONS: Array<CreateOption> = [
   {
     title: 'Custom Form',
     description:
-      'Create a form with custom questions to collect data from parents.',
+      'Parents fill in a custom form with questions you set via Parents Gateway.',
     to: '/forms/new',
     mockup: <FormMockup />,
   },
@@ -160,7 +161,7 @@ function CreatePage() {
               What would you like to create?
             </h1>
             <p className="mt-2 text-sm text-slate-500">
-              Choose a type to get started.
+              Choose a post type to send to parents via Parents Gateway.
             </p>
           </div>
 
