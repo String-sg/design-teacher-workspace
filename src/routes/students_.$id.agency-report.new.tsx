@@ -1267,10 +1267,6 @@ function ReportForm({
           <PanelRight className="mr-1.5 h-3.5 w-3.5" />
           {previewOpen ? 'Hide' : 'Show'} Preview
         </Button>
-        <Button size="sm" onClick={onSubmitForReview}>
-          Submit for P Review
-          <ChevronRight className="ml-1 h-3.5 w-3.5" />
-        </Button>
       </div>
 
       <div className="flex min-h-0 flex-1 bg-muted/10">
@@ -1299,6 +1295,13 @@ function ReportForm({
                 isReviewed={completedSections.has(s.id)}
               />
             ))}
+
+            <div className="flex justify-end pt-2">
+              <Button onClick={onSubmitForReview}>
+                Submit for P Review
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
