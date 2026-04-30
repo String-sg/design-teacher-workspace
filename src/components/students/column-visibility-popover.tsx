@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Columns3, RotateCcw } from 'lucide-react'
 
 import type { FilterField, TemporalType } from '@/types/student'
+import { useFeatureFlags } from '@/lib/feature-flags'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -328,6 +329,9 @@ export function ColumnVisibilityPopover({
   onColumnsChange,
   className,
 }: ColumnVisibilityPopoverProps) {
+  const { isEnabled } = useFeatureFlags()
+  const isStudentInsightsView =
+    !isEnabled('student-analytics') && !isEnabled('student-analytics-basic')
   const [open, setOpen] = useState(false)
 
   const visibleCount = columns.filter((c) => c.visible).length
@@ -341,7 +345,12 @@ export function ColumnVisibilityPopover({
   }
 
   const handleReset = () => {
-    onColumnsChange(defaultColumns)
+    const resetColumns = isStudentInsightsView
+      ? defaultColumns.filter(
+          (c) => c.id !== 'approvedMtl' && c.id !== 'postSecEligibility',
+        )
+      : defaultColumns
+    onColumnsChange(resetColumns)
   }
 
   const handleShowAll = () => {

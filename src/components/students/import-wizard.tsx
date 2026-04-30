@@ -18,11 +18,8 @@ import {
 
 import { toast } from 'sonner'
 
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/alert'
+import type { ColumnConfig } from './column-visibility-popover'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -55,7 +52,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
-import type { ColumnConfig } from './column-visibility-popover'
 
 // ─── Mock data ──────────────────────────────────────────────────────────────
 
@@ -84,21 +80,97 @@ const MOCK_MANY_FIELDS_BY_CATEGORY: Record<string, Array<string>> = {
     'Medical leave',
     'Excused absences',
   ],
-  Behaviour: ["Teacher's remarks", 'Conduct grade', 'Detention records', 'Commendations'],
+  Behaviour: [
+    "Teacher's remarks",
+    'Conduct grade',
+    'Detention records',
+    'Commendations',
+  ],
   CCA: ['CCA name', 'CCA attendance', 'CCA achievement level'],
 }
 
 const MOCK_REVIEW_ROWS = [
-  { row: 1, name: 'Chan Jun Kai', class: '3A', viaMissed: '2', nextSteps: 'Schedule a one-on-one session', teacherRemarks: 'Absent for 3 consecutive VIA sessions without valid reason' },
-  { row: 2, name: 'Vincent Koh Kin Yi', class: '3A', viaMissed: '3', nextSteps: 'Watch the recorded session', teacherRemarks: 'No visible effort to make up missed sessions' },
-  { row: 3, name: 'Lam Wei Jie', class: '3A', viaMissed: '7', nextSteps: 'Join the upcoming cohort', teacherRemarks: 'Missing most sessions, needs immediate intervention' },
-  { row: 4, name: 'Sarah Chan Jun Kai', class: '3A', viaMissed: '5', nextSteps: 'Review the VIA schedule', teacherRemarks: 'Absent without prior notice on multiple occasions' },
-  { row: 5, name: 'Kenneth Koh Kin Yi', class: '3A', viaMissed: '6', nextSteps: 'Attend the supplementary class', teacherRemarks: 'No sign of engagement in VIA activities this term' },
-  { row: 6, name: 'Liang Mei Jie', class: '3A', viaMissed: '1', nextSteps: 'Complete an online module', teacherRemarks: 'Medical leave accounted for; follow up on make-up session' },
-  { row: 7, name: 'Diana Tan Hui Lin', class: '3A', viaMissed: '5', nextSteps: 'Arrange a peer tutoring session', teacherRemarks: 'No valid reasons provided for absences' },
-  { row: 8, name: 'Samuel Tan Jun Kai', class: '3A', viaMissed: '3', nextSteps: 'Participate in a future cohort', teacherRemarks: 'Missing sessions due to CCA clashes; monitor closely' },
-  { row: 9, name: 'Priya Nair', class: '3A', viaMissed: '2', nextSteps: 'Submit a set of reflection notes', teacherRemarks: 'Absent on days with no prior communication' },
-  { row: 10, name: 'Ethan Ong Wei Ming', class: '3A', viaMissed: '1', nextSteps: 'Access additional resources', teacherRemarks: 'Absent once; parent informed and acknowledged' },
+  {
+    row: 1,
+    name: 'Chan Jun Kai',
+    class: '3A',
+    viaMissed: '2',
+    nextSteps: 'Schedule a one-on-one session',
+    teacherRemarks:
+      'Absent for 3 consecutive VIA sessions without valid reason',
+  },
+  {
+    row: 2,
+    name: 'Vincent Koh Kin Yi',
+    class: '3A',
+    viaMissed: '3',
+    nextSteps: 'Watch the recorded session',
+    teacherRemarks: 'No visible effort to make up missed sessions',
+  },
+  {
+    row: 3,
+    name: 'Lam Wei Jie',
+    class: '3A',
+    viaMissed: '7',
+    nextSteps: 'Join the upcoming cohort',
+    teacherRemarks: 'Missing most sessions, needs immediate intervention',
+  },
+  {
+    row: 4,
+    name: 'Sarah Chan Jun Kai',
+    class: '3A',
+    viaMissed: '5',
+    nextSteps: 'Review the VIA schedule',
+    teacherRemarks: 'Absent without prior notice on multiple occasions',
+  },
+  {
+    row: 5,
+    name: 'Kenneth Koh Kin Yi',
+    class: '3A',
+    viaMissed: '6',
+    nextSteps: 'Attend the supplementary class',
+    teacherRemarks: 'No sign of engagement in VIA activities this term',
+  },
+  {
+    row: 6,
+    name: 'Liang Mei Jie',
+    class: '3A',
+    viaMissed: '1',
+    nextSteps: 'Complete an online module',
+    teacherRemarks: 'Medical leave accounted for; follow up on make-up session',
+  },
+  {
+    row: 7,
+    name: 'Diana Tan Hui Lin',
+    class: '3A',
+    viaMissed: '5',
+    nextSteps: 'Arrange a peer tutoring session',
+    teacherRemarks: 'No valid reasons provided for absences',
+  },
+  {
+    row: 8,
+    name: 'Samuel Tan Jun Kai',
+    class: '3A',
+    viaMissed: '3',
+    nextSteps: 'Participate in a future cohort',
+    teacherRemarks: 'Missing sessions due to CCA clashes; monitor closely',
+  },
+  {
+    row: 9,
+    name: 'Priya Nair',
+    class: '3A',
+    viaMissed: '2',
+    nextSteps: 'Submit a set of reflection notes',
+    teacherRemarks: 'Absent on days with no prior communication',
+  },
+  {
+    row: 10,
+    name: 'Ethan Ong Wei Ming',
+    class: '3A',
+    viaMissed: '1',
+    nextSteps: 'Access additional resources',
+    teacherRemarks: 'Absent once; parent informed and acknowledged',
+  },
 ]
 
 const REVIEW_ISSUES = [
@@ -119,7 +191,8 @@ const REVIEW_ISSUES = [
   {
     id: 'same-name-class',
     title: 'Same name and class',
-    description: 'If these are different students, add their NRIC in a separate column',
+    description:
+      'If these are different students, add their NRIC in a separate column',
     ref: 'Row 2 and 3',
     highlightRows: [2, 3],
   },
@@ -214,7 +287,8 @@ function WizardStepper({ current }: { current: number }) {
               <div
                 className={cn(
                   'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white transition-colors',
-                  (isActive || isCompleted) && 'bg-[var(--color-twblue-9,#0064ff)]',
+                  (isActive || isCompleted) &&
+                    'bg-[var(--color-twblue-9,#0064ff)]',
                   isDimmed && 'bg-[var(--btn-color-fill-disabled,#b9bbc6)]',
                 )}
               >
@@ -227,8 +301,10 @@ function WizardStepper({ current }: { current: number }) {
               <span
                 className={cn(
                   'hidden text-sm min-[562px]:inline',
-                  (isActive || isCompleted) && 'text-[var(--color-slate-12,#1c2024)]',
-                  isDimmed && 'text-[var(--btn-color-foreground-disabled,#b9bbc6)]',
+                  (isActive || isCompleted) &&
+                    'text-[var(--color-slate-12,#1c2024)]',
+                  isDimmed &&
+                    'text-[var(--btn-color-foreground-disabled,#b9bbc6)]',
                 )}
               >
                 {label}
@@ -391,7 +467,9 @@ function Step1({
               <div className="flex items-start gap-3">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
                 <div>
-                  <p className="text-sm font-semibold text-slate-600">Name and Class</p>
+                  <p className="text-sm font-semibold text-slate-600">
+                    Name and Class
+                  </p>
                   <p className="text-xs text-slate-500">
                     As shown in School Cockpit
                   </p>
@@ -400,7 +478,9 @@ function Step1({
               <div className="flex items-start gap-3">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
                 <div>
-                  <p className="text-sm font-semibold text-slate-600">Or NRIC</p>
+                  <p className="text-sm font-semibold text-slate-600">
+                    Or NRIC
+                  </p>
                   <p className="text-xs text-slate-500">
                     As shown in School Cockpit
                   </p>
@@ -480,7 +560,12 @@ function Step2({
       <div className="flex-1 overflow-y-auto">
         <div className="px-8 pb-2 pt-8">
           <h1 className="text-2xl font-semibold text-slate-900">Review</h1>
-          <Badge variant="outline" className="mt-6 border-transparent bg-[var(--color-slate-3)] text-[var(--color-slate-11)] text-sm">1023 records, 5 columns</Badge>
+          <Badge
+            variant="outline"
+            className="mt-6 border-transparent bg-[var(--color-slate-3)] text-[var(--color-slate-11)] text-sm"
+          >
+            1023 records, 5 columns
+          </Badge>
         </div>
 
         <div className="flex flex-col gap-4 px-8 pb-6 sm:flex-row sm:items-start">
@@ -491,12 +576,24 @@ function Step2({
                 <Table>
                   <TableHeader className="bg-[var(--color-slate-2)]">
                     <TableRow className="hover:bg-[var(--color-slate-2)]">
-                      <TableHead className="w-10 text-center text-base font-semibold text-[var(--color-slate-11)]">#</TableHead>
-                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">Name</TableHead>
-                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">Class</TableHead>
-                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">VIA missed</TableHead>
-                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">Next steps</TableHead>
-                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">Teacher's remarks</TableHead>
+                      <TableHead className="w-10 text-center text-base font-semibold text-[var(--color-slate-11)]">
+                        #
+                      </TableHead>
+                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">
+                        Name
+                      </TableHead>
+                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">
+                        Class
+                      </TableHead>
+                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">
+                        VIA missed
+                      </TableHead>
+                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">
+                        Next steps
+                      </TableHead>
+                      <TableHead className="text-base font-semibold text-[var(--color-slate-11)]">
+                        Teacher's remarks
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -505,9 +602,7 @@ function Step2({
                         <TableCell className="text-center text-base tabular-nums text-slate-400">
                           {r.row}
                         </TableCell>
-                        <TableCell
-                          className="text-base text-slate-700"
-                        >
+                        <TableCell className="text-base text-slate-700">
                           {r.name}
                         </TableCell>
                         <TableCell className="text-base text-slate-500">
@@ -520,7 +615,9 @@ function Step2({
                           <span className="block truncate">{r.nextSteps}</span>
                         </TableCell>
                         <TableCell className="max-w-0 text-base text-slate-500">
-                          <span className="block truncate">{r.teacherRemarks}</span>
+                          <span className="block truncate">
+                            {r.teacherRemarks}
+                          </span>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -528,67 +625,70 @@ function Step2({
                 </Table>
               </div>
             </div>
-            <p className="text-sm text-[var(--color-slate-11)]">Preview of first 10 rows</p>
+            <p className="text-sm text-[var(--color-slate-11)]">
+              Preview of first 10 rows
+            </p>
           </div>
 
           {/* Validation panel — first on mobile (top), second on desktop (right) */}
           <div className="order-1 w-full sm:order-2 sm:h-[620px] sm:w-[412px] sm:shrink-0">
             {hasIssues ? (
               <div className="flex flex-col rounded-2xl border bg-white px-6 py-6 sm:min-h-[620px] sm:p-6">
-              <div className="mb-5 flex items-center justify-between">
-                <p className="text-lg font-semibold text-[var(--color-slate-11)]">
-                  Few issues found
-                </p>
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={onBack}
-                >
-                  Upload again
-                  <Upload className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-              <ul className="flex flex-col gap-3">
-                {REVIEW_ISSUES.map((iss) => (
-                  <li
-                    key={iss.id}
-                    className="flex items-start gap-3 rounded-xl border border-[var(--color-slate-3)] bg-slate-50 p-3"
-                  >
-                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--crimson-11)]" />
-                    <div className="flex min-w-0 flex-col gap-2">
-                      <div className="flex flex-col gap-1">
-                        <p className="text-base font-semibold text-[var(--crimson-11)]">
-                          {iss.title}
-                        </p>
-                        <p className="text-sm text-slate-500">
-                          {iss.description}
-                        </p>
+                <div className="mb-5 flex items-center justify-between">
+                  <p className="text-lg font-semibold text-[var(--color-slate-11)]">
+                    Few issues found
+                  </p>
+                  <Button size="sm" className="gap-1.5" onClick={onBack}>
+                    Upload again
+                    <Upload className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <ul className="flex flex-col gap-3">
+                  {REVIEW_ISSUES.map((iss) => (
+                    <li
+                      key={iss.id}
+                      className="flex items-start gap-3 rounded-xl border border-[var(--color-slate-3)] bg-slate-50 p-3"
+                    >
+                      <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--crimson-11)]" />
+                      <div className="flex min-w-0 flex-col gap-2">
+                        <div className="flex flex-col gap-1">
+                          <p className="text-base font-semibold text-[var(--crimson-11)]">
+                            {iss.title}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            {iss.description}
+                          </p>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="border-transparent bg-[var(--color-slate-3)] text-[var(--color-slate-11)] text-sm"
+                        >
+                          {iss.ref}
+                        </Badge>
                       </div>
-                      <Badge variant="outline" className="border-transparent bg-[var(--color-slate-3)] text-[var(--color-slate-11)] text-sm">{iss.ref}</Badge>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center rounded-[var(--radius-3xl,24px)] border border-[var(--color-slate-6)] bg-white px-6 py-6 sm:h-full sm:py-5">
-              <div className="flex flex-col items-center">
-                <img
-                  src="/no-issues-illustration.png"
-                  alt="No issues found"
-                  className="size-[200px] object-cover"
-                />
-                <div className="mt-3 flex flex-col items-center gap-3 text-center">
-                  <p className="text-[23px] font-semibold leading-7 text-[var(--color-slate-12)]">
-                    No issues found
-                  </p>
-                  <p className="text-base text-[var(--color-slate-11)]">
-                    Your file is good to go!
-                  </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-[var(--radius-3xl,24px)] border border-[var(--color-slate-6)] bg-white px-6 py-6 sm:h-full sm:py-5">
+                <div className="flex flex-col items-center">
+                  <img
+                    src="/no-issues-illustration.png"
+                    alt="No issues found"
+                    className="size-[200px] object-cover"
+                  />
+                  <div className="mt-3 flex flex-col items-center gap-3 text-center">
+                    <p className="text-[23px] font-semibold leading-7 text-[var(--color-slate-12)]">
+                      No issues found
+                    </p>
+                    <p className="text-base text-[var(--color-slate-11)]">
+                      Your file is good to go!
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
           </div>
         </div>
       </div>
@@ -636,7 +736,12 @@ function CategorySelectRow({
       return
     }
     onAddCategory(trimmed)
-    onChange({ mode: 'selected', selected: trimmed, newValue: '', newError: '' })
+    onChange({
+      mode: 'selected',
+      selected: trimmed,
+      newValue: '',
+      newError: '',
+    })
   }
 
   // "creating" mode: show inline input + confirm button
@@ -644,7 +749,9 @@ function CategorySelectRow({
     return (
       <TableRow className="hover:bg-transparent">
         <TableCell className="w-1/2 py-4 pl-5">
-          <span className="text-sm font-medium text-slate-800">{fieldName}</span>
+          <span className="text-sm font-medium text-slate-800">
+            {fieldName}
+          </span>
         </TableCell>
         <TableCell className="w-1/2 py-4 pr-5">
           <div className="flex flex-col gap-1">
@@ -692,7 +799,9 @@ function CategorySelectRow({
     <TableRow className="hover:bg-transparent">
       <TableCell className="w-1/2 py-4 pl-5">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-800">{fieldName}</span>
+          <span className="text-sm font-medium text-slate-800">
+            {fieldName}
+          </span>
           {state.mode === 'selected' && (
             <span className="inline-flex items-center gap-1 rounded-full bg-[#E0F8F3] px-2 py-0.5 text-xs font-medium text-[#008573]">
               <Check className="h-3 w-3" />
@@ -706,7 +815,9 @@ function CategorySelectRow({
           <PopoverTrigger
             className={cn(
               'flex h-9 w-full items-center justify-between rounded-lg border border-[var(--color-slate-6)] px-3 text-sm',
-              state.mode === 'skipped' ? 'bg-[var(--color-slate-2)]' : 'bg-white',
+              state.mode === 'skipped'
+                ? 'bg-[var(--color-slate-2)]'
+                : 'bg-white',
             )}
           >
             <span
@@ -728,45 +839,48 @@ function CategorySelectRow({
             sideOffset={4}
           >
             <div className="flex flex-col gap-1">
-              {categories.slice().sort().map((cat) => {
-                const isSelected = state.selected === cat
-                const description = CATEGORY_DESCRIPTIONS[cat]
-                return (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => {
-                      onChange({ mode: 'selected', selected: cat })
-                      setOpen(false)
-                    }}
-                    className={cn(
-                      'flex w-full items-center gap-2 rounded-xl p-2 text-left transition-colors',
-                      isSelected
-                        ? 'bg-[var(--color-slate-5)]'
-                        : 'hover:bg-[var(--color-slate-4)]',
-                    )}
-                  >
-                    <div className="flex min-w-0 flex-1 flex-col gap-1">
-                      <span
-                        className={cn(
-                          'text-base text-[var(--color-slate-12)]',
-                          isSelected && 'font-semibold',
-                        )}
-                      >
-                        {cat}
-                      </span>
-                      {description && (
-                        <span className="truncate text-sm text-[var(--color-slate-11)]">
-                          {description}
-                        </span>
+              {categories
+                .slice()
+                .sort()
+                .map((cat) => {
+                  const isSelected = state.selected === cat
+                  const description = CATEGORY_DESCRIPTIONS[cat]
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => {
+                        onChange({ mode: 'selected', selected: cat })
+                        setOpen(false)
+                      }}
+                      className={cn(
+                        'flex w-full items-center gap-2 rounded-xl p-2 text-left transition-colors',
+                        isSelected
+                          ? 'bg-[var(--color-slate-5)]'
+                          : 'hover:bg-[var(--color-slate-4)]',
                       )}
-                    </div>
-                    {isSelected && (
-                      <Check className="h-4 w-4 shrink-0 text-[var(--color-slate-11)]" />
-                    )}
-                  </button>
-                )
-              })}
+                    >
+                      <div className="flex min-w-0 flex-1 flex-col gap-1">
+                        <span
+                          className={cn(
+                            'text-base text-[var(--color-slate-12)]',
+                            isSelected && 'font-semibold',
+                          )}
+                        >
+                          {cat}
+                        </span>
+                        {description && (
+                          <span className="truncate text-sm text-[var(--color-slate-11)]">
+                            {description}
+                          </span>
+                        )}
+                      </div>
+                      {isSelected && (
+                        <Check className="h-4 w-4 shrink-0 text-[var(--color-slate-11)]" />
+                      )}
+                    </button>
+                  )
+                })}
 
               <div className="my-1 h-px bg-[var(--color-slate-6)]" />
 
@@ -820,7 +934,8 @@ function Step3({
     () =>
       Object.fromEntries(INCOMING_FIELDS.map((f) => [f.id, makeFieldState()])),
   )
-  const [categories, setCategories] = useState<Array<string>>(DEFAULT_CATEGORIES)
+  const [categories, setCategories] =
+    useState<Array<string>>(DEFAULT_CATEGORIES)
 
   function updateField(id: string, patch: Partial<FieldState>) {
     setFieldStates((prev) => ({
@@ -914,7 +1029,10 @@ function Step3({
         <div className="flex items-center gap-3">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" onClick={() => onSkipAll(buildMappings())}>
+              <Button
+                variant="outline"
+                onClick={() => onSkipAll(buildMappings())}
+              >
                 Skip for now
               </Button>
             </TooltipTrigger>
@@ -1151,7 +1269,9 @@ export function ImportWizard({
       {step === 4 && (
         <ConfirmationPage
           fieldsByCategory={
-            confirmationShowAll ? MOCK_MANY_FIELDS_BY_CATEGORY : fieldsByCategory
+            confirmationShowAll
+              ? MOCK_MANY_FIELDS_BY_CATEGORY
+              : fieldsByCategory
           }
           onExplore={() => {
             if (onImportComplete) {
@@ -1187,12 +1307,7 @@ export function ImportWizard({
             </button>
           }
         />
-        <PopoverContent
-          side="top"
-          sideOffset={8}
-          align="end"
-          className="w-64"
-        >
+        <PopoverContent side="top" sideOffset={8} align="end" className="w-64">
           <PopoverHeader>
             <PopoverTitle>Design Tools</PopoverTitle>
           </PopoverHeader>

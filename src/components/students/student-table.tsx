@@ -3,6 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 
 import { ColumnHeaderMenu } from './column-header-menu'
+import { CURRENT_TERM_KEY } from './column-visibility-popover'
 import type {
   AttentionTag,
   FilterField,
@@ -25,7 +26,6 @@ import {
 import { usePagination } from '@/hooks/use-pagination'
 import { getTermlyData, tagColors } from '@/data/mock-students'
 import { useFeatureFlags } from '@/lib/feature-flags'
-import { CURRENT_TERM_KEY } from './column-visibility-popover'
 
 interface StudentTableProps {
   students: Array<Student>
@@ -69,7 +69,7 @@ function AnimatedDots() {
   }, [])
   return (
     <span className="text-muted-foreground inline-block w-6">
-      {'.' .repeat(frame + 1)}
+      {'.'.repeat(frame + 1)}
     </span>
   )
 }
@@ -258,7 +258,7 @@ export function StudentTable({
 
   // Helper to check if a column is visible
   const isVisible = (id: string) =>
-    columns.find((c) => c.id === id)?.visible ?? true
+    columns.find((c) => c.id === id)?.visible ?? false
 
   // Render header content (reusable for both regular and fixed header)
   const renderHeaderContent = () => (
@@ -727,40 +727,63 @@ export function StudentTable({
                         )}
                       </TableCell>
                     )}
-                    {isVisible('attendance') && (() => {
-                      const d = getTermlyData(student, getSelectedTerm('attendance'))
-                      return (
-                        <TableCell>
-                          {d.totalSchoolDays > 0
-                            ? Math.round((d.daysPresent / d.totalSchoolDays) * 100)
-                            : 0}
-                          %
-                        </TableCell>
-                      )
-                    })()}
+                    {isVisible('attendance') &&
+                      (() => {
+                        const d = getTermlyData(
+                          student,
+                          getSelectedTerm('attendance'),
+                        )
+                        return (
+                          <TableCell>
+                            {d.totalSchoolDays > 0
+                              ? Math.round(
+                                  (d.daysPresent / d.totalSchoolDays) * 100,
+                                )
+                              : 0}
+                            %
+                          </TableCell>
+                        )
+                      })()}
                     {isVisible('lateComing') && (
                       <TableCell>
-                        {getTermlyData(student, getSelectedTerm('lateComing')).lateComing}
+                        {
+                          getTermlyData(student, getSelectedTerm('lateComing'))
+                            .lateComing
+                        }
                       </TableCell>
                     )}
                     {isVisible('absences') && (
                       <TableCell>
-                        {getTermlyData(student, getSelectedTerm('absences')).absences}
+                        {
+                          getTermlyData(student, getSelectedTerm('absences'))
+                            .absences
+                        }
                       </TableCell>
                     )}
                     {isVisible('ccaMissed') && (
                       <TableCell>
-                        {getTermlyData(student, getSelectedTerm('ccaMissed')).ccaMissed}
+                        {
+                          getTermlyData(student, getSelectedTerm('ccaMissed'))
+                            .ccaMissed
+                        }
                       </TableCell>
                     )}
                     {isVisible('offences') && (
                       <TableCell>
-                        {getTermlyData(student, getSelectedTerm('offences')).offences}
+                        {
+                          getTermlyData(student, getSelectedTerm('offences'))
+                            .offences
+                        }
                       </TableCell>
                     )}
                     {isVisible('counsellingSessions') && (
                       <TableCell>
-                        {getTermlyData(student, getSelectedTerm('counsellingSessions')).counsellingSessions}
+                        {
+                          getTermlyData(
+                            student,
+                            getSelectedTerm('counsellingSessions'),
+                          ).counsellingSessions
+                        }
                       </TableCell>
                     )}
                     {isVisible('sen') && (
@@ -870,7 +893,10 @@ export function StudentTable({
                     {columns
                       .filter((c) => c.imported && c.visible)
                       .map((col) => (
-                        <TableCell key={col.id} className="pr-6 text-muted-foreground">
+                        <TableCell
+                          key={col.id}
+                          className="pr-6 text-muted-foreground"
+                        >
                           —
                         </TableCell>
                       ))}

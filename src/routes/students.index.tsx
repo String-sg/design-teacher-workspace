@@ -17,7 +17,10 @@ import { StudentFilters } from '@/components/students/student-filters'
 import { StudentTable } from '@/components/students/student-table'
 import { ClassSelector } from '@/components/students/class-selector'
 import { defaultColumns } from '@/components/students/column-visibility-popover'
-import { SubjectSelectorDialog, ALL_SUBJECTS } from '@/components/students/subject-selector-dialog'
+import {
+  ALL_SUBJECTS,
+  SubjectSelectorDialog,
+} from '@/components/students/subject-selector-dialog'
 
 import { getMetrics, mockStudents } from '@/data/mock-students'
 import { getImportedColumns, saveImportedColumns } from '@/lib/imported-columns'
@@ -32,12 +35,12 @@ function loadSelectedSubjects(): Array<string> | null {
     if (!Array.isArray(parsed)) return null
     // If any current subject is missing from the saved list, the list is stale
     // (subjects were added after the user last saved) — reset to all selected
-    const hasNewSubjects = ALL_SUBJECTS.some(s => !parsed.includes(s))
+    const hasNewSubjects = ALL_SUBJECTS.some((s) => !parsed.includes(s))
     if (hasNewSubjects) {
       localStorage.removeItem(SUBJECT_SELECTION_KEY)
       return null
     }
-    const isAll = ALL_SUBJECTS.every(s => parsed.includes(s))
+    const isAll = ALL_SUBJECTS.every((s) => parsed.includes(s))
     return isAll ? null : parsed
   } catch {
     return null
@@ -80,11 +83,30 @@ function matchesCondition(
 ): boolean {
   // Imported/custom fields have no student data — skip filter (show all)
   const knownFields = new Set<string>([
-    'class','cca','overallPercentage','conduct','approvedMtl','learningSupport',
-    'postSecEligibility','offences','absences','lateComing','ccaMissed',
-    'riskIndicators','lowMoodFlagged','socialLinks','counsellingSessions','sen',
-    'fas','housing','housingType','custody','commuterStatus',
-    'afterSchoolArrangement','siblings','externalAgencies',
+    'class',
+    'cca',
+    'overallPercentage',
+    'conduct',
+    'approvedMtl',
+    'learningSupport',
+    'postSecEligibility',
+    'offences',
+    'absences',
+    'lateComing',
+    'ccaMissed',
+    'riskIndicators',
+    'lowMoodFlagged',
+    'socialLinks',
+    'counsellingSessions',
+    'sen',
+    'fas',
+    'housing',
+    'housingType',
+    'custody',
+    'commuterStatus',
+    'afterSchoolArrangement',
+    'siblings',
+    'externalAgencies',
   ])
   if (!knownFields.has(filter.field)) return true
 
@@ -143,6 +165,9 @@ function matchesCondition(
 
 function StudentsPage() {
   const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
+  const studentAnalyticsBasicEnabled = useFeatureFlag('student-analytics-basic')
+  const isStudentInsightsView =
+    !studentAnalyticsEnabled && !studentAnalyticsBasicEnabled
   const pageTitle = studentAnalyticsEnabled ? 'Profiles' : 'Student Insights'
   useSetBreadcrumbs([{ label: pageTitle, href: '/students' }])
 
@@ -150,10 +175,23 @@ function StudentsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filters, setFilters] = useState<Array<FilterCriterion>>([])
   const [columns, setColumns] = useState<Array<ColumnConfig>>(() => {
+    const baseColumns = isStudentInsightsView
+      ? defaultColumns.filter(
+          (c) =>
+            c.id !== 'approvedMtl' &&
+            c.id !== 'postSecEligibility' &&
+            c.id !== 'commuterStatus' &&
+            c.id !== 'afterSchoolArrangement',
+        )
+      : defaultColumns
     const saved = getImportedColumns()
-    if (saved.length === 0) return defaultColumns
+    if (saved.length === 0) return baseColumns
     const now = new Date()
-    const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    const dateStr = now.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
     const restoredImported: Array<ColumnConfig> = saved.map((c) => ({
       id: c.id,
       label: c.label,
@@ -164,7 +202,9 @@ function StudentsPage() {
       lastUpdated: `${dateStr} by You`,
     }))
     return [
-      ...defaultColumns.filter((c) => !restoredImported.some((ic) => ic.id === c.id)),
+      ...baseColumns.filter(
+        (c) => !restoredImported.some((ic) => ic.id === c.id),
+      ),
       ...restoredImported,
     ]
   })
@@ -277,8 +317,12 @@ function StudentsPage() {
     if (sort) {
       result.sort((a, b) => {
         const getSortVal = (s: Student) => {
-          if (sort.field === 'overallPercentage') return computeStudentOverall(s, selectedSubjects)
-          if (sort.field === 'attendance') return s.totalSchoolDays > 0 ? s.daysPresent / s.totalSchoolDays : null
+          if (sort.field === 'overallPercentage')
+            return computeStudentOverall(s, selectedSubjects)
+          if (sort.field === 'attendance')
+            return s.totalSchoolDays > 0
+              ? s.daysPresent / s.totalSchoolDays
+              : null
           return s[sort.field as keyof Student]
         }
         const aVal = getSortVal(a)
@@ -374,13 +418,20 @@ function StudentsPage() {
           onFiltersChange={setFilters}
           columns={columns}
           onColumnsChange={setColumns}
-          importedColumns={importedColumns.map((c) => ({ id: c.id, label: c.label }))}
+          importedColumns={importedColumns.map((c) => ({
+            id: c.id,
+            label: c.label,
+          }))}
           onImportComplete={(importedColumns) => {
             setColumns((prev) => [
-              ...prev.filter((c) => !importedColumns.some((ic) => ic.id === c.id)),
+              ...prev.filter(
+                (c) => !importedColumns.some((ic) => ic.id === c.id),
+              ),
               ...importedColumns,
             ])
-            saveImportedColumns(importedColumns.map((c) => ({ id: c.id, label: c.label })))
+            saveImportedColumns(
+              importedColumns.map((c) => ({ id: c.id, label: c.label })),
+            )
           }}
           matchedCount={hasActiveFilters ? matchedIds.size : undefined}
           totalCount={hasActiveFilters ? classStudents.length : undefined}

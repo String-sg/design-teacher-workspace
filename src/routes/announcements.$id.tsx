@@ -21,6 +21,8 @@ import {
   X,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import type { SelectedEntity } from '@/components/comms/entity-selector'
+import type { PGRole } from '@/types/pg-announcement'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { getPGAnnouncementById } from '@/data/mock-pg-announcements'
 import { getStudentById } from '@/data/mock-students'
@@ -31,9 +33,7 @@ import { ReadRate } from '@/components/comms/read-rate'
 import { RecipientReadTable } from '@/components/comms/recipient-read-table'
 import { StaffSelector } from '@/components/comms/staff-selector'
 import { EnquiryEmailSelector } from '@/components/comms/enquiry-email-selector'
-import type { SelectedEntity } from '@/components/comms/entity-selector'
 import { MOCK_STAFF } from '@/data/mock-staff'
-import type { PGRole } from '@/types/pg-announcement'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -450,7 +450,8 @@ function AnnouncementDetailPage() {
           <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
           <p>
             <span className="font-medium">Files expire after 30 days.</span>{' '}
-            Uploaded files and images are automatically removed 30 days after upload. Re-upload before sending if needed.
+            Uploaded files and images are automatically removed 30 days after
+            upload. Re-upload before sending if needed.
           </p>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
   BookOpen,
@@ -284,6 +284,11 @@ export function StudentProfile({
   const { isEnabled } = useFeatureFlags()
 
   const holisticReportsEnabled = useFeatureFlag('holistic-reports')
+  const studentAnalyticsEnabled = useFeatureFlag('student-analytics')
+  const studentAnalyticsBasicEnabled = useFeatureFlag('student-analytics-basic')
+  // Default "Student Insights" view — applies when both analytics flags are off
+  const isStudentInsightsView =
+    !studentAnalyticsEnabled && !studentAnalyticsBasicEnabled
   const importedColumns = useMemo(() => getImportedColumns(), [])
 
   const gradeCounts = getStudentGradeCounts(student)
@@ -297,7 +302,7 @@ export function StudentProfile({
     { id: 'wellbeing', label: 'Wellbeing' },
     { id: 'academic', label: 'Academic' },
     { id: 'family', label: 'Family' },
-    { id: 'personal', label: 'Personal' },
+    ...(isStudentInsightsView ? [] : [{ id: 'personal', label: 'Personal' }]),
     ...(holisticReportsEnabled ? [{ id: 'reports', label: 'Reports' }] : []),
     ...(importedColumns.length > 0 ? [{ id: 'others', label: 'Others' }] : []),
   ]
@@ -444,16 +449,18 @@ export function StudentProfile({
 
           {analyticsOpen && <AttendanceAnalytics />}
 
-          <div className="mt-4">
-            <Button
-              variant="link"
-              size="sm"
-              className="h-auto p-0 text-blue-600"
-              onClick={() => setAnalyticsOpen((prev) => !prev)}
-            >
-              {analyticsOpen ? 'Show less ∧' : 'View analytics ∨'}
-            </Button>
-          </div>
+          {!isStudentInsightsView && (
+            <div className="mt-4">
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-blue-600"
+                onClick={() => setAnalyticsOpen((prev) => !prev)}
+              >
+                {analyticsOpen ? 'Show less ∧' : 'View analytics ∨'}
+              </Button>
+            </div>
+          )}
         </Section>
 
         {/* Behaviour Section */}
@@ -559,13 +566,15 @@ export function StudentProfile({
             <Field label="Conduct grade" value={student.conduct} />
           </dl>
 
-          <div className="mt-6 space-y-4 border-t pt-4">
-            <RemarksField
-              label="Teacher's remarks"
-              value={student.teacherObservations}
-            />
-            <RemarksField label="Next steps" value={student.nextSteps} />
-          </div>
+          {!isStudentInsightsView && (
+            <div className="mt-6 space-y-4 border-t pt-4">
+              <RemarksField
+                label="Teacher's remarks"
+                value={student.teacherObservations}
+              />
+              <RemarksField label="Next steps" value={student.nextSteps} />
+            </div>
+          )}
         </Section>
 
         {/* Wellbeing Section */}
@@ -575,164 +584,193 @@ export function StudentProfile({
           icon={<Heart className="h-5 w-5" />}
           iconClassName="bg-pink-100 text-pink-600"
         >
-          <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
-            <FieldWithDetails
-              label="Social links"
-              value={student.socialLinks}
-              tooltip="Number of social connections"
-              sideSheetTitle="Social links"
-              sideSheetContent={
-                <div className="space-y-5">
-                  <div>
-                    <p className="mb-2 text-sm font-medium">Social links</p>
-                    <div className="rounded-lg bg-muted px-4 py-3">
-                      <ul className="space-y-1 text-sm">
-                        <li className="flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                          {student.socialLinks}
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="mb-2 text-sm font-medium">Remarks</p>
-                    <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
-                      <div>
-                        <p className="font-medium mb-1.5">Selected by</p>
-                        {student.selectedBy && student.selectedBy.length > 0 ? (
-                          <ul className="space-y-1.5">
-                            {student.selectedBy.map((person, i) => (
-                              <li key={i} className="flex items-start gap-2">
-                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                                {person.name} ({person.class}, closeness rating:{' '}
-                                {person.closenessRating != null
-                                  ? `${person.closenessRating}/5`
-                                  : 'N/A'}
-                                )
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-muted-foreground">None</p>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium mb-1.5">Selected friends</p>
-                        {student.selectedFriends &&
-                        student.selectedFriends.length > 0 ? (
-                          <ul className="space-y-1.5">
-                            {student.selectedFriends.map((person, i) => (
-                              <li key={i} className="flex items-start gap-2">
-                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                                {person.name} ({person.class}, closeness rating:{' '}
-                                {person.closenessRating != null
-                                  ? `${person.closenessRating}/5`
-                                  : 'N/A'}
-                                )
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-muted-foreground">None</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              }
-            />
-            <FieldWithDetails
-              label="Risk indicators"
-              value={student.riskIndicators}
-              tooltip="Risk indicators from TCI survey"
-              sideSheetTitle="Risk indicators"
-              sideSheetContent={
-                <div className="space-y-5">
-                  <div>
-                    <p className="mb-1 text-sm font-medium">Risk indicators</p>
-                    <p className="mb-2 text-xs text-muted-foreground">
-                      No. of risk indicators flagged in the latest Termly
-                      Check-In Survey (All Ears)
-                    </p>
-                    <div className="rounded-lg bg-muted px-4 py-3">
-                      <ul className="space-y-1 text-sm">
-                        <li className="flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                          {student.riskIndicators}
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  {student.riskIndicatorHistory &&
-                    student.riskIndicatorHistory.length > 0 && (
-                      <div>
-                        <p className="mb-2 text-sm font-medium">Remarks</p>
-                        <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
-                          {student.riskIndicatorHistory.map((record, i) => (
-                            <div key={i}>
-                              <p className="font-medium mb-1.5">
-                                {record.year}, {record.term}
-                              </p>
-                              <ul className="space-y-1.5">
-                                {record.indicators.map((indicator, j) => (
-                                  <li
-                                    key={j}
-                                    className="flex items-start gap-2"
-                                  >
-                                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                                    {indicator}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                </div>
-              }
-            />
-            <FieldWithDetails
-              label="Low mood flagged 2+ terms"
-              value={student.lowMoodFlagged || 'No'}
-              tooltip="Flagged for persistent low mood"
-              sideSheetTitle="Low mood flagged 2+ terms"
-              sideSheetContent={
-                <div className="space-y-5">
-                  <div>
-                    <p className="mb-1 text-sm font-medium">
-                      Low mood flagged 2+ terms
-                    </p>
-                    <p className="mb-2 text-xs text-muted-foreground">
-                      Flagged in at least 2 terms in the past year, based on
-                      Termly Check-In Survey (All Ears).
-                    </p>
-                    <div className="rounded-lg bg-muted px-4 py-3">
-                      <ul className="space-y-1 text-sm">
-                        <li className="flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                          {student.lowMoodFlagged || 'No'}
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  {student.lowMoodTerms && student.lowMoodTerms.length > 0 && (
+          {(() => {
+            const socialLinks = (
+              <FieldWithDetails
+                label="Social links"
+                value={student.socialLinks}
+                tooltip="Number of social connections"
+                sideSheetTitle="Social links"
+                sideSheetContent={
+                  <div className="space-y-5">
                     <div>
-                      <p className="mb-2 text-sm font-medium">Remarks</p>
+                      <p className="mb-2 text-sm font-medium">Social links</p>
                       <div className="rounded-lg bg-muted px-4 py-3">
-                        <ul className="space-y-1.5 text-sm">
-                          <li className="flex items-start gap-2">
-                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                            {formatTermList(student.lowMoodTerms)}
+                        <ul className="space-y-1 text-sm">
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            {student.socialLinks}
                           </li>
                         </ul>
                       </div>
                     </div>
-                  )}
-                </div>
-              }
-            />
-          </dl>
+                    <div>
+                      <p className="mb-2 text-sm font-medium">Remarks</p>
+                      <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                        <div>
+                          <p className="font-medium mb-1.5">Selected by</p>
+                          {student.selectedBy &&
+                          student.selectedBy.length > 0 ? (
+                            <ul className="space-y-1.5">
+                              {student.selectedBy.map((person, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                  {person.name} ({person.class}, closeness
+                                  rating:{' '}
+                                  {person.closenessRating != null
+                                    ? `${person.closenessRating}/5`
+                                    : 'N/A'}
+                                  )
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-muted-foreground">None</p>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium mb-1.5">Selected friends</p>
+                          {student.selectedFriends &&
+                          student.selectedFriends.length > 0 ? (
+                            <ul className="space-y-1.5">
+                              {student.selectedFriends.map((person, i) => (
+                                <li key={i} className="flex items-start gap-2">
+                                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                  {person.name} ({person.class}, closeness
+                                  rating:{' '}
+                                  {person.closenessRating != null
+                                    ? `${person.closenessRating}/5`
+                                    : 'N/A'}
+                                  )
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-muted-foreground">None</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              />
+            )
+            const riskIndicators = (
+              <FieldWithDetails
+                label="Risk indicators"
+                value={student.riskIndicators}
+                tooltip="Risk indicators from TCI survey"
+                sideSheetTitle="Risk indicators"
+                sideSheetContent={
+                  <div className="space-y-5">
+                    <div>
+                      <p className="mb-1 text-sm font-medium">
+                        Risk indicators
+                      </p>
+                      <p className="mb-2 text-xs text-muted-foreground">
+                        No. of risk indicators flagged in the latest Termly
+                        Check-In Survey (All Ears)
+                      </p>
+                      <div className="rounded-lg bg-muted px-4 py-3">
+                        <ul className="space-y-1 text-sm">
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            {student.riskIndicators}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    {student.riskIndicatorHistory &&
+                      student.riskIndicatorHistory.length > 0 && (
+                        <div>
+                          <p className="mb-2 text-sm font-medium">Remarks</p>
+                          <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
+                            {student.riskIndicatorHistory.map((record, i) => (
+                              <div key={i}>
+                                <p className="font-medium mb-1.5">
+                                  {record.year}, {record.term}
+                                </p>
+                                <ul className="space-y-1.5">
+                                  {record.indicators.map((indicator, j) => (
+                                    <li
+                                      key={j}
+                                      className="flex items-start gap-2"
+                                    >
+                                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                      {indicator}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                }
+              />
+            )
+            const lowMood = (
+              <FieldWithDetails
+                label="Low mood flagged 2+ terms"
+                value={student.lowMoodFlagged || 'No'}
+                tooltip="Flagged for persistent low mood"
+                sideSheetTitle="Low mood flagged 2+ terms"
+                sideSheetContent={
+                  <div className="space-y-5">
+                    <div>
+                      <p className="mb-1 text-sm font-medium">
+                        Low mood flagged 2+ terms
+                      </p>
+                      <p className="mb-2 text-xs text-muted-foreground">
+                        Flagged in at least 2 terms in the past year, based on
+                        Termly Check-In Survey (All Ears).
+                      </p>
+                      <div className="rounded-lg bg-muted px-4 py-3">
+                        <ul className="space-y-1 text-sm">
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                            {student.lowMoodFlagged || 'No'}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    {student.lowMoodTerms &&
+                      student.lowMoodTerms.length > 0 && (
+                        <div>
+                          <p className="mb-2 text-sm font-medium">Remarks</p>
+                          <div className="rounded-lg bg-muted px-4 py-3">
+                            <ul className="space-y-1.5 text-sm">
+                              <li className="flex items-start gap-2">
+                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                {formatTermList(student.lowMoodTerms)}
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                }
+              />
+            )
+            return (
+              <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
+                {isStudentInsightsView ? (
+                  <>
+                    {riskIndicators}
+                    {lowMood}
+                    {socialLinks}
+                  </>
+                ) : (
+                  <>
+                    {socialLinks}
+                    {riskIndicators}
+                    {lowMood}
+                  </>
+                )}
+              </dl>
+            )
+          })()}
         </Section>
 
         {/* Academic Section */}
@@ -783,42 +821,53 @@ export function StudentProfile({
               }
             />
 
-            <Field
-              label="No. of subjects"
-              value={gradeCounts !== null ? gradeCounts.total : '-'}
-            />
-            {gradeCounts !== null && (
+            {!isStudentInsightsView && (
               <>
                 <Field
-                  label="No. of Distinctions"
-                  value={gradeCounts.distinctions}
+                  label="No. of subjects"
+                  value={gradeCounts !== null ? gradeCounts.total : '-'}
                 />
-                <Field label="No. of Passes" value={gradeCounts.passes} />
+                {gradeCounts !== null && (
+                  <>
+                    <Field
+                      label="No. of Distinctions"
+                      value={gradeCounts.distinctions}
+                    />
+                    <Field label="No. of Passes" value={gradeCounts.passes} />
+                  </>
+                )}
+                <Field
+                  label="Approved MTL"
+                  value={student.approvedMtl || '-'}
+                />
               </>
             )}
-            <Field label="Approved MTL" value={student.approvedMtl || '-'} />
             <Field
               label="Learning support"
               value={student.learningSupport || '-'}
             />
-            <Field
-              label="Post-sec eligibility"
-              value={student.postSecEligibility || '-'}
-            />
+            {!isStudentInsightsView && (
+              <Field
+                label="Post-sec eligibility"
+                value={student.postSecEligibility || '-'}
+              />
+            )}
           </dl>
 
           {academicAnalyticsOpen && <AcademicAnalytics />}
 
-          <div className="mt-4">
-            <Button
-              variant="link"
-              size="sm"
-              className="h-auto p-0 text-blue-600"
-              onClick={() => setAcademicAnalyticsOpen((prev) => !prev)}
-            >
-              {academicAnalyticsOpen ? 'Show less ∧' : 'View analytics ∨'}
-            </Button>
-          </div>
+          {!isStudentInsightsView && (
+            <div className="mt-4">
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-blue-600"
+                onClick={() => setAcademicAnalyticsOpen((prev) => !prev)}
+              >
+                {academicAnalyticsOpen ? 'Show less ∧' : 'View analytics ∨'}
+              </Button>
+            </div>
+          )}
         </Section>
 
         {/* Family Section */}
@@ -860,19 +909,21 @@ export function StudentProfile({
                           </li>
                         </ul>
                       </div>
-                      <div>
-                        <p className="font-medium mb-1.5">Living arrangement</p>
-                        <ul className="space-y-1">
-                          <li className="flex items-center gap-2">
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                            Not staying with parents
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                            Father deceased
-                          </li>
-                        </ul>
-                      </div>
+                      {!isStudentInsightsView && (
+                        <div>
+                          <p className="font-medium mb-1.5">Living arrangement</p>
+                          <ul className="space-y-1">
+                            <li className="flex items-center gap-2">
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                              Not staying with parents
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                              Father deceased
+                            </li>
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -889,14 +940,18 @@ export function StudentProfile({
               }
             />
             <Field label="Custody" value={student.custody || '-'} />
-            <Field
-              label="Commuter status"
-              value={student.commuterStatus || 'Non-commuter'}
-            />
-            <Field
-              label="After-school arrangement"
-              value={student.afterSchoolArrangement || 'No arrangement'}
-            />
+            {!isStudentInsightsView && (
+              <Field
+                label="Commuter status"
+                value={student.commuterStatus || 'Non-commuter'}
+              />
+            )}
+            {!isStudentInsightsView && (
+              <Field
+                label="After-school arrangement"
+                value={student.afterSchoolArrangement || 'No arrangement'}
+              />
+            )}
             <FieldWithDetails
               label="Primary contact"
               value="Mother"
@@ -981,23 +1036,34 @@ export function StudentProfile({
                     <div>
                       <p className="mb-2 text-sm font-medium">Remarks</p>
                       <div className="rounded-lg bg-muted px-4 py-3 space-y-4 text-sm">
-                        {student.siblingDetails.map((s, i) => (
-                          <div key={i}>
-                            <p className="font-medium mb-1.5">
-                              {s.name} ({s.class})
-                            </p>
-                            {s.relationship ? (
-                              <ul className="space-y-1.5">
-                                <li className="flex items-start gap-2">
-                                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
-                                  {s.relationship}
-                                </li>
-                              </ul>
-                            ) : (
-                              <p className="text-muted-foreground">None</p>
-                            )}
-                          </div>
-                        ))}
+                        {isStudentInsightsView ? (
+                          <ul className="space-y-1.5">
+                            {student.siblingDetails.map((s, i) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                {s.name} ({s.class})
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          student.siblingDetails.map((s, i) => (
+                            <div key={i}>
+                              <p className="font-medium mb-1.5">
+                                {s.name} ({s.class})
+                              </p>
+                              {s.relationship ? (
+                                <ul className="space-y-1.5">
+                                  <li className="flex items-start gap-2">
+                                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground" />
+                                    {s.relationship}
+                                  </li>
+                                </ul>
+                              ) : (
+                                <p className="text-muted-foreground">None</p>
+                              )}
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1013,6 +1079,7 @@ export function StudentProfile({
         </Section>
 
         {/* Personal Section */}
+        {!isStudentInsightsView && (
         <Section
           id="personal"
           title="Personal"
@@ -1020,7 +1087,9 @@ export function StudentProfile({
           iconClassName="bg-purple-100 text-purple-600"
         >
           <dl className="grid grid-cols-3 gap-x-8 gap-y-4">
-            <Field label="Health alerts" value="1 from Parent, 1 from SHS" />
+            {!isStudentInsightsView && (
+              <Field label="Health alerts" value="1 from Parent, 1 from SHS" />
+            )}
             <Field label="Citizenship" value={student.citizenship ?? '-'} />
             <Field
               label="Language spoken"
@@ -1050,6 +1119,7 @@ export function StudentProfile({
             />
           </dl>
         </Section>
+        )}
 
         {/* Reports Section */}
         {holisticReportsEnabled && (

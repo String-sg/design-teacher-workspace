@@ -12,9 +12,9 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { PGAnnouncement, PGStatus } from '@/types/pg-announcement'
-import { clearDraft, loadDraft } from '@/lib/draft-storage'
 import type { FormStatus } from '@/types/form'
 import type { AnnouncementFilters } from '@/components/comms/announcement-filter-bar'
+import { clearDraft, loadDraft } from '@/lib/draft-storage'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { mockPGAnnouncements } from '@/data/mock-pg-announcements'
 import { mockForms } from '@/data/mock-forms'
@@ -596,7 +596,8 @@ function ParentsGatewayPage() {
                                 <span className="truncate font-medium">
                                   {announcement.title}
                                 </span>
-                                {(announcement.attachments?.length ?? 0) > 0 && (
+                                {(announcement.attachments?.length ?? 0) >
+                                  0 && (
                                   <Paperclip className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                                 )}
                                 {announcement.responseType ===

@@ -25,12 +25,12 @@ import {
 } from 'lucide-react'
 
 import type { GroupSharedWith, StudentGroup } from '@/types/student-group'
+import type { SelectedEntity } from '@/components/comms/entity-selector'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { MOCK_GROUPS, getGroupById } from '@/data/mock-groups'
 import { MOCK_STAFF, MOCK_STAFF_GROUPS } from '@/data/mock-staff'
 import { StaffSelector } from '@/components/comms/staff-selector'
-import type { SelectedEntity } from '@/components/comms/entity-selector'
-import { stripSalutation } from '@/lib/utils'
+import { cn, stripSalutation } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -76,7 +76,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { EmptyState } from '@/components/empty-state'
-import { cn } from '@/lib/utils'
 
 const CURRENT_USER_EMAIL = 'tanml@school.edu.sg'
 
@@ -144,7 +143,7 @@ function SharingDialog({
 
   // Expand the selectedStaff entities (groups → individual staff IDs)
   const expandedStaffIds = useMemo<Array<string>>(() => {
-    const ids: string[] = []
+    const ids: Array<string> = []
     const seen = new Set<string>()
     for (const entity of selectedStaff) {
       if (entity.type === 'individual') {
@@ -255,8 +254,12 @@ function SharingDialog({
                   <Users className="size-5 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">No one added yet</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Search above to add staff</p>
+                  <p className="text-sm font-medium text-foreground">
+                    No one added yet
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Search above to add staff
+                  </p>
                 </div>
               </div>
             ) : (
