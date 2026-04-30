@@ -295,7 +295,11 @@ export const filterFieldConfigs: Array<FilterFieldConfig> = [
     group: 'family',
     defaultOperator: 'is',
     defaultValue: '',
-    enumValues: ['Father', 'Mother', 'Joint custody', 'Others'],
+    enumValues: [
+      'Mother (Sole custody with care and control)',
+      'Father (Sole custody with care and control)',
+      '-',
+    ],
   },
   {
     field: 'commuterStatus',

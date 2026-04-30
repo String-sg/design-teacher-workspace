@@ -37,6 +37,7 @@ import type {
 } from '@/types/pg-announcement'
 import type { FormQuestion, ReminderType, ResponseType } from '@/types/form'
 import type { SelectedEntity } from '@/components/comms/entity-selector'
+import type { FileMeta } from '@/lib/draft-storage'
 import { QuestionBuilder } from '@/components/comms/question-builder'
 import { useSetBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { StudentRecipientSelector } from '@/components/comms/student-recipient-selector'
@@ -69,7 +70,6 @@ import {
   loadDraft,
   saveDraft,
 } from '@/lib/draft-storage'
-import type { FileMeta } from '@/lib/draft-storage'
 
 export const Route = createFileRoute('/announcements/new')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -1223,8 +1223,7 @@ function NewAnnouncementPage() {
         existingAnnouncement.attachments.map((att) => {
           // Parse "214 KB" / "1.2 MB" → bytes
           const [num, unit] = att.size.split(' ')
-          const multiplier =
-            unit?.toUpperCase() === 'MB' ? 1024 * 1024 : 1024
+          const multiplier = unit?.toUpperCase() === 'MB' ? 1024 * 1024 : 1024
           return {
             name: att.name,
             size: Math.round(parseFloat(num) * multiplier),

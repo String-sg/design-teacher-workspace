@@ -1,4 +1,4 @@
-import type { Shortcut, PGWebsiteLink, PGRole } from '@/types/pg-announcement'
+import type { PGRole, PGWebsiteLink, Shortcut } from '@/types/pg-announcement'
 import type { FormQuestion, ReminderType, ResponseType } from '@/types/form'
 import type { SelectedEntity } from '@/components/comms/entity-selector'
 

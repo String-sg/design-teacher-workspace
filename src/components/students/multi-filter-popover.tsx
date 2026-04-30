@@ -18,6 +18,7 @@ import type {
 } from '@/types/student'
 import type { FilterFieldOption } from '@/data/filter-config'
 import { filterFieldConfigs, isFilterComplete } from '@/data/filter-config'
+import { useFeatureFlags } from '@/lib/feature-flags'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -103,6 +104,9 @@ export function MultiFilterPopover({
   totalCount,
   className,
 }: MultiFilterPopoverProps) {
+  const { isEnabled } = useFeatureFlags()
+  const isStudentInsightsView =
+    !isEnabled('student-analytics') && !isEnabled('student-analytics-basic')
   const [open, setOpen] = useState(false)
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -174,9 +178,23 @@ export function MultiFilterPopover({
     [importedFields],
   )
 
+  const visibleFilterFieldOptions = useMemo(
+    () =>
+      isStudentInsightsView
+        ? filterFieldOptions.filter(
+            (opt) =>
+              opt.field !== 'approvedMtl' &&
+              opt.field !== 'postSecEligibility' &&
+              opt.field !== 'commuterStatus' &&
+              opt.field !== 'afterSchoolArrangement',
+          )
+        : filterFieldOptions,
+    [isStudentInsightsView],
+  )
+
   const allFieldOptions = useMemo(
-    () => [...filterFieldOptions, ...importedFieldOptions],
-    [importedFieldOptions],
+    () => [...visibleFilterFieldOptions, ...importedFieldOptions],
+    [importedFieldOptions, visibleFilterFieldOptions],
   )
 
   const activeFields = useMemo(
@@ -201,13 +219,27 @@ export function MultiFilterPopover({
   const filteredImported = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
     if (!q) return availableImported
-    return availableImported.filter((opt) => opt.label.toLowerCase().includes(q))
+    return availableImported.filter((opt) =>
+      opt.label.toLowerCase().includes(q),
+    )
   }, [availableImported, searchQuery])
 
   const groupedFields = useMemo(() => {
-    const groups = [{ group: '_all', label: '', fields: filteredFields.filter((f) => !importedFields.some((i) => i.id === f.field)) }]
+    const groups = [
+      {
+        group: '_all',
+        label: '',
+        fields: filteredFields.filter(
+          (f) => !importedFields.some((i) => i.id === f.field),
+        ),
+      },
+    ]
     if (filteredImported.length > 0) {
-      groups.push({ group: '_imported', label: 'Imported data', fields: filteredImported })
+      groups.push({
+        group: '_imported',
+        label: 'Imported data',
+        fields: filteredImported,
+      })
     }
     return groups
   }, [filteredFields, filteredImported, importedFields])
@@ -817,11 +849,12 @@ export function MultiFilterPopover({
                             ))}
                           </div>
                         ))}
-                        {filteredFields.length === 0 && filteredImported.length === 0 && (
-                          <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-                            No filters found
-                          </div>
-                        )}
+                        {filteredFields.length === 0 &&
+                          filteredImported.length === 0 && (
+                            <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                              No filters found
+                            </div>
+                          )}
                       </div>
                     </ScrollArea>
                   </PopoverContent>
